@@ -1,0 +1,11 @@
+cleo_ai_bin/
+mobile/
+mobile_backend/
+docs/
+.gemini/
+.agents/
+.vibe/
+node_modules/
+.git/
+bundle_analysis*
+QubitCoin/

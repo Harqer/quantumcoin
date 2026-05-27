@@ -1,0 +1,31 @@
+.class public Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEKeyGenerationParameters;
+.super Lorg/bouncyseoncastle/crypto/KeyGenerationParameters;
+.source "SourceFile"
+
+
+# instance fields
+.field private c:Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEParameters;
+
+
+# direct methods
+.method public constructor <init>(Ljava/security/SecureRandom;Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEParameters;)V
+    .locals 1
+
+    const/16 v0, 0x100
+
+    invoke-direct {p0, p1, v0}, Lorg/bouncyseoncastle/crypto/KeyGenerationParameters;-><init>(Ljava/security/SecureRandom;I)V
+
+    iput-object p2, p0, Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEKeyGenerationParameters;->c:Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEParameters;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public c()Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEParameters;
+    .locals 0
+
+    iget-object p0, p0, Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEKeyGenerationParameters;->c:Lorg/bouncyseoncastle/pqc/crypto/cmce/CMCEParameters;
+
+    return-object p0
+.end method

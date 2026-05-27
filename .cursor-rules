@@ -1,0 +1,37 @@
+# Project Context and Architecture Rules
+
+## Context Loading Strategy
+Use the `.vibe/scripts/context.sh` script to quickly load frontend, backend, or database context into the workspace based on the current feature you are developing. Use `.vibe/scripts/validate-context.sh` to verify context completeness.
+
+### High Priority Context (Always Include)
+- `package.json` (dependencies and scripts)
+- `tsconfig.json` (TypeScript configuration)
+- `schema` files (database/API schemas)
+- `types/*.d.ts` (type definitions)
+- `.env.example` (environment variables)
+- `.cursor-rules` (coding standards)
+- `README.md` (project overview)
+- `CONTRIBUTING.md` (development guidelines)
+
+### Context Quality Metrics
+Ensure high context completeness before proceeding with complex integrations.
+Target: 90%+ completeness for required files, type definitions, config files, and pattern examples.
+
+---
+
+## Architectural Constraints & Implementation Strategies
+
+### 1. Frontend Development Context
+- **Required Files:** `components/ui/*`, `lib/utils.ts`, `hooks/*`, `types/index.ts`, `tailwind.config.js`
+- **Patterns:** Component composition, Server state (TanStack Query), Local state (Zustand/useState), Form handling (React Hook Form + Zod), Error boundaries.
+- **Constraints:** Use existing design system (shadcn/ui), maintain responsive design, ensure accessibility, strictly use TypeScript, components must be server-compatible for Next.js App Router.
+
+### 2. API / Backend Development Context
+- **Required Files:** `api/routes/*`, `lib/db.ts`, `middleware/*`, `types/api.ts`, `schema/*`
+- **Patterns:** tRPC procedures with Zod validation, Custom AuthError handling, JWT tokens with refresh token rotation.
+- **Constraints:** Follow existing auth patterns (NextAuth.js with JWT), implement comprehensive logging, rate limiting, and CORS. Maintain consistent TRPCError usage with appropriate HTTP status codes.
+
+### 3. Database Schema Context
+- **Required Files:** `prisma/schema.prisma`, `migrations/*`, `lib/db.ts`, `types/database.ts`
+- **Patterns:** Naming conventions for tables/columns, Relationship patterns, Index strategies, Data validation at the database level.
+- **Constraints:** Maintain referential integrity, consider performance implications, and create reversible migrations using PostgreSQL with Prisma ORM.

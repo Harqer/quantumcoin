@@ -1,0 +1,141 @@
+.class public interface abstract Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# annotations
+.annotation runtime Lcom/scandit/datacapture/tools/internal/sdk/ProxyReversedAdapter;
+    owner = Lcom/scandit/datacapture/core/framesave/FrameSaveSession;
+    value = Lcom/scandit/datacapture/core/internal/module/framesave/NativeFrameSaveSessionListener;
+.end annotation
+
+.annotation system Ldalvik/annotation/MemberClasses;
+    value = {
+        Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener$DefaultImpls;
+    }
+.end annotation
+
+.annotation runtime Lkotlin/Metadata;
+    d1 = {
+        "\u0000$\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000e\n\u0000\n\u0002\u0010\t\n\u0002\u0008\u0004\u0008g\u0018\u00002\u00020\u0001J \u0010\u0002\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u00052\u0006\u0010\u0006\u001a\u00020\u00072\u0006\u0010\u0008\u001a\u00020\tH\u0017J \u0010\n\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u00052\u0006\u0010\u0006\u001a\u00020\u00072\u0006\u0010\u0008\u001a\u00020\tH\u0017J\u0010\u0010\u000b\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u0005H\u0017J\u0010\u0010\u000c\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u0005H\u0017\u00a8\u0006\r\u00c0\u0006\u0003"
+    }
+    d2 = {
+        "Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;",
+        "",
+        "onFrameSaveFailure",
+        "",
+        "session",
+        "Lcom/scandit/datacapture/core/framesave/FrameSaveSession;",
+        "message",
+        "",
+        "remainingQueueSize",
+        "",
+        "onFrameSaveSuccess",
+        "onObservationStarted",
+        "onObservationStopped",
+        "scandit-capture-core"
+    }
+    k = 0x1
+    mv = {
+        0x1,
+        0x9,
+        0x0
+    }
+    xi = 0x30
+.end annotation
+
+
+# direct methods
+.method public static synthetic access$onFrameSaveFailure$jd(Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+    .locals 0
+
+    .line 1
+    invoke-super {p0, p1, p2, p3, p4}, Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;->onFrameSaveFailure(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+
+    return-void
+.end method
+
+.method public static synthetic access$onFrameSaveSuccess$jd(Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+    .locals 0
+
+    .line 1
+    invoke-super {p0, p1, p2, p3, p4}, Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;->onFrameSaveSuccess(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+
+    return-void
+.end method
+
+.method public static synthetic access$onObservationStarted$jd(Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+    .locals 0
+
+    .line 1
+    invoke-super {p0, p1}, Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;->onObservationStarted(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+
+    return-void
+.end method
+
+.method public static synthetic access$onObservationStopped$jd(Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+    .locals 0
+
+    .line 1
+    invoke-super {p0, p1}, Lcom/scandit/datacapture/core/framesave/FrameSaveSessionListener;->onObservationStopped(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public onFrameSaveFailure(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+    .locals 0
+    .annotation runtime Lcom/scandit/datacapture/tools/internal/sdk/ProxyFunction;
+    .end annotation
+
+    const-string p0, "session"
+
+    invoke-static {p1, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string p0, "message"
+
+    invoke-static {p2, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    return-void
+.end method
+
+.method public onFrameSaveSuccess(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;Ljava/lang/String;J)V
+    .locals 0
+    .annotation runtime Lcom/scandit/datacapture/tools/internal/sdk/ProxyFunction;
+    .end annotation
+
+    const-string p0, "session"
+
+    invoke-static {p1, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string p0, "message"
+
+    invoke-static {p2, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    return-void
+.end method
+
+.method public onObservationStarted(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+    .locals 0
+    .annotation runtime Lcom/scandit/datacapture/tools/internal/sdk/ProxyFunction;
+    .end annotation
+
+    const-string p0, "session"
+
+    invoke-static {p1, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    return-void
+.end method
+
+.method public onObservationStopped(Lcom/scandit/datacapture/core/framesave/FrameSaveSession;)V
+    .locals 0
+    .annotation runtime Lcom/scandit/datacapture/tools/internal/sdk/ProxyFunction;
+    .end annotation
+
+    const-string p0, "session"
+
+    invoke-static {p1, p0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    return-void
+.end method

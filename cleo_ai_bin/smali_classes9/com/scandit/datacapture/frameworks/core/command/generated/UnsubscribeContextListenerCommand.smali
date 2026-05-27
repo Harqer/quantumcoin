@@ -1,0 +1,98 @@
+.class public final Lcom/scandit/datacapture/frameworks/core/command/generated/UnsubscribeContextListenerCommand;
+.super Ljava/lang/Object;
+.source "CoreModuleCommands.kt"
+
+# interfaces
+.implements Lcom/scandit/datacapture/frameworks/core/command/generated/CoreModuleCommand;
+
+
+# annotations
+.annotation runtime Lkotlin/Metadata;
+    d1 = {
+        "\u0000\u001e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0008\u0002\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u00020\u0001B\r\u0012\u0006\u0010\u0002\u001a\u00020\u0003\u00a2\u0006\u0002\u0010\u0004J\u0010\u0010\u0005\u001a\u00020\u00062\u0006\u0010\u0007\u001a\u00020\u0008H\u0016R\u000e\u0010\u0002\u001a\u00020\u0003X\u0082\u0004\u00a2\u0006\u0002\n\u0000\u00a8\u0006\t"
+    }
+    d2 = {
+        "Lcom/scandit/datacapture/frameworks/core/command/generated/UnsubscribeContextListenerCommand;",
+        "Lcom/scandit/datacapture/frameworks/core/command/generated/CoreModuleCommand;",
+        "module",
+        "Lcom/scandit/datacapture/frameworks/core/CoreModule;",
+        "(Lcom/scandit/datacapture/frameworks/core/CoreModule;)V",
+        "execute",
+        "",
+        "result",
+        "Lcom/scandit/datacapture/frameworks/core/result/FrameworksResult;",
+        "scandit-datacapture-frameworks-core_release"
+    }
+    k = 0x1
+    mv = {
+        0x1,
+        0x9,
+        0x0
+    }
+    xi = 0x30
+.end annotation
+
+
+# instance fields
+.field private final module:Lcom/scandit/datacapture/frameworks/core/CoreModule;
+
+
+# direct methods
+.method public constructor <init>(Lcom/scandit/datacapture/frameworks/core/CoreModule;)V
+    .locals 1
+
+    const-string v0, "module"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 299
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 300
+    iput-object p1, p0, Lcom/scandit/datacapture/frameworks/core/command/generated/UnsubscribeContextListenerCommand;->module:Lcom/scandit/datacapture/frameworks/core/CoreModule;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public execute(Lcom/scandit/datacapture/frameworks/core/result/FrameworksResult;)V
+    .locals 3
+
+    const-string v0, "result"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const/4 v0, 0x2
+
+    .line 307
+    new-array v0, v0, [Ljava/lang/String;
+
+    const/4 v1, 0x0
+
+    const-string v2, "DataCaptureContextListener.onObservationStarted"
+
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x1
+
+    .line 308
+    const-string v2, "DataCaptureContextListener.onStatusChanged"
+
+    aput-object v2, v0, v1
+
+    .line 306
+    invoke-static {v0}, Lkotlin/collections/CollectionsKt;->listOf([Ljava/lang/Object;)Ljava/util/List;
+
+    move-result-object v0
+
+    .line 305
+    invoke-interface {p1, v0}, Lcom/scandit/datacapture/frameworks/core/result/FrameworksResult;->unregisterCallbackForEvents(Ljava/util/List;)V
+
+    .line 311
+    iget-object p0, p0, Lcom/scandit/datacapture/frameworks/core/command/generated/UnsubscribeContextListenerCommand;->module:Lcom/scandit/datacapture/frameworks/core/CoreModule;
+
+    invoke-virtual {p0, p1}, Lcom/scandit/datacapture/frameworks/core/CoreModule;->unsubscribeContextListener(Lcom/scandit/datacapture/frameworks/core/result/FrameworksResult;)V
+
+    return-void
+.end method

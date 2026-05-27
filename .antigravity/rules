@@ -1,0 +1,211 @@
+# AI Code Generation Rules & Planning Validation Framework
+
+These rules ensure AI-assisted development maintains structural integrity, prevents hallucinated APIs, and adheres strictly to the QuantumCoin architectural standard.
+
+## 1. Development Standards
+- **Strict TypeScript**: All variables and functions MUST be fully typed. Use `unknown` over `any`. Avoid implicit any. Interfaces and types should accurately represent the data layer.
+- **Error Handling**: Implement predictable failure states. Wrap async data fetching in try-catch blocks and provide graceful UX degradation. 
+- **Formatting & Style**: Respect ESLint and Prettier configurations. Do not re-format files entirely, only format modified lines to minimize diff noise. 
+- **Modularity**: Prioritize small, composable components over monolithic files. Maintain separation of concerns between UI layers, API fetching, and state management.
+- **Zero-Mock Policy**: In production-grade features, avoid returning mocked strings or values. Integrate with real endpoints, TRPC procedures, or explicitly comment `// TODO:` if an endpoint is legitimately missing.
+
+## 2. Planning Validation Framework (Pre-Implementation Checklist)
+Before executing code, AI agents MUST ensure the following checklist is mentally met:
+- [ ] Technical approach aligns with established architectural patterns.
+- [ ] All business requirements addressed with measurable acceptance criteria.
+- [ ] Performance and scalability considerations explicitly planned.
+- [ ] Security implications thoroughly analyzed with threat modeling.
+- [ ] Error handling strategy covers both expected and edge cases.
+- [ ] Testing strategy includes unit, integration, and end-to-end coverage where applicable.
+- [ ] Implementation phases are logical and manageable.
+- [ ] Risk mitigation strategies address identified technical challenges.
+- [ ] Resource requirements are realistic and available.
+- [ ] Timeline accounts for complexity, dependencies, and testing.
+
+## 3. Approval Gates
+Consider these questions when designing or refactoring code to provoke a senior developer mindset:
+1. **Architecture**: Does this solution fit our long-term technical strategy?
+2. **Scalability**: How will this perform under 10x current load?
+3. **Security**: What are the potential attack vectors and mitigations?
+4. **Maintainability**: Can our team effectively support this long-term?
+5. **Integration**: How does this impact existing systems and workflows?
+
+---
+
+# Advanced Context Management System
+
+## The Context Engineering Pipeline
+Context management transforms AI from a hallucinating code generator into a reliable development partner.
+
+### Context Selection Framework
+**High Priority Context (Always Include)**:
+- `package.json` (dependencies and scripts)
+- `tsconfig.json` (TypeScript configuration)
+- Schema files (database/API schemas)
+- `.env.example` (environment variables)
+
+**Pattern Context (Include When Relevant)**:
+- Similar implementations (`components/auth/*`, `lib/utils/*`, `hooks/*`)
+- Integration patterns (`middleware/*`, `services/*`, `tests/*`)
+
+**Integration Context (As-Needed)**:
+- Related systems, external API documentation, database migration files, deployment configurations.
+
+## Progressive Context Loading Strategy
+Start with Foundation Context (Core config, schemas, rules). Then load Pattern Context (Similar implementations, test examples) during feature development. For complex integrations, load Full Context (Integration docs, security guidelines).
+
+## Context Templates for Different Scenarios
+- **Frontend Development Context**: Focus on `components/ui/*`, `lib/utils.ts`, `hooks/*`, `types/index.ts`. Constraints: Use existing design system components, maintain responsive design, implement proper TypeScript types.
+- **API Development Context**: Focus on `api/routes/*`, `lib/db.ts`, `middleware/*`, `schema/*`. Constraints: Follow existing auth patterns, validate input with Zod, implement proper logging.
+- **Database Schema Context**: Focus on `prisma/schema.prisma`, `migrations/*`, `lib/db.ts`. Constraints: Maintain referential integrity, create reversible migrations, index strategies for performance.
+
+---
+
+# Scaling & Capacity Planning Framework
+
+When tasked with scaling the system to handle larger targets, follow this systematic approach:
+
+## 1. Bottleneck Analysis
+- Identify current and projected bottlenecks in order of impact.
+- Quantify the scaling limits of each system component.
+- Determine which bottlenecks are architectural vs operational.
+
+## 2. Scaling Architecture
+- Evaluate horizontal vs vertical scaling strategy for each component.
+- Database scaling approach (sharding, read replicas, caching strategy).
+- Auto-scaling configuration and resource management.
+
+## 3. Infrastructure Evolution
+- Cloud strategy and load balancing / traffic management.
+- Storage scaling and data archiving strategy.
+
+## 4. Operational Scaling
+- Monitoring and observability at scale.
+- Deployment automation and canary release processes.
+- Capacity planning and cost optimization.
+
+## 5. Implementation Roadmap
+- Phased approach with clear milestones and success criteria.
+- Risk assessment and rollback plans.
+
+---
+
+# Performance Issue Investigation Framework
+
+When encountering a performance issue, act as a senior performance engineer and execute this diagnostic flow before jumping to solutions.
+
+## 1. Hypothesis Formation
+Based on symptoms (response times, error rates, time of occurrence), define the top 3 most likely root causes ranked by probability. Explain what evidence would prove/disprove each.
+
+## 2. Investigation Sequence
+Prioritize step-by-step debugging:
+- Identify what investigations can run in parallel.
+- Select what tools/queries/tests to use for each step.
+
+## 3. Data Collection Strategy
+- Capture key metrics, logging/tracing requirements, and establish baselines.
+
+## 4. Resolution Approaches
+For each likely root cause, outline:
+- Immediate mitigation strategies (band-aids to reduce impact).
+- Proper fix implementation approach.
+- Testing strategy to validate fixes.
+
+## 5. Prevention Strategy
+Define how to prevent this class of issue in the future through improved monitoring, testing, or architectural shifts.
+
+---
+
+# LAYER 2 FUNCTIONAL VERIFICATION: Systematically test the functionality implemented
+
+## BUSINESS LOGIC VALIDATION
+Test these scenarios and report results:
+
+1. **HAPPY PATH TESTING**:
+   - Primary use case works as expected
+   - All required features function correctly
+   - User experience flows smoothly
+
+2. **EDGE CASE VALIDATION**:
+   - Empty/null input handling
+   - Maximum/minimum value boundaries
+   - Concurrent operation handling
+   - Network failure scenarios
+
+3. **ERROR SCENARIOS**:
+   - Invalid input rejection
+   - Authorization failures
+   - Resource unavailability
+   - Graceful error messaging
+
+4. **PERFORMANCE VALIDATION**:
+   - Response time under normal load
+   - Memory usage patterns
+   - Database query efficiency
+   - Caching effectiveness
+
+5. **SECURITY VERIFICATION**:
+   - Input sanitization working
+   - Authentication properly enforced
+   - Data exposure prevented
+   - Audit logging present
+
+## FUNCTIONAL VERIFICATION REPORT FORMAT
+✅ Business Logic: [working/issues found]
+✅ Edge Cases: [handled properly/gaps identified]  
+✅ Error Handling: [comprehensive/needs improvement]
+✅ Performance: [acceptable/concerns noted]
+✅ Security: [secure/vulnerabilities found]
+
+**CRITICAL ISSUES REQUIRING IMMEDIATE FIX**:
+[List any issues that must be resolved before deployment]
+
+**RECOMMENDED IMPROVEMENTS**:
+[List enhancements that would improve quality]
+
+*Only proceed to Layer 3 if all critical issues are resolved.*
+
+---
+
+# LAYER 3: ARCHITECTURAL REVIEW CHECKLIST
+
+## ARCHITECTURAL ALIGNMENT:
+□ Follows established design patterns in our codebase
+□ Respects existing module boundaries and interfaces  
+□ Maintains consistent abstraction levels
+□ Doesn't introduce unnecessary complexity
+
+## SCALABILITY ASSESSMENT:
+□ Will perform acceptably at 10x current scale
+□ Database queries will scale with data growth
+□ No obvious bottlenecks under increased load
+□ Resource usage patterns are sustainable
+
+## MAINTAINABILITY EVALUATION:
+□ Code is self-documenting and clear
+□ Easy to modify without breaking other components
+□ Test coverage enables confident refactoring
+□ New team members could understand and extend this
+
+## SECURITY ARCHITECTURE:
+□ Security controls are properly layered
+□ No security decisions pushed to presentation layer
+□ Sensitive operations have proper authorization
+□ Attack surface is minimized
+
+## TECHNICAL DEBT IMPACT:
+□ Doesn't increase overall system complexity
+□ Follows existing conventions and standards
+□ Doesn't create future migration challenges
+□ Balances speed with long-term maintainability
+
+## RED FLAGS REQUIRING DISCUSSION:
+□ Creates new architectural patterns without justification
+□ Introduces dependencies that affect other teams
+□ Makes assumptions about future requirements
+□ Optimizes for current needs at expense of flexibility
+
+## APPROVAL DECISION:
+□ APPROVE: Meets all architectural standards
+□ APPROVE WITH CONDITIONS: [list required changes]
+□ NEEDS REWORK: [explain architectural concerns]

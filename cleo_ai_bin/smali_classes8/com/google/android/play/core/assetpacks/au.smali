@@ -1,0 +1,14 @@
+.class final Lcom/google/android/play/core/assetpacks/au;
+.super Lcom/google/android/play/core/assetpacks/am;
+.source "com.google.android.play:asset-delivery@@2.3.0"
+
+
+# direct methods
+.method constructor <init>(Lcom/google/android/play/core/assetpacks/ax;Lcom/google/android/gms/tasks/TaskCompletionSource;)V
+    .locals 0
+
+    .line 1
+    invoke-direct {p0, p1, p2}, Lcom/google/android/play/core/assetpacks/am;-><init>(Lcom/google/android/play/core/assetpacks/ax;Lcom/google/android/gms/tasks/TaskCompletionSource;)V
+
+    return-void
+.end method

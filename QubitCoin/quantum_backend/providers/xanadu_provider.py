@@ -69,7 +69,7 @@ class XanaduProvider(QuantumProvider):
     
     async def execute(
         self,
-        circuit: Any,
+        circuit_qasm: str,
         shots: int = 1024,
         error_suppress: bool = True
     ) -> ExecutionResult:
@@ -79,11 +79,11 @@ class XanaduProvider(QuantumProvider):
         For CV QNRG, we use squeezed vacuum states and quadrature measurements.
         """
         # For CV, we create a custom execution
-        if hasattr(circuit, '_is_cv_circuit'):
+        if hasattr(circuit_qasm, '_is_cv_circuit'):
             return await self._execute_cv_qnrg(shots)
         
         # Fallback to discrete simulation
-        return await self._execute_discrete(circuit, shots)
+        return await self._execute_discrete(circuit_qasm, shots)
     
     async def _execute_cv_qnrg(self, shots: int) -> ExecutionResult:
         """

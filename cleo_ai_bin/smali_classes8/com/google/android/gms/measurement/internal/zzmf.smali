@@ -1,0 +1,96 @@
+.class final Lcom/google/android/gms/measurement/internal/zzmf;
+.super Ljava/lang/Object;
+.source "com.google.android.gms:play-services-measurement-impl@@22.5.0"
+
+# interfaces
+.implements Ljava/lang/Runnable;
+
+
+# instance fields
+.field final synthetic zza:Lcom/google/android/gms/measurement/internal/zzr;
+
+.field final synthetic zzb:Z
+
+.field final synthetic zzc:Lcom/google/android/gms/measurement/internal/zzpk;
+
+.field final synthetic zzd:Lcom/google/android/gms/measurement/internal/zznk;
+
+
+# direct methods
+.method constructor <init>(Lcom/google/android/gms/measurement/internal/zznk;Lcom/google/android/gms/measurement/internal/zzr;ZLcom/google/android/gms/measurement/internal/zzpk;)V
+    .locals 0
+
+    .line 1
+    iput-object p2, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zza:Lcom/google/android/gms/measurement/internal/zzr;
+
+    iput-boolean p3, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzb:Z
+
+    iput-object p4, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzc:Lcom/google/android/gms/measurement/internal/zzpk;
+
+    invoke-static {p1}, Ljava/util/Objects;->requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;
+
+    iput-object p1, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzd:Lcom/google/android/gms/measurement/internal/zznk;
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final run()V
+    .locals 4
+
+    .line 1
+    iget-object v0, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzd:Lcom/google/android/gms/measurement/internal/zznk;
+
+    invoke-virtual {v0}, Lcom/google/android/gms/measurement/internal/zznk;->zzZ()Lcom/google/android/gms/measurement/internal/zzga;
+
+    move-result-object v1
+
+    if-nez v1, :cond_0
+
+    iget-object p0, v0, Lcom/google/android/gms/measurement/internal/zzjd;->zzu:Lcom/google/android/gms/measurement/internal/zzib;
+
+    invoke-virtual {p0}, Lcom/google/android/gms/measurement/internal/zzib;->zzaV()Lcom/google/android/gms/measurement/internal/zzgt;
+
+    move-result-object p0
+
+    .line 2
+    invoke-virtual {p0}, Lcom/google/android/gms/measurement/internal/zzgt;->zzb()Lcom/google/android/gms/measurement/internal/zzgr;
+
+    move-result-object p0
+
+    const-string v0, "Discarding data. Failed to set user property"
+
+    invoke-virtual {p0, v0}, Lcom/google/android/gms/measurement/internal/zzgr;->zza(Ljava/lang/String;)V
+
+    return-void
+
+    :cond_0
+    iget-object v2, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zza:Lcom/google/android/gms/measurement/internal/zzr;
+
+    .line 3
+    invoke-static {v2}, Lcom/google/android/gms/common/internal/Preconditions;->checkNotNull(Ljava/lang/Object;)Ljava/lang/Object;
+
+    iget-boolean v3, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzb:Z
+
+    if-eqz v3, :cond_1
+
+    const/4 p0, 0x0
+
+    goto :goto_0
+
+    .line 5
+    :cond_1
+    iget-object p0, p0, Lcom/google/android/gms/measurement/internal/zzmf;->zzc:Lcom/google/android/gms/measurement/internal/zzpk;
+
+    .line 4
+    :goto_0
+    invoke-virtual {v0, v1, p0, v2}, Lcom/google/android/gms/measurement/internal/zznk;->zzm(Lcom/google/android/gms/measurement/internal/zzga;Lcom/google/android/gms/common/internal/safeparcel/AbstractSafeParcelable;Lcom/google/android/gms/measurement/internal/zzr;)V
+
+    .line 5
+    invoke-virtual {v0}, Lcom/google/android/gms/measurement/internal/zznk;->zzV()V
+
+    return-void
+.end method

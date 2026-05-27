@@ -1,10 +1,10 @@
 """
 Fire Opal (Q-CTRL) error suppression wrapper.
 
-Fire Opal applies automated error suppression to quantum circuits,
-dramatically improving result quality without requiring hardware expertise.
-It handles gate optimization, dynamical decoupling, readout error
-mitigation, and circuit compilation — all transparently.
+Fire Opal applies automated error suppression to quantum circuits autonomously.
+By submitting circuits via `execute()` or `iterate()`, the AI-driven pipeline
+handles gate optimization, dynamical decoupling, readout error mitigation,
+and circuit compilation under the hood—no manual parameter tuning is needed.
 
 Supported backends:
 - IBM Quantum (all Heron/Eagle processors)
@@ -17,7 +17,6 @@ does not bias the randomness or corrupt the key distribution.
 
 import structlog
 
-from qiskit import QuantumCircuit
 
 from quantum_backend.config import config
 
@@ -68,7 +67,7 @@ class FireOpalExecutor:
 
     def execute_with_suppression(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         credentials,
         backend_name: str,
         shots: int = 8192,
@@ -95,16 +94,20 @@ class FireOpalExecutor:
 
         self._authenticate()
 
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
+
         logger.info(
             "fire_opal.executing",
             backend=backend_name,
-            num_qubits=circuit.num_qubits,
+            num_qubits=num_qubits,
             shots=shots,
         )
 
         # Validate circuit compatibility before execution
         validation = fo.validate(
-            circuits=[circuit],
+            circuits=[circuit_qasm],
             credentials=credentials,
             backend_name=backend_name,
         )
@@ -112,7 +115,7 @@ class FireOpalExecutor:
             logger.warning("fire_opal.validation_failed", details=validation)
 
         result = fo.execute(
-            circuits=[circuit],
+            circuits=[circuit_qasm],
             credentials=credentials,
             backend_name=backend_name,
             shot_count=shots,
@@ -123,6 +126,46 @@ class FireOpalExecutor:
             backend=backend_name,
         )
 
+        return result
+
+    def iterate_with_suppression(
+        self,
+        circuits_qasm: list[str],
+        credentials,
+        backend_name: str,
+        shots: int = 8192,
+    ) -> list[dict]:
+        """
+        Execute multiple circuits autonomously, typically used for variational
+        algorithms (VQE/QAOA) requiring multiple submissions.
+        
+        Args:
+            circuits_qasm: List of QASM strings.
+            credentials: Provider credentials.
+            backend_name: Hardware backend name.
+            shots: Number of shots.
+            
+        Returns:
+            List of results.
+        """
+        import fireopal as fo
+        self._authenticate()
+
+        logger.info(
+            "fire_opal.iterating",
+            backend=backend_name,
+            num_circuits=len(circuits_qasm),
+            shots=shots,
+        )
+
+        result = fo.iterate(
+            circuits=circuits_qasm,
+            credentials=credentials,
+            backend_name=backend_name,
+            shot_count=shots,
+        )
+
+        logger.info("fire_opal.iteration_complete", backend=backend_name)
         return result
 
 

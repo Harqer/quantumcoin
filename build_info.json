@@ -1,0 +1,42 @@
+{
+  "id": "119e74ef-0e12-4ce5-81f7-d0473f9e828d",
+  "status": "ERRORED",
+  "platform": "ANDROID",
+  "error": {
+    "errorCode": "UNKNOWN_ERROR",
+    "message": "Unknown error. See logs of the Bundle JavaScript build phase for more information."
+  },
+  "artifacts": {},
+  "initiatingActor": {
+    "id": "17fd56df-e085-4ae2-b9ea-f905cb9a6898",
+    "displayName": "harqer"
+  },
+  "logFiles": [
+    "https://storage.googleapis.com/eas-workflows-production/logs/47da65ff-b32c-48a1-abf9-507f9090ca7f/119e74ef-0e12-4ce5-81f7-d0473f9e828d/2026-06-03T07%3A30%3A06Z-b2e39b5a-477b-4770-a304-238a2dadaa1e.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260603%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260603T073235Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=0a1a4f1c3534b15756847bdee9d825f0a06f2646d5ddbc628907ee4c98c2e4c45dd6d5a52f974ebe3eff27a02f485668726cef517e5503d0999bed8502e9785b7177cb76c4331db90fcc5ca5a96a351d6512043d2aa55f036c9e539268104c7f48096723557caa80ce9977dcc22d42517e1a536a7b69f1649b71c27fd96b9bea7058554a813755ec662a7044e0f298b02d01f3f5c20ec97eb549cc2bdb0cb8b580d31bb24aec4c9d7bca272cdcfe844e8f863aad90754bb3b506fd2c960af1fc77cb91060d952f22e299b29f0512a909ce6f7ee7729382e8fa3be78cde73de2e5213f096db4711a9b9dc68c93a2f9624ee61dacc4773016542995b9649d2f1e5"
+  ],
+  "project": {
+    "id": "47da65ff-b32c-48a1-abf9-507f9090ca7f",
+    "name": "quantumcoin",
+    "slug": "quantumcoin",
+    "ownerAccount": {
+      "id": "4d5824a7-7dfe-4411-ab28-3c3b2ac425af",
+      "name": "harqer"
+    }
+  },
+  "distribution": "INTERNAL",
+  "buildProfile": "preview",
+  "sdkVersion": "52.0.0",
+  "appVersion": "1.0.0",
+  "appBuildVersion": "1",
+  "priority": "NORMAL",
+  "createdAt": "2026-06-03T07:30:02.334Z",
+  "updatedAt": "2026-06-03T07:31:00.175Z",
+  "completedAt": "2026-06-03T07:31:00.002Z",
+  "expirationDate": "2026-06-17T07:30:02.360Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 860,
+    "buildQueueTime": 7745,
+    "buildDuration": 49063
+  }
+}

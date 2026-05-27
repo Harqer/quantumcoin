@@ -45,7 +45,6 @@ from typing import Optional
 
 import numpy as np
 import structlog
-from qiskit import QuantumCircuit
 
 from quantum_backend.config import config
 from quantum_backend.providers.registry import get_provider
@@ -66,32 +65,13 @@ ALICE_ANGLES = [0.0, np.pi / 4]           # A0=0, A1=π/4
 BOB_ANGLES   = [np.pi / 8, -np.pi / 8]   # B0=π/8, B1=-π/8
 
 
-def build_bell_pair_circuit(num_pairs: int = 1) -> QuantumCircuit:
-    """
-    Create maximally entangled Bell pairs |Φ+⟩ = (|00⟩ + |11⟩)/√2.
-
-    Each pair uses 2 qubits: qubit 2i (Alice) and qubit 2i+1 (Bob).
-    """
-    n_qubits = 2 * num_pairs
-    qc = QuantumCircuit(n_qubits, n_qubits)
-
-    for i in range(num_pairs):
-        alice_q = 2 * i
-        bob_q = 2 * i + 1
-        qc.h(alice_q)
-        qc.cx(alice_q, bob_q)
-
-    qc.barrier()
-    return qc
-
-
 def build_chsh_circuit(
     num_pairs: int,
     alice_settings: list[int],
     bob_settings: list[int],
-) -> QuantumCircuit:
+) -> str:
     """
-    Build a CHSH measurement circuit for DI-QKD.
+    Build a CHSH measurement circuit for DI-QKD using OpenQASM 3.0.
 
     For each Bell pair, Alice and Bob independently choose a measurement
     setting (0 or 1). The measurement is implemented as a rotation
@@ -106,29 +86,34 @@ def build_chsh_circuit(
         bob_settings: List of Bob's setting choices (0 or 1) per pair.
 
     Returns:
-        Complete circuit: Bell pair creation + measurement rotations + measure.
+        Complete circuit: Bell pair creation + measurement rotations + measure as OpenQASM 3 string.
     """
     assert len(alice_settings) == num_pairs
     assert len(bob_settings) == num_pairs
 
-    qc = build_bell_pair_circuit(num_pairs)
+    from quantum_backend.qasm3_builder import QASM3Builder
+    builder = QASM3Builder(num_qubits=2 * num_pairs)
 
     for i in range(num_pairs):
         alice_q = 2 * i
         bob_q = 2 * i + 1
+        
+        # Bell pair creation
+        builder.h(alice_q)
+        builder.cx(alice_q, bob_q)
 
         # Alice's measurement rotation
         alice_angle = ALICE_ANGLES[alice_settings[i]]
         if alice_angle != 0.0:
-            qc.ry(-2 * alice_angle, alice_q)
+            builder.ry(-2 * alice_angle, alice_q)
 
         # Bob's measurement rotation
         bob_angle = BOB_ANGLES[bob_settings[i]]
         if bob_angle != 0.0:
-            qc.ry(-2 * bob_angle, bob_q)
+            builder.ry(-2 * bob_angle, bob_q)
 
-    qc.measure_all()
-    return qc
+    builder.measure_all()
+    return builder.build()
 
 
 def compute_chsh_parameter(correlations: dict) -> tuple[float, dict]:
@@ -288,7 +273,7 @@ async def distribute_di_qkd_key(
 
         # Execute on QPU
         result = await provider.execute(
-            circuit=circuit,
+            circuit_qasm=circuit,
             shots=shots_per_circuit,
             error_suppress=True,
         )

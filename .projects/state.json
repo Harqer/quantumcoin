@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "providers": {
+    "auth0": {
+      "name": "Auth0"
+    },
+    "neon": {
+      "name": "Neon"
+    },
+    "sentry": {
+      "name": "Sentry"
+    },
+    "vercel": {
+      "name": "Vercel"
+    }
+  },
+  "resources": {
+    "auth": {
+      "name": "auth",
+      "providerName": "Auth0",
+      "serviceId": "client"
+    },
+    "auth0-plan": {
+      "name": "auth0-plan",
+      "providerName": "Auth0",
+      "serviceId": "free"
+    },
+    "neon-plan": {
+      "name": "neon-plan",
+      "providerName": "Neon",
+      "serviceId": "free"
+    },
+    "primary-db": {
+      "name": "primary-db",
+      "providerName": "Neon",
+      "serviceId": "postgres"
+    },
+    "sentry-project": {
+      "name": "sentry-project",
+      "providerName": "Sentry",
+      "serviceId": "project"
+    },
+    "sentry-project-2": {
+      "name": "sentry-project-2",
+      "providerName": "Sentry",
+      "serviceId": "project"
+    },
+    "vercel-plan": {
+      "name": "vercel-plan",
+      "providerName": "Vercel",
+      "serviceId": "hobby"
+    },
+    "vercel-project": {
+      "name": "vercel-project",
+      "providerName": "Vercel",
+      "serviceId": "project"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+.class public abstract Lio/ably/lib/types/AsyncHttpPaginatedResponse;
+.super Ljava/lang/Object;
+.source "AsyncHttpPaginatedResponse.java"
+
+
+# annotations
+.annotation system Ldalvik/annotation/MemberClasses;
+    value = {
+        Lio/ably/lib/types/AsyncHttpPaginatedResponse$Callback;
+    }
+.end annotation
+
+
+# instance fields
+.field public errorCode:I
+
+.field public errorMessage:Ljava/lang/String;
+
+.field public headers:[Lio/ably/lib/types/Param;
+
+.field public statusCode:I
+
+.field public success:Z
+
+
+# direct methods
+.method public constructor <init>()V
+    .locals 0
+
+    .line 5
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public abstract current(Lio/ably/lib/types/AsyncHttpPaginatedResponse$Callback;)V
+.end method
+
+.method public abstract first(Lio/ably/lib/types/AsyncHttpPaginatedResponse$Callback;)V
+.end method
+
+.method public abstract hasCurrent()Z
+.end method
+
+.method public abstract hasFirst()Z
+.end method
+
+.method public abstract hasNext()Z
+.end method
+
+.method public abstract items()[Lcom/google/gson/JsonElement;
+.end method
+
+.method public abstract next(Lio/ably/lib/types/AsyncHttpPaginatedResponse$Callback;)V
+.end method

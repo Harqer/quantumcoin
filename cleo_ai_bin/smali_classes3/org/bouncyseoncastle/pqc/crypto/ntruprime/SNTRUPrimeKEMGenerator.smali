@@ -1,0 +1,218 @@
+.class public Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeKEMGenerator;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lorg/bouncyseoncastle/crypto/EncapsulatedSecretGenerator;
+
+
+# instance fields
+.field private final a:Ljava/security/SecureRandom;
+
+
+# direct methods
+.method public constructor <init>(Ljava/security/SecureRandom;)V
+    .locals 0
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    iput-object p1, p0, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeKEMGenerator;->a:Ljava/security/SecureRandom;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public a(Lorg/bouncyseoncastle/crypto/params/AsymmetricKeyParameter;)Lorg/bouncyseoncastle/crypto/SecretWithEncapsulation;
+    .locals 10
+
+    check-cast p1, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimePublicKeyParameters;
+
+    invoke-virtual {p1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeKeyParameters;->b()Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;->b()I
+
+    move-result v1
+
+    invoke-virtual {v0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;->e()I
+
+    move-result v2
+
+    invoke-virtual {v0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;->h()I
+
+    move-result v3
+
+    invoke-virtual {v0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;->f()I
+
+    move-result v4
+
+    const/4 v5, 0x1
+
+    new-array v6, v5, [B
+
+    const/4 v7, 0x0
+
+    const/4 v8, 0x4
+
+    aput-byte v8, v6, v7
+
+    invoke-virtual {p1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimePublicKeyParameters;->d()[B
+
+    move-result-object v9
+
+    invoke-static {v6, v9}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[B)[B
+
+    move-result-object v6
+
+    new-array v9, v1, [B
+
+    iget-object p0, p0, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeKEMGenerator;->a:Ljava/security/SecureRandom;
+
+    invoke-static {p0, v9, v1, v3}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->a(Ljava/security/SecureRandom;[BII)V
+
+    add-int/lit8 p0, v1, 0x3
+
+    div-int/2addr p0, v8
+
+    new-array p0, p0, [B
+
+    invoke-static {p0, v9, v1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[BI)V
+
+    new-array v3, v1, [S
+
+    invoke-virtual {p1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimePublicKeyParameters;->c()[B
+
+    move-result-object p1
+
+    invoke-static {v3, p1, v1, v2}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([S[BII)V
+
+    new-array p1, v1, [S
+
+    invoke-static {p1, v3, v9, v1, v2}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->a([S[S[BII)V
+
+    new-array v3, v1, [S
+
+    invoke-static {v3, p1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->a([S[S)V
+
+    new-array p1, v4, [B
+
+    invoke-static {p1, v3, v1, v2}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[SII)V
+
+    new-array v1, v5, [B
+
+    const/4 v2, 0x3
+
+    aput-byte v2, v1, v7
+
+    invoke-static {v1, p0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[B)[B
+
+    move-result-object v1
+
+    array-length v3, v1
+
+    const/4 v8, 0x2
+
+    div-int/2addr v3, v8
+
+    array-length v9, v6
+
+    div-int/2addr v9, v8
+
+    add-int/2addr v3, v9
+
+    new-array v3, v3, [B
+
+    array-length v9, v1
+
+    div-int/2addr v9, v8
+
+    invoke-static {v1, v7, v3, v7, v9}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    array-length v1, v1
+
+    div-int/2addr v1, v8
+
+    array-length v9, v6
+
+    div-int/2addr v9, v8
+
+    invoke-static {v6, v7, v3, v1, v9}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    new-array v1, v5, [B
+
+    aput-byte v8, v1, v7
+
+    invoke-static {v1, v3}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[B)[B
+
+    move-result-object v1
+
+    array-length v3, v1
+
+    div-int/2addr v3, v8
+
+    add-int/2addr v3, v4
+
+    new-array v6, v3, [B
+
+    invoke-static {p1, v7, v6, v7, v4}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    array-length p1, v1
+
+    div-int/2addr p1, v8
+
+    invoke-static {v1, v7, v6, v4, p1}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    new-array p1, v5, [B
+
+    aput-byte v2, p1, v7
+
+    invoke-static {p1, p0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[B)[B
+
+    move-result-object p0
+
+    array-length p1, p0
+
+    div-int/2addr p1, v8
+
+    add-int/2addr p1, v3
+
+    new-array p1, p1, [B
+
+    array-length v1, p0
+
+    div-int/2addr v1, v8
+
+    invoke-static {p0, v7, p1, v7, v1}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    array-length p0, p0
+
+    div-int/2addr p0, v8
+
+    invoke-static {v6, v7, p1, p0, v3}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+
+    new-array p0, v5, [B
+
+    aput-byte v5, p0, v7
+
+    invoke-static {p0, p1}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/Utils;->b([B[B)[B
+
+    move-result-object p0
+
+    invoke-virtual {v0}, Lorg/bouncyseoncastle/pqc/crypto/ntruprime/SNTRUPrimeParameters;->g()I
+
+    move-result p1
+
+    div-int/lit8 p1, p1, 0x8
+
+    invoke-static {p0, v7, p1}, Lorg/bouncyseoncastle/util/Arrays;->b([BII)[B
+
+    move-result-object p0
+
+    new-instance p1, Lorg/bouncyseoncastle/pqc/crypto/util/SecretWithEncapsulationImpl;
+
+    invoke-direct {p1, p0, v6}, Lorg/bouncyseoncastle/pqc/crypto/util/SecretWithEncapsulationImpl;-><init>([B[B)V
+
+    return-object p1
+.end method

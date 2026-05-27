@@ -192,7 +192,7 @@ async def generate_quantum_random(
     provider = get_provider(provider_name)
 
     result = await provider.execute(
-        circuit=circuit,
+        circuit_qasm=circuit,
         shots=effective_shots,
         error_suppress=True,
     )

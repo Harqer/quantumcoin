@@ -26,7 +26,6 @@ import time
 from typing import Optional
 
 import structlog
-from qiskit import QuantumCircuit
 
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
@@ -85,25 +84,29 @@ class BraketProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 1024,
         error_suppress: bool = True,
     ) -> ExecutionResult:
         from braket.aws import AwsDevice, AwsQuantumTask
-        from braket.circuits import Circuit as BraketCircuit
+        from braket.ir.openqasm import Program as OpenQASMProgram
 
         device_arn = _resolve_device_arn(config.braket.device)
+        
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
 
         logger.info(
             "braket.submitting",
             device=config.braket.device,
             arn=device_arn,
-            num_qubits=circuit.num_qubits,
+            num_qubits=num_qubits,
             shots=shots,
         )
 
-        # Convert Qiskit circuit → OpenQASM 3.0 → Braket circuit
-        braket_circuit = self._qiskit_to_braket(circuit)
+        # Convert OpenQASM 3.0 string to Braket Program
+        braket_program = OpenQASMProgram(source=circuit_qasm)
 
         # Submit task to Braket (non-blocking submission)
         device = AwsDevice(device_arn)
@@ -112,7 +115,7 @@ class BraketProvider(QuantumProvider):
         loop = asyncio.get_event_loop()
         task = await loop.run_in_executor(
             None,
-            lambda: device.run(braket_circuit, shots=shots),
+            lambda: device.run(braket_program, shots=shots),
         )
 
         task_id = task.id
@@ -189,67 +192,4 @@ class BraketProvider(QuantumProvider):
             },
         )
 
-    @staticmethod
-    def _qiskit_to_braket(circuit: QuantumCircuit):
-        """
-        Convert a Qiskit QuantumCircuit to a Braket Circuit.
 
-        Uses OpenQASM 3.0 as the interchange format — this is the most
-        reliable conversion path and handles all standard Qiskit gates.
-        Falls back to gate-by-gate translation if QASM export fails.
-        """
-        from braket.circuits import Circuit as BraketCircuit
-
-        try:
-            # Primary path: OpenQASM 3.0 interchange
-            from braket.ir.openqasm import Program as OpenQASMProgram
-            qasm3_str = circuit.qasm()
-            return BraketCircuit.from_ir(OpenQASMProgram(source=qasm3_str))
-        except Exception:
-            pass
-
-        try:
-            # Fallback: use qiskit-braket-provider's converter if available
-            from qiskit_braket_provider.providers.adapter import to_braket
-            return to_braket(circuit)
-        except ImportError:
-            pass
-
-        # Manual gate-by-gate translation for common gates
-        braket_circuit = BraketCircuit()
-        from braket.circuits import gates as bg
-
-        gate_map = {
-            "h": lambda qubits, _: braket_circuit.h(qubits[0]),
-            "x": lambda qubits, _: braket_circuit.x(qubits[0]),
-            "y": lambda qubits, _: braket_circuit.y(qubits[0]),
-            "z": lambda qubits, _: braket_circuit.z(qubits[0]),
-            "s": lambda qubits, _: braket_circuit.s(qubits[0]),
-            "t": lambda qubits, _: braket_circuit.t(qubits[0]),
-            "rx": lambda qubits, params: braket_circuit.rx(qubits[0], params[0]),
-            "ry": lambda qubits, params: braket_circuit.ry(qubits[0], params[0]),
-            "rz": lambda qubits, params: braket_circuit.rz(qubits[0], params[0]),
-            "cx": lambda qubits, _: braket_circuit.cnot(qubits[0], qubits[1]),
-            "cz": lambda qubits, _: braket_circuit.cz(qubits[0], qubits[1]),
-            "swap": lambda qubits, _: braket_circuit.swap(qubits[0], qubits[1]),
-            "ccx": lambda qubits, _: braket_circuit.ccnot(qubits[0], qubits[1], qubits[2]),
-        }
-
-        for instruction in circuit.data:
-            gate_name = instruction.operation.name
-            qubit_indices = [circuit.qubits.index(q) for q in instruction.qubits]
-            params = list(instruction.operation.params)
-
-            if gate_name == "measure":
-                continue  # Braket measures all qubits by default
-            elif gate_name == "barrier":
-                continue
-            elif gate_name in gate_map:
-                gate_map[gate_name](qubit_indices, params)
-            else:
-                raise ValueError(
-                    f"Unsupported gate '{gate_name}' for Braket conversion. "
-                    f"Install qiskit-braket-provider for full gate support."
-                )
-
-        return braket_circuit

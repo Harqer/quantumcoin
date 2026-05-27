@@ -1,0 +1,21 @@
+name: Production Build and Submit
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_production:
+    name: Build Production
+    type: build
+    params:
+      platform: all
+      profile: production
+
+  submit:
+    name: Submit to Stores
+    type: submit
+    needs: [build_production]
+    params:
+      platform: all
+      profile: production

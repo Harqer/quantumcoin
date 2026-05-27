@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@id/mainContainer" android:fitsSystemWindows="true" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include layout="@layout/center_title_toolbar" />
+    <LinearLayout android:id="@id/webViewContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="200.0dp" android:layout_below="@id/toolbar">
+        <com.i2cinc.mcpsdk.view.SDKWebView android:id="@id/webView" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </LinearLayout>
+    <ProgressBar android:id="@id/progressBar" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" />
+</RelativeLayout>

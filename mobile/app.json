@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "QuantumCoin",
+    "slug": "quantumcoin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": ["quantumcoin", "cleo", "plaid", "stripe"],
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#47201c"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.harqer.quantumcoin",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            { "scheme": "https", "host": "cleo.onelink.me" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-font",
+      "./plugins/withMLKitMetaData",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera for ID Verification."
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "47da65ff-b32c-48a1-abf9-507f9090ca7f"
+      }
+    },
+    "owner": "harqer",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/47da65ff-b32c-48a1-abf9-507f9090ca7f"
+    }
+  }
+}

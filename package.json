@@ -1,0 +1,30 @@
+{
+  "name": "quantumcoin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harqer/quantumcoin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Harqer/quantumcoin/issues"
+  },
+  "homepage": "https://github.com/Harqer/quantumcoin#readme",
+  "dependencies": {
+    "@google/genai": "^2.7.0",
+    "@prisma/client": "^5.22.0",
+    "@prisma/config": "^7.8.0",
+    "prisma": "^5.22.0"
+  }
+}

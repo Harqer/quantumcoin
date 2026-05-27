@@ -52,3 +52,5 @@ secrets/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+web-backup/
+web_old/

@@ -1,0 +1,34 @@
+.class Lorg/bouncyseoncastle/crypto/generators/CramerShoupParametersGenerator$ParametersHelper;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lorg/bouncyseoncastle/crypto/generators/CramerShoupParametersGenerator;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0xa
+    name = "ParametersHelper"
+.end annotation
+
+
+# static fields
+.field private static final a:Ljava/math/BigInteger;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 2
+
+    const-wide/16 v0, 0x2
+
+    invoke-static {v0, v1}, Ljava/math/BigInteger;->valueOf(J)Ljava/math/BigInteger;
+
+    move-result-object v0
+
+    sput-object v0, Lorg/bouncyseoncastle/crypto/generators/CramerShoupParametersGenerator$ParametersHelper;->a:Ljava/math/BigInteger;
+
+    return-void
+.end method

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "cdp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "-p",
+        "@coinbase/cdp-cli",
+        "cdp",
+        "mcp"
+      ],
+      "transport": "stdio"
+    }
+  }
+}

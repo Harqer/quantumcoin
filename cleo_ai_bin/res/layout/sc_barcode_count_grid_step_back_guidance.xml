@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_gravity="center" android:layout_width="300.0dp" android:layout_height="380.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/sc_phone" android:layout_width="115.0dp" android:layout_height="220.0dp" android:src="@drawable/sc_barcode_count_grid_phone" android:adjustViewBounds="true" android:layout_centerInParent="true" android:contentDescription="@null" />
+    <ImageView android:id="@id/sc_grid" android:layout_width="80.0dp" android:layout_height="100.0dp" android:src="@drawable/sc_barcode_count_grid" android:scaleType="fitCenter" android:adjustViewBounds="true" android:layout_centerInParent="true" android:contentDescription="@null" />
+    <TextView android:textSize="16.0sp" android:textColor="@android:color/white" android:gravity="center" android:id="@id/sc_textview" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24.0dp" android:layout_below="@id/sc_phone" android:layout_centerHorizontal="true" android:layout_marginStart="40.0dp" android:layout_marginEnd="40.0dp" />
+</RelativeLayout>

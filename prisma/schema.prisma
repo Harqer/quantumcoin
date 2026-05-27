@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRIMARY_DB_CONNECTION_STRING")
+}
+
+model User {
+  id               String          @id @default(uuid())
+  email            String          @unique
+  name             String?
+  stripeCustomerId       String?         // Added for Stripe Customer flow
+  stripeConnectAccountId String?         // Added for Stripe Connect payouts
+  bankAccounts     BankAccount[]
+  transactions     Transaction[]
+  paymentMethods   PaymentMethod[]
+  kycStatus        String?         // e.g., 'pending', 'verified', 'rejected'
+  socureDeviceId   String?         // For identity verification device tracking
+  subscriptions    Subscription[]
+  incomeSources    IncomeSource[]
+  budgets          Budget[]
+  chatSessions     ChatSession[]
+  cashAdvances     CashAdvance[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model BankAccount {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  accessToken  String        // Plaid access_token (Encrypted)
+  iv           String?       // AES-GCM Initialization Vector
+  itemId       String        // Plaid item_id
+  stripeBankId String?       // The Stripe Bank Account Source ID
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  bankAccountId String?
+  bankAccount   BankAccount? @relation(fields: [bankAccountId], references: [id])
+  amount        Float
+  currency      String
+  status        String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model PaymentMethod {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  customerId String   // Stripe customer_id
+  type       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Subscription {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  tier       String   // e.g., 'plus', 'builder'
+  status     String   // e.g., 'active', 'canceled'
+  stripeSubId String? 
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model IncomeSource {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  employerName String
+  frequency    String        // e.g., 'biweekly', 'monthly'
+  amount       Float
+  pinwheelId   String?       // Reference to Pinwheel connection
+  cashAdvances CashAdvance[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Budget {
+  id         String     @id @default(uuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+  limit      Float
+  categories Category[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  budgetId  String
+  budget    Budget   @relation(fields: [budgetId], references: [id])
+  name      String
+  limit     Float
+  spent     Float    @default(0)
+  icon      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatSession {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id            String      @id @default(uuid())
+  chatSessionId String
+  session       ChatSession @relation(fields: [chatSessionId], references: [id])
+  role          String      // 'user' or 'ai'
+  content       String      @db.Text
+  createdAt     DateTime    @default(now())
+}
+
+model CashAdvance {
+  id             String        @id @default(uuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  incomeSourceId String?
+  incomeSource   IncomeSource? @relation(fields: [incomeSourceId], references: [id])
+  amount         Float
+  status         String        // 'pending', 'approved', 'funded', 'repaid'
+  repaymentDate  DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}

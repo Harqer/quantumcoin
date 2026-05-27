@@ -1,0 +1,116 @@
+.class public final Lcom/scandit/datacapture/core/data/FrameDataSerializer;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# annotations
+.annotation runtime Lkotlin/Metadata;
+    d1 = {
+        "\u0000\u0016\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000e\n\u0002\u0008\u0003\u0008\u00c6\u0002\u0018\u00002\u00020\u0001J\u0017\u0010\u0005\u001a\u00020\u00042\u0006\u0010\u0003\u001a\u00020\u0002H\u0007\u00a2\u0006\u0004\u0008\u0005\u0010\u0006\u00a8\u0006\u0007"
+    }
+    d2 = {
+        "Lcom/scandit/datacapture/core/data/FrameDataSerializer;",
+        "",
+        "Lcom/scandit/datacapture/core/data/FrameData;",
+        "frameData",
+        "",
+        "toJson",
+        "(Lcom/scandit/datacapture/core/data/FrameData;)Ljava/lang/String;",
+        "scandit-capture-core"
+    }
+    k = 0x1
+    mv = {
+        0x1,
+        0x9,
+        0x0
+    }
+    xi = 0x30
+.end annotation
+
+
+# static fields
+.field public static final INSTANCE:Lcom/scandit/datacapture/core/data/FrameDataSerializer;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    new-instance v0, Lcom/scandit/datacapture/core/data/FrameDataSerializer;
+
+    invoke-direct {v0}, Lcom/scandit/datacapture/core/data/FrameDataSerializer;-><init>()V
+
+    sput-object v0, Lcom/scandit/datacapture/core/data/FrameDataSerializer;->INSTANCE:Lcom/scandit/datacapture/core/data/FrameDataSerializer;
+
+    return-void
+.end method
+
+.method private constructor <init>()V
+    .locals 0
+
+    .line 1
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method
+
+.method public static final toJson(Lcom/scandit/datacapture/core/data/FrameData;)Ljava/lang/String;
+    .locals 3
+    .annotation runtime Lkotlin/jvm/JvmStatic;
+    .end annotation
+
+    const-string v0, "frameData"
+
+    invoke-static {p0, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 1
+    new-instance v0, Lorg/json/JSONObject;
+
+    invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
+
+    .line 4
+    new-instance v1, Lorg/json/JSONArray;
+
+    invoke-direct {v1}, Lorg/json/JSONArray;-><init>()V
+
+    invoke-interface {p0}, Lcom/scandit/datacapture/core/data/FrameData;->getImageBuffer()Lcom/scandit/datacapture/core/common/graphic/ImageBuffer;
+
+    move-result-object v2
+
+    invoke-static {v2}, Lcom/scandit/datacapture/core/internal/sdk/common/graphic/ImageBufferSerializerKt;->toJsonObject(Lcom/scandit/datacapture/core/common/graphic/ImageBuffer;)Lorg/json/JSONObject;
+
+    move-result-object v2
+
+    invoke-virtual {v1, v2}, Lorg/json/JSONArray;->put(Ljava/lang/Object;)Lorg/json/JSONArray;
+
+    sget-object v2, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
+
+    .line 5
+    const-string v2, "imageBuffers"
+
+    invoke-virtual {v0, v2, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
+    move-result-object v0
+
+    .line 9
+    invoke-interface {p0}, Lcom/scandit/datacapture/core/data/FrameData;->getOrientation()I
+
+    move-result p0
+
+    const-string v1, "orientation"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;I)Lorg/json/JSONObject;
+
+    move-result-object p0
+
+    .line 10
+    invoke-virtual {p0}, Lorg/json/JSONObject;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v0, "toString(...)"
+
+    invoke-static {p0, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullExpressionValue(Ljava/lang/Object;Ljava/lang/String;)V
+
+    return-object p0
+.end method

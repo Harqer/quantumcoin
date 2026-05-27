@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:layout_gravity="bottom" android:orientation="vertical" android:background="@drawable/sc_barcode_sequence_initial_guidance_bg" android:padding="24.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24.0dp" android:elevation="8.0dp">
+        <TextView android:textSize="24.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:gravity="start" android:id="@id/title_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dp" />
+        <TextView android:textSize="16.0sp" android:textColor="@android:color/black" android:gravity="start" android:id="@id/instruction_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="24.0dp" />
+        <ImageView android:id="@id/initial_guidance_image" android:layout_width="343.0dp" android:layout_height="247.0dp" android:src="@drawable/sc_barcode_sequence_initial_guidance" android:contentDescription="@string/sc_barcode_sequence_initial_guidance_content_description" android:layout_marginEnd="24.0dp" />
+        <Button android:textSize="16.0sp" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:id="@id/dismiss_button" android:background="@drawable/sc_button_with_border" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24.0dp" android:stateListAnimator="@null" />
+    </LinearLayout>
+</merge>
