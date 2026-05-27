@@ -1,125 +1,66 @@
-# QLink Bridge Contracts
+## Foundry
 
-Quantum-safe cross-chain bridge smart contracts implementing the [QLink paper](https://github.com/QuantumCoin/qlink) architecture.
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-## Architecture
+Foundry consists of:
 
-```
-┌─────────────────────────────────────────────┐
-│  QLinkBridge.sol                            │
-│  - Lock-and-mint cross-chain transfers      │
-│  - PQC signature verification                │
-│  - Multi-validator threshold signatures      │
-├─────────────────────────────────────────────┤
-│  PQCSignatureVerifier.sol                   │
-│  - ML-DSA (Dilithium) signature verification │
-│  - Quantum-certified key registration        │
-│  - HSM integration ready                     │
-├─────────────────────────────────────────────┤
-│  QuantumValidator.sol                         │
-│  - QKD session management                    │
-│  - CHSH Bell test verification               │
-│  - Tiered DI-QKD support (1/2/3)            │
-└─────────────────────────────────────────────┘
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+
+## Documentation
+
+https://book.getfoundry.sh/
+
+## Usage
+
+### Build
+
+```shell
+$ forge build
 ```
 
-## Key Features
+### Test
 
-- **Quantum-safe signatures**: NIST standardized Dilithium/Falcon PQC
-- **QKD integration**: Device-independent quantum key distribution
-- **HSM-ready**: Validator keys stored in Hardware Security Modules
-- **Platform-agnostic**: Works with any EVM-compatible chain
-
-## Quick Start
-
-```bash
-cd contracts
-npm install
-cp .env.example .env
-# Edit .env with your private key and RPC URLs
-
-# Compile
-npm run compile
-
-# Test
-npm run test
-
-# Deploy to Base Sepolia
-npm run deploy:base
+```shell
+$ forge test
 ```
 
-## Contract Interactions
+### Format
 
-### Register as Validator
-
-```javascript
-// 1. Register QKD tier capability
-await quantumValidator.registerValidator(validatorAddress, 1); // Tier 1
-
-// 2. Register PQC public key
-const publicKey = /* 1952 bytes for Dilithium3 */;
-const qnrgHash = /* hash of QNRG seed */;
-await pqcVerifier.registerValidatorKey(
-  publicKey,
-  2, // Dilithium3
-  qnrgHash,
-  true // quantum-certified
-);
-
-// 3. Add to bridge
-await bridge.addValidator(validatorAddress);
+```shell
+$ forge fmt
 ```
 
-### Initiate Cross-Chain Transfer
+### Gas Snapshots
 
-```javascript
-const transferId = await bridge.initiateTransfer(
-  tokenAddress,
-  amount,
-  recipientAddress,
-  8453 // destination chain (Base)
-);
+```shell
+$ forge snapshot
 ```
 
-### Submit Validator Proof
+### Anvil
 
-```javascript
-const pqcSignature = /* Dilithium signature from Python backend */;
-const qkdSessionKey = /* QKD-derived session key */;
-
-await bridge.submitProof(transferId, pqcSignature, qkdSessionKey);
+```shell
+$ anvil
 ```
 
-### Execute Transfer
+### Deploy
 
-```javascript
-await bridge.executeTransfer(transferId);
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
 ```
 
-## Integration with Python Backend
+### Cast
 
-The contracts interface with your existing Python quantum backend:
-
-```python
-# From your FastAPI backend
-from quantum_backend.pq_signatures import sign_message
-from quantum_backend.qkd import establish_qkd_session
-
-# Generate PQC signature for bridge proof
-signature = await sign_message(transfer_hash, validator_key)
-
-# Establish QKD session
-qkd_session = await establish_qkd_session(alice_node, bob_node)
+```shell
+$ cast <subcommand>
 ```
 
-## Security Model
+### Help
 
-- **3 validators minimum** for multi-sig threshold
-- **CHSH S > 2** required for QKD session establishment
-- **QBER < 11%** maximum quantum bit error rate
-- **1-hour QKD session expiry** for forward secrecy
-- **PQC signatures** on all cross-chain proofs
-
-## License
-
-MIT - See [LICENSE](../LICENSE)
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```

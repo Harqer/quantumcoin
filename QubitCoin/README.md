@@ -1,23 +1,20 @@
-# QubitCoin (Quantum Coin)
+# QubitCoin (QBC): Quantum-Security-as-a-Service (QSaaS)
 
-QubitCoin is an **L2 (Layer-2), universal, heterogeneous quantum coin** designed for the future of quantum technology. Operating natively on the Base L2 network, it is natively cross-chain (via Wormhole NTT) and powered by actual quantum hardware for maximum security and true randomness.
+QubitCoin (QBC) is an institutional-grade, deflationary utility token deployed on the Base L2 network. It functions as the native gas and staking asset for a decentralized, hardware-backed quantum security infrastructure designed to mitigate the "Q-Day" cryptographic threat.
 
-## Universal & Heterogeneous Scaling
+## Universal QSaaS Architecture
 
-QubitCoin is not tied to a single quantum architecture. It is built to **scale as quantum hardware scales**. By leveraging universal quantum programming frameworks like QIR (Quantum Intermediate Representation) and hardware-agnostic SDKs, QubitCoin is natively mined and validated across:
-
+QBC powers a hardware-agnostic quantum backend that natively interfaces with universal quantum programming frameworks (e.g., QIR) to execute across diverse physical modalities:
 *   **Superconducting Qubits** (IBM Quantum, IQM)
 *   **Trapped-Ion Qubits** (IonQ)
-*   **Photonic Continuous-Variable & Discrete Systems** (QuiX Quantum, Xanadu)
-*   **Neutral Atom & Annealing Systems**
+*   **Photonic Systems** (QuiX Quantum, Xanadu)
 
-As new physical qubit modalities are invented, QubitCoin's universal architecture seamlessly integrates them into its mining and distribution network.
+## Core Microeconomics & Infrastructure
 
-## Core Architecture
-
-1.  **Quantum Backend (`/quantum_backend`):** A hardware-agnostic server that interfaces with dozens of quantum QPUs to perform Quantum Random Number Generation (QNRG) and simulated Quantum Key Distribution (QKD) for wallet security.
-2.  **Omnichain Bridging:** Utilizes Wormhole Native Token Transfers (NTT) to ensure the volatile, quantum-minted L2 asset can bridge from the Base L2 network to any other chain (Solana, Ethereum L1, Arbitrum L2) without losing its native quantum properties or relying on wrapped liquidity pools.
-3.  **Frontend App:** Built on Next.js and deployed to Vercel, providing the primary user interface.
+1.  **Deflationary Utility Model:** Access to the physical Quantum Random Number Generation (QNRG) and Device-Independent QKD (DI-QKD) API endpoints requires the expenditure and programmatic burning of QBC. High-frequency enterprise consumers must stake QBC to secure elevated rate limits, creating structural supply constraints.
+2.  **Quantum Backend (`/quantum_backend`):** A high-throughput FastAPI server orchestrating QPU job execution and serving quantum-secured session keys and wallet seeds to clients.
+3.  **Omnichain Bridging:** Utilizes Wormhole Native Token Transfers (NTT) to allow QBC to route liquidity seamlessly across Solana, Ethereum L1, and Arbitrum L2.
+4.  **Frontend App (`/src`):** Next.js application leveraging Coinbase OnchainKit for seamless fiat-to-crypto onboarding and wallet interactions.
 
 ---
 

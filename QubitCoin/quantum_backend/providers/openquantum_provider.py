@@ -137,21 +137,8 @@ class OpenQuantumProvider(QuantumProvider):
     def _find_subcategory(self) -> Optional[str]:
         """
         Find a valid job subcategory for submission.
-        Returns None if we need to prompt user or use default.
         """
-        # Try common subcategories that might work
-        common_subcats = [
-            "general",
-            "quantum",
-            "research",
-            "crypto",
-            "qkd",
-            "qnrq"
-        ]
-        
-        # In practice, user needs to configure this in their dashboard
-        # Return preferred backend as hint
-        return None  # Will use backend_id as subcategory fallback
+        return getattr(self.config, 'subcategory', 'crypto')
     
     async def execute(
         self,
@@ -195,12 +182,12 @@ class OpenQuantumProvider(QuantumProvider):
         # Find subcategory
         subcategory = self._find_subcategory()
         
-        # Build config - try with subcategory or backend as fallback
+        # Build config - use the proper subcategory
         try:
             config = JobSubmissionConfig(
                 organization_id=org_id,
                 backend_class_id=backend_id,
-                job_subcategory_id=subcategory or backend_id,  # Fallback to backend
+                job_subcategory_id=subcategory,
                 name=f"qiskit-circuit-{circuit.num_qubits}q",
                 shots=shots,
                 execution_plan="auto",

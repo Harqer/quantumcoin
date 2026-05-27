@@ -191,28 +191,15 @@ async def update_all_calibrations():
             updated_any = True
             logger.info("calibration.pull_success", provider="ibm", cal=ibm_cal)
         except Exception as e:
-            logger.warning(
-                "calibration.pull_failed_using_baseline",
+            logger.error(
+                "calibration.pull_failed",
                 provider="ibm",
                 error=str(e),
             )
-            # Add small noise deviation to make mock/fallback dynamic and simulate daily drift
-            import random
-            cache["ibm"]["t1_us"] *= random.uniform(0.95, 1.05)
-            cache["ibm"]["gate_2q_error"] *= random.uniform(0.9, 1.1)
-            cache["ibm"]["last_update"] = time.time()
-            updated_any = True
+            # Do not inject random noise. Just skip updating cache if real API fails.
 
-    # Other providers (Braket, Azure) would have matching API pull blocks here.
-    # For simulation purposes, drift their baselines slightly so models can learn variance
-    import random
-    for p in cache:
-        if p != "ibm" or not config.ibm.available:
-            cache[p]["t1_us"] *= random.uniform(0.98, 1.02)
-            cache[p]["gate_2q_error"] *= random.uniform(0.95, 1.05)
-            cache[p]["readout_error"] *= random.uniform(0.95, 1.05)
-            cache[p]["last_update"] = time.time()
-            updated_any = True
+    # Other providers (Braket, Azure) would have matching API pull blocks here in production.
+    # We do not simulate drift with random noise.
 
     if updated_any:
         _save_cache(cache)

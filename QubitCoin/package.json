@@ -1,34 +1,16 @@
 {
-  "name": "onchainkit-demo",
-  "version": "0.1.0",
+  "name": "quantumcoin",
   "private": true,
+  "packageManager": "npm@11.13.0",
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "setup-aws-secrets": "node scripts/setup-aws-secrets.js"
-  },
-  "dependencies": {
-    "@aws-sdk/client-secrets-manager": "latest",
-    "@coinbase/onchainkit": "latest",
-    "@tailwindcss/postcss": "^4.3.0",
-    "dotenv": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "viem": "latest",
-    "wagmi": "latest"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
   },
   "devDependencies": {
-    "@types/connect": "latest",
-    "@types/node": "^25.8.0",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
-    "postcss": "latest",
-    "tailwindcss": "latest",
-    "typescript": "latest"
+    "turbo": "latest"
   }
 }

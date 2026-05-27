@@ -102,15 +102,10 @@ class QuandelaHDTester:
         print(f"   Device: Quandela Belenos (24-mode photonic QPU)")
         
         # Generate certified QRNG from Quandela
-        try:
-            result = self.provider.generate_certified_qrng(
-                num_bytes=total_bytes_needed,
-                certification=certification
-            )
-        except Exception as e:
-            logger.warning("Cloud generation failed, using simulation", error=str(e))
-            # Fallback to simulation for testing
-            result = self._simulate_hd_qrng(dimension, total_bytes_needed)
+        result = self.provider.generate_certified_qrng(
+            num_bytes=total_bytes_needed,
+            certification=certification
+        )
         
         # Convert to d-ary symbols
         symbols = self._bytes_to_symbols(result.random_bytes, dimension, self.num_symbols)
@@ -139,33 +134,7 @@ class QuandelaHDTester:
             ais31_level=ais31_level
         )
     
-    def _simulate_hd_qrng(self, dimension: int, num_bytes: int):
-        """Simulate HD-QRNG for testing without cloud access."""
-        logger.info("Using simulation mode for HD-QRNG")
-        
-        # Simulate d-ary quantum measurement
-        # Each symbol has equal probability 1/d (maximal entropy)
-        symbols = np.random.randint(0, dimension, size=num_bytes * 2)
-        
-        # Convert to bytes
-        if dimension == 2:
-            byte_array = np.packbits(symbols[:num_bytes * 8])
-        else:
-            # Pack multiple symbols per byte
-            symbols_per_byte = 256 // dimension
-            byte_array = bytearray()
-            for i in range(0, len(symbols), symbols_per_byte):
-                value = 0
-                for j, s in enumerate(symbols[i:i+symbols_per_byte]):
-                    value |= (s << (j * int(np.log2(dimension))))
-                byte_array.append(value % 256)
-        
-        @dataclass
-        class SimResult:
-            random_bytes: bytes
-            certification_score: float = 0.99
-        
-        return SimResult(random_bytes=bytes(byte_array[:num_bytes]))
+
     
     def _bytes_to_symbols(self, data: bytes, dimension: int, num_symbols: int) -> np.ndarray:
         """Convert byte array to d-ary symbols."""

@@ -72,23 +72,22 @@ class AWSKMSClient:
             
             key_id = f"alias/quantumcoin-validator-{validator_address[:8]}"
             
-            # In production: Create key in CloudHSM cluster with PQC capability
-            # response = self.client.create_key(
-            #     Description=f"QuantumCoin validator PQC key for {validator_address}",
-            #     KeyUsage='SIGN_VERIFY',
-            #     KeySpec='ASYMMETRIC_PRIVATE',
-            #     MultiRegion=False,
-            #     Tags=[
-            #         {'TagKey': 'Project', 'TagValue': 'QuantumCoin'},
-            #         {'TagKey': 'Validator', 'TagValue': validator_address}
-            #     ]
-            # )
+            logger.info(f"Creating PQC key in AWS KMS for {validator_address}")
+            response = self.client.create_key(
+                Description=f"QuantumCoin validator PQC key for {validator_address}",
+                KeyUsage='SIGN_VERIFY',
+                KeySpec='DILITHIUM3',
+                MultiRegion=False,
+                Tags=[
+                    {'TagKey': 'Project', 'TagValue': 'QuantumCoin'},
+                    {'TagKey': 'Validator', 'TagValue': validator_address}
+                ]
+            )
             
-            # For now, return mock key info
             return HSMKey(
-                key_id=key_id,
+                key_id=response['KeyMetadata']['KeyId'],
                 provider=HSMProvider.AWS_KMS,
-                public_key_hash="",  # Would be populated from actual key
+                public_key_hash="",  # Would require calling get_public_key
                 created_at=asyncio.get_event_loop().time()
             )
             
@@ -102,16 +101,13 @@ class AWSKMSClient:
             return None
         
         try:
-            # In production: Call KMS to sign with PQC key
-            # response = self.client.sign(
-            #     KeyId=key_id,
-            #     Message=message,
-            #     SigningAlgorithm='DILITHIUM_SHA256'  # Future AWS support
-            # )
-            # return response['Signature']
-            
-            logger.info(f"Mock HSM sign for key {key_id}")
-            return os.urandom(3293)  # Mock Dilithium3 signature size
+            logger.info(f"Requesting PQC signature from AWS KMS for key {key_id}")
+            response = self.client.sign(
+                KeyId=key_id,
+                Message=message,
+                SigningAlgorithm='DILITHIUM_SHA256'
+            )
+            return response['Signature']
             
         except Exception as e:
             logger.error(f"HSM signing failed: {e}")

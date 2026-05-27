@@ -9,6 +9,8 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
+from quantum_backend.edge_secrets_manager import secrets_manager
+
 load_dotenv()
 
 
@@ -115,10 +117,11 @@ class QuandelaConfig:
 @dataclass
 class OpenQuantumConfig:
     """Open Quantum Platform - multi-provider access to IQM, IonQ, Rigetti, AQT."""
-    sdk_key_path: str = field(default_factory=lambda: os.getenv("OPENQUANTUM_SDK_KEY", ""))
-    organization_id: str = field(default_factory=lambda: os.getenv("OPENQUANTUM_ORG_ID", ""))
+    sdk_key_path: str = field(default_factory=lambda: secrets_manager.get_secret("OPENQUANTUM_SDK_KEY", ""))
+    organization_id: str = field(default_factory=lambda: secrets_manager.get_secret("OPENQUANTUM_ORG_ID", ""))
     preferred_backend: str = field(default_factory=lambda: os.getenv("OPENQUANTUM_BACKEND", "iqm:garnet"))
     auto_approve: bool = field(default_factory=lambda: os.getenv("OPENQUANTUM_AUTO_APPROVE", "true").lower() == "true")
+    subcategory: str = field(default_factory=lambda: os.getenv("OPENQUANTUM_SUBCATEGORY", "crypto"))
 
     @property
     def available(self) -> bool:
