@@ -9,11 +9,11 @@
 - Simple, maximum entropy per qubit
 - Best for: Wallet seeds, cryptographic nonces
 
-### 2. `qkd_bb84_iqm_20qubit.qasm`
-**BB84 Quantum Key Distribution**
-- Mixed basis preparation (Z and X)
-- Simulates Alice's side of QKD protocol
-- Best for: Quantum-secured key exchange
+### 2. `di_qkd_bell_iqm.qasm`
+**Device-Independent Quantum Key Distribution (DI-QKD)**
+- Bell state (EPR pair) preparation
+- Evaluates CHSH inequalities to guarantee device independence
+- Best for: Trustless, device-agnostic quantum-secured key exchange
 
 ### 3. `qnrg_hd_d4_iqm.qasm`
 **High-Dimensional QNRG (d=4)**

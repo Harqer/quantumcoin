@@ -19,7 +19,7 @@ FastAPI Server (quantum_backend/server.py)
     │     └── Hadamard circuit → measure → von Neumann debias → random bytes
     │
     ├── QKD Module (qkd.py)
-    │     └── BB84 protocol → sift → QBER check → privacy amplification → key
+    │     └── DI-QKD protocol → CHSH inequality check → privacy amplification → key
     │
     ├── Fire Opal Wrapper (providers/fire_opal_wrapper.py)
     │     └── Automated error suppression on all circuits
@@ -39,7 +39,7 @@ FastAPI Server (quantum_backend/server.py)
 | `/health` | GET | Provider availability & config |
 | `/api/qnrg` | POST | Generate quantum random bytes |
 | `/api/wallet-seed` | POST | Generate 256-bit quantum wallet seed |
-| `/api/qkd` | POST | Execute BB84 QKD protocol |
+| `/api/qkd` | POST | Execute DI-QKD protocol |
 | `/api/encrypt-wallet` | POST | Full wallet encryption flow |
 
 ## Setup
@@ -83,21 +83,21 @@ error suppression that dramatically improves output quality.
 5. Validate min-entropy > 0.95 bits/bit
 6. Return cryptographically secure random bytes
 
-### QKD (BB84 Quantum Key Distribution)
-1. Generate quantum-random bits & bases via QNRG
-2. Alice encodes qubits: Z-basis (|0⟩/|1⟩) or X-basis (|+⟩/|−⟩)
-3. Bob measures in random bases
-4. Execute on QPU with Fire Opal error suppression
-5. Sift: keep only matching-basis measurements (~50%)
-6. Estimate QBER — abort if > 11% (eavesdropping detected)
+### QKD (Device-Independent Quantum Key Distribution)
+1. Generate entangled qubit pairs (Bell states)
+2. Alice and Bob measure their qubits in randomly selected bases
+3. Execute on QPU with Fire Opal error suppression
+4. Compute CHSH inequality score from measurement correlations
+5. Validate CHSH score > 2.0 (ensuring quantum entanglement and device independence)
+6. Sift bases and estimate QBER
 7. Privacy amplification via SHA-256
 8. Return 256-bit quantum-distributed key
 
 ## Scientific References
 
-- Bennett & Brassard, "Quantum cryptography" (1984) — BB84 protocol
-- Shor & Preskill, "Simple proof of security of BB84" (2000) — security proof
+- Ekert, "Quantum cryptography based on Bell's theorem" (1991) — E91/DI-QKD foundation
+- Vazirani & Vidick, "Fully Device-Independent Quantum Key Distribution" (2014)
 - NIST SP 800-22 — Randomness test suite for QRNG validation
 - arXiv:2512.09862 — TRNG on QPU hardware, native gate optimization
-- EPJ Quantum Technology (2026) — BB84 with entropy maximization
+- EPJ Quantum Technology (2026) — DI-QKD with entropy maximization
 - Q-CTRL Fire Opal — Automated error suppression documentation
