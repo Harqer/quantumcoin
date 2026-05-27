@@ -1,0 +1,65 @@
+{
+    "ionq": {
+        "t1_us": 1000000.0,
+        "t2_us": 500000.0,
+        "gate_1q_error": 0.0001,
+        "gate_2q_error": 0.003,
+        "readout_error": 0.005,
+        "connectivity": "all_to_all",
+        "last_update": 0.0
+    },
+    "ibm": {
+        "t1_us": 250.0,
+        "t2_us": 180.0,
+        "gate_1q_error": 0.0002,
+        "gate_2q_error": 0.004,
+        "readout_error": 0.012,
+        "connectivity": "heavy_hex",
+        "last_update": 0.0
+    },
+    "azure": {
+        "t1_us": 5000000.0,
+        "t2_us": 2000000.0,
+        "gate_1q_error": 0.0001,
+        "gate_2q_error": 0.001,
+        "readout_error": 0.002,
+        "connectivity": "all_to_all",
+        "last_update": 0.0
+    },
+    "qbraid": {
+        "t1_us": 150.0,
+        "t2_us": 100.0,
+        "gate_1q_error": 0.0005,
+        "gate_2q_error": 0.008,
+        "readout_error": 0.02,
+        "connectivity": "nearest_neighbor",
+        "last_update": 0.0
+    },
+    "bluequbit": {
+        "t1_us": 200.0,
+        "t2_us": 150.0,
+        "gate_1q_error": 0.0003,
+        "gate_2q_error": 0.007,
+        "readout_error": 0.015,
+        "connectivity": "all_to_all",
+        "last_update": 0.0
+    },
+    "braket": {
+        "t1_us": 120.0,
+        "t2_us": 80.0,
+        "gate_1q_error": 0.0005,
+        "gate_2q_error": 0.008,
+        "readout_error": 0.025,
+        "connectivity": "nearest_neighbor",
+        "last_update": 0.0
+    },
+    "openquantum": {
+        "t1_us": 180.0,
+        "t2_us": 120.0,
+        "gate_1q_error": 0.0004,
+        "gate_2q_error": 0.005,
+        "readout_error": 0.015,
+        "connectivity": "all_to_all",
+        "last_update": 0.0
+    }
+}

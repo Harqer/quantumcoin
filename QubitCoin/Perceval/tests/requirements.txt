@@ -1,0 +1,7 @@
+pytest
+pytest-cov
+pytest-benchmark
+flake8
+responses
+pytest-responses
+flaky

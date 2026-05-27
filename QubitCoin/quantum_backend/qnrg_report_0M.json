@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-05-18T15:47:39.501960",
+  "num_bits_tested": 10000,
+  "all_passed": false,
+  "results": [
+    {
+      "test": "Frequency (Monobit)",
+      "description": "Proportion of 0s and 1s",
+      "ones": 4987,
+      "zeros": 5013,
+      "proportion_ones": 0.4987,
+      "s_statistic": 1.8446744073709552e+17,
+      "p_value": 0.0,
+      "passed": "False",
+      "severity": "CRITICAL"
+    },
+    {
+      "test": "Runs",
+      "description": "Oscillation patterns between 0s and 1s",
+      "runs": 5031,
+      "expected_runs": 4999.97,
+      "z_statistic": NaN,
+      "p_value": NaN,
+      "passed": "False",
+      "severity": "OK"
+    },
+    {
+      "test": "test_longest_run_ones",
+      "status": "ERROR",
+      "error": "For each axis slice, the sum of the observed frequencies must agree with the sum of the expected frequencies to a relative tolerance of 1.4901161193847656e-08, but the percent differences are:\n10012.0",
+      "passed": false
+    },
+    {
+      "test": "Shannon Entropy",
+      "description": "Information content per byte",
+      "entropy_bits": 7.859925,
+      "max_entropy": 8.0,
+      "entropy_ratio": 0.982491,
+      "percentage": 98.2491,
+      "passed": "False",
+      "ais31_ptg1": "False",
+      "ais31_ptg2": "False",
+      "ais31_ptg3": "False",
+      "severity": "CRITICAL"
+    },
+    {
+      "test": "Chi-Square Uniformity",
+      "description": "Uniformity of byte distribution",
+      "chi2_statistic": 244.6304,
+      "degrees_of_freedom": 255,
+      "p_value": 0.6686,
+      "passed": "True",
+      "interpretation": "UNIFORM",
+      "severity": "OK"
+    },
+    {
+      "test": "Autocorrelation",
+      "description": "Correlation between adjacent bits",
+      "lag_1_coefficient": -0.0061,
+      "z_score": -0.61,
+      "p_value": 0.5419,
+      "passed": "False",
+      "severity": "MEDIUM"
+    },
+    {
+      "test": "Serial (16-bit)",
+      "description": "Frequency of overlapping 16-bit patterns",
+      "m": 16,
+      "unique_patterns": 1238,
+      "expected_patterns": 65536,
+      "chi2": 65441.3571,
+      "p_value": 0.6014,
+      "passed": "True",
+      "severity": "OK"
+    }
+  ]
+}

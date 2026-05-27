@@ -1,0 +1,11 @@
+quix/
+xanadu2/
+QubitCoin/quantum_backend/miner_cv_single_mode.py
+QubitCoin/quantum_backend/miner_rotations.py
+
+.venv/
+venv/
+node_modules/
+__pycache__/
+.next/
+.env*

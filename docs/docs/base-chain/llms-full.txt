@@ -1,0 +1,213 @@
+# https://docs.base.org/base-chain/llms-full.txt
+
+## Base Chain — Deep Guide for LLMs
+
+> Base is a fast, low‑cost Ethereum L2 built on the OP Stack. This guide orients an LLM to deployment, connectivity, network details, node operations, and security across the Base Chain docs.
+
+### What you can do here
+- Deploy smart contracts quickly (testnet and mainnet)
+- Connect apps to read/write on Base
+- Understand fees, contracts, and bridges
+- Use the full Ethereum JSON-RPC API and Flashblocks pre-confirmation API
+- Operate performant nodes
+- Obtain testnet ETH from faucets
+- Discover Flashblocks resources
+- Follow security disclosure guidance
+
+## Navigation (with brief descriptions)
+
+### Quickstart
+- [Why Base](https://docs.base.org/base-chain/quickstart/why-base.md) — Platform value prop
+- [Deploy on Base](https://docs.base.org/base-chain/quickstart/deploy-on-base.md) — Deploy contracts (Foundry)
+- [Connecting to Base](https://docs.base.org/base-chain/quickstart/connecting-to-base.md) — App connectivity
+- [Base-Solana Bridge](https://docs.base.org/base-chain/quickstart/base-solana-bridge.md) — Bridge between Base and Solana
+
+### Network Information
+- [Base Contracts](https://docs.base.org/base-chain/network-information/base-contracts.md) — Canonical addresses
+- [Network Fees](https://docs.base.org/base-chain/network-information/network-fees.md) — Fee model
+- [Ecosystem Contracts](https://docs.base.org/base-chain/network-information/ecosystem-contracts.md) — Third‑party addresses
+- [Block Building](https://docs.base.org/base-chain/network-information/block-building.md) — Block production
+- [Diffs vs Ethereum](https://docs.base.org/base-chain/network-information/diffs-ethereum-base.md) — Differences from L1
+- [Bridges](https://docs.base.org/base-chain/network-information/bridges.md) — Bridges
+- [Transaction Finality](https://docs.base.org/base-chain/network-information/transaction-finality.md) — Finality model
+- [Troubleshooting Transactions](https://docs.base.org/base-chain/network-information/troubleshooting-transactions.md) — Diagnose common transaction issues
+- [Configuration Changelog](https://docs.base.org/base-chain/network-information/configuration-changelog.md) — Network config changes
+- [Network Faucets](https://docs.base.org/base-chain/network-information/network-faucets.md) — Testnet ETH for Base Sepolia
+
+### Flashblocks
+- [Overview](https://docs.base.org/base-chain/flashblocks/overview.md) — What Flashblocks is and how the two-tier RPC system works
+- [App Integration](https://docs.base.org/base-chain/flashblocks/app-integration.md) — Apps using Flashblocks
+- [Architecture](https://docs.base.org/base-chain/flashblocks/architecture.md) — How the sequencer emits Flashblocks and nodes consume them
+- [FAQ](https://docs.base.org/base-chain/flashblocks/faq.md) — Frequently asked questions about Flashblocks
+
+### API Reference
+- [Overview](https://docs.base.org/base-chain/api-reference/rpc-overview.md) — Networks, endpoints (Standard and Flashblocks), request/response format, error codes, block parameters, and full method index for all three API groups
+- [Ethereum JSON-RPC API](https://docs.base.org/base-chain/api-reference/ethereum-json-rpc-api/eth_blockNumber.md) — Core Ethereum protocol methods: account state, blocks, transactions, gas, logs, chain info, and WebSocket subscriptions (28 methods total)
+- [Flashblocks API](https://docs.base.org/base-chain/api-reference/flashblocks-api/flashblocks-api-overview.md) — Flashblocks-specific HTTP methods (eth_simulateV1, base_transactionStatus), WebSocket subscriptions (newFlashblockTransactions, pendingLogs, newFlashblocks), and the raw infrastructure stream schema
+- [Debug API](https://docs.base.org/base-chain/api-reference/debug-api/debug_traceTransaction.md) — EVM execution tracing: debug_traceTransaction, debug_traceBlockByHash, debug_traceBlockByNumber
+
+### Node Operators
+- [Run a Base Node](https://docs.base.org/base-chain/node-operators/run-a-base-node.md) — Node setup
+- [Base Azul Upgrade](https://docs.base.org/base-chain/node-operators/base-v1-upgrade.md) — Migrate to base-reth-node and base-consensus for Azul
+- [Performance Tuning](https://docs.base.org/base-chain/node-operators/performance-tuning.md) — Optimization
+- [Snapshots](https://docs.base.org/base-chain/node-operators/snapshots.md) — Snapshot sync
+- [Troubleshooting](https://docs.base.org/base-chain/node-operators/troubleshooting.md) — Common fixes
+- [Node Providers](https://docs.base.org/base-chain/node-operators/node-providers.md) — RPC node providers for Base
+
+### Builder Codes
+- [Builder Codes](https://docs.base.org/apps/builder-codes/builder-codes.md) — Overview of the Builder Codes program
+- [App Developers](https://docs.base.org/apps/builder-codes/app-developers.md) — Builder Codes for app developers
+- [Wallet Developers](https://docs.base.org/apps/builder-codes/wallet-developers.md) — Builder Codes for wallet developers
+- [Agent Developers](https://docs.base.org/apps/builder-codes/agent-developers.md) — Attribute AI agent transactions to your identity on Base
+
+### Protocol Specs
+- [Specification Index](https://docs.base.org/base-chain/specs/index.md) — Entry point for the full Base Chain protocol specification
+- [Protocol Overview](https://docs.base.org/base-chain/specs/protocol/overview.md) — Architecture tour: sequencer, batcher, derivation, proofs, and bridge
+- [Batcher](https://docs.base.org/base-chain/specs/protocol/batcher.md) — How sequencer data is posted to L1 as channel frames and batches
+- [Derivation](https://docs.base.org/base-chain/specs/protocol/consensus/derivation.md) — Deterministic L2 block derivation from L1 data and sequencer batches
+- [P2P Network](https://docs.base.org/base-chain/specs/protocol/consensus/p2p.md) — Rollup node peer discovery, gossip, and unsafe block propagation
+- [Rollup Node RPC](https://docs.base.org/base-chain/specs/protocol/consensus/rpc.md) — optimism_outputAtBlock and rollup node RPC interface
+- [Execution Engine](https://docs.base.org/base-chain/specs/protocol/execution/index.md) — EIP-1559 parameters, fee vaults, and Engine API behavior
+- [Predeploys](https://docs.base.org/base-chain/specs/protocol/execution/evm/predeploys.md) — System contracts at predetermined genesis addresses
+- [Precompiles](https://docs.base.org/base-chain/specs/protocol/execution/evm/precompiles.md) — Native EVM implementations at predefined addresses
+- [Preinstalls](https://docs.base.org/base-chain/specs/protocol/execution/evm/preinstalls.md) — Utility contracts deployed in genesis state
+- [Bridges](https://docs.base.org/base-chain/specs/protocol/bridging/bridges.md) — Standard bridge for ETH and ERC20 cross-domain transfers
+- [Deposits](https://docs.base.org/base-chain/specs/protocol/bridging/deposits.md) — L1-to-L2 deposit transaction mechanism
+- [Withdrawals](https://docs.base.org/base-chain/specs/protocol/bridging/withdrawals.md) — L2-to-L1 withdrawal and proof mechanism
+- [Messengers](https://docs.base.org/base-chain/specs/protocol/bridging/messengers.md) — Cross-domain messenger API for arbitrary message passing
+- [Fault Proof System](https://docs.base.org/base-chain/specs/protocol/fault-proof/index.md) — Program, VM, and dispute game overview
+- [Cannon FPVM](https://docs.base.org/base-chain/specs/protocol/fault-proof/cannon-fault-proof-vm.md) — Multithreaded Cannon virtual machine specification
+- [Proposer](https://docs.base.org/base-chain/specs/protocol/fault-proof/proposer.md) — L2 output root publication to L1
+- [Fault Dispute Game](https://docs.base.org/base-chain/specs/protocol/fault-proof/stage-one/fault-dispute-game.md) — Bisection-based dispute resolution protocol
+- [Honest Challenger](https://docs.base.org/base-chain/specs/protocol/fault-proof/stage-one/honest-challenger-fdg.md) — Correct challenger behavior in the dispute game
+- [Bond Incentives](https://docs.base.org/base-chain/specs/protocol/fault-proof/stage-one/bond-incentives.md) — Financial incentives enforcing honest participation
+- [OptimismPortal](https://docs.base.org/base-chain/specs/protocol/fault-proof/stage-one/optimism-portal.md) — Primary L1 interface for deposits and withdrawals
+- [Bridge Integration](https://docs.base.org/base-chain/specs/protocol/fault-proof/stage-one/bridge-integration.md) — Dispute-game-based withdrawal path
+- [Glossary](https://docs.base.org/base-chain/specs/reference/glossary.md) — Protocol terminology and definitions
+- [Configurability](https://docs.base.org/base-chain/specs/reference/configurability.md) — All configurable protocol parameters
+
+### Protocol Specs — Upgrades
+- [Jovian](https://docs.base.org/base-chain/specs/upgrades/jovian/overview.md) — Minimum base fee and DA footprint gas scalar
+- [Isthmus](https://docs.base.org/base-chain/specs/upgrades/isthmus/overview.md) — Pectra EIPs and operator fee mechanism
+- [Holocene](https://docs.base.org/base-chain/specs/upgrades/holocene/overview.md) — Dynamic EIP-1559 parameters and stricter derivation rules
+- [Granite](https://docs.base.org/base-chain/specs/upgrades/granite/overview.md) — bn256Pairing restrictions and channel timeout changes
+- [Fjord](https://docs.base.org/base-chain/specs/upgrades/fjord/overview.md) — FastLZ fee estimation, RIP-7212 precompile, brotli compression
+- [Ecotone](https://docs.base.org/base-chain/specs/upgrades/ecotone/overview.md) — EIP-4844 blob DA and Dencun integration
+- [Delta](https://docs.base.org/base-chain/specs/upgrades/delta/overview.md) — Span batches for efficient L1 data posting
+- [Canyon](https://docs.base.org/base-chain/specs/upgrades/canyon/overview.md) — Ethereum Shanghai EIPs (EIP-3651, EIP-3855, EIP-3860)
+- [Azul](https://docs.base.org/base-chain/specs/upgrades/azul/overview.md) — Osaka EVM support and multi-proof system
+- [Pectra Blob Schedule](https://docs.base.org/base-chain/specs/upgrades/pectra-blob-schedule/overview.md) — Optional delay of Ethereum blob count schedule changes
+
+### Security
+- [Security Council](https://docs.base.org/base-chain/security/security-council.md) — Security governance
+- [Avoid Malicious Flags](https://docs.base.org/base-chain/security/avoid-malicious-flags.md) — App‑blocklist
+- [Report a Vulnerability](https://docs.base.org/base-chain/security/report-vulnerability.md) — Reporting
+- [Bug Bounty](https://docs.base.org/base-chain/security/bug-bounty.md) — Bug bounty program
+
+
+## Quickstart (excerpts)
+
+Source: `https://docs.base.org/base-chain/quickstart/deploy-on-base.md`
+
+Deploy with Foundry to Base Sepolia:
+
+```bash
+forge create src/Contract.sol:Contract \
+  --rpc-url $BASE_SEPOLIA_RPC \
+  --private-key $PRIVATE_KEY \
+  --verify --verifier blockscout --verifier-url https://base-sepolia.blockscout.com/api
+```
+
+Source: `https://docs.base.org/base-chain/quickstart/connecting-to-base.md`
+
+Connect a client to Base:
+
+```ts
+import { createPublicClient, http } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
+
+const client = createPublicClient({ chain: base, transport: http() })
+```
+
+
+## Key Concepts (excerpts)
+
+Source: `https://docs.base.org/base-chain/network-information/diffs-ethereum-base.md`
+
+- OP Stack rollup: Base batches L2 transactions and posts data to Ethereum L1, inheriting L1 security.
+- Fees: Total includes L2 execution and L1 data costs. See fee breakdown and estimator.
+  - Source: `https://docs.base.org/base-chain/network-information/network-fees.md`
+- Canonical contracts: Use published address lists for bridges, system contracts, and registry.
+  - Source: `https://docs.base.org/base-chain/network-information/base-contracts.md`
+- Bridges: Official and third‑party bridge options for moving assets to/from Base.
+  - Source: `https://docs.base.org/base-chain/network-information/bridges.md`
+
+
+## Infrastructure (pruned)
+
+- Node Providers — RPC endpoints for Base and Base Sepolia
+  - Source: `https://docs.base.org/base-chain/node-operators/node-providers.md`
+- Faucets — Get test ETH for Base Sepolia
+  - Source: `https://docs.base.org/base-chain/network-information/network-faucets.md`
+
+
+## Node Operations (excerpts)
+
+Sources:
+- `https://docs.base.org/base-chain/node-operators/run-a-base-node.md`
+- `https://docs.base.org/base-chain/node-operators/performance-tuning.md`
+- `https://docs.base.org/base-chain/node-operators/snapshots.md`
+- `https://docs.base.org/base-chain/node-operators/troubleshooting.md`
+
+- Architecture: Operate a rollup (consensus) node paired with an execution client. Ensure both services are healthy and in sync.
+- Provisioning: Use SSD storage, reliable network, and adhere to the current requirements listed in the run‑a‑node guide. Prefer containerized or systemd‑managed services for resilience.
+- Sync strategy: Start from a published snapshot to reduce time‑to‑sync, or sync from genesis when required for auditing. Choose pruned vs. archive based on workload.
+- Monitoring: Track head slot/number, peer count, p2p health, RPC latency, error rates, and disk pressure. Export metrics to your observability stack and set alerts.
+- RPC best practices: Expose only necessary methods, enforce authentication and rate limits, and front with a TLS‑terminating proxy. Separate public and internal RPCs.
+- Performance tuning: Tune DB/cache sizes, peer limits, and concurrency. Offload heavy queries. See the performance tuning guide for recommended flags and OS settings.
+- Maintenance: Keep up with client releases and chain config updates. Rotate logs, verify backups, and periodically re‑validate snapshots.
+- Troubleshooting: Use the troubleshooting guide for common sync stalls, p2p isolation, or corrupted DB recovery.
+
+Check sync status via JSON‑RPC:
+
+```bash
+curl -s -X POST "$BASE_RPC" -H 'content-type: application/json' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"eth_syncing","params":[]}' | jq
+```
+
+
+## Flashblocks (excerpts)
+
+Sources:
+- `https://docs.base.org/base-chain/flashblocks/faq.md`
+- `https://docs.base.org/base-chain/flashblocks/app-integration.md`
+- `https://docs.base.org/base-chain/api-reference/flashblocks-api/flashblocks-api-overview.md`
+
+- Overview: Flashblocks provide sub-200ms preconfirmed block state on Base, enabling lower-latency reads and faster transaction confirmation signals.
+- Ecosystem: Review apps that make use of Flashblocks‑related infra and the node providers who support relevant capabilities.
+- When to consider: High‑frequency reads/writes, market‑sensitive UX, or services where propagation and data freshness are critical.
+- Integration: Connect to `mainnet-preconf.base.org` (or `sepolia-preconf.base.org`); use `"pending"` block tag to query preconfirmed state. Follow provider documentation and the Flashblocks docs for setup and operational guidance.
+- Validation: Measure end‑to‑end latency and consistency across providers as part of your rollout plan.
+
+Simple latency probe (conceptual):
+
+```ts
+const t0 = Date.now()
+const block = await client.getBlock()
+console.log('latencyMs', Date.now() - t0, 'number', block.number)
+```
+
+
+## Examples (common flows)
+
+Example: Read a contract on Base with Viem
+
+Source: `https://docs.base.org/base-chain/quickstart/connecting-to-base.md`
+
+```ts
+import { createPublicClient, http } from 'viem'
+import { base } from 'viem/chains'
+
+const client = createPublicClient({ chain: base, transport: http() })
+const totalSupply = await client.readContract({ address: USDC, abi, functionName: 'totalSupply' })
+```

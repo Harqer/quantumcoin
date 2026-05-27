@@ -1,0 +1,8 @@
+{
+    "importFilesToOrigRelpaths": {},
+    "primary_contract": "HSMKeyManager",
+    "specfile": "/home/shaolin/QuantumCoin/QubitCoin/contracts/certora/HSMKeyManager.spec",
+    "specfileOrigRelpath": "certora/HSMKeyManager.spec",
+    "specfilesToImportDecls": {},
+    "type": "spec"
+}
