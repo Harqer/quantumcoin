@@ -84,7 +84,12 @@ class QuandelaProvider(QuantumProvider):
         # Create a QuandelaSession with platform name and token
         return self._session_class(self.device, self.api_key)
     
-    async def execute(self, circuit: Any, shots: int = 1024, options: Optional[Dict] = None) -> ExecutionResult:
+    async def execute(
+        self,
+        circuit_qasm: str,
+        shots: int = 1024,
+        error_suppress: bool = True,
+    ) -> ExecutionResult:
         """Execute a photonic circuit on Quandela hardware."""
         # For QRNG, use specialized method below
         pass

@@ -8,11 +8,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Python deps
-COPY requirements.txt .
+COPY QubitCoin/quantum_backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source
-COPY . /app/quantum_backend/
+COPY QubitCoin/quantum_backend/ /app/quantum_backend/
 
 # Non-root user for security
 RUN adduser --disabled-password --gecos '' quser

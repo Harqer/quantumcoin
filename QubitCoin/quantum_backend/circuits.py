@@ -20,10 +20,10 @@ Scientific basis:
 """
 
 import numpy as np
-from qiskit import QuantumCircuit
+from quantum_backend.qasm3_builder import QASM3Builder
 
 
-def build_qnrg_circuit(num_qubits: int = 32) -> QuantumCircuit:
+def build_qnrg_circuit(num_qubits: int = 32) -> str:
     """
     Build a QNRG circuit: Hadamard on all qubits, then measure.
 
@@ -41,26 +41,30 @@ def build_qnrg_circuit(num_qubits: int = 32) -> QuantumCircuit:
         num_qubits: Number of qubits (= bits per shot of randomness).
 
     Returns:
-        QuantumCircuit ready for execution.
+        OpenQASM 3 string ready for execution.
     """
     from quantum_backend.circuit_cache import get_circuit_cache
     cache = get_circuit_cache()
     key = cache.make_key("qnrg", num_qubits)
     cached = cache.get(key)
     if cached is not None:
-        return cached.copy()
+        return cached
 
-    qc = QuantumCircuit(num_qubits, num_qubits)
-    qc.h(range(num_qubits))
-    qc.measure(range(num_qubits), range(num_qubits))
-    cache.put(key, qc)
-    return qc
+    builder = QASM3Builder(num_qubits, num_qubits)
+    for i in range(num_qubits):
+        builder.h(i)
+    
+    builder.measure_all()
+    qasm_str = builder.build()
+    
+    cache.put(key, qasm_str)
+    return qasm_str
 
 
 def build_bb84_alice_circuit(
     bits: list[int],
     bases: list[int],
-) -> QuantumCircuit:
+) -> QASM3Builder:
     """
     Build Alice's BB84 encoding circuit.
 
@@ -74,28 +78,27 @@ def build_bb84_alice_circuit(
               0=Z-basis (computational), 1=X-basis (Hadamard).
 
     Returns:
-        QuantumCircuit encoding Alice's BB84 states.
+        QASM3Builder encoding Alice's BB84 states.
     """
     n = len(bits)
     assert len(bases) == n, "bits and bases must be same length"
 
-    qc = QuantumCircuit(n, n)
+    builder = QASM3Builder(n, n)
 
     for i in range(n):
         if bits[i] == 1:
-            qc.x(i)
+            builder.x(i)
         if bases[i] == 1:
-            qc.h(i)
+            builder.h(i)
 
-    qc.barrier()
-    return qc
+    return builder
 
 
 def build_bb84_bob_measure(
-    alice_circuit: QuantumCircuit,
+    builder: QASM3Builder,
     bob_bases: list[int],
     drift_compensation_angle: float = 0.0,
-) -> QuantumCircuit:
+) -> str:
     """
     Append Bob's measurement in his randomly chosen bases to Alice's circuit.
 
@@ -108,34 +111,31 @@ def build_bb84_bob_measure(
     the outcome is uniformly random.
 
     Args:
-        alice_circuit: Alice's prepared circuit.
+        builder: Alice's prepared circuit (QASM3Builder).
         bob_bases: Bob's random basis choices (list of 0/1).
         drift_compensation_angle: Bob's corrective rotation angle in radians.
 
     Returns:
-        Complete BB84 circuit with measurements.
+        Complete BB84 circuit OpenQASM 3.0 string with measurements.
     """
-    n = alice_circuit.num_qubits
+    n = builder.num_qubits
     assert len(bob_bases) == n, "bob_bases must match circuit qubit count"
-
-    qc = alice_circuit.copy()
-    qc.barrier()
 
     for i in range(n):
         if drift_compensation_angle != 0.0:
-            qc.ry(drift_compensation_angle, i)
+            builder.ry(drift_compensation_angle, i)
         if bob_bases[i] == 1:
-            qc.h(i)
+            builder.h(i)
 
-    qc.measure(range(n), range(n))
-    return qc
+    builder.measure_all()
+    return builder.build()
 
 
 def build_bb84_full_round(
     num_qubits: int = 8,
     rng: np.random.Generator | None = None,
     drift_compensation_angle: float = 0.0,
-) -> tuple[QuantumCircuit, dict]:
+) -> tuple[str, dict]:
     """
     Build a complete BB84 round: generate random bits/bases, encode, measure.
 
@@ -149,7 +149,7 @@ def build_bb84_full_round(
         drift_compensation_angle: Polarization drift compensation angle in radians.
 
     Returns:
-        Tuple of (circuit, metadata) where metadata contains:
+        Tuple of (circuit_qasm, metadata) where metadata contains:
         - alice_bits: Alice's random bits
         - alice_bases: Alice's random bases
         - bob_bases: Bob's random bases
@@ -161,9 +161,9 @@ def build_bb84_full_round(
     alice_bases = rng.integers(0, 2, size=num_qubits).tolist()
     bob_bases = rng.integers(0, 2, size=num_qubits).tolist()
 
-    alice_circuit = build_bb84_alice_circuit(alice_bits, alice_bases)
-    full_circuit = build_bb84_bob_measure(
-        alice_circuit, bob_bases, drift_compensation_angle=drift_compensation_angle
+    builder = build_bb84_alice_circuit(alice_bits, alice_bases)
+    qasm_str = build_bb84_bob_measure(
+        builder, bob_bases, drift_compensation_angle=drift_compensation_angle
     )
 
     metadata = {
@@ -174,7 +174,7 @@ def build_bb84_full_round(
         "drift_compensation_angle": drift_compensation_angle,
     }
 
-    return full_circuit, metadata
+    return qasm_str, metadata
 
 
 def sift_bb84_key(
@@ -246,7 +246,7 @@ def privacy_amplification(raw_key: list[int], security_parameter: int = 32) -> b
 def build_rotation_hash_circuit(
     header_bits: list[int],
     num_qubits: int = 16,
-) -> QuantumCircuit:
+) -> str:
     """
     Build a quantum rotation hashing circuit for a block header candidate.
 
@@ -261,14 +261,14 @@ def build_rotation_hash_circuit(
         num_qubits: Number of qubits to use for the circuit.
 
     Returns:
-        QuantumCircuit ready for execution.
+        OpenQASM 3 string ready for execution.
     """
     n_bits = len(header_bits)
     if n_bits == 0:
         header_bits = [0] * 640
         n_bits = 640
 
-    qc = QuantumCircuit(num_qubits, num_qubits)
+    builder = QASM3Builder(num_qubits, num_qubits)
 
     # Process the bits in chunks of size num_qubits
     chunk_size = num_qubits
@@ -287,20 +287,16 @@ def build_rotation_hash_circuit(
             # Use Ry rotation: if bit is 1, rotate by pi/2, else rotate by pi/4 (to create superpositions)
             # We can also add some layer-dependent and qubit-dependent phase to avoid simple symmetries
             theta = (bit * np.pi / 2) + (np.pi / 4) + (layer * np.pi / (num_layers * 2))
-            qc.ry(theta, i)
+            builder.ry(theta, i)
 
             # Apply Rz rotation for phase diffusion
             phi = (bit * np.pi / 4) + (i * np.pi / num_qubits)
-            qc.rz(phi, i)
-
-        qc.barrier()
+            builder.rz(phi, i)
 
         # Apply entangling layers (CNOT chain) for diffusion/mixing
         for i in range(num_qubits):
-            qc.cx(i, (i + 1) % num_qubits)
+            builder.cx(i, (i + 1) % num_qubits)
 
-        qc.barrier()
-
-    qc.measure(range(num_qubits), range(num_qubits))
-    return qc
+    builder.measure_all()
+    return builder.build()
 

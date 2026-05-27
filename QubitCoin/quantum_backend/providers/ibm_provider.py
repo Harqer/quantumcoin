@@ -10,8 +10,6 @@ Without Fire Opal, falls back to direct Qiskit Runtime execution.
 
 import structlog
 
-from qiskit import QuantumCircuit
-
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
 from quantum_backend.providers.fire_opal_wrapper import fire_opal
@@ -32,7 +30,7 @@ class IBMProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 8192,
         error_suppress: bool = True,
     ) -> ExecutionResult:
@@ -42,7 +40,7 @@ class IBMProvider(QuantumProvider):
         if error_suppress and config.fire_opal.available:
             credentials = fire_opal.make_ibm_credentials()
             result = fire_opal.execute_with_suppression(
-                circuit=circuit,
+                circuit_qasm=circuit_qasm,
                 credentials=credentials,
                 backend_name=backend_name,
                 shots=shots,
@@ -59,6 +57,10 @@ class IBMProvider(QuantumProvider):
 
         # Direct Qiskit Runtime fallback
         from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
+        import qiskit.qasm3
+
+        # Parse OpenQASM 3.0 string back into QuantumCircuit for Qiskit Runtime
+        circuit = qiskit.qasm3.loads(circuit_qasm)
 
         service = QiskitRuntimeService(
             channel="ibm_quantum",

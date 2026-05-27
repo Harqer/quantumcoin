@@ -164,7 +164,7 @@ async def distribute_quantum_key(
 
         # Execute on real QPU
         result = await provider.execute(
-            circuit=circuit,
+            circuit_qasm=circuit,
             shots=1,  # BB84 is single-shot per round
             error_suppress=True,
         )

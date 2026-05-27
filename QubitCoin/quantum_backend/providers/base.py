@@ -6,9 +6,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
-from qiskit import QuantumCircuit
-
-
 @dataclass
 class ExecutionResult:
     """Standardized result from any quantum provider."""
@@ -59,19 +56,37 @@ class QuantumProvider(ABC):
     @abstractmethod
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 1024,
         error_suppress: bool = True,
     ) -> ExecutionResult:
         """
-        Execute a quantum circuit on this provider's hardware.
+        Execute an OpenQASM 3.0 circuit on this provider's hardware.
 
         Args:
-            circuit: Qiskit QuantumCircuit to run.
+            circuit_qasm: OpenQASM 3.0 string to run.
             shots: Number of measurement repetitions.
             error_suppress: Whether to apply Fire Opal error suppression.
 
-        Returns:
-            ExecutionResult with measurement counts.
         """
         ...
+
+    async def execute_pulse_graph(
+        self,
+        graph_data: Any,
+        **kwargs
+    ) -> Any:
+        """
+        Execute a Q-CTRL Boulder Opal pulse-level optimization graph.
+        
+        Optional hook for providers that support direct pulse-level control
+        or characterization via Boulder Opal.
+        
+        Args:
+            graph_data: The boulderopal.Graph object or serialized equivalent.
+            kwargs: Additional hardware-specific arguments.
+            
+        Returns:
+            Provider-specific pulse characterization/optimization results.
+        """
+        raise NotImplementedError(f"Pulse-level execution via Boulder Opal not supported on {self.name}")

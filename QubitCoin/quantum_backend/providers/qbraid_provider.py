@@ -12,8 +12,6 @@ to whatever device is configured, with automatic transpilation.
 
 import structlog
 
-from qiskit import QuantumCircuit
-
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
 
@@ -33,7 +31,7 @@ class QBraidProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 8192,
         error_suppress: bool = True,
     ) -> ExecutionResult:
@@ -58,14 +56,21 @@ class QBraidProvider(QuantumProvider):
 
         device = provider.get_device(device_id)
 
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
+
         logger.info(
             "qbraid.submitting",
             device_id=device_id,
-            num_qubits=circuit.num_qubits,
+            num_qubits=num_qubits,
             shots=shots,
         )
 
-        job = device.run(circuit, shots=shots)
+        from qbraid.programs import load_program
+        program = load_program(circuit_qasm)
+
+        job = device.run(program, shots=shots)
         result = job.result()
 
         counts = result.data.get_counts()

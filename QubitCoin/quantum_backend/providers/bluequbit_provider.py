@@ -12,8 +12,6 @@ Qiskit circuits natively.
 
 import structlog
 
-from qiskit import QuantumCircuit
-
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
 
@@ -33,7 +31,7 @@ class BlueQubitProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 8192,
         error_suppress: bool = True,
     ) -> ExecutionResult:
@@ -47,19 +45,23 @@ class BlueQubitProvider(QuantumProvider):
         max_shots = 100000
         effective_shots = min(shots, max_shots)
 
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
+
         logger.info(
             "bluequbit.submitting",
             device=device,
-            num_qubits=circuit.num_qubits,
+            num_qubits=num_qubits,
             shots=effective_shots,
         )
 
         # Submit and wait — BlueQubit .run() blocks by default
         result = bq.run(
-            circuit,
+            circuit_qasm,
             device=device,
             shots=effective_shots,
-            job_name=f"qnrg-qkd-{circuit.num_qubits}q",
+            job_name=f"qnrg-qkd-{num_qubits}q",
         )
 
         # BlueQubit JobResult.get_counts() returns dict[str, int]

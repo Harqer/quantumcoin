@@ -28,7 +28,6 @@ from enum import Enum
 from typing import Optional
 
 import structlog
-from qiskit import QuantumCircuit
 
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
 from quantum_backend.providers.registry import get_provider, get_available_providers
@@ -36,84 +35,9 @@ from quantum_backend.providers.registry import get_provider, get_available_provi
 logger = structlog.get_logger()
 
 
-# ---------------------------------------------------------------------------
-# Provider capability profiles — auto-detected where possible, seeded with
-# known hardware specs. These are NOT preferences — they describe physical
-# constraints of the hardware that determine whether a circuit CAN run.
-# ---------------------------------------------------------------------------
-PROVIDER_CAPABILITIES = {
-    "ionq": {
-        "max_qubits": 36,
-        "connectivity": "all_to_all",
-        "native_2q_gate": "ms",
-        "typical_1q_fidelity": 0.9999,
-        "typical_2q_fidelity": 0.9999,
-        "max_shots": 10000,
-        "supports_mid_circuit_measurement": False,
-        "debiasing": True,
-    },
-    "ibm": {
-        "max_qubits": 156,
-        "connectivity": "heavy_hex",
-        "native_2q_gate": "cx",
-        "typical_1q_fidelity": 0.9995,
-        "typical_2q_fidelity": 0.995,
-        "max_shots": 100000,
-        "supports_mid_circuit_measurement": True,
-        "debiasing": False,
-    },
-    "azure": {
-        "max_qubits": 56,
-        "connectivity": "all_to_all",
-        "native_2q_gate": "zz",
-        "typical_1q_fidelity": 0.9999,
-        "typical_2q_fidelity": 0.999,
-        "max_shots": 10000,
-        "supports_mid_circuit_measurement": True,
-        "debiasing": False,
-    },
-    "qbraid": {
-        "max_qubits": 108,
-        "connectivity": "nearest_neighbor",
-        "native_2q_gate": "cz",
-        "typical_1q_fidelity": 0.999,
-        "typical_2q_fidelity": 0.995,
-        "max_shots": 100000,
-        "supports_mid_circuit_measurement": False,
-        "debiasing": False,
-    },
-    "bluequbit": {
-        "max_qubits": 30,
-        "connectivity": "all_to_all",
-        "native_2q_gate": "cx",
-        "typical_1q_fidelity": 0.999,
-        "typical_2q_fidelity": 0.99,
-        "max_shots": 100000,
-        "supports_mid_circuit_measurement": False,
-        "debiasing": False,
-    },
-    "braket": {
-        "max_qubits": 108,
-        "connectivity": "nearest_neighbor",
-        "native_2q_gate": "cz",
-        "typical_1q_fidelity": 0.999,
-        "typical_2q_fidelity": 0.995,
-        "max_shots": 100000,
-        "supports_mid_circuit_measurement": False,
-        "debiasing": False,
-    },
-    "openquantum": {
-        "max_qubits": 54,  # IQM Emerald
-        "connectivity": "all_to_all",  # IQM supports all-to-all
-        "native_2q_gate": "cz",
-        "typical_1q_fidelity": 0.9995,
-        "typical_2q_fidelity": 0.995,
-        "max_shots": 10000,
-        "supports_mid_circuit_measurement": False,
-        "debiasing": False,
-        "backends": ["iqm:garnet", "iqm:emerald", "ionq:forte-1"],
-    },
-}
+from quantum_backend.providers.hardware_registry import load_dynamic_capabilities
+
+PROVIDER_CAPABILITIES = load_dynamic_capabilities()
 
 
 class BalancingStrategy(str, Enum):
@@ -136,30 +60,43 @@ class CircuitProfile:
     estimated_fidelity_need: float  # higher = needs better hardware
 
 
-def _analyze_circuit(circuit: QuantumCircuit) -> CircuitProfile:
+def _analyze_circuit(circuit_qasm: str) -> CircuitProfile:
     """
     Extract circuit characteristics for routing decisions.
-    This is a fast O(gates) scan — adds negligible latency.
+    This uses regex to parse QASM strings.
     """
-    num_qubits = circuit.num_qubits
-    depth = circuit.depth()
+    import re
+    match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+    num_qubits = int(match.group(1)) if match else 1
 
+    lines = circuit_qasm.split('\n')
     num_2q_gates = 0
     num_1q_gates = 0
+    has_measurements = False
     qubit_pairs = set()
 
-    for instruction in circuit.data:
-        n_qubits = len(instruction.qubits)
-        if n_qubits >= 2:
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith('//') or line.startswith('OPENQASM') or line.startswith('include'):
+            continue
+            
+        if line.startswith('measure'):
+            has_measurements = True
+            continue
+            
+        # Extract indices
+        indices = [int(x.strip('[]')) for x in re.findall(r"\[(\d+)\]", line)]
+        
+        if len(indices) >= 2:
             num_2q_gates += 1
-            # Track which qubit pairs interact (for connectivity check)
-            indices = [circuit.qubits.index(q) for q in instruction.qubits]
             for i in range(len(indices)):
                 for j in range(i + 1, len(indices)):
-                    qubit_pairs.add((min(indices[i], indices[j]),
-                                     max(indices[i], indices[j])))
-        elif n_qubits == 1:
-            num_1q_gates += 1
+                    qubit_pairs.add((min(indices[i], indices[j]), max(indices[i], indices[j])))
+        elif len(indices) == 1:
+            if not line.startswith('qubit'):
+                num_1q_gates += 1
+
+    depth = max(1, (num_1q_gates + num_2q_gates) // max(1, num_qubits) + (1 if num_2q_gates > 0 else 0))
 
     # Determine if the circuit needs all-to-all connectivity
     # (non-adjacent qubit pairs interacting)
@@ -184,7 +121,7 @@ def _analyze_circuit(circuit: QuantumCircuit) -> CircuitProfile:
         depth=depth,
         num_2q_gates=num_2q_gates,
         num_1q_gates=num_1q_gates,
-        has_measurements=circuit.num_clbits > 0,
+        has_measurements=has_measurements,
         needs_all_to_all=needs_all_to_all,
         estimated_fidelity_need=fidelity_need,
     )
@@ -294,7 +231,7 @@ class ProviderLoadBalancer:
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 1024,
         error_suppress: bool = True,
         preferred_provider: Optional[str] = None,
@@ -320,7 +257,7 @@ class ProviderLoadBalancer:
             if stats.is_healthy:
                 try:
                     return await self._execute_with_tracking(
-                        provider, circuit, shots, error_suppress, preferred_provider
+                        provider, circuit_qasm, shots, error_suppress, preferred_provider
                     )
                 except Exception:
                     if self._strategy == BalancingStrategy.FAILOVER:
@@ -329,14 +266,14 @@ class ProviderLoadBalancer:
                         raise
 
         # Select providers based on strategy
-        providers_to_try = await self._select_providers(circuit, shots)
+        providers_to_try = await self._select_providers(circuit_qasm, shots)
 
         last_error = None
         for provider_name in providers_to_try:
             provider = self._providers[provider_name]
             try:
                 result = await self._execute_with_tracking(
-                    provider, circuit, shots, error_suppress, provider_name
+                    provider, circuit_qasm, shots, error_suppress, provider_name
                 )
                 self._routing_decisions[provider_name] += 1
                 return result
@@ -356,7 +293,7 @@ class ProviderLoadBalancer:
         )
 
     async def _select_providers(
-        self, circuit: QuantumCircuit, shots: int
+        self, circuit_qasm: str, shots: int
     ) -> list[str]:
         """
         Return ordered list of providers, best-first.
@@ -373,7 +310,7 @@ class ProviderLoadBalancer:
             healthy = list(self._providers.keys())
 
         if self._strategy == BalancingStrategy.SMART:
-            return self._smart_select(circuit, shots, healthy)
+            return self._smart_select(circuit_qasm, shots, healthy)
 
         elif self._strategy == BalancingStrategy.ROUND_ROBIN:
             self._robin_index = (self._robin_index + 1) % len(healthy)
@@ -402,7 +339,7 @@ class ProviderLoadBalancer:
 
     def _smart_select(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int,
         healthy_providers: list[str],
     ) -> list[str]:
@@ -412,7 +349,7 @@ class ProviderLoadBalancer:
         falling back to classical heuristic smart select on error.
         """
         from quantum_backend.config import config
-        profile = _analyze_circuit(circuit)
+        profile = _analyze_circuit(circuit_qasm)
 
         # Check if AI routing is enabled and attempt it
         if config.ai_routing_enabled:
@@ -596,7 +533,7 @@ class ProviderLoadBalancer:
     async def _execute_with_tracking(
         self,
         provider: QuantumProvider,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int,
         error_suppress: bool,
         provider_name: str,
@@ -615,7 +552,7 @@ class ProviderLoadBalancer:
 
         try:
             result = await provider.execute(
-                circuit=circuit,
+                circuit_qasm=circuit_qasm,
                 shots=shots,
                 error_suppress=error_suppress,
             )
@@ -625,7 +562,7 @@ class ProviderLoadBalancer:
                 "load_balancer.execution_complete",
                 provider=provider_name,
                 latency_ms=round(elapsed_ms, 1),
-                qubits=circuit.num_qubits,
+                qubits=len(re.findall(r"qubit\[", circuit_qasm)),
             )
 
             # Check if QBER, CHSH S, or min_entropy metadata was populated in the result
@@ -648,7 +585,7 @@ class ProviderLoadBalancer:
             # Log this execution to the telemetry system for surrogate model feedback loop
             try:
                 from quantum_backend.ml_orchestrator.telemetry import log_execution
-                profile = _analyze_circuit(circuit)
+                profile = _analyze_circuit(circuit_qasm)
                 
                 # Retrieve actual backend name if returned in result
                 actual_backend = result.backend if result else provider_name

@@ -13,8 +13,6 @@ import asyncio
 from typing import Optional
 from dataclasses import dataclass
 
-from qiskit import QuantumCircuit, qasm2
-from qiskit.transpiler import CouplingMap
 
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
 
@@ -113,27 +111,7 @@ class OpenQuantumProvider(QuantumProvider):
                 "ionq:forte-1", "ionq:aria-1", "ionq:aria-2"
             ]
     
-    def _circuit_to_qasm(self, circuit: QuantumCircuit) -> bytes:
-        """
-        Convert Qiskit circuit to OpenQASM 2.0 for Open Quantum.
-        
-        Hardware-agnostic: works with any Qiskit circuit regardless of provider.
-        """
-        # Export to OpenQASM 2.0
-        try:
-            qasm_str = qasm2.dumps(circuit)
-        except Exception:
-            # Fallback: transpile to basic gates first
-            from qiskit import transpile
-            basic_circuit = transpile(
-                circuit, 
-                basis_gates=['u1', 'u2', 'u3', 'cx', 'id'],
-                optimization_level=1
-            )
-            qasm_str = qasm2.dumps(basic_circuit)
-        
-        return qasm_str.encode('utf-8')
-    
+
     def _find_subcategory(self) -> Optional[str]:
         """
         Find a valid job subcategory for submission.
@@ -142,7 +120,7 @@ class OpenQuantumProvider(QuantumProvider):
     
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 1024,
         error_suppress: bool = True,
     ) -> ExecutionResult:
@@ -170,8 +148,12 @@ class OpenQuantumProvider(QuantumProvider):
         else:
             org_id = self.config.organization_id
         
-        # Convert circuit to QASM
-        qasm_bytes = self._circuit_to_qasm(circuit)
+        # Encode QASM string
+        qasm_bytes = circuit_qasm.encode('utf-8')
+        
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
         
         # Determine backend
         backend_id = self.config.preferred_backend
@@ -188,7 +170,7 @@ class OpenQuantumProvider(QuantumProvider):
                 organization_id=org_id,
                 backend_class_id=backend_id,
                 job_subcategory_id=subcategory,
-                name=f"qiskit-circuit-{circuit.num_qubits}q",
+                name=f"qasm-circuit-{num_qubits}q",
                 shots=shots,
                 execution_plan="auto",
                 queue_priority="auto",

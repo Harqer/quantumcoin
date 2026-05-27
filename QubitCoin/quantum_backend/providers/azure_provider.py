@@ -25,7 +25,6 @@ from typing import Optional
 
 import structlog
 
-from qiskit import QuantumCircuit
 
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
@@ -60,7 +59,7 @@ class AzureProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 8192,
         error_suppress: bool = True,
     ) -> ExecutionResult:
@@ -82,24 +81,25 @@ class AzureProvider(QuantumProvider):
             lambda: workspace.get_targets(config.azure.target),
         )
 
+        import re
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
+
         logger.info(
             "azure.submitting",
             target=config.azure.target,
-            num_qubits=circuit.num_qubits,
+            num_qubits=num_qubits,
             shots=shots,
         )
-
-        # Convert circuit to OpenQASM for Azure submission
-        qasm_str = circuit.qasm()
 
         # Submit job (non-blocking)
         job = await loop.run_in_executor(
             None,
             lambda: target.submit(
-                input_data=qasm_str,
-                input_data_format="qiskit",
+                input_data=circuit_qasm,
+                input_data_format="qasm",
                 shots=shots,
-                name=f"quantumcoin-{circuit.num_qubits}q-{shots}s",
+                name=f"quantumcoin-{num_qubits}q-{shots}s",
             ),
         )
 

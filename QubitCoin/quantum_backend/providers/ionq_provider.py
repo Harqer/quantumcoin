@@ -25,7 +25,6 @@ from typing import Optional
 import httpx
 import numpy as np
 import structlog
-from qiskit import QuantumCircuit
 
 from quantum_backend.config import config
 from quantum_backend.providers.base import QuantumProvider, ExecutionResult
@@ -62,12 +61,15 @@ class IonQProvider(QuantumProvider):
 
     async def execute(
         self,
-        circuit: QuantumCircuit,
+        circuit_qasm: str,
         shots: int = 8192,
         error_suppress: bool = True,
     ) -> ExecutionResult:
+        import re
         target = self._get_target()
-        num_qubits = circuit.num_qubits
+        
+        match = re.search(r"qubit\[(\d+)\]", circuit_qasm)
+        num_qubits = int(match.group(1)) if match else 1
 
         # IonQ caps shots at 10000 for QPU
         effective_shots = min(shots, 10000)
@@ -79,14 +81,11 @@ class IonQProvider(QuantumProvider):
             shots=effective_shots,
         )
 
-        # Convert Qiskit circuit to IonQ native JSON gate format
-        ionq_circuit = self._qiskit_to_ionq(circuit)
-
         # Submit job via IonQ REST API
         payload = {
             "target": target,
             "shots": effective_shots,
-            "input": ionq_circuit,
+            "input": {"format": "qasm", "qasm": circuit_qasm},
             "error_mitigation": {
                 "debias": True,
             },
@@ -195,69 +194,6 @@ class IonQProvider(QuantumProvider):
                 "debias": True,
             },
         )
-
-    def _qiskit_to_ionq(self, circuit: QuantumCircuit) -> dict:
-        """
-        Convert a Qiskit QuantumCircuit to IonQ native JSON format.
-
-        IonQ format:
-        {
-            "qubits": N,
-            "circuit": [
-                {"gate": "h", "target": 0},
-                {"gate": "cnot", "control": 0, "target": 1},
-                {"gate": "rx", "rotation": 0.5, "target": 2},
-                ...
-            ]
-        }
-
-        Measurement is implicit in IonQ — all qubits are measured at end.
-        """
-        gates = []
-
-        for instruction in circuit.data:
-            gate_name = instruction.operation.name.lower()
-            qubits = [circuit.find_bit(q).index for q in instruction.qubits]
-            params = list(instruction.operation.params)
-
-            if gate_name == "measure" or gate_name == "barrier":
-                continue  # IonQ measures all qubits implicitly
-
-            if gate_name == "h":
-                gates.append({"gate": "h", "target": qubits[0]})
-            elif gate_name == "x":
-                gates.append({"gate": "x", "target": qubits[0]})
-            elif gate_name == "y":
-                gates.append({"gate": "y", "target": qubits[0]})
-            elif gate_name == "z":
-                gates.append({"gate": "z", "target": qubits[0]})
-            elif gate_name == "s":
-                gates.append({"gate": "s", "target": qubits[0]})
-            elif gate_name == "sdg":
-                gates.append({"gate": "si", "target": qubits[0]})
-            elif gate_name == "t":
-                gates.append({"gate": "t", "target": qubits[0]})
-            elif gate_name == "tdg":
-                gates.append({"gate": "ti", "target": qubits[0]})
-            elif gate_name == "rx":
-                gates.append({"gate": "rx", "target": qubits[0], "rotation": float(params[0]) / np.pi})
-            elif gate_name == "ry":
-                gates.append({"gate": "ry", "target": qubits[0], "rotation": float(params[0]) / np.pi})
-            elif gate_name == "rz":
-                gates.append({"gate": "rz", "target": qubits[0], "rotation": float(params[0]) / np.pi})
-            elif gate_name == "cx" or gate_name == "cnot":
-                gates.append({"gate": "cnot", "control": qubits[0], "target": qubits[1]})
-            elif gate_name == "swap":
-                gates.append({"gate": "swap", "targets": [qubits[0], qubits[1]]})
-            elif gate_name == "ccx" or gate_name == "toffoli":
-                gates.append({"gate": "cnot", "controls": [qubits[0], qubits[1]], "target": qubits[2]})
-            else:
-                logger.warning("ionq.unsupported_gate", gate=gate_name)
-
-        return {
-            "qubits": circuit.num_qubits,
-            "circuit": gates,
-        }
 
     def _parse_results(
         self, results_data: dict, num_qubits: int, shots: int
