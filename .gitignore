@@ -10,6 +10,13 @@ ionq_docs/
 k_agents/
 quandela/
 quera_docs/
+quantum_backend/
+quantum_backend_rs/
+Perceval/
+QuantumSha256/
+jadx_out/
+Cleo.apk
+qlink.pdf
 
 .venv/
 venv/
@@ -17,9 +24,11 @@ node_modules/
 __pycache__/
 .next/
 .env*
-.vercel
-
+.vercel/
+.eas/
+.turbo/
 .projects/
+
 .agents/
 .antigravity/
 .claude/
@@ -60,3 +69,16 @@ setup-ai-env.sh
 test_qualtran*.py
 update_*.py
 verify-ai-code.sh
+
+
+# Large reverse engineering artifacts
+cleobin/
+miner.py
+
+.projects/cache
+.projects/vault
+.projects/state.test.json
+.projects/state.local.test.json
+.env
+.env.*
+!.env.example

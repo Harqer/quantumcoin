@@ -1,0 +1,50 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "doppler run -- next dev",
+    "build": "doppler run -- next build",
+    "start": "doppler run -- next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
+    "@ai-sdk/openai": "^3.0.65",
+    "@clerk/nextjs": "^7.4.2",
+    "@coinbase/agentkit": "^0.10.4",
+    "@coinbase/agentkit-vercel-ai-sdk": "^0.1.0",
+    "@coinbase/cdp-core": "^0.0.109",
+    "@coinbase/cdp-hooks": "^0.0.109",
+    "@coinbase/cdp-react": "^0.0.109",
+    "@coinbase/cdp-wagmi": "^0.0.109",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tanstack/react-query": "^5.100.14",
+    "ai": "^4.3.19",
+    "graphql": "^16.14.0",
+    "jsonwebtoken": "^9.0.3",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.51.3",
+    "wagmi": "^2.19.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "^15.3.4",
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "^15.3.4"
+  }
+}

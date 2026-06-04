@@ -1,0 +1,152 @@
+.container {
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #0a1128 0%, #000000 100%);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.header {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #ffffff, #8ba1d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: #8ba1d4;
+  font-size: 1.1rem;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.authCard, .dashboardCard {
+  background: rgba(16, 24, 48, 0.6);
+  border: 1px solid rgba(0, 82, 255, 0.2);
+  border-radius: 24px;
+  padding: 2.5rem;
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+
+.authCard h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.authCard p {
+  color: #8ba1d4;
+  margin-bottom: 2rem;
+}
+
+.primaryButton, .mintButton, .burnButton {
+  background: #0052ff;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.primaryButton:hover, .mintButton:hover {
+  background: #003ebd;
+}
+
+.primaryButton:disabled, .mintButton:disabled, .burnButton:disabled {
+  background: #333;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.burnButton {
+  background: #ff4d4d;
+}
+
+.burnButton:hover {
+  background: #cc0000;
+}
+
+.note {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.error {
+  color: #ff4d4d;
+  margin-bottom: 1rem;
+}
+
+.walletInfo {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+}
+
+.walletInfo p {
+  margin-bottom: 0.5rem;
+}
+
+.walletInfo p:last-child {
+  margin-bottom: 0;
+}
+
+.actionSection {
+  text-align: left;
+}
+
+.actionSection label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #8ba1d4;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 82, 255, 0.3);
+  padding: 1rem;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0052ff;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+}
+
+.txSuccess {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 200, 83, 0.1);
+  border: 1px solid rgba(0, 200, 83, 0.3);
+  color: #00e676;
+  border-radius: 12px;
+  text-align: center;
+  word-break: break-all;
+}

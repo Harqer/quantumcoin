@@ -6,11 +6,9 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 import { queryClient, coreTrpc, coreTrpcClient, cryptoTrpc, cryptoTrpcClient } from '../utils/trpc';
 import { useTrackScreen } from '../hooks/useTelemetry';
 
-// Hardcoded production Clerk key bypassing .env
-const CLERK_PUBLISHABLE_KEY = "pk_test_dWx0aW1hdGUtZGluZ28tNDguY2xlcmsuYWNjb";
-
-// Stripe Test Publishable Key
-const STRIPE_PUBLISHABLE_KEY = "pk_test_51TYJq2J4IBsxckIQHOf5kkFTSHfh75jyReCgdyHoRplUl86";
+// Publishable keys are loaded from EAS Vault Secrets in production, and .env locally.
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
 
 export default function RootLayout() {
   useTrackScreen('App_Launch', { version: '1.0.0' });

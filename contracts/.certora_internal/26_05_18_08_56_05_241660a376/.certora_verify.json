@@ -1,0 +1,8 @@
+{
+    "importFilesToOrigRelpaths": {},
+    "primary_contract": "HSMKeyManager",
+    "specfile": "certora/HSMKeyManager.spec",
+    "specfileOrigRelpath": "certora/HSMKeyManager.spec",
+    "specfilesToImportDecls": {},
+    "type": "spec"
+}

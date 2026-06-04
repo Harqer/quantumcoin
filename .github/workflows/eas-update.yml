@@ -27,8 +27,8 @@ jobs:
         working-directory: ./mobile
         run: npm ci
 
-      - name: Publish update
+      - name: Run eas update
         working-directory: ./mobile
-        run: eas update --auto --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas update

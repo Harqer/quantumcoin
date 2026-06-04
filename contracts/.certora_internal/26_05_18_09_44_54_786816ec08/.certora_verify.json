@@ -1,0 +1,8 @@
+{
+    "importFilesToOrigRelpaths": {},
+    "primary_contract": "QLinkBridge",
+    "specfile": "certora/QLinkBridge.spec",
+    "specfileOrigRelpath": "certora/QLinkBridge.spec",
+    "specfilesToImportDecls": {},
+    "type": "spec"
+}

@@ -1,0 +1,154 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  flex: 1;
+}
+
+.convertWidget {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+}
+
+.widgetTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.inputWithSelect {
+  display: flex;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.inputWithSelect:focus-within {
+  border-color: var(--primary);
+}
+
+.inputWithSelect input {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--foreground);
+  outline: none;
+}
+
+.inputWithSelect select {
+  padding: 0 1rem;
+  border: none;
+  border-left: 1px solid var(--border);
+  background: var(--card);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  outline: none;
+  cursor: pointer;
+}
+
+.swapIcon {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin: -1rem 0 1rem 0;
+  z-index: 10;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  line-height: 38px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
+}
+
+.primaryButton {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #0040cc;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quoteDetails {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.quoteRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.success {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}

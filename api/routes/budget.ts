@@ -32,12 +32,42 @@ export const budgetRouter = router({
       return { success: true, category };
     }),
     
+  updateBudget: publicProcedure
+    .input(z.object({
+      email: z.string(),
+      limit: z.number().optional(),
+      money: z.number().optional(),
+      billingCycle: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "YEARLY"]).optional(),
+      serviceFeeCap: z.number().optional()
+    }))
+    .mutation(async ({ input }) => {
+      const user = await prisma.user.findUnique({ where: { email: input.email } });
+      if (!user) throw new Error("User not found");
+
+      let budget = await prisma.budget.findFirst({ where: { userId: user.id } });
+      if (!budget) {
+        budget = await prisma.budget.create({ data: { userId: user.id, limit: input.limit || 0 } });
+      }
+
+      const updated = await prisma.budget.update({
+        where: { id: budget.id },
+        data: {
+          limit: input.limit,
+          money: input.money,
+          billingCycle: input.billingCycle,
+          serviceFeeCap: input.serviceFeeCap,
+        }
+      });
+      
+      return { success: true, budget: updated };
+    }),
+
   getBudgets: publicProcedure
     .input(z.object({ email: z.string().optional() }))
     .query(async ({ input }) => {
-      if (!input.email) return { limit: 0, categories: [] };
+      if (!input.email) return { limit: 0, money: 0, billingCycle: null, serviceFeeCap: null, categories: [] };
       const user = await prisma.user.findUnique({ where: { email: input.email } });
-      if (!user) return { limit: 0, categories: [] };
+      if (!user) return { limit: 0, money: 0, billingCycle: null, serviceFeeCap: null, categories: [] };
 
       const budget = await prisma.budget.findFirst({ 
         where: { userId: user.id },
@@ -45,7 +75,10 @@ export const budgetRouter = router({
       });
 
       return { 
-        limit: budget?.limit || 0, 
+        limit: budget?.limit || 0,
+        money: budget?.money || 0,
+        billingCycle: budget?.billingCycle || null,
+        serviceFeeCap: budget?.serviceFeeCap || null,
         categories: budget?.categories || [] 
       };
     }),

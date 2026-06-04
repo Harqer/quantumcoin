@@ -12,8 +12,8 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-// Production secret for Clerk
-const CLERK_SECRET_KEY = "sk_test_cXoGaIXOhqS51WyKqdYRwXAExZieNQHloR7FmU7KtS";
+// Production secret for Clerk - loaded via Infisical / Environment Variables
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY as string;
 
 // Vercel KV automatically connects via KV_REST_API_URL and KV_REST_API_TOKEN environment variables
 

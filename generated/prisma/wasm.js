@@ -128,6 +128,14 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   stripeCustomerId: 'stripeCustomerId',
   stripeConnectAccountId: 'stripeConnectAccountId',
+  spendingPower: 'spendingPower',
+  subscriptionNextBillingDate: 'subscriptionNextBillingDate',
+  invitedUserReward: 'invitedUserReward',
+  totalToRepay: 'totalToRepay',
+  minDepositAmount: 'minDepositAmount',
+  boosts: 'boosts',
+  last4_digits: 'last4_digits',
+  cleo_card: 'cleo_card',
   kycStatus: 'kycStatus',
   socureDeviceId: 'socureDeviceId',
   createdAt: 'createdAt',
@@ -150,8 +158,11 @@ exports.Prisma.TransactionScalarFieldEnum = {
   userId: 'userId',
   bankAccountId: 'bankAccountId',
   amount: 'amount',
+  selectedAmount: 'selectedAmount',
   currency: 'currency',
   status: 'status',
+  lastFormatted: 'lastFormatted',
+  bankName: 'bankName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -190,6 +201,9 @@ exports.Prisma.BudgetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   limit: 'limit',
+  money: 'money',
+  billingCycle: 'billingCycle',
+  serviceFeeCap: 'serviceFeeCap',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -208,6 +222,8 @@ exports.Prisma.CategoryScalarFieldEnum = {
 exports.Prisma.ChatSessionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  subscriptionName: 'subscriptionName',
+  bankName: 'bankName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -225,6 +241,10 @@ exports.Prisma.CashAdvanceScalarFieldEnum = {
   userId: 'userId',
   incomeSourceId: 'incomeSourceId',
   amount: 'amount',
+  totalToRepay: 'totalToRepay',
+  spendingPower: 'spendingPower',
+  totalBoostsAmount: 'totalBoostsAmount',
+  serviceFeeCap: 'serviceFeeCap',
   status: 'status',
   repaymentDate: 'repaymentDate',
   createdAt: 'createdAt',
@@ -236,16 +256,32 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.BillingCycle = exports.$Enums.BillingCycle = {
+  WEEKLY: 'WEEKLY',
+  BIWEEKLY: 'BIWEEKLY',
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',

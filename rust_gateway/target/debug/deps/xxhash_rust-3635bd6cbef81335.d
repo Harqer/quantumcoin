@@ -1,0 +1,10 @@
+/home/shaolin/QuantumCoin/QubitCoin/rust_gateway/target/debug/deps/xxhash_rust-3635bd6cbef81335.d: /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/lib.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/utils.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh32_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh64_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3.rs
+
+/home/shaolin/QuantumCoin/QubitCoin/rust_gateway/target/debug/deps/libxxhash_rust-3635bd6cbef81335.rmeta: /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/lib.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/utils.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh32_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh64_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3_common.rs /home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3.rs
+
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/lib.rs:
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/utils.rs:
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh32_common.rs:
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh64_common.rs:
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3_common.rs:
+/home/shaolin/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/xxhash-rust-0.8.15/src/xxh3.rs:

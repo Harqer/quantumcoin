@@ -1,0 +1,49 @@
+{
+  "name": "my-onchainkit-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "doppler run -- next dev",
+    "build": "doppler run -- next build",
+    "start": "doppler run -- next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.4.2",
+    "@coinbase/cdp-core": "^0.0.109",
+    "@coinbase/cdp-hooks": "^0.0.109",
+    "@coinbase/cdp-react": "^0.0.109",
+    "@coinbase/cdp-sdk": "^1.51.0",
+    "@coinbase/cdp-solana-standard-wallet": "^0.0.109",
+    "@coinbase/cdp-wagmi": "^0.0.109",
+    "@coinbase/onchainkit": "latest",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@solana/wallet-standard": "^1.1.4",
+    "@tanstack/react-query": "^5.100.14",
+    "@wallet-standard/app": "^1.1.0",
+    "@wallet-standard/base": "^1.1.0",
+    "@wallet-standard/features": "^1.1.0",
+    "@x402/axios": "^2.13.0",
+    "@x402/core": "^2.13.0",
+    "@x402/evm": "^2.13.0",
+    "@x402/fetch": "^2.13.0",
+    "@x402/next": "^2.13.0",
+    "axios": "^1.16.1",
+    "bs58": "^6.0.0",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.31.6",
+    "wagmi": "^2.16.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "^15.3.4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "typescript": "^5"
+  }
+}

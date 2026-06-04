@@ -70,6 +70,25 @@ export type ChatMessage = $Result.DefaultSelection<Prisma.$ChatMessagePayload>
 export type CashAdvance = $Result.DefaultSelection<Prisma.$CashAdvancePayload>
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const BillingCycle: {
+  WEEKLY: 'WEEKLY',
+  BIWEEKLY: 'BIWEEKLY',
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+};
+
+export type BillingCycle = (typeof BillingCycle)[keyof typeof BillingCycle]
+
+}
+
+export type BillingCycle = $Enums.BillingCycle
+
+export const BillingCycle: typeof $Enums.BillingCycle
+
+/**
  * ##  Prisma Client ʲˢ
  * 
  * Type-safe database client for TypeScript & Node.js
@@ -1926,8 +1945,24 @@ export namespace Prisma {
 
   export type AggregateUser = {
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserAvgAggregateOutputType = {
+    spendingPower: number | null
+    invitedUserReward: number | null
+    totalToRepay: number | null
+    minDepositAmount: number | null
+  }
+
+  export type UserSumAggregateOutputType = {
+    spendingPower: number | null
+    invitedUserReward: number | null
+    totalToRepay: number | null
+    minDepositAmount: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1936,6 +1971,13 @@ export namespace Prisma {
     name: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
+    spendingPower: number | null
+    subscriptionNextBillingDate: Date | null
+    invitedUserReward: number | null
+    totalToRepay: number | null
+    minDepositAmount: number | null
+    last4_digits: string | null
+    cleo_card: boolean | null
     kycStatus: string | null
     socureDeviceId: string | null
     createdAt: Date | null
@@ -1948,6 +1990,13 @@ export namespace Prisma {
     name: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
+    spendingPower: number | null
+    subscriptionNextBillingDate: Date | null
+    invitedUserReward: number | null
+    totalToRepay: number | null
+    minDepositAmount: number | null
+    last4_digits: string | null
+    cleo_card: boolean | null
     kycStatus: string | null
     socureDeviceId: string | null
     createdAt: Date | null
@@ -1960,6 +2009,14 @@ export namespace Prisma {
     name: number
     stripeCustomerId: number
     stripeConnectAccountId: number
+    spendingPower: number
+    subscriptionNextBillingDate: number
+    invitedUserReward: number
+    totalToRepay: number
+    minDepositAmount: number
+    boosts: number
+    last4_digits: number
+    cleo_card: number
     kycStatus: number
     socureDeviceId: number
     createdAt: number
@@ -1968,12 +2025,33 @@ export namespace Prisma {
   }
 
 
+  export type UserAvgAggregateInputType = {
+    spendingPower?: true
+    invitedUserReward?: true
+    totalToRepay?: true
+    minDepositAmount?: true
+  }
+
+  export type UserSumAggregateInputType = {
+    spendingPower?: true
+    invitedUserReward?: true
+    totalToRepay?: true
+    minDepositAmount?: true
+  }
+
   export type UserMinAggregateInputType = {
     id?: true
     email?: true
     name?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
+    spendingPower?: true
+    subscriptionNextBillingDate?: true
+    invitedUserReward?: true
+    totalToRepay?: true
+    minDepositAmount?: true
+    last4_digits?: true
+    cleo_card?: true
     kycStatus?: true
     socureDeviceId?: true
     createdAt?: true
@@ -1986,6 +2064,13 @@ export namespace Prisma {
     name?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
+    spendingPower?: true
+    subscriptionNextBillingDate?: true
+    invitedUserReward?: true
+    totalToRepay?: true
+    minDepositAmount?: true
+    last4_digits?: true
+    cleo_card?: true
     kycStatus?: true
     socureDeviceId?: true
     createdAt?: true
@@ -1998,6 +2083,14 @@ export namespace Prisma {
     name?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
+    spendingPower?: true
+    subscriptionNextBillingDate?: true
+    invitedUserReward?: true
+    totalToRepay?: true
+    minDepositAmount?: true
+    boosts?: true
+    last4_digits?: true
+    cleo_card?: true
     kycStatus?: true
     socureDeviceId?: true
     createdAt?: true
@@ -2043,6 +2136,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: UserAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: UserMinAggregateInputType
@@ -2073,6 +2178,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: UserCountAggregateInputType | true
+    _avg?: UserAvgAggregateInputType
+    _sum?: UserSumAggregateInputType
     _min?: UserMinAggregateInputType
     _max?: UserMaxAggregateInputType
   }
@@ -2083,11 +2190,21 @@ export namespace Prisma {
     name: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
+    spendingPower: number
+    subscriptionNextBillingDate: Date | null
+    invitedUserReward: number
+    totalToRepay: number
+    minDepositAmount: number
+    boosts: JsonValue | null
+    last4_digits: string | null
+    cleo_card: boolean
     kycStatus: string | null
     socureDeviceId: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
   }
@@ -2112,6 +2229,14 @@ export namespace Prisma {
     name?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
+    spendingPower?: boolean
+    subscriptionNextBillingDate?: boolean
+    invitedUserReward?: boolean
+    totalToRepay?: boolean
+    minDepositAmount?: boolean
+    boosts?: boolean
+    last4_digits?: boolean
+    cleo_card?: boolean
     kycStatus?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
@@ -2133,6 +2258,14 @@ export namespace Prisma {
     name?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
+    spendingPower?: boolean
+    subscriptionNextBillingDate?: boolean
+    invitedUserReward?: boolean
+    totalToRepay?: boolean
+    minDepositAmount?: boolean
+    boosts?: boolean
+    last4_digits?: boolean
+    cleo_card?: boolean
     kycStatus?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
@@ -2145,6 +2278,14 @@ export namespace Prisma {
     name?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
+    spendingPower?: boolean
+    subscriptionNextBillingDate?: boolean
+    invitedUserReward?: boolean
+    totalToRepay?: boolean
+    minDepositAmount?: boolean
+    boosts?: boolean
+    last4_digits?: boolean
+    cleo_card?: boolean
     kycStatus?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
@@ -2182,6 +2323,14 @@ export namespace Prisma {
       name: string | null
       stripeCustomerId: string | null
       stripeConnectAccountId: string | null
+      spendingPower: number
+      subscriptionNextBillingDate: Date | null
+      invitedUserReward: number
+      totalToRepay: number
+      minDepositAmount: number
+      boosts: Prisma.JsonValue | null
+      last4_digits: string | null
+      cleo_card: boolean
       kycStatus: string | null
       socureDeviceId: string | null
       createdAt: Date
@@ -2592,6 +2741,14 @@ export namespace Prisma {
     readonly name: FieldRef<"User", 'String'>
     readonly stripeCustomerId: FieldRef<"User", 'String'>
     readonly stripeConnectAccountId: FieldRef<"User", 'String'>
+    readonly spendingPower: FieldRef<"User", 'Float'>
+    readonly subscriptionNextBillingDate: FieldRef<"User", 'DateTime'>
+    readonly invitedUserReward: FieldRef<"User", 'Float'>
+    readonly totalToRepay: FieldRef<"User", 'Float'>
+    readonly minDepositAmount: FieldRef<"User", 'Float'>
+    readonly boosts: FieldRef<"User", 'Json'>
+    readonly last4_digits: FieldRef<"User", 'String'>
+    readonly cleo_card: FieldRef<"User", 'Boolean'>
     readonly kycStatus: FieldRef<"User", 'String'>
     readonly socureDeviceId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -4093,10 +4250,12 @@ export namespace Prisma {
 
   export type TransactionAvgAggregateOutputType = {
     amount: number | null
+    selectedAmount: number | null
   }
 
   export type TransactionSumAggregateOutputType = {
     amount: number | null
+    selectedAmount: number | null
   }
 
   export type TransactionMinAggregateOutputType = {
@@ -4104,8 +4263,11 @@ export namespace Prisma {
     userId: string | null
     bankAccountId: string | null
     amount: number | null
+    selectedAmount: number | null
     currency: string | null
     status: string | null
+    lastFormatted: string | null
+    bankName: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4115,8 +4277,11 @@ export namespace Prisma {
     userId: string | null
     bankAccountId: string | null
     amount: number | null
+    selectedAmount: number | null
     currency: string | null
     status: string | null
+    lastFormatted: string | null
+    bankName: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4126,8 +4291,11 @@ export namespace Prisma {
     userId: number
     bankAccountId: number
     amount: number
+    selectedAmount: number
     currency: number
     status: number
+    lastFormatted: number
+    bankName: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4136,10 +4304,12 @@ export namespace Prisma {
 
   export type TransactionAvgAggregateInputType = {
     amount?: true
+    selectedAmount?: true
   }
 
   export type TransactionSumAggregateInputType = {
     amount?: true
+    selectedAmount?: true
   }
 
   export type TransactionMinAggregateInputType = {
@@ -4147,8 +4317,11 @@ export namespace Prisma {
     userId?: true
     bankAccountId?: true
     amount?: true
+    selectedAmount?: true
     currency?: true
     status?: true
+    lastFormatted?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4158,8 +4331,11 @@ export namespace Prisma {
     userId?: true
     bankAccountId?: true
     amount?: true
+    selectedAmount?: true
     currency?: true
     status?: true
+    lastFormatted?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4169,8 +4345,11 @@ export namespace Prisma {
     userId?: true
     bankAccountId?: true
     amount?: true
+    selectedAmount?: true
     currency?: true
     status?: true
+    lastFormatted?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4267,8 +4446,11 @@ export namespace Prisma {
     userId: string
     bankAccountId: string | null
     amount: number
+    selectedAmount: number | null
     currency: string
     status: string
+    lastFormatted: string | null
+    bankName: string | null
     createdAt: Date
     updatedAt: Date
     _count: TransactionCountAggregateOutputType | null
@@ -4297,8 +4479,11 @@ export namespace Prisma {
     userId?: boolean
     bankAccountId?: boolean
     amount?: boolean
+    selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    lastFormatted?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -4310,8 +4495,11 @@ export namespace Prisma {
     userId?: boolean
     bankAccountId?: boolean
     amount?: boolean
+    selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    lastFormatted?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -4323,8 +4511,11 @@ export namespace Prisma {
     userId?: boolean
     bankAccountId?: boolean
     amount?: boolean
+    selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    lastFormatted?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -4349,8 +4540,11 @@ export namespace Prisma {
       userId: string
       bankAccountId: string | null
       amount: number
+      selectedAmount: number | null
       currency: string
       status: string
+      lastFormatted: string | null
+      bankName: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["transaction"]>
@@ -4752,8 +4946,11 @@ export namespace Prisma {
     readonly userId: FieldRef<"Transaction", 'String'>
     readonly bankAccountId: FieldRef<"Transaction", 'String'>
     readonly amount: FieldRef<"Transaction", 'Float'>
+    readonly selectedAmount: FieldRef<"Transaction", 'Float'>
     readonly currency: FieldRef<"Transaction", 'String'>
     readonly status: FieldRef<"Transaction", 'String'>
+    readonly lastFormatted: FieldRef<"Transaction", 'String'>
+    readonly bankName: FieldRef<"Transaction", 'String'>
     readonly createdAt: FieldRef<"Transaction", 'DateTime'>
     readonly updatedAt: FieldRef<"Transaction", 'DateTime'>
   }
@@ -8048,16 +8245,23 @@ export namespace Prisma {
 
   export type BudgetAvgAggregateOutputType = {
     limit: number | null
+    money: number | null
+    serviceFeeCap: number | null
   }
 
   export type BudgetSumAggregateOutputType = {
     limit: number | null
+    money: number | null
+    serviceFeeCap: number | null
   }
 
   export type BudgetMinAggregateOutputType = {
     id: string | null
     userId: string | null
     limit: number | null
+    money: number | null
+    billingCycle: $Enums.BillingCycle | null
+    serviceFeeCap: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8066,6 +8270,9 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     limit: number | null
+    money: number | null
+    billingCycle: $Enums.BillingCycle | null
+    serviceFeeCap: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8074,6 +8281,9 @@ export namespace Prisma {
     id: number
     userId: number
     limit: number
+    money: number
+    billingCycle: number
+    serviceFeeCap: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -8082,16 +8292,23 @@ export namespace Prisma {
 
   export type BudgetAvgAggregateInputType = {
     limit?: true
+    money?: true
+    serviceFeeCap?: true
   }
 
   export type BudgetSumAggregateInputType = {
     limit?: true
+    money?: true
+    serviceFeeCap?: true
   }
 
   export type BudgetMinAggregateInputType = {
     id?: true
     userId?: true
     limit?: true
+    money?: true
+    billingCycle?: true
+    serviceFeeCap?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8100,6 +8317,9 @@ export namespace Prisma {
     id?: true
     userId?: true
     limit?: true
+    money?: true
+    billingCycle?: true
+    serviceFeeCap?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8108,6 +8328,9 @@ export namespace Prisma {
     id?: true
     userId?: true
     limit?: true
+    money?: true
+    billingCycle?: true
+    serviceFeeCap?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -8203,6 +8426,9 @@ export namespace Prisma {
     id: string
     userId: string
     limit: number
+    money: number
+    billingCycle: $Enums.BillingCycle | null
+    serviceFeeCap: number | null
     createdAt: Date
     updatedAt: Date
     _count: BudgetCountAggregateOutputType | null
@@ -8230,6 +8456,9 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     limit?: boolean
+    money?: boolean
+    billingCycle?: boolean
+    serviceFeeCap?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -8241,6 +8470,9 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     limit?: boolean
+    money?: boolean
+    billingCycle?: boolean
+    serviceFeeCap?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -8250,6 +8482,9 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     limit?: boolean
+    money?: boolean
+    billingCycle?: boolean
+    serviceFeeCap?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -8273,6 +8508,9 @@ export namespace Prisma {
       id: string
       userId: string
       limit: number
+      money: number
+      billingCycle: $Enums.BillingCycle | null
+      serviceFeeCap: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["budget"]>
@@ -8673,6 +8911,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Budget", 'String'>
     readonly userId: FieldRef<"Budget", 'String'>
     readonly limit: FieldRef<"Budget", 'Float'>
+    readonly money: FieldRef<"Budget", 'Float'>
+    readonly billingCycle: FieldRef<"Budget", 'BillingCycle'>
+    readonly serviceFeeCap: FieldRef<"Budget", 'Float'>
     readonly createdAt: FieldRef<"Budget", 'DateTime'>
     readonly updatedAt: FieldRef<"Budget", 'DateTime'>
   }
@@ -10047,6 +10288,8 @@ export namespace Prisma {
   export type ChatSessionMinAggregateOutputType = {
     id: string | null
     userId: string | null
+    subscriptionName: string | null
+    bankName: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10054,6 +10297,8 @@ export namespace Prisma {
   export type ChatSessionMaxAggregateOutputType = {
     id: string | null
     userId: string | null
+    subscriptionName: string | null
+    bankName: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10061,6 +10306,8 @@ export namespace Prisma {
   export type ChatSessionCountAggregateOutputType = {
     id: number
     userId: number
+    subscriptionName: number
+    bankName: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10070,6 +10317,8 @@ export namespace Prisma {
   export type ChatSessionMinAggregateInputType = {
     id?: true
     userId?: true
+    subscriptionName?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10077,6 +10326,8 @@ export namespace Prisma {
   export type ChatSessionMaxAggregateInputType = {
     id?: true
     userId?: true
+    subscriptionName?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10084,6 +10335,8 @@ export namespace Prisma {
   export type ChatSessionCountAggregateInputType = {
     id?: true
     userId?: true
+    subscriptionName?: true
+    bankName?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10164,6 +10417,8 @@ export namespace Prisma {
   export type ChatSessionGroupByOutputType = {
     id: string
     userId: string
+    subscriptionName: string | null
+    bankName: string | null
     createdAt: Date
     updatedAt: Date
     _count: ChatSessionCountAggregateOutputType | null
@@ -10188,6 +10443,8 @@ export namespace Prisma {
   export type ChatSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    subscriptionName?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -10198,6 +10455,8 @@ export namespace Prisma {
   export type ChatSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    subscriptionName?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -10206,6 +10465,8 @@ export namespace Prisma {
   export type ChatSessionSelectScalar = {
     id?: boolean
     userId?: boolean
+    subscriptionName?: boolean
+    bankName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -10228,6 +10489,8 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
+      subscriptionName: string | null
+      bankName: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["chatSession"]>
@@ -10627,6 +10890,8 @@ export namespace Prisma {
   interface ChatSessionFieldRefs {
     readonly id: FieldRef<"ChatSession", 'String'>
     readonly userId: FieldRef<"ChatSession", 'String'>
+    readonly subscriptionName: FieldRef<"ChatSession", 'String'>
+    readonly bankName: FieldRef<"ChatSession", 'String'>
     readonly createdAt: FieldRef<"ChatSession", 'DateTime'>
     readonly updatedAt: FieldRef<"ChatSession", 'DateTime'>
   }
@@ -11928,10 +12193,18 @@ export namespace Prisma {
 
   export type CashAdvanceAvgAggregateOutputType = {
     amount: number | null
+    totalToRepay: number | null
+    spendingPower: number | null
+    totalBoostsAmount: number | null
+    serviceFeeCap: number | null
   }
 
   export type CashAdvanceSumAggregateOutputType = {
     amount: number | null
+    totalToRepay: number | null
+    spendingPower: number | null
+    totalBoostsAmount: number | null
+    serviceFeeCap: number | null
   }
 
   export type CashAdvanceMinAggregateOutputType = {
@@ -11939,6 +12212,10 @@ export namespace Prisma {
     userId: string | null
     incomeSourceId: string | null
     amount: number | null
+    totalToRepay: number | null
+    spendingPower: number | null
+    totalBoostsAmount: number | null
+    serviceFeeCap: number | null
     status: string | null
     repaymentDate: Date | null
     createdAt: Date | null
@@ -11950,6 +12227,10 @@ export namespace Prisma {
     userId: string | null
     incomeSourceId: string | null
     amount: number | null
+    totalToRepay: number | null
+    spendingPower: number | null
+    totalBoostsAmount: number | null
+    serviceFeeCap: number | null
     status: string | null
     repaymentDate: Date | null
     createdAt: Date | null
@@ -11961,6 +12242,10 @@ export namespace Prisma {
     userId: number
     incomeSourceId: number
     amount: number
+    totalToRepay: number
+    spendingPower: number
+    totalBoostsAmount: number
+    serviceFeeCap: number
     status: number
     repaymentDate: number
     createdAt: number
@@ -11971,10 +12256,18 @@ export namespace Prisma {
 
   export type CashAdvanceAvgAggregateInputType = {
     amount?: true
+    totalToRepay?: true
+    spendingPower?: true
+    totalBoostsAmount?: true
+    serviceFeeCap?: true
   }
 
   export type CashAdvanceSumAggregateInputType = {
     amount?: true
+    totalToRepay?: true
+    spendingPower?: true
+    totalBoostsAmount?: true
+    serviceFeeCap?: true
   }
 
   export type CashAdvanceMinAggregateInputType = {
@@ -11982,6 +12275,10 @@ export namespace Prisma {
     userId?: true
     incomeSourceId?: true
     amount?: true
+    totalToRepay?: true
+    spendingPower?: true
+    totalBoostsAmount?: true
+    serviceFeeCap?: true
     status?: true
     repaymentDate?: true
     createdAt?: true
@@ -11993,6 +12290,10 @@ export namespace Prisma {
     userId?: true
     incomeSourceId?: true
     amount?: true
+    totalToRepay?: true
+    spendingPower?: true
+    totalBoostsAmount?: true
+    serviceFeeCap?: true
     status?: true
     repaymentDate?: true
     createdAt?: true
@@ -12004,6 +12305,10 @@ export namespace Prisma {
     userId?: true
     incomeSourceId?: true
     amount?: true
+    totalToRepay?: true
+    spendingPower?: true
+    totalBoostsAmount?: true
+    serviceFeeCap?: true
     status?: true
     repaymentDate?: true
     createdAt?: true
@@ -12102,6 +12407,10 @@ export namespace Prisma {
     userId: string
     incomeSourceId: string | null
     amount: number
+    totalToRepay: number
+    spendingPower: number
+    totalBoostsAmount: number
+    serviceFeeCap: number | null
     status: string
     repaymentDate: Date | null
     createdAt: Date
@@ -12132,6 +12441,10 @@ export namespace Prisma {
     userId?: boolean
     incomeSourceId?: boolean
     amount?: boolean
+    totalToRepay?: boolean
+    spendingPower?: boolean
+    totalBoostsAmount?: boolean
+    serviceFeeCap?: boolean
     status?: boolean
     repaymentDate?: boolean
     createdAt?: boolean
@@ -12145,6 +12458,10 @@ export namespace Prisma {
     userId?: boolean
     incomeSourceId?: boolean
     amount?: boolean
+    totalToRepay?: boolean
+    spendingPower?: boolean
+    totalBoostsAmount?: boolean
+    serviceFeeCap?: boolean
     status?: boolean
     repaymentDate?: boolean
     createdAt?: boolean
@@ -12158,6 +12475,10 @@ export namespace Prisma {
     userId?: boolean
     incomeSourceId?: boolean
     amount?: boolean
+    totalToRepay?: boolean
+    spendingPower?: boolean
+    totalBoostsAmount?: boolean
+    serviceFeeCap?: boolean
     status?: boolean
     repaymentDate?: boolean
     createdAt?: boolean
@@ -12184,6 +12505,10 @@ export namespace Prisma {
       userId: string
       incomeSourceId: string | null
       amount: number
+      totalToRepay: number
+      spendingPower: number
+      totalBoostsAmount: number
+      serviceFeeCap: number | null
       status: string
       repaymentDate: Date | null
       createdAt: Date
@@ -12587,6 +12912,10 @@ export namespace Prisma {
     readonly userId: FieldRef<"CashAdvance", 'String'>
     readonly incomeSourceId: FieldRef<"CashAdvance", 'String'>
     readonly amount: FieldRef<"CashAdvance", 'Float'>
+    readonly totalToRepay: FieldRef<"CashAdvance", 'Float'>
+    readonly spendingPower: FieldRef<"CashAdvance", 'Float'>
+    readonly totalBoostsAmount: FieldRef<"CashAdvance", 'Float'>
+    readonly serviceFeeCap: FieldRef<"CashAdvance", 'Float'>
     readonly status: FieldRef<"CashAdvance", 'String'>
     readonly repaymentDate: FieldRef<"CashAdvance", 'DateTime'>
     readonly createdAt: FieldRef<"CashAdvance", 'DateTime'>
@@ -12958,6 +13287,14 @@ export namespace Prisma {
     name: 'name',
     stripeCustomerId: 'stripeCustomerId',
     stripeConnectAccountId: 'stripeConnectAccountId',
+    spendingPower: 'spendingPower',
+    subscriptionNextBillingDate: 'subscriptionNextBillingDate',
+    invitedUserReward: 'invitedUserReward',
+    totalToRepay: 'totalToRepay',
+    minDepositAmount: 'minDepositAmount',
+    boosts: 'boosts',
+    last4_digits: 'last4_digits',
+    cleo_card: 'cleo_card',
     kycStatus: 'kycStatus',
     socureDeviceId: 'socureDeviceId',
     createdAt: 'createdAt',
@@ -12986,8 +13323,11 @@ export namespace Prisma {
     userId: 'userId',
     bankAccountId: 'bankAccountId',
     amount: 'amount',
+    selectedAmount: 'selectedAmount',
     currency: 'currency',
     status: 'status',
+    lastFormatted: 'lastFormatted',
+    bankName: 'bankName',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13038,6 +13378,9 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     limit: 'limit',
+    money: 'money',
+    billingCycle: 'billingCycle',
+    serviceFeeCap: 'serviceFeeCap',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13062,6 +13405,8 @@ export namespace Prisma {
   export const ChatSessionScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    subscriptionName: 'subscriptionName',
+    bankName: 'bankName',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13085,6 +13430,10 @@ export namespace Prisma {
     userId: 'userId',
     incomeSourceId: 'incomeSourceId',
     amount: 'amount',
+    totalToRepay: 'totalToRepay',
+    spendingPower: 'spendingPower',
+    totalBoostsAmount: 'totalBoostsAmount',
+    serviceFeeCap: 'serviceFeeCap',
     status: 'status',
     repaymentDate: 'repaymentDate',
     createdAt: 'createdAt',
@@ -13102,12 +13451,29 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   export const NullsOrder: {
@@ -13138,6 +13504,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -13152,16 +13532,30 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
+   * Reference to a field of type 'Json'
    */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
   /**
-   * Reference to a field of type 'Float[]'
+   * Reference to a field of type 'Boolean'
    */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'BillingCycle'
+   */
+  export type EnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingCycle'>
+    
+
+
+  /**
+   * Reference to a field of type 'BillingCycle[]'
+   */
+  export type ListEnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingCycle[]'>
     
 
 
@@ -13191,6 +13585,14 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     stripeCustomerId?: StringNullableFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableFilter<"User"> | string | null
+    spendingPower?: FloatFilter<"User"> | number
+    subscriptionNextBillingDate?: DateTimeNullableFilter<"User"> | Date | string | null
+    invitedUserReward?: FloatFilter<"User"> | number
+    totalToRepay?: FloatFilter<"User"> | number
+    minDepositAmount?: FloatFilter<"User"> | number
+    boosts?: JsonNullableFilter<"User">
+    last4_digits?: StringNullableFilter<"User"> | string | null
+    cleo_card?: BoolFilter<"User"> | boolean
     kycStatus?: StringNullableFilter<"User"> | string | null
     socureDeviceId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -13211,6 +13613,14 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeConnectAccountId?: SortOrderInput | SortOrder
+    spendingPower?: SortOrder
+    subscriptionNextBillingDate?: SortOrderInput | SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
+    boosts?: SortOrderInput | SortOrder
+    last4_digits?: SortOrderInput | SortOrder
+    cleo_card?: SortOrder
     kycStatus?: SortOrderInput | SortOrder
     socureDeviceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -13234,6 +13644,14 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     stripeCustomerId?: StringNullableFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableFilter<"User"> | string | null
+    spendingPower?: FloatFilter<"User"> | number
+    subscriptionNextBillingDate?: DateTimeNullableFilter<"User"> | Date | string | null
+    invitedUserReward?: FloatFilter<"User"> | number
+    totalToRepay?: FloatFilter<"User"> | number
+    minDepositAmount?: FloatFilter<"User"> | number
+    boosts?: JsonNullableFilter<"User">
+    last4_digits?: StringNullableFilter<"User"> | string | null
+    cleo_card?: BoolFilter<"User"> | boolean
     kycStatus?: StringNullableFilter<"User"> | string | null
     socureDeviceId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -13254,13 +13672,23 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeConnectAccountId?: SortOrderInput | SortOrder
+    spendingPower?: SortOrder
+    subscriptionNextBillingDate?: SortOrderInput | SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
+    boosts?: SortOrderInput | SortOrder
+    last4_digits?: SortOrderInput | SortOrder
+    cleo_card?: SortOrder
     kycStatus?: SortOrderInput | SortOrder
     socureDeviceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
+    _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
+    _sum?: UserSumOrderByAggregateInput
   }
 
   export type UserScalarWhereWithAggregatesInput = {
@@ -13272,6 +13700,14 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     stripeCustomerId?: StringNullableWithAggregatesFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    spendingPower?: FloatWithAggregatesFilter<"User"> | number
+    subscriptionNextBillingDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    invitedUserReward?: FloatWithAggregatesFilter<"User"> | number
+    totalToRepay?: FloatWithAggregatesFilter<"User"> | number
+    minDepositAmount?: FloatWithAggregatesFilter<"User"> | number
+    boosts?: JsonNullableWithAggregatesFilter<"User">
+    last4_digits?: StringNullableWithAggregatesFilter<"User"> | string | null
+    cleo_card?: BoolWithAggregatesFilter<"User"> | boolean
     kycStatus?: StringNullableWithAggregatesFilter<"User"> | string | null
     socureDeviceId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -13359,8 +13795,11 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
+    selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    lastFormatted?: StringNullableFilter<"Transaction"> | string | null
+    bankName?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13372,8 +13811,11 @@ export namespace Prisma {
     userId?: SortOrder
     bankAccountId?: SortOrderInput | SortOrder
     amount?: SortOrder
+    selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
+    lastFormatted?: SortOrderInput | SortOrder
+    bankName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -13388,8 +13830,11 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
+    selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    lastFormatted?: StringNullableFilter<"Transaction"> | string | null
+    bankName?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13401,8 +13846,11 @@ export namespace Prisma {
     userId?: SortOrder
     bankAccountId?: SortOrderInput | SortOrder
     amount?: SortOrder
+    selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
+    lastFormatted?: SortOrderInput | SortOrder
+    bankName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TransactionCountOrderByAggregateInput
@@ -13420,8 +13868,11 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Transaction"> | string
     bankAccountId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     amount?: FloatWithAggregatesFilter<"Transaction"> | number
+    selectedAmount?: FloatNullableWithAggregatesFilter<"Transaction"> | number | null
     currency?: StringWithAggregatesFilter<"Transaction"> | string
     status?: StringWithAggregatesFilter<"Transaction"> | string
+    lastFormatted?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    bankName?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   }
@@ -13633,6 +14084,9 @@ export namespace Prisma {
     id?: StringFilter<"Budget"> | string
     userId?: StringFilter<"Budget"> | string
     limit?: FloatFilter<"Budget"> | number
+    money?: FloatFilter<"Budget"> | number
+    billingCycle?: EnumBillingCycleNullableFilter<"Budget"> | $Enums.BillingCycle | null
+    serviceFeeCap?: FloatNullableFilter<"Budget"> | number | null
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13643,6 +14097,9 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     limit?: SortOrder
+    money?: SortOrder
+    billingCycle?: SortOrderInput | SortOrder
+    serviceFeeCap?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -13656,6 +14113,9 @@ export namespace Prisma {
     NOT?: BudgetWhereInput | BudgetWhereInput[]
     userId?: StringFilter<"Budget"> | string
     limit?: FloatFilter<"Budget"> | number
+    money?: FloatFilter<"Budget"> | number
+    billingCycle?: EnumBillingCycleNullableFilter<"Budget"> | $Enums.BillingCycle | null
+    serviceFeeCap?: FloatNullableFilter<"Budget"> | number | null
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13666,6 +14126,9 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     limit?: SortOrder
+    money?: SortOrder
+    billingCycle?: SortOrderInput | SortOrder
+    serviceFeeCap?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: BudgetCountOrderByAggregateInput
@@ -13682,6 +14145,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Budget"> | string
     userId?: StringWithAggregatesFilter<"Budget"> | string
     limit?: FloatWithAggregatesFilter<"Budget"> | number
+    money?: FloatWithAggregatesFilter<"Budget"> | number
+    billingCycle?: EnumBillingCycleNullableWithAggregatesFilter<"Budget"> | $Enums.BillingCycle | null
+    serviceFeeCap?: FloatNullableWithAggregatesFilter<"Budget"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Budget"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Budget"> | Date | string
   }
@@ -13764,6 +14230,8 @@ export namespace Prisma {
     NOT?: ChatSessionWhereInput | ChatSessionWhereInput[]
     id?: StringFilter<"ChatSession"> | string
     userId?: StringFilter<"ChatSession"> | string
+    subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
+    bankName?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13773,6 +14241,8 @@ export namespace Prisma {
   export type ChatSessionOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    subscriptionName?: SortOrderInput | SortOrder
+    bankName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -13785,6 +14255,8 @@ export namespace Prisma {
     OR?: ChatSessionWhereInput[]
     NOT?: ChatSessionWhereInput | ChatSessionWhereInput[]
     userId?: StringFilter<"ChatSession"> | string
+    subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
+    bankName?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13794,6 +14266,8 @@ export namespace Prisma {
   export type ChatSessionOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    subscriptionName?: SortOrderInput | SortOrder
+    bankName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ChatSessionCountOrderByAggregateInput
@@ -13807,6 +14281,8 @@ export namespace Prisma {
     NOT?: ChatSessionScalarWhereWithAggregatesInput | ChatSessionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ChatSession"> | string
     userId?: StringWithAggregatesFilter<"ChatSession"> | string
+    subscriptionName?: StringNullableWithAggregatesFilter<"ChatSession"> | string | null
+    bankName?: StringNullableWithAggregatesFilter<"ChatSession"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
   }
@@ -13874,6 +14350,10 @@ export namespace Prisma {
     userId?: StringFilter<"CashAdvance"> | string
     incomeSourceId?: StringNullableFilter<"CashAdvance"> | string | null
     amount?: FloatFilter<"CashAdvance"> | number
+    totalToRepay?: FloatFilter<"CashAdvance"> | number
+    spendingPower?: FloatFilter<"CashAdvance"> | number
+    totalBoostsAmount?: FloatFilter<"CashAdvance"> | number
+    serviceFeeCap?: FloatNullableFilter<"CashAdvance"> | number | null
     status?: StringFilter<"CashAdvance"> | string
     repaymentDate?: DateTimeNullableFilter<"CashAdvance"> | Date | string | null
     createdAt?: DateTimeFilter<"CashAdvance"> | Date | string
@@ -13887,6 +14367,10 @@ export namespace Prisma {
     userId?: SortOrder
     incomeSourceId?: SortOrderInput | SortOrder
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrderInput | SortOrder
     status?: SortOrder
     repaymentDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -13903,6 +14387,10 @@ export namespace Prisma {
     userId?: StringFilter<"CashAdvance"> | string
     incomeSourceId?: StringNullableFilter<"CashAdvance"> | string | null
     amount?: FloatFilter<"CashAdvance"> | number
+    totalToRepay?: FloatFilter<"CashAdvance"> | number
+    spendingPower?: FloatFilter<"CashAdvance"> | number
+    totalBoostsAmount?: FloatFilter<"CashAdvance"> | number
+    serviceFeeCap?: FloatNullableFilter<"CashAdvance"> | number | null
     status?: StringFilter<"CashAdvance"> | string
     repaymentDate?: DateTimeNullableFilter<"CashAdvance"> | Date | string | null
     createdAt?: DateTimeFilter<"CashAdvance"> | Date | string
@@ -13916,6 +14404,10 @@ export namespace Prisma {
     userId?: SortOrder
     incomeSourceId?: SortOrderInput | SortOrder
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrderInput | SortOrder
     status?: SortOrder
     repaymentDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -13935,6 +14427,10 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"CashAdvance"> | string
     incomeSourceId?: StringNullableWithAggregatesFilter<"CashAdvance"> | string | null
     amount?: FloatWithAggregatesFilter<"CashAdvance"> | number
+    totalToRepay?: FloatWithAggregatesFilter<"CashAdvance"> | number
+    spendingPower?: FloatWithAggregatesFilter<"CashAdvance"> | number
+    totalBoostsAmount?: FloatWithAggregatesFilter<"CashAdvance"> | number
+    serviceFeeCap?: FloatNullableWithAggregatesFilter<"CashAdvance"> | number | null
     status?: StringWithAggregatesFilter<"CashAdvance"> | string
     repaymentDate?: DateTimeNullableWithAggregatesFilter<"CashAdvance"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"CashAdvance"> | Date | string
@@ -13947,6 +14443,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -13967,6 +14471,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -13987,6 +14499,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14007,6 +14527,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14027,6 +14555,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -14039,6 +14575,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14051,6 +14595,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14140,8 +14692,11 @@ export namespace Prisma {
   export type TransactionCreateInput = {
     id?: string
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTransactionsInput
@@ -14153,8 +14708,11 @@ export namespace Prisma {
     userId: string
     bankAccountId?: string | null
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14162,8 +14720,11 @@ export namespace Prisma {
   export type TransactionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTransactionsNestedInput
@@ -14175,8 +14736,11 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14186,8 +14750,11 @@ export namespace Prisma {
     userId: string
     bankAccountId?: string | null
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14195,8 +14762,11 @@ export namespace Prisma {
   export type TransactionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14206,8 +14776,11 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14426,6 +14999,9 @@ export namespace Prisma {
   export type BudgetCreateInput = {
     id?: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutBudgetsInput
@@ -14436,6 +15012,9 @@ export namespace Prisma {
     id?: string
     userId: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     categories?: CategoryUncheckedCreateNestedManyWithoutBudgetInput
@@ -14444,6 +15023,9 @@ export namespace Prisma {
   export type BudgetUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutBudgetsNestedInput
@@ -14454,6 +15036,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categories?: CategoryUncheckedUpdateManyWithoutBudgetNestedInput
@@ -14463,6 +15048,9 @@ export namespace Prisma {
     id?: string
     userId: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14470,6 +15058,9 @@ export namespace Prisma {
   export type BudgetUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14478,6 +15069,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14560,6 +15154,8 @@ export namespace Prisma {
 
   export type ChatSessionCreateInput = {
     id?: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutChatSessionsInput
@@ -14569,6 +15165,8 @@ export namespace Prisma {
   export type ChatSessionUncheckedCreateInput = {
     id?: string
     userId: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageUncheckedCreateNestedManyWithoutSessionInput
@@ -14576,6 +15174,8 @@ export namespace Prisma {
 
   export type ChatSessionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutChatSessionsNestedInput
@@ -14585,6 +15185,8 @@ export namespace Prisma {
   export type ChatSessionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUncheckedUpdateManyWithoutSessionNestedInput
@@ -14593,12 +15195,16 @@ export namespace Prisma {
   export type ChatSessionCreateManyInput = {
     id?: string
     userId: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type ChatSessionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14606,6 +15212,8 @@ export namespace Prisma {
   export type ChatSessionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14668,6 +15276,10 @@ export namespace Prisma {
   export type CashAdvanceCreateInput = {
     id?: string
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -14681,6 +15293,10 @@ export namespace Prisma {
     userId: string
     incomeSourceId?: string | null
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -14690,6 +15306,10 @@ export namespace Prisma {
   export type CashAdvanceUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14703,6 +15323,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     incomeSourceId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14714,6 +15338,10 @@ export namespace Prisma {
     userId: string
     incomeSourceId?: string | null
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -14723,6 +15351,10 @@ export namespace Prisma {
   export type CashAdvanceUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14734,6 +15366,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     incomeSourceId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14768,6 +15404,55 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+  export type JsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -14872,10 +15557,25 @@ export namespace Prisma {
     name?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
+    spendingPower?: SortOrder
+    subscriptionNextBillingDate?: SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
+    boosts?: SortOrder
+    last4_digits?: SortOrder
+    cleo_card?: SortOrder
     kycStatus?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserAvgOrderByAggregateInput = {
+    spendingPower?: SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -14884,6 +15584,13 @@ export namespace Prisma {
     name?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
+    spendingPower?: SortOrder
+    subscriptionNextBillingDate?: SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
+    last4_digits?: SortOrder
+    cleo_card?: SortOrder
     kycStatus?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
@@ -14896,10 +15603,24 @@ export namespace Prisma {
     name?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
+    spendingPower?: SortOrder
+    subscriptionNextBillingDate?: SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
+    last4_digits?: SortOrder
+    cleo_card?: SortOrder
     kycStatus?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserSumOrderByAggregateInput = {
+    spendingPower?: SortOrder
+    invitedUserReward?: SortOrder
+    totalToRepay?: SortOrder
+    minDepositAmount?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -14936,6 +15657,69 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -14990,15 +15774,15 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
     lt?: number | FloatFieldRefInput<$PrismaModel>
     lte?: number | FloatFieldRefInput<$PrismaModel>
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type BankAccountNullableRelationFilter = {
@@ -15011,14 +15795,18 @@ export namespace Prisma {
     userId?: SortOrder
     bankAccountId?: SortOrder
     amount?: SortOrder
+    selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    lastFormatted?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type TransactionAvgOrderByAggregateInput = {
     amount?: SortOrder
+    selectedAmount?: SortOrder
   }
 
   export type TransactionMaxOrderByAggregateInput = {
@@ -15026,8 +15814,11 @@ export namespace Prisma {
     userId?: SortOrder
     bankAccountId?: SortOrder
     amount?: SortOrder
+    selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    lastFormatted?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15037,30 +15828,34 @@ export namespace Prisma {
     userId?: SortOrder
     bankAccountId?: SortOrder
     amount?: SortOrder
+    selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    lastFormatted?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type TransactionSumOrderByAggregateInput = {
     amount?: SortOrder
+    selectedAmount?: SortOrder
   }
 
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
     lt?: number | FloatFieldRefInput<$PrismaModel>
     lte?: number | FloatFieldRefInput<$PrismaModel>
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type PaymentMethodCountOrderByAggregateInput = {
@@ -15161,6 +15956,13 @@ export namespace Prisma {
     amount?: SortOrder
   }
 
+  export type EnumBillingCycleNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBillingCycleNullableFilter<$PrismaModel> | $Enums.BillingCycle | null
+  }
+
   export type CategoryListRelationFilter = {
     every?: CategoryWhereInput
     some?: CategoryWhereInput
@@ -15175,18 +15977,26 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     limit?: SortOrder
+    money?: SortOrder
+    billingCycle?: SortOrder
+    serviceFeeCap?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type BudgetAvgOrderByAggregateInput = {
     limit?: SortOrder
+    money?: SortOrder
+    serviceFeeCap?: SortOrder
   }
 
   export type BudgetMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
     limit?: SortOrder
+    money?: SortOrder
+    billingCycle?: SortOrder
+    serviceFeeCap?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15195,12 +16005,27 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     limit?: SortOrder
+    money?: SortOrder
+    billingCycle?: SortOrder
+    serviceFeeCap?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type BudgetSumOrderByAggregateInput = {
     limit?: SortOrder
+    money?: SortOrder
+    serviceFeeCap?: SortOrder
+  }
+
+  export type EnumBillingCycleNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBillingCycleNullableWithAggregatesFilter<$PrismaModel> | $Enums.BillingCycle | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBillingCycleNullableFilter<$PrismaModel>
+    _max?: NestedEnumBillingCycleNullableFilter<$PrismaModel>
   }
 
   export type BudgetRelationFilter = {
@@ -15264,6 +16089,8 @@ export namespace Prisma {
   export type ChatSessionCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    subscriptionName?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15271,6 +16098,8 @@ export namespace Prisma {
   export type ChatSessionMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    subscriptionName?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15278,6 +16107,8 @@ export namespace Prisma {
   export type ChatSessionMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    subscriptionName?: SortOrder
+    bankName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15311,17 +16142,6 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type IncomeSourceNullableRelationFilter = {
     is?: IncomeSourceWhereInput | null
     isNot?: IncomeSourceWhereInput | null
@@ -15332,6 +16152,10 @@ export namespace Prisma {
     userId?: SortOrder
     incomeSourceId?: SortOrder
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrder
     status?: SortOrder
     repaymentDate?: SortOrder
     createdAt?: SortOrder
@@ -15340,6 +16164,10 @@ export namespace Prisma {
 
   export type CashAdvanceAvgOrderByAggregateInput = {
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrder
   }
 
   export type CashAdvanceMaxOrderByAggregateInput = {
@@ -15347,6 +16175,10 @@ export namespace Prisma {
     userId?: SortOrder
     incomeSourceId?: SortOrder
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrder
     status?: SortOrder
     repaymentDate?: SortOrder
     createdAt?: SortOrder
@@ -15358,6 +16190,10 @@ export namespace Prisma {
     userId?: SortOrder
     incomeSourceId?: SortOrder
     amount?: SortOrder
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrder
     status?: SortOrder
     repaymentDate?: SortOrder
     createdAt?: SortOrder
@@ -15366,20 +16202,10 @@ export namespace Prisma {
 
   export type CashAdvanceSumOrderByAggregateInput = {
     amount?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    totalToRepay?: SortOrder
+    spendingPower?: SortOrder
+    totalBoostsAmount?: SortOrder
+    serviceFeeCap?: SortOrder
   }
 
   export type BankAccountCreateNestedManyWithoutUserInput = {
@@ -15500,6 +16326,22 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -15798,8 +16640,8 @@ export namespace Prisma {
     connect?: BankAccountWhereUniqueInput
   }
 
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
@@ -15926,6 +16768,10 @@ export namespace Prisma {
     connectOrCreate?: CategoryCreateOrConnectWithoutBudgetInput | CategoryCreateOrConnectWithoutBudgetInput[]
     createMany?: CategoryCreateManyBudgetInputEnvelope
     connect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+  }
+
+  export type NullableEnumBillingCycleFieldUpdateOperationsInput = {
+    set?: $Enums.BillingCycle | null
   }
 
   export type UserUpdateOneRequiredWithoutBudgetsNestedInput = {
@@ -16060,10 +16906,6 @@ export namespace Prisma {
     connect?: IncomeSourceWhereUniqueInput
   }
 
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
-  }
-
   export type UserUpdateOneRequiredWithoutCashAdvancesNestedInput = {
     create?: XOR<UserCreateWithoutCashAdvancesInput, UserUncheckedCreateWithoutCashAdvancesInput>
     connectOrCreate?: UserCreateOrConnectWithoutCashAdvancesInput
@@ -16108,6 +16950,33 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -16177,31 +17046,6 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -16218,17 +17062,6 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -16241,6 +17074,94 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBillingCycleNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBillingCycleNullableFilter<$PrismaModel> | $Enums.BillingCycle | null
+  }
+
+  export type NestedEnumBillingCycleNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBillingCycleNullableWithAggregatesFilter<$PrismaModel> | $Enums.BillingCycle | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBillingCycleNullableFilter<$PrismaModel>
+    _max?: NestedEnumBillingCycleNullableFilter<$PrismaModel>
   }
 
   export type BankAccountCreateWithoutUserInput = {
@@ -16278,8 +17199,11 @@ export namespace Prisma {
   export type TransactionCreateWithoutUserInput = {
     id?: string
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccount?: BankAccountCreateNestedOneWithoutTransactionsInput
@@ -16289,8 +17213,11 @@ export namespace Prisma {
     id?: string
     bankAccountId?: string | null
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -16394,6 +17321,9 @@ export namespace Prisma {
   export type BudgetCreateWithoutUserInput = {
     id?: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     categories?: CategoryCreateNestedManyWithoutBudgetInput
@@ -16402,6 +17332,9 @@ export namespace Prisma {
   export type BudgetUncheckedCreateWithoutUserInput = {
     id?: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     categories?: CategoryUncheckedCreateNestedManyWithoutBudgetInput
@@ -16419,6 +17352,8 @@ export namespace Prisma {
 
   export type ChatSessionCreateWithoutUserInput = {
     id?: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageCreateNestedManyWithoutSessionInput
@@ -16426,6 +17361,8 @@ export namespace Prisma {
 
   export type ChatSessionUncheckedCreateWithoutUserInput = {
     id?: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageUncheckedCreateNestedManyWithoutSessionInput
@@ -16444,6 +17381,10 @@ export namespace Prisma {
   export type CashAdvanceCreateWithoutUserInput = {
     id?: string
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -16455,6 +17396,10 @@ export namespace Prisma {
     id?: string
     incomeSourceId?: string | null
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -16525,8 +17470,11 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
+    selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    lastFormatted?: StringNullableFilter<"Transaction"> | string | null
+    bankName?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
   }
@@ -16641,6 +17589,9 @@ export namespace Prisma {
     id?: StringFilter<"Budget"> | string
     userId?: StringFilter<"Budget"> | string
     limit?: FloatFilter<"Budget"> | number
+    money?: FloatFilter<"Budget"> | number
+    billingCycle?: EnumBillingCycleNullableFilter<"Budget"> | $Enums.BillingCycle | null
+    serviceFeeCap?: FloatNullableFilter<"Budget"> | number | null
     createdAt?: DateTimeFilter<"Budget"> | Date | string
     updatedAt?: DateTimeFilter<"Budget"> | Date | string
   }
@@ -16667,6 +17618,8 @@ export namespace Prisma {
     NOT?: ChatSessionScalarWhereInput | ChatSessionScalarWhereInput[]
     id?: StringFilter<"ChatSession"> | string
     userId?: StringFilter<"ChatSession"> | string
+    subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
+    bankName?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
   }
@@ -16695,6 +17648,10 @@ export namespace Prisma {
     userId?: StringFilter<"CashAdvance"> | string
     incomeSourceId?: StringNullableFilter<"CashAdvance"> | string | null
     amount?: FloatFilter<"CashAdvance"> | number
+    totalToRepay?: FloatFilter<"CashAdvance"> | number
+    spendingPower?: FloatFilter<"CashAdvance"> | number
+    totalBoostsAmount?: FloatFilter<"CashAdvance"> | number
+    serviceFeeCap?: FloatNullableFilter<"CashAdvance"> | number | null
     status?: StringFilter<"CashAdvance"> | string
     repaymentDate?: DateTimeNullableFilter<"CashAdvance"> | Date | string | null
     createdAt?: DateTimeFilter<"CashAdvance"> | Date | string
@@ -16707,6 +17664,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -16726,6 +17691,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -16747,8 +17720,11 @@ export namespace Prisma {
   export type TransactionCreateWithoutBankAccountInput = {
     id?: string
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTransactionsInput
@@ -16758,8 +17734,11 @@ export namespace Prisma {
     id?: string
     userId: string
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -16791,6 +17770,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16810,6 +17797,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16845,6 +17840,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -16864,6 +17867,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -16926,6 +17937,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16945,6 +17964,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16997,6 +18024,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17016,6 +18051,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17051,6 +18094,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17070,6 +18121,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17089,6 +18148,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17108,6 +18175,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17143,6 +18218,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17162,6 +18245,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17181,6 +18272,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17200,6 +18299,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17221,6 +18328,10 @@ export namespace Prisma {
   export type CashAdvanceCreateWithoutIncomeSourceInput = {
     id?: string
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -17232,6 +18343,10 @@ export namespace Prisma {
     id?: string
     userId: string
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -17265,6 +18380,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17284,6 +18407,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17319,6 +18450,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17338,6 +18477,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17403,6 +18550,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17422,6 +18577,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17468,6 +18631,9 @@ export namespace Prisma {
   export type BudgetCreateWithoutCategoriesInput = {
     id?: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutBudgetsInput
@@ -17477,6 +18643,9 @@ export namespace Prisma {
     id?: string
     userId: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17500,6 +18669,9 @@ export namespace Prisma {
   export type BudgetUpdateWithoutCategoriesInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutBudgetsNestedInput
@@ -17509,6 +18681,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17519,6 +18694,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17538,6 +18721,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17597,6 +18788,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17616,6 +18815,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17658,6 +18865,8 @@ export namespace Prisma {
 
   export type ChatSessionCreateWithoutMessagesInput = {
     id?: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutChatSessionsInput
@@ -17666,6 +18875,8 @@ export namespace Prisma {
   export type ChatSessionUncheckedCreateWithoutMessagesInput = {
     id?: string
     userId: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17688,6 +18899,8 @@ export namespace Prisma {
 
   export type ChatSessionUpdateWithoutMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutChatSessionsNestedInput
@@ -17696,6 +18909,8 @@ export namespace Prisma {
   export type ChatSessionUncheckedUpdateWithoutMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17706,6 +18921,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17725,6 +18948,14 @@ export namespace Prisma {
     name?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
     kycStatus?: string | null
     socureDeviceId?: string | null
     createdAt?: Date | string
@@ -17787,6 +19018,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17806,6 +19045,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17866,8 +19113,11 @@ export namespace Prisma {
     id?: string
     bankAccountId?: string | null
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17902,12 +19152,17 @@ export namespace Prisma {
   export type BudgetCreateManyUserInput = {
     id?: string
     limit: number
+    money?: number
+    billingCycle?: $Enums.BillingCycle | null
+    serviceFeeCap?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type ChatSessionCreateManyUserInput = {
     id?: string
+    subscriptionName?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17916,6 +19171,10 @@ export namespace Prisma {
     id?: string
     incomeSourceId?: string | null
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -17957,8 +19216,11 @@ export namespace Prisma {
   export type TransactionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccount?: BankAccountUpdateOneWithoutTransactionsNestedInput
@@ -17968,8 +19230,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17978,8 +19243,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18070,6 +19338,9 @@ export namespace Prisma {
   export type BudgetUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categories?: CategoryUpdateManyWithoutBudgetNestedInput
@@ -18078,6 +19349,9 @@ export namespace Prisma {
   export type BudgetUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categories?: CategoryUncheckedUpdateManyWithoutBudgetNestedInput
@@ -18086,12 +19360,17 @@ export namespace Prisma {
   export type BudgetUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     limit?: FloatFieldUpdateOperationsInput | number
+    money?: FloatFieldUpdateOperationsInput | number
+    billingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ChatSessionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUpdateManyWithoutSessionNestedInput
@@ -18099,6 +19378,8 @@ export namespace Prisma {
 
   export type ChatSessionUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUncheckedUpdateManyWithoutSessionNestedInput
@@ -18106,6 +19387,8 @@ export namespace Prisma {
 
   export type ChatSessionUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18113,6 +19396,10 @@ export namespace Prisma {
   export type CashAdvanceUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18124,6 +19411,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     incomeSourceId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18134,6 +19425,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     incomeSourceId?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18144,8 +19439,11 @@ export namespace Prisma {
     id?: string
     userId: string
     amount: number
+    selectedAmount?: number | null
     currency: string
     status: string
+    lastFormatted?: string | null
+    bankName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18153,8 +19451,11 @@ export namespace Prisma {
   export type TransactionUpdateWithoutBankAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTransactionsNestedInput
@@ -18164,8 +19465,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18174,8 +19478,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18184,6 +19491,10 @@ export namespace Prisma {
     id?: string
     userId: string
     amount: number
+    totalToRepay?: number
+    spendingPower?: number
+    totalBoostsAmount?: number
+    serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
     createdAt?: Date | string
@@ -18193,6 +19504,10 @@ export namespace Prisma {
   export type CashAdvanceUpdateWithoutIncomeSourceInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18204,6 +19519,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18214,6 +19533,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    totalBoostsAmount?: FloatFieldUpdateOperationsInput | number
+    serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
