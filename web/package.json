@@ -26,7 +26,7 @@
     "jsonwebtoken": "^9.0.3",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^1.17.0",
-    "next": "15.3.4",
+    "next": "^15.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "viem": "^2.51.3",
@@ -43,5 +43,14 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "flatted": "^3.3.2",
+    "h3": "^1.12.0",
+    "tar": "^6.2.1",
+    "socket.io-parser": "^4.2.4",
+    "minimatch": "^5.1.6",
+    "sha.js": "^2.4.11",
+    "ws": "^8.17.1"
   }
 }
