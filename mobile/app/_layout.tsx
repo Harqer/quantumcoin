@@ -17,12 +17,12 @@ export default function RootLayout() {
 
   // Load custom typography derived from cleo_ai_bin/assets/fonts
   const [fontsLoaded] = useFonts({
-    'PPNeueMontreal-Regular': require('../../cleo_ai_bin/assets/fonts/PPNeueMontreal-Regular.ttf'),
-    'PPNeueMontreal-Medium': require('../../cleo_ai_bin/assets/fonts/PPNeueMontreal-Medium.ttf'),
-    'PPNeueMontreal-Bold': require('../../cleo_ai_bin/assets/fonts/PPNeueMontreal-Bold.ttf'),
-    'Archivo-Regular': require('../../cleo_ai_bin/assets/fonts/Archivo-Regular.ttf'),
-    'Archivo-Bold': require('../../cleo_ai_bin/assets/fonts/Archivo-Bold.ttf'),
-    'GT-Flexa-Compressed': require('../../cleo_ai_bin/assets/fonts/GT-Flexa-Compressed-Regular.otf'),
+    'PPNeueMontreal-Regular': require('../assets/fonts/PPNeueMontreal-Regular.ttf'),
+    'PPNeueMontreal-Medium': require('../assets/fonts/PPNeueMontreal-Medium.ttf'),
+    'PPNeueMontreal-Bold': require('../assets/fonts/PPNeueMontreal-Bold.ttf'),
+    'Archivo-Regular': require('../assets/fonts/Archivo-Regular.ttf'),
+    'Archivo-Bold': require('../assets/fonts/Archivo-Bold.ttf'),
+    'GT-Flexa-Compressed': require('../assets/fonts/GT-Flexa-Compressed-Regular.otf'),
   });
 
   if (!fontsLoaded) {
