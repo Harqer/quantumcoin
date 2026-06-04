@@ -8,11 +8,11 @@ import { useAuth } from '@clerk/clerk-expo';
 
 const stripePromise = loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
 
-function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState(50.00);
 
   const handleSubmit = async () => {
     if (!stripe || !elements) return;
@@ -51,7 +51,7 @@ function CheckoutForm() {
         
         <View className="bg-gray-900 p-6 rounded-[28px] mb-8 shadow-xl">
           <Text className="text-gray-400 font-montreal text-sm font-semibold uppercase tracking-widest">Deposit Amount</Text>
-          <Text className="text-white text-5xl font-montrealBold my-3">$50.00</Text>
+          <Text className="text-white text-5xl font-montrealBold my-3">${amount.toFixed(2)}</Text>
           <View className="bg-gray-800 self-start px-3 py-1 rounded-full">
             <Text className="text-green-400 font-montreal text-sm font-bold">No Network Fee</Text>
           </View>
@@ -78,6 +78,10 @@ function CheckoutForm() {
 export default function CheckoutScreenWeb() {
   const { getToken } = useAuth();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  
+  // Note: in a fully wired app, the user sets this amount via a TextInput or Route param.
+  // For the Checkout wrapper, we use a dynamic state that can be updated.
+  const [depositAmount, setDepositAmount] = useState<number>(50.00);
 
   useEffect(() => {
     const fetchSecret = async () => {
@@ -87,7 +91,7 @@ export default function CheckoutScreenWeb() {
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'https://api-rosy-one-81.vercel.app'}/api/v1/billing/create-payment-intent`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ amount: 5000, currency: "usd" }),
+          body: JSON.stringify({ amount: Math.round(depositAmount * 100), currency: "usd" }),
         });
         const data = await response.json();
         setClientSecret(data.paymentIntent || data.clientSecret); 
