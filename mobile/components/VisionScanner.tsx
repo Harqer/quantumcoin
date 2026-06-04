@@ -3,10 +3,10 @@ import { StyleSheet, View, Text } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
 import { useTensorflowModel } from 'react-native-fast-tflite';
 
-const blurModelFile = require('../../assets/models/blur_model.tflite');
-const glareModelFile = require('../../assets/models/glare_model.tflite');
-const iddModelFile = require('../../assets/models/idd_model.tflite');
-const lightModelFile = require('../../assets/models/light_intensity_model.tflite');
+const blurModelFile = require('../assets/models/blur_model.tflite');
+const glareModelFile = require('../assets/models/glare_model.tflite');
+const iddModelFile = require('../assets/models/idd_model.tflite');
+const lightModelFile = require('../assets/models/light_intensity_model.tflite');
 
 interface VisionScannerProps {
   onQualityCheckComplete?: () => void;
