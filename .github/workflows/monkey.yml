@@ -6,7 +6,7 @@ on:
 jobs:
   monkey-test:
     name: Run UI Fuzzing (Monkey)
-    runs-on: macos-latest # macOS runners support hardware acceleration for Android Emulators
+    runs-on: macos-13 # Use Intel runner for better x86_64 emulator support
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,9 +21,10 @@ jobs:
       - name: Run Android Emulator and Monkey Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
+          api-level: 29
           target: default
           arch: x86_64
+          disable-animations: true
           script: |
             echo "Emulator booted successfully."
             
