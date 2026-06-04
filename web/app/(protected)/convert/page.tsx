@@ -1,5 +1,5 @@
 import styles from "./page.module.css";
-import Header from "../../components/Header";
+import Header from "@/components/Header";
 import ConvertComponent from "./ConvertComponent";
 
 export default function ConvertPage() {

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       const dummyKey = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
       const x402Client = await createAgenticX402Client(dummyKey);
       
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://getqubits.com';
       let data = null;
       let error = null;
 

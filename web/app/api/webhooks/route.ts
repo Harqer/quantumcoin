@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // Proxy to Rust backend for verification
-    const rustVerifyRes = await fetch('http://localhost:8001/api/verify-webhook', {
+    const rustVerifyRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com'}/api/verify-webhook`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

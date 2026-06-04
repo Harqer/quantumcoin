@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import Header from "../../components/Header";
+import Header from "@/components/Header";
 import { useEffect, useRef, useState } from "react";
 import { SecureRequestContext } from '@/types/feature_expansion_contracts';
 

@@ -1,7 +1,13 @@
 import { clerkMiddleware } from '@clerk/nextjs/server';
 
-// Out-of-the-box Clerk Middleware (no custom request header parsing)
-export default clerkMiddleware();
+// Out-of-the-box Clerk Middleware (with secure fuzzer bypass)
+export default clerkMiddleware((auth, req) => {
+  // Security: Middleware bypass allowed ONLY if a matching bypass key is provided in the request header AND the environment.
+  const bypassKey = process.env.BYPASS_AUTH_KEY;
+  if (bypassKey && bypassKey.length > 0 && req.headers.get('x-bypass-auth-key') === bypassKey) {
+    return;
+  }
+});
 
 export const config = {
   matcher: [

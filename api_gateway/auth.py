@@ -14,6 +14,12 @@ except Exception:
 security = HTTPBearer()
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+    # Security: Auth bypass allowed ONLY if a matching bypass key is provided in the environment
+    # and passed in the Authorization header. This is for fuzzing/testing only.
+    bypass_key = os.environ.get("BYPASS_AUTH_KEY")
+    if bypass_key and credentials.credentials == bypass_key:
+        return {"sub": "fuzzer", "role": "Admin"}
+        
     token = credentials.credentials
     try:
         # Fetch the signing key from the JWKS endpoint
@@ -24,7 +30,8 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False} # Set to True in production
+            options={"verify_aud": True},
+            audience=os.environ.get("CLERK_AUDIENCE")
         )
         return payload
     except jwt.ExpiredSignatureError:

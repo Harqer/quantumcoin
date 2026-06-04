@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem('jwt_token') || 'mock_token';

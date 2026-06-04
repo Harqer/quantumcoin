@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { apiListKeys, apiCreateKey, apiRotateKey } from "../../lib/api";
+import { apiListKeys, apiCreateKey, apiRotateKey } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function SecurityComponent() {

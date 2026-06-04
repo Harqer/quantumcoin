@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { apiGetBuyQuote, apiGetBuyOptions, apiGetOfframpSession } from "../../lib/api";
+import { apiGetBuyQuote, apiGetBuyOptions, apiGetOfframpSession } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function FiatComponent() {

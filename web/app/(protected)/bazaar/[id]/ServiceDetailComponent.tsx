@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { apiGetBazaarServices, apiSubmitJob, apiGetJobStatus } from "../../../lib/api";
+import { apiGetBazaarServices, apiSubmitJob, apiGetJobStatus } from "../@/lib/api";
 import styles from "../page.module.css";
 
 export default function ServiceDetailComponent({ id }: { id: string }) {

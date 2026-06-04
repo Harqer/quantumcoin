@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     }
 
     // Proxy request to FastAPI backend (Quantum Server)
-    const backendUrl = `http://localhost:8001${backendEndpoint}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com'}${backendEndpoint}`;
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -27,9 +27,26 @@ def serve():
     port = '50051'
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     quantumcoin_pb2_grpc.add_QuantumEngineServicer_to_server(QuantumEngineService(), server)
-    server.add_insecure_port(f'[::]:{port}')
     
-    logging.info(f"Starting Python Quantum Engine gRPC server on port {port}...")
+    # Secure gRPC with TLS
+    cert_chain_path = os.environ.get("GRPC_CERT_CHAIN")
+    private_key_path = os.environ.get("GRPC_PRIVATE_KEY")
+    
+    if cert_chain_path and private_key_path:
+        with open(private_key_path, 'rb') as f:
+            private_key = f.read()
+        with open(cert_chain_path, 'rb') as f:
+            certificate_chain = f.read()
+        
+        server_credentials = grpc.ssl_server_credentials(
+            [(private_key, certificate_chain)]
+        )
+        server.add_secure_port(f'[::]:{port}', server_credentials)
+        logging.info(f"Starting Secure Python Quantum Engine gRPC server on port {port}...")
+    else:
+        logging.warning("⚠️ Starting INSECURE gRPC server. Set GRPC_CERT_CHAIN and GRPC_PRIVATE_KEY for TLS.")
+        server.add_insecure_port(f'[::]:{port}')
+    
     server.start()
     server.wait_for_termination()
 

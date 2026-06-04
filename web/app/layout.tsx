@@ -26,17 +26,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          <RootProvider>
-            <Sentry.ErrorBoundary fallback={<p>An error has occurred.</p>}>
-              {children}
-            </Sentry.ErrorBoundary>
-          </RootProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+  const content = (
+    <html lang="en">
+      <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+        <RootProvider>
+          <Sentry.ErrorBoundary fallback={<p>An error has occurred.</p>}>
+            {children}
+          </Sentry.ErrorBoundary>
+        </RootProvider>
+      </body>
+    </html>
   );
+
+  // Security: Frontend bypass allowed ONLY if a matching bypass key is provided in the request header AND the environment.
+  // We use the non-public BYPASS_AUTH_KEY to avoid leaking the secret to the client bundle.
+  let isBypassed = false;
+  try {
+    const { headers } = require('next/headers');
+    const headerList = headers();
+    const bypassKey = process.env.BYPASS_AUTH_KEY;
+    if (bypassKey && bypassKey.length > 0 && headerList.get('x-bypass-auth-key') === bypassKey) {
+      isBypassed = true;
+    }
+  } catch (e) {
+    // headers() might not be available at build time
+  }
+
+  if (isBypassed) {
+    return content;
+  }
+
+  return <ClerkProvider>{content}</ClerkProvider>;
 }

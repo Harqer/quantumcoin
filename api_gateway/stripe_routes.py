@@ -115,7 +115,8 @@ async def create_payment_intent(data: CreatePaymentIntentRequest, payload: dict 
             "publishableKey": STRIPE_PUBLISHABLE_KEY
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error creating payment intent: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error occurred")
 
 @router.post("/webhook/stripe")
 async def stripe_webhook(request: Request, stripe_signature: str = Header(None)):
@@ -144,9 +145,15 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
         if conn:
             cur = None
             try:
+                # Use parameterized queries correctly for both SQLite and Postgres via SQLAlchemy logic if possible, 
+                # but here we'll stick to a simple check or use a more robust way.
+                # Given this is a script, we'll ensure placeholders match the connection type.
+                is_sqlite = POSTGRES_URL and POSTGRES_URL.startswith("sqlite")
+                placeholder = "?" if is_sqlite else "%s"
+                
                 cur = conn.cursor()
                 # 1. Find User
-                cur.execute('SELECT "id", "walletBalance" FROM "User" WHERE "id" = ?', (clerk_id,))
+                cur.execute(f'SELECT "id", "walletBalance" FROM "User" WHERE "id" = {placeholder}', (clerk_id,))
                 user = cur.fetchone()
                 
                 if user:
@@ -154,22 +161,23 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
                     current_balance = user[1] or 0.0
 
                     # 2. Check for duplicate webhook via Transaction table
-                    cur.execute('SELECT "id" FROM "Transaction" WHERE "stripePaymentIntentId" = ?', (pi_id,))
+                    cur.execute(f'SELECT "id" FROM "Transaction" WHERE "stripePaymentIntentId" = {placeholder}', (pi_id,))
                     duplicate = cur.fetchone()
 
                     if not duplicate:
                         # 3. Insert transaction
+                        id_gen = "lower(hex(randomblob(16)))" if is_sqlite else "gen_random_uuid()"
                         cur.execute(
-                            '''INSERT INTO "Transaction" 
+                            f'''INSERT INTO "Transaction" 
                             ("id", "userId", "stripePaymentIntentId", "type", "amount", "currency", "status", "description", "updatedAt") 
-                            VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, ?, ?, ?, datetime('now'))''',
+                            VALUES ({id_gen}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {"datetime('now')" if is_sqlite else "NOW()"})''',
                             (user_internal_id, pi_id, 'credit', amount_dollars, 'usd', 'succeeded', 'Stripe Deposit')
                         )
                         
                         # 4. Increment balance securely
                         new_balance = current_balance + amount_dollars
                         cur.execute(
-                            'UPDATE "User" SET "walletBalance" = ?, "updatedAt" = datetime("now") WHERE "id" = ?',
+                            f'UPDATE "User" SET "walletBalance" = {placeholder}, "updatedAt" = {"datetime(\'now\')" if is_sqlite else "NOW()"} WHERE "id" = {placeholder}',
                             (new_balance, user_internal_id)
                         )
                         conn.commit()

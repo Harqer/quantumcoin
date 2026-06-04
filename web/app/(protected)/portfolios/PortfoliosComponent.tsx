@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { apiGetPortfolios, apiGetPortfolioBreakdown } from "../../lib/api";
+import { apiGetPortfolios, apiGetPortfolioBreakdown } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function PortfoliosComponent() {

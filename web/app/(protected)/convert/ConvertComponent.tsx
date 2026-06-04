@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { apiGetConvertQuote, apiExecuteTrade } from "../../lib/api";
+import { apiGetConvertQuote, apiExecuteTrade } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function ConvertComponent() {
