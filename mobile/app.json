@@ -13,10 +13,14 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera for ID Verification."
+      }
     },
     "android": {
       "package": "com.harqer.quantumcoin",
+      "permissions": ["android.permission.CAMERA"],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -31,13 +35,7 @@
       "expo-router",
       "expo-asset",
       "expo-font",
-      "./plugins/withMLKitMetaData",
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera for ID Verification."
-        }
-      ]
+      "./plugins/withMLKitMetaData"
     ],
     "extra": {
       "router": {
