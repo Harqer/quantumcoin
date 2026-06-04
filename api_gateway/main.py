@@ -67,12 +67,28 @@ def log_audit(db: Session, request_id: str, user_id: int, action: str, outcome: 
     db.commit()
 
 # --- REST Endpoints ---
+import requests
+
 @app.post("/api/v1/quantum/qnrg", dependencies=[Depends(require_role(["User", "Admin"]))])
 def request_qnrg(req: QNRGRequest, request: Request, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
-    random_bytes = base64.b64encode(os.urandom(req.size)).decode('utf-8')
-    provider = "Xanadu"
-    
-    # Sub is clerk_id string, map it to our internal ID or store clerk_id directly
+    try:
+        # Fetch true quantum randomness from the ANU Quantum Vacuum API
+        response = requests.get(f"https://qrng.anu.edu.au/API/jsonI.php?length={req.size}&type=uint8", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        
+        if data.get("success"):
+            raw_bytes = bytes(data["data"])
+            random_bytes = base64.b64encode(raw_bytes).decode('utf-8')
+            provider = "ANU Quantum Vacuum"
+        else:
+            raise ValueError("Quantum API success flag missing")
+    except Exception as e:
+        # Fallback to cryptographically secure PRNG if quantum hardware is unreachable
+        print(f"⚠️ Quantum hardware offline, falling back to PRNG: {e}")
+        random_bytes = base64.b64encode(os.urandom(req.size)).decode('utf-8')
+        provider = "Simulated PRNG (Fallback)"
+
     user = db.query(User).filter(User.username == payload.get("sub")).first()
     user_id = user.id if user else 0
     
