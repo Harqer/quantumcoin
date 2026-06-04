@@ -97,3 +97,12 @@ sdk-key-s_*.json
 .vercelignore
 .vscode/
 venv_new/
+
+# Exclude all dotfiles and hidden folders
+.*
+# Essential exceptions to keep tracked
+!.gitignore
+!.github/
+!.npmrc
+!.prettierrc
+!.eslintrc*
