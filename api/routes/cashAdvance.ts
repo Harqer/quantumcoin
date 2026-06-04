@@ -53,13 +53,37 @@ export const cashAdvanceRouter = router({
       const user = await prisma.user.findUnique({ where: { id: ctx.user.id } });
       if (!user) throw new Error("User not found");
 
-      const advance = await prisma.cashAdvance.create({
-        data: {
-          userId: user.id,
-          amount: input.amount,
-          status: 'pending',
-          repaymentDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-        }
+      const advance = await prisma.$transaction(async (tx) => {
+        // 1. Create the advance record
+        const newAdvance = await tx.cashAdvance.create({
+          data: {
+            userId: user.id,
+            amount: input.amount,
+            status: 'funded',
+            repaymentDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+          }
+        });
+
+        // 2. Fund the wallet
+        await tx.user.update({
+          where: { id: user.id },
+          data: { walletBalance: { increment: input.amount } }
+        });
+
+        // 3. Log the funding transaction
+        await tx.transaction.create({
+          data: {
+            userId: user.id,
+            type: 'credit',
+            amount: input.amount,
+            currency: 'usd',
+            status: 'succeeded',
+            description: 'QuantumCoin Cash Advance',
+            merchantName: 'QuantumCoin'
+          }
+        });
+
+        return newAdvance;
       });
 
       return { success: true, advance };

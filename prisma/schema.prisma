@@ -17,6 +17,14 @@ model User {
   id                          String          @id @default(uuid())
   email                       String          @unique
   name                        String?
+  firstName                   String?
+  lastName                    String?
+  dob                         String? // YYYY-MM-DD
+  ssn                         String?
+  addressStreet               String?
+  addressCity                 String?
+  addressState                String?
+  addressZip                  String?
   stripeCustomerId            String? // Added for Stripe Customer flow
   stripeConnectAccountId      String? // Added for Stripe Connect payouts
   spendingPower               Float           @default(0) // Maximum limit or available funds for advances.
