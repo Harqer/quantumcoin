@@ -47,7 +47,10 @@ export default function LinkBankScreenWeb() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ public_token })
+                body: JSON.stringify({ 
+                    public_token, 
+                    account_id: metadata.accounts && metadata.accounts.length > 0 ? metadata.accounts[0].id : null 
+                })
             });
 
             if (!response.ok) {

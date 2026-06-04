@@ -57,15 +57,29 @@ async def create_link_token(request: Request, payload: dict = Depends(verify_tok
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from plaid.model.processor_stripe_bank_account_token_create_request import ProcessorStripeBankAccountTokenCreateRequest
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+POSTGRES_URL = os.environ.get("PRIMARY_DB_CONNECTION_STRING")
+
+def get_pg_connection():
+    return psycopg2.connect(POSTGRES_URL)
+
 @router.post("/exchange_public_token")
 async def exchange_public_token(request: Request, payload: dict = Depends(verify_token)):
+    conn = None
     try:
         data = await request.json()
         public_token = data.get("public_token")
+        account_id = data.get("account_id")
         
         if not public_token:
             raise HTTPException(status_code=400, detail="public_token is required")
+        if not account_id:
+            raise HTTPException(status_code=400, detail="account_id is required to create a Stripe bank account token")
 
+        # 1. Exchange public token for access token
         exchange_request = ItemPublicTokenExchangeRequest(public_token=public_token)
         exchange_response = client.item_public_token_exchange(exchange_request)
         
@@ -73,12 +87,42 @@ async def exchange_public_token(request: Request, payload: dict = Depends(verify
         item_id = exchange_response['item_id']
         clerk_id = payload.get("sub", "anonymous")
         
-        # In a real app, you securely save `access_token` and `item_id` to the database
-        # tied to the user's clerk_id to initiate ACH transfers.
-        print(f"✅ Plaid Access Token securely acquired for user {clerk_id}. Saving to DB...")
+        # 2. Exchange Plaid access_token + account_id for a Stripe Bank Account Token
+        stripe_request = ProcessorStripeBankAccountTokenCreateRequest(
+            access_token=access_token,
+            account_id=account_id
+        )
+        stripe_response = client.processor_stripe_bank_account_token_create(stripe_request)
+        stripe_bank_account_token = stripe_response['stripe_bank_account_token']
         
-        return {"status": "success", "message": "Bank linked securely"}
+        # 3. Securely persist to PostgreSQL DB
+        conn = get_pg_connection()
+        with conn.cursor() as cur:
+            # Find the user's internal ID
+            cur.execute('SELECT "id" FROM "User" WHERE "id" = %s OR email = %s LIMIT 1', (clerk_id, payload.get("email", "")))
+            user = cur.fetchone()
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found in primary database")
+            
+            user_internal_id = user[0]
+            
+            # Insert the bank account
+            cur.execute(
+                '''INSERT INTO "BankAccount" 
+                ("id", "userId", "accessToken", "itemId", "stripeBankId", "updatedAt") 
+                VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW())''',
+                (user_internal_id, access_token, item_id, stripe_bank_account_token)
+            )
+            conn.commit()
+            print(f"✅ Plaid Access Token and Stripe Token ({stripe_bank_account_token}) securely acquired and saved for {clerk_id}.")
+        
+        return {"status": "success", "message": "Bank linked securely with Stripe"}
     except plaid.ApiException as e:
+        if conn: conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        if conn: conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()
