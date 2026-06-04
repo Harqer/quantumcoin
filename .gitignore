@@ -95,3 +95,4 @@ vercel.json
 .vercel/
 sdk-key-s_*.json
 .vercelignore
+.vscode/
