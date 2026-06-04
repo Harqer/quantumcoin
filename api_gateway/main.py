@@ -75,8 +75,13 @@ import requests
 
 @app.post("/api/v1/quantum/qnrg", dependencies=[Depends(require_role(["User", "Admin"]))])
 def request_qnrg(req: QNRGRequest, request: Request, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+    # Input validation to prevent abuse/SSRF
+    if not (1 <= req.size <= 1024):
+        raise HTTPException(status_code=400, detail="Requested size must be between 1 and 1024")
+
     try:
         # Fetch true quantum randomness from the ANU Quantum Vacuum API
+        # Using a timeout and strict validation of the size parameter
         response = requests.get(f"https://qrng.anu.edu.au/API/jsonI.php?length={req.size}&type=uint8", timeout=5)
         response.raise_for_status()
         data = response.json()

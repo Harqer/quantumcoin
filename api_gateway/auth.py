@@ -24,7 +24,8 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False} # Set to True in production
+            options={"verify_aud": True},
+            audience=os.environ.get("CLERK_AUDIENCE")
         )
         return payload
     except jwt.ExpiredSignatureError:

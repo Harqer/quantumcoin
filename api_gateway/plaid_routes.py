@@ -92,7 +92,8 @@ async def create_link_token(request: Request, payload: dict = Depends(verify_tok
         response = client.link_token_create(request_obj)
         return {"link_token": response['link_token']}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error creating link token: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error occurred")
 
 @router.post("/exchange_public_token")
 async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict = Depends(verify_token)):
@@ -128,7 +129,8 @@ async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict 
         return {"status": "success"}
     except Exception as e:
         if conn: conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error exchanging public token: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error occurred")
     finally:
         if conn: conn.close()
 
@@ -145,7 +147,8 @@ async def plaid_webhook(payload: PlaidWebhookPayload):
                 print(f"⚠️ Marked bank item {payload.item_id} as disconnected.")
         except Exception as e:
             conn.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            print(f"Error in plaid webhook: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error occurred")
         finally:
             conn.close()
     return {"status": "webhook_received"}

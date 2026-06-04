@@ -3,6 +3,9 @@ import { router, protectedProcedure } from "../trpc";
 import { prisma } from "../db";
 import crypto from "crypto";
 
+if (!process.env.ENCRYPTION_KEY && process.env.NODE_ENV === 'production') {
+  throw new Error("ENCRYPTION_KEY must be set in production");
+}
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 
 function encrypt(text: string) {
@@ -33,7 +36,7 @@ function encryptToken(token: string) {
 
 export const plaidRouter = router({
   createLinkToken: protectedProcedure
-    .mutation(async ({ ctx }) => {
+    .mutation(async ({ ctx, input }) => {
       if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) throw new Error("Missing Plaid keys");
 
       const response = await fetch("https://sandbox.plaid.com/link/token/create", {
@@ -131,7 +134,7 @@ export const plaidRouter = router({
             'capabilities[transfers][requested]': 'true',
             business_type: 'individual',
             'tos_acceptance[date]': Math.floor(Date.now() / 1000).toString(),
-            'tos_acceptance[ip]': '8.8.8.8'
+            'tos_acceptance[ip]': ctx.ip || '0.0.0.0'
           }).toString()
         });
         const accountData = await accountRes.json();

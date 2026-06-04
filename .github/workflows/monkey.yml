@@ -6,7 +6,7 @@ on:
 jobs:
   monkey-test:
     name: Run UI Fuzzing (Monkey)
-    runs-on: macos-latest # macOS runners support hardware acceleration for Android Emulators
+    runs-on: macos-13
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,9 +21,12 @@ jobs:
       - name: Run Android Emulator and Monkey Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
-          target: default
+          api-level: 28
+          target: google_apis
           arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
           script: |
             echo "Emulator booted successfully."
             

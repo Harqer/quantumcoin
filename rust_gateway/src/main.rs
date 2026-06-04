@@ -101,11 +101,16 @@ async fn extract_tenant_id(headers: &HeaderMap) -> Option<String> {
         return Some("00000000-0000-0000-0000-000000000000".to_string());
     }
 
-    // Try decoding without validation just to extract tenant_id for the mock,
-    // since we don't have the real key.
-    let mut validation = Validation::new(Algorithm::ES256);
-    validation.insecure_disable_signature_validation();
-    let token_data = decode::<Claims>(token, &DecodingKey::from_secret(b""), &validation).ok()?;
+    // In production, load the public key from a secure source.
+    let decoding_key = if let Ok(key) = std::env::var("JWT_PUBLIC_KEY") {
+        DecodingKey::from_ec_pem(key.as_bytes()).ok()?
+    } else {
+        // Fallback or error out in production
+        return None;
+    };
+
+    let validation = Validation::new(Algorithm::ES256);
+    let token_data = decode::<Claims>(token, &decoding_key, &validation).ok()?;
     Some(token_data.claims.tenant_id)
 }
 
