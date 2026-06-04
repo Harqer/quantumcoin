@@ -1905,6 +1905,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type CategoryCountOutputType
+   */
+
+  export type CategoryCountOutputType = {
+    transactions: number
+  }
+
+  export type CategoryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    transactions?: boolean | CategoryCountOutputTypeCountTransactionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CategoryCountOutputType without action
+   */
+  export type CategoryCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CategoryCountOutputType
+     */
+    select?: CategoryCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CategoryCountOutputType without action
+   */
+  export type CategoryCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TransactionWhereInput
+  }
+
+
+  /**
    * Count Type ChatSessionCountOutputType
    */
 
@@ -1955,6 +1986,7 @@ export namespace Prisma {
     spendingPower: number | null
     invitedUserReward: number | null
     totalToRepay: number | null
+    walletBalance: number | null
     minDepositAmount: number | null
   }
 
@@ -1962,6 +1994,7 @@ export namespace Prisma {
     spendingPower: number | null
     invitedUserReward: number | null
     totalToRepay: number | null
+    walletBalance: number | null
     minDepositAmount: number | null
   }
 
@@ -1969,12 +2002,21 @@ export namespace Prisma {
     id: string | null
     email: string | null
     name: string | null
+    firstName: string | null
+    lastName: string | null
+    dob: string | null
+    ssn: string | null
+    addressStreet: string | null
+    addressCity: string | null
+    addressState: string | null
+    addressZip: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
     spendingPower: number | null
     subscriptionNextBillingDate: Date | null
     invitedUserReward: number | null
     totalToRepay: number | null
+    walletBalance: number | null
     minDepositAmount: number | null
     last4_digits: string | null
     cleo_card: boolean | null
@@ -1988,12 +2030,21 @@ export namespace Prisma {
     id: string | null
     email: string | null
     name: string | null
+    firstName: string | null
+    lastName: string | null
+    dob: string | null
+    ssn: string | null
+    addressStreet: string | null
+    addressCity: string | null
+    addressState: string | null
+    addressZip: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
     spendingPower: number | null
     subscriptionNextBillingDate: Date | null
     invitedUserReward: number | null
     totalToRepay: number | null
+    walletBalance: number | null
     minDepositAmount: number | null
     last4_digits: string | null
     cleo_card: boolean | null
@@ -2007,12 +2058,21 @@ export namespace Prisma {
     id: number
     email: number
     name: number
+    firstName: number
+    lastName: number
+    dob: number
+    ssn: number
+    addressStreet: number
+    addressCity: number
+    addressState: number
+    addressZip: number
     stripeCustomerId: number
     stripeConnectAccountId: number
     spendingPower: number
     subscriptionNextBillingDate: number
     invitedUserReward: number
     totalToRepay: number
+    walletBalance: number
     minDepositAmount: number
     boosts: number
     last4_digits: number
@@ -2029,6 +2089,7 @@ export namespace Prisma {
     spendingPower?: true
     invitedUserReward?: true
     totalToRepay?: true
+    walletBalance?: true
     minDepositAmount?: true
   }
 
@@ -2036,6 +2097,7 @@ export namespace Prisma {
     spendingPower?: true
     invitedUserReward?: true
     totalToRepay?: true
+    walletBalance?: true
     minDepositAmount?: true
   }
 
@@ -2043,12 +2105,21 @@ export namespace Prisma {
     id?: true
     email?: true
     name?: true
+    firstName?: true
+    lastName?: true
+    dob?: true
+    ssn?: true
+    addressStreet?: true
+    addressCity?: true
+    addressState?: true
+    addressZip?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
     spendingPower?: true
     subscriptionNextBillingDate?: true
     invitedUserReward?: true
     totalToRepay?: true
+    walletBalance?: true
     minDepositAmount?: true
     last4_digits?: true
     cleo_card?: true
@@ -2062,12 +2133,21 @@ export namespace Prisma {
     id?: true
     email?: true
     name?: true
+    firstName?: true
+    lastName?: true
+    dob?: true
+    ssn?: true
+    addressStreet?: true
+    addressCity?: true
+    addressState?: true
+    addressZip?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
     spendingPower?: true
     subscriptionNextBillingDate?: true
     invitedUserReward?: true
     totalToRepay?: true
+    walletBalance?: true
     minDepositAmount?: true
     last4_digits?: true
     cleo_card?: true
@@ -2081,12 +2161,21 @@ export namespace Prisma {
     id?: true
     email?: true
     name?: true
+    firstName?: true
+    lastName?: true
+    dob?: true
+    ssn?: true
+    addressStreet?: true
+    addressCity?: true
+    addressState?: true
+    addressZip?: true
     stripeCustomerId?: true
     stripeConnectAccountId?: true
     spendingPower?: true
     subscriptionNextBillingDate?: true
     invitedUserReward?: true
     totalToRepay?: true
+    walletBalance?: true
     minDepositAmount?: true
     boosts?: true
     last4_digits?: true
@@ -2188,12 +2277,21 @@ export namespace Prisma {
     id: string
     email: string
     name: string | null
+    firstName: string | null
+    lastName: string | null
+    dob: string | null
+    ssn: string | null
+    addressStreet: string | null
+    addressCity: string | null
+    addressState: string | null
+    addressZip: string | null
     stripeCustomerId: string | null
     stripeConnectAccountId: string | null
     spendingPower: number
     subscriptionNextBillingDate: Date | null
     invitedUserReward: number
     totalToRepay: number
+    walletBalance: number
     minDepositAmount: number
     boosts: JsonValue | null
     last4_digits: string | null
@@ -2227,12 +2325,21 @@ export namespace Prisma {
     id?: boolean
     email?: boolean
     name?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    dob?: boolean
+    ssn?: boolean
+    addressStreet?: boolean
+    addressCity?: boolean
+    addressState?: boolean
+    addressZip?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
     spendingPower?: boolean
     subscriptionNextBillingDate?: boolean
     invitedUserReward?: boolean
     totalToRepay?: boolean
+    walletBalance?: boolean
     minDepositAmount?: boolean
     boosts?: boolean
     last4_digits?: boolean
@@ -2256,12 +2363,21 @@ export namespace Prisma {
     id?: boolean
     email?: boolean
     name?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    dob?: boolean
+    ssn?: boolean
+    addressStreet?: boolean
+    addressCity?: boolean
+    addressState?: boolean
+    addressZip?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
     spendingPower?: boolean
     subscriptionNextBillingDate?: boolean
     invitedUserReward?: boolean
     totalToRepay?: boolean
+    walletBalance?: boolean
     minDepositAmount?: boolean
     boosts?: boolean
     last4_digits?: boolean
@@ -2276,12 +2392,21 @@ export namespace Prisma {
     id?: boolean
     email?: boolean
     name?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    dob?: boolean
+    ssn?: boolean
+    addressStreet?: boolean
+    addressCity?: boolean
+    addressState?: boolean
+    addressZip?: boolean
     stripeCustomerId?: boolean
     stripeConnectAccountId?: boolean
     spendingPower?: boolean
     subscriptionNextBillingDate?: boolean
     invitedUserReward?: boolean
     totalToRepay?: boolean
+    walletBalance?: boolean
     minDepositAmount?: boolean
     boosts?: boolean
     last4_digits?: boolean
@@ -2321,12 +2446,21 @@ export namespace Prisma {
       id: string
       email: string
       name: string | null
+      firstName: string | null
+      lastName: string | null
+      dob: string | null
+      ssn: string | null
+      addressStreet: string | null
+      addressCity: string | null
+      addressState: string | null
+      addressZip: string | null
       stripeCustomerId: string | null
       stripeConnectAccountId: string | null
       spendingPower: number
       subscriptionNextBillingDate: Date | null
       invitedUserReward: number
       totalToRepay: number
+      walletBalance: number
       minDepositAmount: number
       boosts: Prisma.JsonValue | null
       last4_digits: string | null
@@ -2739,12 +2873,21 @@ export namespace Prisma {
     readonly id: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
+    readonly firstName: FieldRef<"User", 'String'>
+    readonly lastName: FieldRef<"User", 'String'>
+    readonly dob: FieldRef<"User", 'String'>
+    readonly ssn: FieldRef<"User", 'String'>
+    readonly addressStreet: FieldRef<"User", 'String'>
+    readonly addressCity: FieldRef<"User", 'String'>
+    readonly addressState: FieldRef<"User", 'String'>
+    readonly addressZip: FieldRef<"User", 'String'>
     readonly stripeCustomerId: FieldRef<"User", 'String'>
     readonly stripeConnectAccountId: FieldRef<"User", 'String'>
     readonly spendingPower: FieldRef<"User", 'Float'>
     readonly subscriptionNextBillingDate: FieldRef<"User", 'DateTime'>
     readonly invitedUserReward: FieldRef<"User", 'Float'>
     readonly totalToRepay: FieldRef<"User", 'Float'>
+    readonly walletBalance: FieldRef<"User", 'Float'>
     readonly minDepositAmount: FieldRef<"User", 'Float'>
     readonly boosts: FieldRef<"User", 'Json'>
     readonly last4_digits: FieldRef<"User", 'String'>
@@ -3247,8 +3390,20 @@ export namespace Prisma {
 
   export type AggregateBankAccount = {
     _count: BankAccountCountAggregateOutputType | null
+    _avg: BankAccountAvgAggregateOutputType | null
+    _sum: BankAccountSumAggregateOutputType | null
     _min: BankAccountMinAggregateOutputType | null
     _max: BankAccountMaxAggregateOutputType | null
+  }
+
+  export type BankAccountAvgAggregateOutputType = {
+    currentBalance: number | null
+    availableBalance: number | null
+  }
+
+  export type BankAccountSumAggregateOutputType = {
+    currentBalance: number | null
+    availableBalance: number | null
   }
 
   export type BankAccountMinAggregateOutputType = {
@@ -3258,6 +3413,8 @@ export namespace Prisma {
     iv: string | null
     itemId: string | null
     stripeBankId: string | null
+    currentBalance: number | null
+    availableBalance: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3269,6 +3426,8 @@ export namespace Prisma {
     iv: string | null
     itemId: string | null
     stripeBankId: string | null
+    currentBalance: number | null
+    availableBalance: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3280,11 +3439,23 @@ export namespace Prisma {
     iv: number
     itemId: number
     stripeBankId: number
+    currentBalance: number
+    availableBalance: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type BankAccountAvgAggregateInputType = {
+    currentBalance?: true
+    availableBalance?: true
+  }
+
+  export type BankAccountSumAggregateInputType = {
+    currentBalance?: true
+    availableBalance?: true
+  }
 
   export type BankAccountMinAggregateInputType = {
     id?: true
@@ -3293,6 +3464,8 @@ export namespace Prisma {
     iv?: true
     itemId?: true
     stripeBankId?: true
+    currentBalance?: true
+    availableBalance?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3304,6 +3477,8 @@ export namespace Prisma {
     iv?: true
     itemId?: true
     stripeBankId?: true
+    currentBalance?: true
+    availableBalance?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3315,6 +3490,8 @@ export namespace Prisma {
     iv?: true
     itemId?: true
     stripeBankId?: true
+    currentBalance?: true
+    availableBalance?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3358,6 +3535,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: BankAccountAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BankAccountSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: BankAccountMinAggregateInputType
@@ -3388,6 +3577,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: BankAccountCountAggregateInputType | true
+    _avg?: BankAccountAvgAggregateInputType
+    _sum?: BankAccountSumAggregateInputType
     _min?: BankAccountMinAggregateInputType
     _max?: BankAccountMaxAggregateInputType
   }
@@ -3399,9 +3590,13 @@ export namespace Prisma {
     iv: string | null
     itemId: string
     stripeBankId: string | null
+    currentBalance: number | null
+    availableBalance: number | null
     createdAt: Date
     updatedAt: Date
     _count: BankAccountCountAggregateOutputType | null
+    _avg: BankAccountAvgAggregateOutputType | null
+    _sum: BankAccountSumAggregateOutputType | null
     _min: BankAccountMinAggregateOutputType | null
     _max: BankAccountMaxAggregateOutputType | null
   }
@@ -3427,6 +3622,8 @@ export namespace Prisma {
     iv?: boolean
     itemId?: boolean
     stripeBankId?: boolean
+    currentBalance?: boolean
+    availableBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3441,6 +3638,8 @@ export namespace Prisma {
     iv?: boolean
     itemId?: boolean
     stripeBankId?: boolean
+    currentBalance?: boolean
+    availableBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3453,6 +3652,8 @@ export namespace Prisma {
     iv?: boolean
     itemId?: boolean
     stripeBankId?: boolean
+    currentBalance?: boolean
+    availableBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -3479,6 +3680,8 @@ export namespace Prisma {
       iv: string | null
       itemId: string
       stripeBankId: string | null
+      currentBalance: number | null
+      availableBalance: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["bankAccount"]>
@@ -3882,6 +4085,8 @@ export namespace Prisma {
     readonly iv: FieldRef<"BankAccount", 'String'>
     readonly itemId: FieldRef<"BankAccount", 'String'>
     readonly stripeBankId: FieldRef<"BankAccount", 'String'>
+    readonly currentBalance: FieldRef<"BankAccount", 'Float'>
+    readonly availableBalance: FieldRef<"BankAccount", 'Float'>
     readonly createdAt: FieldRef<"BankAccount", 'DateTime'>
     readonly updatedAt: FieldRef<"BankAccount", 'DateTime'>
   }
@@ -4262,12 +4467,16 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     bankAccountId: string | null
+    categoryId: string | null
+    stripePaymentIntentId: string | null
+    type: string | null
     amount: number | null
     selectedAmount: number | null
     currency: string | null
     status: string | null
     lastFormatted: string | null
-    bankName: string | null
+    merchantName: string | null
+    description: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4276,12 +4485,16 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     bankAccountId: string | null
+    categoryId: string | null
+    stripePaymentIntentId: string | null
+    type: string | null
     amount: number | null
     selectedAmount: number | null
     currency: string | null
     status: string | null
     lastFormatted: string | null
-    bankName: string | null
+    merchantName: string | null
+    description: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4290,12 +4503,16 @@ export namespace Prisma {
     id: number
     userId: number
     bankAccountId: number
+    categoryId: number
+    stripePaymentIntentId: number
+    type: number
     amount: number
     selectedAmount: number
     currency: number
     status: number
     lastFormatted: number
-    bankName: number
+    merchantName: number
+    description: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4316,12 +4533,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     bankAccountId?: true
+    categoryId?: true
+    stripePaymentIntentId?: true
+    type?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
     lastFormatted?: true
-    bankName?: true
+    merchantName?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4330,12 +4551,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     bankAccountId?: true
+    categoryId?: true
+    stripePaymentIntentId?: true
+    type?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
     lastFormatted?: true
-    bankName?: true
+    merchantName?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4344,12 +4569,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     bankAccountId?: true
+    categoryId?: true
+    stripePaymentIntentId?: true
+    type?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
     lastFormatted?: true
-    bankName?: true
+    merchantName?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4445,12 +4674,16 @@ export namespace Prisma {
     id: string
     userId: string
     bankAccountId: string | null
+    categoryId: string | null
+    stripePaymentIntentId: string | null
+    type: string
     amount: number
     selectedAmount: number | null
     currency: string
     status: string
     lastFormatted: string | null
-    bankName: string | null
+    merchantName: string | null
+    description: string | null
     createdAt: Date
     updatedAt: Date
     _count: TransactionCountAggregateOutputType | null
@@ -4478,44 +4711,58 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     bankAccountId?: boolean
+    categoryId?: boolean
+    stripePaymentIntentId?: boolean
+    type?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
     lastFormatted?: boolean
-    bankName?: boolean
+    merchantName?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     bankAccount?: boolean | Transaction$bankAccountArgs<ExtArgs>
+    category?: boolean | Transaction$categoryArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
 
   export type TransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
     bankAccountId?: boolean
+    categoryId?: boolean
+    stripePaymentIntentId?: boolean
+    type?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
     lastFormatted?: boolean
-    bankName?: boolean
+    merchantName?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     bankAccount?: boolean | Transaction$bankAccountArgs<ExtArgs>
+    category?: boolean | Transaction$categoryArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
 
   export type TransactionSelectScalar = {
     id?: boolean
     userId?: boolean
     bankAccountId?: boolean
+    categoryId?: boolean
+    stripePaymentIntentId?: boolean
+    type?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
     lastFormatted?: boolean
-    bankName?: boolean
+    merchantName?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -4523,10 +4770,12 @@ export namespace Prisma {
   export type TransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     bankAccount?: boolean | Transaction$bankAccountArgs<ExtArgs>
+    category?: boolean | Transaction$categoryArgs<ExtArgs>
   }
   export type TransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     bankAccount?: boolean | Transaction$bankAccountArgs<ExtArgs>
+    category?: boolean | Transaction$categoryArgs<ExtArgs>
   }
 
   export type $TransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4534,17 +4783,22 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       bankAccount: Prisma.$BankAccountPayload<ExtArgs> | null
+      category: Prisma.$CategoryPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
       bankAccountId: string | null
+      categoryId: string | null
+      stripePaymentIntentId: string | null
+      type: string
       amount: number
       selectedAmount: number | null
       currency: string
       status: string
       lastFormatted: string | null
-      bankName: string | null
+      merchantName: string | null
+      description: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["transaction"]>
@@ -4913,6 +5167,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     bankAccount<T extends Transaction$bankAccountArgs<ExtArgs> = {}>(args?: Subset<T, Transaction$bankAccountArgs<ExtArgs>>): Prisma__BankAccountClient<$Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    category<T extends Transaction$categoryArgs<ExtArgs> = {}>(args?: Subset<T, Transaction$categoryArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4945,12 +5200,16 @@ export namespace Prisma {
     readonly id: FieldRef<"Transaction", 'String'>
     readonly userId: FieldRef<"Transaction", 'String'>
     readonly bankAccountId: FieldRef<"Transaction", 'String'>
+    readonly categoryId: FieldRef<"Transaction", 'String'>
+    readonly stripePaymentIntentId: FieldRef<"Transaction", 'String'>
+    readonly type: FieldRef<"Transaction", 'String'>
     readonly amount: FieldRef<"Transaction", 'Float'>
     readonly selectedAmount: FieldRef<"Transaction", 'Float'>
     readonly currency: FieldRef<"Transaction", 'String'>
     readonly status: FieldRef<"Transaction", 'String'>
     readonly lastFormatted: FieldRef<"Transaction", 'String'>
-    readonly bankName: FieldRef<"Transaction", 'String'>
+    readonly merchantName: FieldRef<"Transaction", 'String'>
+    readonly description: FieldRef<"Transaction", 'String'>
     readonly createdAt: FieldRef<"Transaction", 'DateTime'>
     readonly updatedAt: FieldRef<"Transaction", 'DateTime'>
   }
@@ -5283,6 +5542,21 @@ export namespace Prisma {
      */
     include?: BankAccountInclude<ExtArgs> | null
     where?: BankAccountWhereInput
+  }
+
+  /**
+   * Transaction.category
+   */
+  export type Transaction$categoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    where?: CategoryWhereInput
   }
 
   /**
@@ -9495,6 +9769,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     budget?: boolean | BudgetDefaultArgs<ExtArgs>
+    transactions?: boolean | Category$transactionsArgs<ExtArgs>
+    _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["category"]>
 
   export type CategorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9522,6 +9798,8 @@ export namespace Prisma {
 
   export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     budget?: boolean | BudgetDefaultArgs<ExtArgs>
+    transactions?: boolean | Category$transactionsArgs<ExtArgs>
+    _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     budget?: boolean | BudgetDefaultArgs<ExtArgs>
@@ -9531,6 +9809,7 @@ export namespace Prisma {
     name: "Category"
     objects: {
       budget: Prisma.$BudgetPayload<ExtArgs>
+      transactions: Prisma.$TransactionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9906,6 +10185,7 @@ export namespace Prisma {
   export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     budget<T extends BudgetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BudgetDefaultArgs<ExtArgs>>): Prisma__BudgetClient<$Result.GetResult<Prisma.$BudgetPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    transactions<T extends Category$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, Category$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10258,6 +10538,26 @@ export namespace Prisma {
      * Filter which Categories to delete
      */
     where?: CategoryWhereInput
+  }
+
+  /**
+   * Category.transactions
+   */
+  export type Category$transactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Transaction
+     */
+    select?: TransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TransactionInclude<ExtArgs> | null
+    where?: TransactionWhereInput
+    orderBy?: TransactionOrderByWithRelationInput | TransactionOrderByWithRelationInput[]
+    cursor?: TransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TransactionScalarFieldEnum | TransactionScalarFieldEnum[]
   }
 
   /**
@@ -13285,12 +13585,21 @@ export namespace Prisma {
     id: 'id',
     email: 'email',
     name: 'name',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    dob: 'dob',
+    ssn: 'ssn',
+    addressStreet: 'addressStreet',
+    addressCity: 'addressCity',
+    addressState: 'addressState',
+    addressZip: 'addressZip',
     stripeCustomerId: 'stripeCustomerId',
     stripeConnectAccountId: 'stripeConnectAccountId',
     spendingPower: 'spendingPower',
     subscriptionNextBillingDate: 'subscriptionNextBillingDate',
     invitedUserReward: 'invitedUserReward',
     totalToRepay: 'totalToRepay',
+    walletBalance: 'walletBalance',
     minDepositAmount: 'minDepositAmount',
     boosts: 'boosts',
     last4_digits: 'last4_digits',
@@ -13311,6 +13620,8 @@ export namespace Prisma {
     iv: 'iv',
     itemId: 'itemId',
     stripeBankId: 'stripeBankId',
+    currentBalance: 'currentBalance',
+    availableBalance: 'availableBalance',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13322,12 +13633,16 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     bankAccountId: 'bankAccountId',
+    categoryId: 'categoryId',
+    stripePaymentIntentId: 'stripePaymentIntentId',
+    type: 'type',
     amount: 'amount',
     selectedAmount: 'selectedAmount',
     currency: 'currency',
     status: 'status',
     lastFormatted: 'lastFormatted',
-    bankName: 'bankName',
+    merchantName: 'merchantName',
+    description: 'description',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13583,12 +13898,21 @@ export namespace Prisma {
     id?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     name?: StringNullableFilter<"User"> | string | null
+    firstName?: StringNullableFilter<"User"> | string | null
+    lastName?: StringNullableFilter<"User"> | string | null
+    dob?: StringNullableFilter<"User"> | string | null
+    ssn?: StringNullableFilter<"User"> | string | null
+    addressStreet?: StringNullableFilter<"User"> | string | null
+    addressCity?: StringNullableFilter<"User"> | string | null
+    addressState?: StringNullableFilter<"User"> | string | null
+    addressZip?: StringNullableFilter<"User"> | string | null
     stripeCustomerId?: StringNullableFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableFilter<"User"> | string | null
     spendingPower?: FloatFilter<"User"> | number
     subscriptionNextBillingDate?: DateTimeNullableFilter<"User"> | Date | string | null
     invitedUserReward?: FloatFilter<"User"> | number
     totalToRepay?: FloatFilter<"User"> | number
+    walletBalance?: FloatFilter<"User"> | number
     minDepositAmount?: FloatFilter<"User"> | number
     boosts?: JsonNullableFilter<"User">
     last4_digits?: StringNullableFilter<"User"> | string | null
@@ -13611,12 +13935,21 @@ export namespace Prisma {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrderInput | SortOrder
+    firstName?: SortOrderInput | SortOrder
+    lastName?: SortOrderInput | SortOrder
+    dob?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    addressStreet?: SortOrderInput | SortOrder
+    addressCity?: SortOrderInput | SortOrder
+    addressState?: SortOrderInput | SortOrder
+    addressZip?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeConnectAccountId?: SortOrderInput | SortOrder
     spendingPower?: SortOrder
     subscriptionNextBillingDate?: SortOrderInput | SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
     boosts?: SortOrderInput | SortOrder
     last4_digits?: SortOrderInput | SortOrder
@@ -13642,12 +13975,21 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
+    firstName?: StringNullableFilter<"User"> | string | null
+    lastName?: StringNullableFilter<"User"> | string | null
+    dob?: StringNullableFilter<"User"> | string | null
+    ssn?: StringNullableFilter<"User"> | string | null
+    addressStreet?: StringNullableFilter<"User"> | string | null
+    addressCity?: StringNullableFilter<"User"> | string | null
+    addressState?: StringNullableFilter<"User"> | string | null
+    addressZip?: StringNullableFilter<"User"> | string | null
     stripeCustomerId?: StringNullableFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableFilter<"User"> | string | null
     spendingPower?: FloatFilter<"User"> | number
     subscriptionNextBillingDate?: DateTimeNullableFilter<"User"> | Date | string | null
     invitedUserReward?: FloatFilter<"User"> | number
     totalToRepay?: FloatFilter<"User"> | number
+    walletBalance?: FloatFilter<"User"> | number
     minDepositAmount?: FloatFilter<"User"> | number
     boosts?: JsonNullableFilter<"User">
     last4_digits?: StringNullableFilter<"User"> | string | null
@@ -13670,12 +14012,21 @@ export namespace Prisma {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrderInput | SortOrder
+    firstName?: SortOrderInput | SortOrder
+    lastName?: SortOrderInput | SortOrder
+    dob?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    addressStreet?: SortOrderInput | SortOrder
+    addressCity?: SortOrderInput | SortOrder
+    addressState?: SortOrderInput | SortOrder
+    addressZip?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeConnectAccountId?: SortOrderInput | SortOrder
     spendingPower?: SortOrder
     subscriptionNextBillingDate?: SortOrderInput | SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
     boosts?: SortOrderInput | SortOrder
     last4_digits?: SortOrderInput | SortOrder
@@ -13698,12 +14049,21 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
+    firstName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    lastName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    dob?: StringNullableWithAggregatesFilter<"User"> | string | null
+    ssn?: StringNullableWithAggregatesFilter<"User"> | string | null
+    addressStreet?: StringNullableWithAggregatesFilter<"User"> | string | null
+    addressCity?: StringNullableWithAggregatesFilter<"User"> | string | null
+    addressState?: StringNullableWithAggregatesFilter<"User"> | string | null
+    addressZip?: StringNullableWithAggregatesFilter<"User"> | string | null
     stripeCustomerId?: StringNullableWithAggregatesFilter<"User"> | string | null
     stripeConnectAccountId?: StringNullableWithAggregatesFilter<"User"> | string | null
     spendingPower?: FloatWithAggregatesFilter<"User"> | number
     subscriptionNextBillingDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     invitedUserReward?: FloatWithAggregatesFilter<"User"> | number
     totalToRepay?: FloatWithAggregatesFilter<"User"> | number
+    walletBalance?: FloatWithAggregatesFilter<"User"> | number
     minDepositAmount?: FloatWithAggregatesFilter<"User"> | number
     boosts?: JsonNullableWithAggregatesFilter<"User">
     last4_digits?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -13724,6 +14084,8 @@ export namespace Prisma {
     iv?: StringNullableFilter<"BankAccount"> | string | null
     itemId?: StringFilter<"BankAccount"> | string
     stripeBankId?: StringNullableFilter<"BankAccount"> | string | null
+    currentBalance?: FloatNullableFilter<"BankAccount"> | number | null
+    availableBalance?: FloatNullableFilter<"BankAccount"> | number | null
     createdAt?: DateTimeFilter<"BankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"BankAccount"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13737,6 +14099,8 @@ export namespace Prisma {
     iv?: SortOrderInput | SortOrder
     itemId?: SortOrder
     stripeBankId?: SortOrderInput | SortOrder
+    currentBalance?: SortOrderInput | SortOrder
+    availableBalance?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -13753,6 +14117,8 @@ export namespace Prisma {
     iv?: StringNullableFilter<"BankAccount"> | string | null
     itemId?: StringFilter<"BankAccount"> | string
     stripeBankId?: StringNullableFilter<"BankAccount"> | string | null
+    currentBalance?: FloatNullableFilter<"BankAccount"> | number | null
+    availableBalance?: FloatNullableFilter<"BankAccount"> | number | null
     createdAt?: DateTimeFilter<"BankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"BankAccount"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -13766,11 +14132,15 @@ export namespace Prisma {
     iv?: SortOrderInput | SortOrder
     itemId?: SortOrder
     stripeBankId?: SortOrderInput | SortOrder
+    currentBalance?: SortOrderInput | SortOrder
+    availableBalance?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: BankAccountCountOrderByAggregateInput
+    _avg?: BankAccountAvgOrderByAggregateInput
     _max?: BankAccountMaxOrderByAggregateInput
     _min?: BankAccountMinOrderByAggregateInput
+    _sum?: BankAccountSumOrderByAggregateInput
   }
 
   export type BankAccountScalarWhereWithAggregatesInput = {
@@ -13783,6 +14153,8 @@ export namespace Prisma {
     iv?: StringNullableWithAggregatesFilter<"BankAccount"> | string | null
     itemId?: StringWithAggregatesFilter<"BankAccount"> | string
     stripeBankId?: StringNullableWithAggregatesFilter<"BankAccount"> | string | null
+    currentBalance?: FloatNullableWithAggregatesFilter<"BankAccount"> | number | null
+    availableBalance?: FloatNullableWithAggregatesFilter<"BankAccount"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"BankAccount"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BankAccount"> | Date | string
   }
@@ -13794,63 +14166,82 @@ export namespace Prisma {
     id?: StringFilter<"Transaction"> | string
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
+    categoryId?: StringNullableFilter<"Transaction"> | string | null
+    stripePaymentIntentId?: StringNullableFilter<"Transaction"> | string | null
+    type?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
-    bankName?: StringNullableFilter<"Transaction"> | string | null
+    merchantName?: StringNullableFilter<"Transaction"> | string | null
+    description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     bankAccount?: XOR<BankAccountNullableRelationFilter, BankAccountWhereInput> | null
+    category?: XOR<CategoryNullableRelationFilter, CategoryWhereInput> | null
   }
 
   export type TransactionOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
     bankAccountId?: SortOrderInput | SortOrder
+    categoryId?: SortOrderInput | SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
+    type?: SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
     lastFormatted?: SortOrderInput | SortOrder
-    bankName?: SortOrderInput | SortOrder
+    merchantName?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     bankAccount?: BankAccountOrderByWithRelationInput
+    category?: CategoryOrderByWithRelationInput
   }
 
   export type TransactionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    stripePaymentIntentId?: string
     AND?: TransactionWhereInput | TransactionWhereInput[]
     OR?: TransactionWhereInput[]
     NOT?: TransactionWhereInput | TransactionWhereInput[]
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
+    categoryId?: StringNullableFilter<"Transaction"> | string | null
+    type?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
-    bankName?: StringNullableFilter<"Transaction"> | string | null
+    merchantName?: StringNullableFilter<"Transaction"> | string | null
+    description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     bankAccount?: XOR<BankAccountNullableRelationFilter, BankAccountWhereInput> | null
-  }, "id">
+    category?: XOR<CategoryNullableRelationFilter, CategoryWhereInput> | null
+  }, "id" | "stripePaymentIntentId">
 
   export type TransactionOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
     bankAccountId?: SortOrderInput | SortOrder
+    categoryId?: SortOrderInput | SortOrder
+    stripePaymentIntentId?: SortOrderInput | SortOrder
+    type?: SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
     lastFormatted?: SortOrderInput | SortOrder
-    bankName?: SortOrderInput | SortOrder
+    merchantName?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TransactionCountOrderByAggregateInput
@@ -13867,12 +14258,16 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Transaction"> | string
     userId?: StringWithAggregatesFilter<"Transaction"> | string
     bankAccountId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    categoryId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    stripePaymentIntentId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    type?: StringWithAggregatesFilter<"Transaction"> | string
     amount?: FloatWithAggregatesFilter<"Transaction"> | number
     selectedAmount?: FloatNullableWithAggregatesFilter<"Transaction"> | number | null
     currency?: StringWithAggregatesFilter<"Transaction"> | string
     status?: StringWithAggregatesFilter<"Transaction"> | string
     lastFormatted?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
-    bankName?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    merchantName?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    description?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   }
@@ -14165,6 +14560,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     budget?: XOR<BudgetRelationFilter, BudgetWhereInput>
+    transactions?: TransactionListRelationFilter
   }
 
   export type CategoryOrderByWithRelationInput = {
@@ -14177,6 +14573,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     budget?: BudgetOrderByWithRelationInput
+    transactions?: TransactionOrderByRelationAggregateInput
   }
 
   export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -14192,6 +14589,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     budget?: XOR<BudgetRelationFilter, BudgetWhereInput>
+    transactions?: TransactionListRelationFilter
   }, "id">
 
   export type CategoryOrderByWithAggregationInput = {
@@ -14441,12 +14839,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -14469,12 +14876,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -14497,12 +14913,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14525,12 +14950,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14553,12 +14987,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -14573,12 +15016,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14593,12 +15045,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14615,6 +15076,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutBankAccountsInput
@@ -14628,6 +15091,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutBankAccountInput
@@ -14639,6 +15104,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutBankAccountsNestedInput
@@ -14652,6 +15119,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutBankAccountNestedInput
@@ -14664,6 +15133,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14674,6 +15145,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14685,62 +15158,80 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TransactionCreateInput = {
     id?: string
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTransactionsInput
     bankAccount?: BankAccountCreateNestedOneWithoutTransactionsInput
+    category?: CategoryCreateNestedOneWithoutTransactionsInput
   }
 
   export type TransactionUncheckedCreateInput = {
     id?: string
     userId: string
     bankAccountId?: string | null
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type TransactionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTransactionsNestedInput
     bankAccount?: BankAccountUpdateOneWithoutTransactionsNestedInput
+    category?: CategoryUpdateOneWithoutTransactionsNestedInput
   }
 
   export type TransactionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14749,24 +15240,31 @@ export namespace Prisma {
     id?: string
     userId: string
     bankAccountId?: string | null
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type TransactionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14775,12 +15273,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15085,6 +15587,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     budget: BudgetCreateNestedOneWithoutCategoriesInput
+    transactions?: TransactionCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUncheckedCreateInput = {
@@ -15096,6 +15599,7 @@ export namespace Prisma {
     icon?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUpdateInput = {
@@ -15107,6 +15611,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     budget?: BudgetUpdateOneRequiredWithoutCategoriesNestedInput
+    transactions?: TransactionUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryUncheckedUpdateInput = {
@@ -15118,6 +15623,7 @@ export namespace Prisma {
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryCreateManyInput = {
@@ -15555,12 +16061,21 @@ export namespace Prisma {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    dob?: SortOrder
+    ssn?: SortOrder
+    addressStreet?: SortOrder
+    addressCity?: SortOrder
+    addressState?: SortOrder
+    addressZip?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
     spendingPower?: SortOrder
     subscriptionNextBillingDate?: SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
     boosts?: SortOrder
     last4_digits?: SortOrder
@@ -15575,6 +16090,7 @@ export namespace Prisma {
     spendingPower?: SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
   }
 
@@ -15582,12 +16098,21 @@ export namespace Prisma {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    dob?: SortOrder
+    ssn?: SortOrder
+    addressStreet?: SortOrder
+    addressCity?: SortOrder
+    addressState?: SortOrder
+    addressZip?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
     spendingPower?: SortOrder
     subscriptionNextBillingDate?: SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
     last4_digits?: SortOrder
     cleo_card?: SortOrder
@@ -15601,12 +16126,21 @@ export namespace Prisma {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    dob?: SortOrder
+    ssn?: SortOrder
+    addressStreet?: SortOrder
+    addressCity?: SortOrder
+    addressState?: SortOrder
+    addressZip?: SortOrder
     stripeCustomerId?: SortOrder
     stripeConnectAccountId?: SortOrder
     spendingPower?: SortOrder
     subscriptionNextBillingDate?: SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
     last4_digits?: SortOrder
     cleo_card?: SortOrder
@@ -15620,6 +16154,7 @@ export namespace Prisma {
     spendingPower?: SortOrder
     invitedUserReward?: SortOrder
     totalToRepay?: SortOrder
+    walletBalance?: SortOrder
     minDepositAmount?: SortOrder
   }
 
@@ -15736,6 +16271,17 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -15748,8 +16294,15 @@ export namespace Prisma {
     iv?: SortOrder
     itemId?: SortOrder
     stripeBankId?: SortOrder
+    currentBalance?: SortOrder
+    availableBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type BankAccountAvgOrderByAggregateInput = {
+    currentBalance?: SortOrder
+    availableBalance?: SortOrder
   }
 
   export type BankAccountMaxOrderByAggregateInput = {
@@ -15759,6 +16312,8 @@ export namespace Prisma {
     iv?: SortOrder
     itemId?: SortOrder
     stripeBankId?: SortOrder
+    currentBalance?: SortOrder
+    availableBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15770,76 +16325,15 @@ export namespace Prisma {
     iv?: SortOrder
     itemId?: SortOrder
     stripeBankId?: SortOrder
+    currentBalance?: SortOrder
+    availableBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type BankAccountNullableRelationFilter = {
-    is?: BankAccountWhereInput | null
-    isNot?: BankAccountWhereInput | null
-  }
-
-  export type TransactionCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    bankAccountId?: SortOrder
-    amount?: SortOrder
-    selectedAmount?: SortOrder
-    currency?: SortOrder
-    status?: SortOrder
-    lastFormatted?: SortOrder
-    bankName?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TransactionAvgOrderByAggregateInput = {
-    amount?: SortOrder
-    selectedAmount?: SortOrder
-  }
-
-  export type TransactionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    bankAccountId?: SortOrder
-    amount?: SortOrder
-    selectedAmount?: SortOrder
-    currency?: SortOrder
-    status?: SortOrder
-    lastFormatted?: SortOrder
-    bankName?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TransactionMinOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    bankAccountId?: SortOrder
-    amount?: SortOrder
-    selectedAmount?: SortOrder
-    currency?: SortOrder
-    status?: SortOrder
-    lastFormatted?: SortOrder
-    bankName?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TransactionSumOrderByAggregateInput = {
-    amount?: SortOrder
-    selectedAmount?: SortOrder
+  export type BankAccountSumOrderByAggregateInput = {
+    currentBalance?: SortOrder
+    availableBalance?: SortOrder
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -15856,6 +16350,80 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type BankAccountNullableRelationFilter = {
+    is?: BankAccountWhereInput | null
+    isNot?: BankAccountWhereInput | null
+  }
+
+  export type CategoryNullableRelationFilter = {
+    is?: CategoryWhereInput | null
+    isNot?: CategoryWhereInput | null
+  }
+
+  export type TransactionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    bankAccountId?: SortOrder
+    categoryId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    selectedAmount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    lastFormatted?: SortOrder
+    merchantName?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TransactionAvgOrderByAggregateInput = {
+    amount?: SortOrder
+    selectedAmount?: SortOrder
+  }
+
+  export type TransactionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    bankAccountId?: SortOrder
+    categoryId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    selectedAmount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    lastFormatted?: SortOrder
+    merchantName?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TransactionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    bankAccountId?: SortOrder
+    categoryId?: SortOrder
+    stripePaymentIntentId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    selectedAmount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    lastFormatted?: SortOrder
+    merchantName?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TransactionSumOrderByAggregateInput = {
+    amount?: SortOrder
+    selectedAmount?: SortOrder
   }
 
   export type PaymentMethodCountOrderByAggregateInput = {
@@ -16592,6 +17160,14 @@ export namespace Prisma {
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
   }
 
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type UserUpdateOneRequiredWithoutBankAccountsNestedInput = {
     create?: XOR<UserCreateWithoutBankAccountsInput, UserUncheckedCreateWithoutBankAccountsInput>
     connectOrCreate?: UserCreateOrConnectWithoutBankAccountsInput
@@ -16640,12 +17216,10 @@ export namespace Prisma {
     connect?: BankAccountWhereUniqueInput
   }
 
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+  export type CategoryCreateNestedOneWithoutTransactionsInput = {
+    create?: XOR<CategoryCreateWithoutTransactionsInput, CategoryUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutTransactionsInput
+    connect?: CategoryWhereUniqueInput
   }
 
   export type UserUpdateOneRequiredWithoutTransactionsNestedInput = {
@@ -16664,6 +17238,16 @@ export namespace Prisma {
     delete?: BankAccountWhereInput | boolean
     connect?: BankAccountWhereUniqueInput
     update?: XOR<XOR<BankAccountUpdateToOneWithWhereWithoutTransactionsInput, BankAccountUpdateWithoutTransactionsInput>, BankAccountUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type CategoryUpdateOneWithoutTransactionsNestedInput = {
+    create?: XOR<CategoryCreateWithoutTransactionsInput, CategoryUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutTransactionsInput
+    upsert?: CategoryUpsertWithoutTransactionsInput
+    disconnect?: CategoryWhereInput | boolean
+    delete?: CategoryWhereInput | boolean
+    connect?: CategoryWhereUniqueInput
+    update?: XOR<XOR<CategoryUpdateToOneWithWhereWithoutTransactionsInput, CategoryUpdateWithoutTransactionsInput>, CategoryUncheckedUpdateWithoutTransactionsInput>
   }
 
   export type UserCreateNestedOneWithoutPaymentMethodsInput = {
@@ -16816,12 +17400,54 @@ export namespace Prisma {
     connect?: BudgetWhereUniqueInput
   }
 
+  export type TransactionCreateNestedManyWithoutCategoryInput = {
+    create?: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput> | TransactionCreateWithoutCategoryInput[] | TransactionUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutCategoryInput | TransactionCreateOrConnectWithoutCategoryInput[]
+    createMany?: TransactionCreateManyCategoryInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
+  export type TransactionUncheckedCreateNestedManyWithoutCategoryInput = {
+    create?: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput> | TransactionCreateWithoutCategoryInput[] | TransactionUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutCategoryInput | TransactionCreateOrConnectWithoutCategoryInput[]
+    createMany?: TransactionCreateManyCategoryInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
   export type BudgetUpdateOneRequiredWithoutCategoriesNestedInput = {
     create?: XOR<BudgetCreateWithoutCategoriesInput, BudgetUncheckedCreateWithoutCategoriesInput>
     connectOrCreate?: BudgetCreateOrConnectWithoutCategoriesInput
     upsert?: BudgetUpsertWithoutCategoriesInput
     connect?: BudgetWhereUniqueInput
     update?: XOR<XOR<BudgetUpdateToOneWithWhereWithoutCategoriesInput, BudgetUpdateWithoutCategoriesInput>, BudgetUncheckedUpdateWithoutCategoriesInput>
+  }
+
+  export type TransactionUpdateManyWithoutCategoryNestedInput = {
+    create?: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput> | TransactionCreateWithoutCategoryInput[] | TransactionUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutCategoryInput | TransactionCreateOrConnectWithoutCategoryInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutCategoryInput | TransactionUpsertWithWhereUniqueWithoutCategoryInput[]
+    createMany?: TransactionCreateManyCategoryInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutCategoryInput | TransactionUpdateWithWhereUniqueWithoutCategoryInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutCategoryInput | TransactionUpdateManyWithWhereWithoutCategoryInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutCategoryNestedInput = {
+    create?: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput> | TransactionCreateWithoutCategoryInput[] | TransactionUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutCategoryInput | TransactionCreateOrConnectWithoutCategoryInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutCategoryInput | TransactionUpsertWithWhereUniqueWithoutCategoryInput[]
+    createMany?: TransactionCreateManyCategoryInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutCategoryInput | TransactionUpdateWithWhereUniqueWithoutCategoryInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutCategoryInput | TransactionUpdateManyWithWhereWithoutCategoryInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutChatSessionsInput = {
@@ -17170,6 +17796,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionCreateNestedManyWithoutBankAccountInput
@@ -17181,6 +17809,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutBankAccountInput
@@ -17198,26 +17828,34 @@ export namespace Prisma {
 
   export type TransactionCreateWithoutUserInput = {
     id?: string
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccount?: BankAccountCreateNestedOneWithoutTransactionsInput
+    category?: CategoryCreateNestedOneWithoutTransactionsInput
   }
 
   export type TransactionUncheckedCreateWithoutUserInput = {
     id?: string
     bankAccountId?: string | null
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17442,6 +18080,8 @@ export namespace Prisma {
     iv?: StringNullableFilter<"BankAccount"> | string | null
     itemId?: StringFilter<"BankAccount"> | string
     stripeBankId?: StringNullableFilter<"BankAccount"> | string | null
+    currentBalance?: FloatNullableFilter<"BankAccount"> | number | null
+    availableBalance?: FloatNullableFilter<"BankAccount"> | number | null
     createdAt?: DateTimeFilter<"BankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"BankAccount"> | Date | string
   }
@@ -17469,12 +18109,16 @@ export namespace Prisma {
     id?: StringFilter<"Transaction"> | string
     userId?: StringFilter<"Transaction"> | string
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
+    categoryId?: StringNullableFilter<"Transaction"> | string | null
+    stripePaymentIntentId?: StringNullableFilter<"Transaction"> | string | null
+    type?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
-    bankName?: StringNullableFilter<"Transaction"> | string | null
+    merchantName?: StringNullableFilter<"Transaction"> | string | null
+    description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     updatedAt?: DateTimeFilter<"Transaction"> | Date | string
   }
@@ -17662,12 +18306,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -17689,12 +18342,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -17719,26 +18381,34 @@ export namespace Prisma {
 
   export type TransactionCreateWithoutBankAccountInput = {
     id?: string
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTransactionsInput
+    category?: CategoryCreateNestedOneWithoutTransactionsInput
   }
 
   export type TransactionUncheckedCreateWithoutBankAccountInput = {
     id?: string
     userId: string
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17768,12 +18438,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17795,12 +18474,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17838,12 +18526,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -17865,12 +18562,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -17899,6 +18605,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutBankAccountsInput
@@ -17911,6 +18619,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17918,6 +18628,33 @@ export namespace Prisma {
   export type BankAccountCreateOrConnectWithoutTransactionsInput = {
     where: BankAccountWhereUniqueInput
     create: XOR<BankAccountCreateWithoutTransactionsInput, BankAccountUncheckedCreateWithoutTransactionsInput>
+  }
+
+  export type CategoryCreateWithoutTransactionsInput = {
+    id?: string
+    name: string
+    limit: number
+    spent?: number
+    icon?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    budget: BudgetCreateNestedOneWithoutCategoriesInput
+  }
+
+  export type CategoryUncheckedCreateWithoutTransactionsInput = {
+    id?: string
+    budgetId: string
+    name: string
+    limit: number
+    spent?: number
+    icon?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CategoryCreateOrConnectWithoutTransactionsInput = {
+    where: CategoryWhereUniqueInput
+    create: XOR<CategoryCreateWithoutTransactionsInput, CategoryUncheckedCreateWithoutTransactionsInput>
   }
 
   export type UserUpsertWithoutTransactionsInput = {
@@ -17935,12 +18672,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17962,12 +18708,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18002,6 +18757,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutBankAccountsNestedInput
@@ -18014,6 +18771,41 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CategoryUpsertWithoutTransactionsInput = {
+    update: XOR<CategoryUpdateWithoutTransactionsInput, CategoryUncheckedUpdateWithoutTransactionsInput>
+    create: XOR<CategoryCreateWithoutTransactionsInput, CategoryUncheckedCreateWithoutTransactionsInput>
+    where?: CategoryWhereInput
+  }
+
+  export type CategoryUpdateToOneWithWhereWithoutTransactionsInput = {
+    where?: CategoryWhereInput
+    data: XOR<CategoryUpdateWithoutTransactionsInput, CategoryUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type CategoryUpdateWithoutTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    limit?: FloatFieldUpdateOperationsInput | number
+    spent?: FloatFieldUpdateOperationsInput | number
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    budget?: BudgetUpdateOneRequiredWithoutCategoriesNestedInput
+  }
+
+  export type CategoryUncheckedUpdateWithoutTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    budgetId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    limit?: FloatFieldUpdateOperationsInput | number
+    spent?: FloatFieldUpdateOperationsInput | number
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18022,12 +18814,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18049,12 +18850,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18092,12 +18902,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18119,12 +18938,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18146,12 +18974,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18173,12 +19010,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18216,12 +19062,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18243,12 +19098,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18270,12 +19134,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18297,12 +19170,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18378,12 +19260,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18405,12 +19296,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18448,12 +19348,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18475,12 +19384,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18511,6 +19429,7 @@ export namespace Prisma {
     icon?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    transactions?: TransactionCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUncheckedCreateWithoutBudgetInput = {
@@ -18521,6 +19440,7 @@ export namespace Prisma {
     icon?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryCreateOrConnectWithoutBudgetInput = {
@@ -18548,12 +19468,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18575,12 +19504,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18655,6 +19593,50 @@ export namespace Prisma {
     create: XOR<BudgetCreateWithoutCategoriesInput, BudgetUncheckedCreateWithoutCategoriesInput>
   }
 
+  export type TransactionCreateWithoutCategoryInput = {
+    id?: string
+    stripePaymentIntentId?: string | null
+    type?: string
+    amount: number
+    selectedAmount?: number | null
+    currency?: string
+    status?: string
+    lastFormatted?: string | null
+    merchantName?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTransactionsInput
+    bankAccount?: BankAccountCreateNestedOneWithoutTransactionsInput
+  }
+
+  export type TransactionUncheckedCreateWithoutCategoryInput = {
+    id?: string
+    userId: string
+    bankAccountId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
+    amount: number
+    selectedAmount?: number | null
+    currency?: string
+    status?: string
+    lastFormatted?: string | null
+    merchantName?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TransactionCreateOrConnectWithoutCategoryInput = {
+    where: TransactionWhereUniqueInput
+    create: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput>
+  }
+
+  export type TransactionCreateManyCategoryInputEnvelope = {
+    data: TransactionCreateManyCategoryInput | TransactionCreateManyCategoryInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BudgetUpsertWithoutCategoriesInput = {
     update: XOR<BudgetUpdateWithoutCategoriesInput, BudgetUncheckedUpdateWithoutCategoriesInput>
     create: XOR<BudgetCreateWithoutCategoriesInput, BudgetUncheckedCreateWithoutCategoriesInput>
@@ -18688,16 +19670,41 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TransactionUpsertWithWhereUniqueWithoutCategoryInput = {
+    where: TransactionWhereUniqueInput
+    update: XOR<TransactionUpdateWithoutCategoryInput, TransactionUncheckedUpdateWithoutCategoryInput>
+    create: XOR<TransactionCreateWithoutCategoryInput, TransactionUncheckedCreateWithoutCategoryInput>
+  }
+
+  export type TransactionUpdateWithWhereUniqueWithoutCategoryInput = {
+    where: TransactionWhereUniqueInput
+    data: XOR<TransactionUpdateWithoutCategoryInput, TransactionUncheckedUpdateWithoutCategoryInput>
+  }
+
+  export type TransactionUpdateManyWithWhereWithoutCategoryInput = {
+    where: TransactionScalarWhereInput
+    data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutCategoryInput>
+  }
+
   export type UserCreateWithoutChatSessionsInput = {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18719,12 +19726,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18786,12 +19802,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18813,12 +19838,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18919,12 +19953,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -18946,12 +19989,21 @@ export namespace Prisma {
     id?: string
     email: string
     name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
     stripeCustomerId?: string | null
     stripeConnectAccountId?: string | null
     spendingPower?: number
     subscriptionNextBillingDate?: Date | string | null
     invitedUserReward?: number
     totalToRepay?: number
+    walletBalance?: number
     minDepositAmount?: number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
@@ -19016,12 +20068,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19043,12 +20104,21 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     spendingPower?: FloatFieldUpdateOperationsInput | number
     subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedUserReward?: FloatFieldUpdateOperationsInput | number
     totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     minDepositAmount?: FloatFieldUpdateOperationsInput | number
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19105,6 +20175,8 @@ export namespace Prisma {
     iv?: string | null
     itemId: string
     stripeBankId?: string | null
+    currentBalance?: number | null
+    availableBalance?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19112,12 +20184,16 @@ export namespace Prisma {
   export type TransactionCreateManyUserInput = {
     id?: string
     bankAccountId?: string | null
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19187,6 +20263,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUpdateManyWithoutBankAccountNestedInput
@@ -19198,6 +20276,8 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutBankAccountNestedInput
@@ -19209,32 +20289,42 @@ export namespace Prisma {
     iv?: NullableStringFieldUpdateOperationsInput | string | null
     itemId?: StringFieldUpdateOperationsInput | string
     stripeBankId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentBalance?: NullableFloatFieldUpdateOperationsInput | number | null
+    availableBalance?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TransactionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccount?: BankAccountUpdateOneWithoutTransactionsNestedInput
+    category?: CategoryUpdateOneWithoutTransactionsNestedInput
   }
 
   export type TransactionUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19242,12 +20332,16 @@ export namespace Prisma {
   export type TransactionUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19438,38 +20532,50 @@ export namespace Prisma {
   export type TransactionCreateManyBankAccountInput = {
     id?: string
     userId: string
+    categoryId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
     amount: number
     selectedAmount?: number | null
-    currency: string
-    status: string
+    currency?: string
+    status?: string
     lastFormatted?: string | null
-    bankName?: string | null
+    merchantName?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type TransactionUpdateWithoutBankAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTransactionsNestedInput
+    category?: CategoryUpdateOneWithoutTransactionsNestedInput
   }
 
   export type TransactionUncheckedUpdateWithoutBankAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19477,12 +20583,16 @@ export namespace Prisma {
   export type TransactionUncheckedUpdateManyWithoutBankAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
-    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19561,6 +20671,7 @@ export namespace Prisma {
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: TransactionUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryUncheckedUpdateWithoutBudgetInput = {
@@ -19571,6 +20682,7 @@ export namespace Prisma {
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryUncheckedUpdateManyWithoutBudgetInput = {
@@ -19579,6 +20691,74 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TransactionCreateManyCategoryInput = {
+    id?: string
+    userId: string
+    bankAccountId?: string | null
+    stripePaymentIntentId?: string | null
+    type?: string
+    amount: number
+    selectedAmount?: number | null
+    currency?: string
+    status?: string
+    lastFormatted?: string | null
+    merchantName?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TransactionUpdateWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTransactionsNestedInput
+    bankAccount?: BankAccountUpdateOneWithoutTransactionsNestedInput
+  }
+
+  export type TransactionUncheckedUpdateWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19632,6 +20812,10 @@ export namespace Prisma {
      * @deprecated Use BudgetCountOutputTypeDefaultArgs instead
      */
     export type BudgetCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BudgetCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CategoryCountOutputTypeDefaultArgs instead
+     */
+    export type CategoryCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CategoryCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use ChatSessionCountOutputTypeDefaultArgs instead
      */

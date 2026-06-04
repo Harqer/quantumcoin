@@ -22,22 +22,22 @@ export default function KycScannerScreen() {
     }
   });
 
-  const handleScanSuccess = () => {
-    // In a real app, this is triggered automatically by the VisionScanner frame processor
-    // once the local ML models verify the quality is good.
+  const handleScanSuccess = (capturedId?: any) => {
+    if (!capturedId) return;
+
     verifyIdentity.mutate({
-      userId: user?.id || 'clerk_user_id',
-      deviceSessionId: 'local_ml_verified_session',
-      firstName: user?.firstName || 'John',
-      lastName: user?.lastName || 'Doe',
-      dob: '1990-01-01',
-      email: user?.primaryEmailAddress?.emailAddress || 'john@example.com',
-      phoneNumber: '+1234567890',
+      userId: user?.id || 'unknown',
+      deviceSessionId: capturedId.documentNumber || 'scandit_session',
+      firstName: capturedId.firstName || user?.firstName || '',
+      lastName: capturedId.lastName || user?.lastName || '',
+      dob: capturedId.dateOfBirth ? `${capturedId.dateOfBirth.year}-${capturedId.dateOfBirth.month}-${capturedId.dateOfBirth.day}` : '1990-01-01',
+      email: user?.primaryEmailAddress?.emailAddress || '',
+      phoneNumber: user?.primaryPhoneNumber?.phoneNumber || '',
       address: {
-        street: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        zip: '94105'
+        street: capturedId.address || '',
+        city: '',
+        state: '',
+        zip: ''
       }
     });
   };
@@ -59,15 +59,6 @@ export default function KycScannerScreen() {
         <Text style={styles.instructions}>
           Please align the front of your Driver's License within the frame. Our AI will automatically check for blur and glare.
         </Text>
-        <TouchableOpacity 
-          style={styles.simulateButton}
-          onPress={handleScanSuccess}
-          disabled={verifyIdentity.isPending}
-        >
-          <Text style={styles.simulateButtonText}>
-            {verifyIdentity.isPending ? 'Verifying...' : 'Simulate Scan Success'}
-          </Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

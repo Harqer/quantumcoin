@@ -17,12 +17,21 @@ model User {
   id                          String          @id @default(uuid())
   email                       String          @unique
   name                        String?
+  firstName                   String?
+  lastName                    String?
+  dob                         String? // YYYY-MM-DD
+  ssn                         String?
+  addressStreet               String?
+  addressCity                 String?
+  addressState                String?
+  addressZip                  String?
   stripeCustomerId            String? // Added for Stripe Customer flow
   stripeConnectAccountId      String? // Added for Stripe Connect payouts
   spendingPower               Float           @default(0) // Maximum limit or available funds for advances.
   subscriptionNextBillingDate DateTime? // Relevant for premium subscriptions.
   invitedUserReward           Float           @default(0) // Reward amount for successful referrals.
   totalToRepay                Float           @default(0) // The total outstanding balance the user owes.
+  walletBalance               Float           @default(0) // Centralized wallet balance tracked across transactions.
   minDepositAmount            Float           @default(0) // Minimum limit for deposit thresholds.
   boosts                      Json? // Rewards or score multipliers that increase limits.
   last4_digits                String? // Last four digits of linked bank account.
@@ -42,32 +51,39 @@ model User {
 }
 
 model BankAccount {
-  id           String        @id @default(uuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [id])
-  accessToken  String // Plaid access_token (Encrypted)
-  iv           String? // AES-GCM Initialization Vector
-  itemId       String // Plaid item_id
-  stripeBankId String? // The Stripe Bank Account Source ID
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id               String        @id @default(uuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  accessToken      String // Plaid access_token (Encrypted)
+  iv               String? // AES-GCM Initialization Vector
+  itemId           String // Plaid item_id
+  stripeBankId     String? // The Stripe Bank Account Source ID
+  currentBalance   Float? // Cached balance from Plaid
+  availableBalance Float? // Cached available balance
+  transactions     Transaction[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model Transaction {
-  id             String       @id @default(uuid())
-  userId         String
-  user           User         @relation(fields: [userId], references: [id])
-  bankAccountId  String?
-  bankAccount    BankAccount? @relation(fields: [bankAccountId], references: [id])
-  amount         Float
-  selectedAmount Float? // The amount chosen for a transaction or withdrawal.
-  currency       String
-  status         String
-  lastFormatted  String? // Formatted string representation of the last transaction or balance.
-  bankName       String? // The name of the connected institution.
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                    String       @id @default(uuid())
+  userId                String
+  user                  User         @relation(fields: [userId], references: [id])
+  bankAccountId         String?
+  bankAccount           BankAccount? @relation(fields: [bankAccountId], references: [id])
+  categoryId            String?
+  category              Category?    @relation(fields: [categoryId], references: [id])
+  stripePaymentIntentId String?      @unique // Used to deduplicate Stripe webhooks
+  type                  String       @default("debit") // 'credit' or 'debit'
+  amount                Float
+  selectedAmount        Float? // The amount chosen for a transaction or withdrawal.
+  currency              String       @default("usd")
+  status                String       @default("pending") // 'pending', 'succeeded', 'failed'
+  lastFormatted         String? // Formatted string representation of the last transaction or balance.
+  merchantName          String? // The name of the merchant/connected institution.
+  description           String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 }
 
 model PaymentMethod {
@@ -125,15 +141,16 @@ model Budget {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  budgetId  String
-  budget    Budget   @relation(fields: [budgetId], references: [id])
-  name      String
-  limit     Float
-  spent     Float    @default(0)
-  icon      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  budgetId     String
+  budget       Budget        @relation(fields: [budgetId], references: [id])
+  name         String
+  limit        Float
+  spent        Float         @default(0)
+  icon         String?
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model ChatSession {

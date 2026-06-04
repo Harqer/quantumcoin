@@ -12,7 +12,10 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "verify": "npm run lint && npm run typecheck",
-    "prepare": "husky"
+    "prepare": "husky",
+    "ai-verify": "./.vibe/verify.sh",
+    "ai-verify-full": "./.vibe/verify.sh && echo 'Run Layer 2 functional verification prompt'",
+    "pre-commit": "./.vibe/verify.sh"
   },
   "repository": {
     "type": "git",

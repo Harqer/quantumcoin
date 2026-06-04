@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert, SafeAreaView, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Alert, SafeAreaView, ActivityIndicator, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/clerk-expo';
 
-const stripePromise = loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
+const stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+if (!stripePublishableKey) throw new Error("Missing STRIPE_PUBLISHABLE_KEY");
+const stripePromise = loadStripe(stripePublishableKey);
 
+function CheckoutForm({ amount }: { amount: number }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState(50.00);
 
   const handleSubmit = async () => {
     if (!stripe || !elements) return;
@@ -79,28 +81,79 @@ export default function CheckoutScreenWeb() {
   const { getToken } = useAuth();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   
-  // Note: in a fully wired app, the user sets this amount via a TextInput or Route param.
-  // For the Checkout wrapper, we use a dynamic state that can be updated.
-  const [depositAmount, setDepositAmount] = useState<number>(50.00);
+  const [depositAmountStr, setDepositAmountStr] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [amountSubmitted, setAmountSubmitted] = useState<boolean>(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchSecret = async () => {
-      try {
-        const token = await getToken();
-        
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'https://api-rosy-one-81.vercel.app'}/api/v1/billing/create-payment-intent`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ amount: Math.round(depositAmount * 100), currency: "usd" }),
-        });
-        const data = await response.json();
-        setClientSecret(data.paymentIntent || data.clientSecret); 
-      } catch (e) {
-        console.error(e);
+  const handleAmountSubmit = async () => {
+    const amount = parseFloat(depositAmountStr);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert("Invalid Amount", "Please enter a valid deposit amount.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+      if (!apiUrl) throw new Error("Missing EXPO_PUBLIC_API_URL");
+      
+      const response = await fetch(`${apiUrl}/api/v1/billing/create-payment-intent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount: Math.round(amount * 100), currency: "usd" }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to create payment intent");
       }
-    };
-    fetchSecret();
-  }, [getToken]);
+      setClientSecret(data.paymentIntent || data.clientSecret); 
+      setAmountSubmitted(true);
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert("Error", e.message || "Failed to initialize checkout.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!amountSubmitted) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="px-4 py-2 flex-row justify-between items-center bg-white border-b border-gray-100 shadow-sm z-10">
+          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 justify-center rounded-full bg-gray-50 items-center">
+            <Ionicons name="close" size={28} color="#374151" />
+          </TouchableOpacity>
+          <Text className="text-lg font-montrealBold text-gray-900">Deposit</Text>
+          <View className="w-10" />
+        </View>
+        <View className="flex-1 px-6 pt-8 pb-8 justify-center items-center">
+          <Text className="text-2xl font-montrealBold text-gray-900 mb-4">Enter Amount to Deposit</Text>
+          <View className="flex-row items-center border-b-2 border-blue-600 mb-8 w-1/2">
+            <Text className="text-3xl text-gray-900 mr-2">$</Text>
+            <TextInput 
+              className="text-4xl text-gray-900 flex-1 py-2 font-montrealBold"
+              keyboardType="decimal-pad"
+              value={depositAmountStr}
+              onChangeText={setDepositAmountStr}
+              placeholder="0.00"
+              placeholderTextColor="#A0AABF"
+              autoFocus
+            />
+          </View>
+          <TouchableOpacity 
+            className={`w-full py-4 rounded-full items-center shadow-lg mb-4 ${loading || !depositAmountStr ? 'bg-gray-300' : 'bg-blue-600'}`}
+            onPress={handleAmountSubmit}
+            disabled={loading || !depositAmountStr}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white text-lg font-montrealBold">Continue</Text>}
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!clientSecret) {
     return (
@@ -113,7 +166,7 @@ export default function CheckoutScreenWeb() {
 
   return (
     <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-      <CheckoutForm />
+      <CheckoutForm amount={parseFloat(depositAmountStr)} />
     </Elements>
   );
 }

@@ -2,8 +2,12 @@ import os
 import datetime
 import uuid
 import base64
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Depends, Request, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from strawberry.fastapi import GraphQLRouter

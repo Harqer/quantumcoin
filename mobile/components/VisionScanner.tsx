@@ -1,95 +1,142 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
-import { useTensorflowModel } from 'react-native-fast-tflite';
-
-const blurModelFile = require('../assets/models/blur_model.tflite');
-const glareModelFile = require('../assets/models/glare_model.tflite');
-const iddModelFile = require('../assets/models/idd_model.tflite');
-const lightModelFile = require('../assets/models/light_intensity_model.tflite');
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, Text, AppState, AppStateStatus } from 'react-native';
+import {
+  Camera,
+  DataCaptureContext,
+  DataCaptureView,
+  FrameSourceState,
+} from 'scandit-react-native-datacapture-core';
+import {
+  IdCapture,
+  IdCaptureSettings,
+  IdCaptureOverlay,
+  SupportedDocuments,
+  IdDocumentType,
+} from 'scandit-react-native-datacapture-id';
 
 interface VisionScannerProps {
-  onQualityCheckComplete?: () => void;
+  onQualityCheckComplete?: (documentData: any) => void;
 }
 
-export default function VisionScanner({ onQualityCheckComplete }: VisionScannerProps) {
-  const device = useCameraDevice('back');
-  const [hasPermission, setHasPermission] = useState(false);
+// In production, SCANDIT_LICENSE_KEY should be loaded from env / secrets vault
+const SCANDIT_LICENSE_KEY = process.env.EXPO_PUBLIC_SCANDIT_LICENSE_KEY || '--placeholder-license--';
 
-  // Load the custom TFLite models we discovered from Cleo AI assets
-  const blurPlugin = useTensorflowModel(blurModelFile);
-  const glarePlugin = useTensorflowModel(glareModelFile);
-  const iddPlugin = useTensorflowModel(iddModelFile);
-  const lightPlugin = useTensorflowModel(lightModelFile);
+export default function VisionScanner({ onQualityCheckComplete }: VisionScannerProps) {
+  const [hasPermission, setHasPermission] = useState(false);
+  const [context, setContext] = useState<DataCaptureContext | null>(null);
+  const [camera, setCamera] = useState<Camera | null>(null);
+  const [idCapture, setIdCapture] = useState<IdCapture | null>(null);
+  const [overlay, setOverlay] = useState<IdCaptureOverlay | null>(null);
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
-    (async () => {
+    let mounted = true;
+
+    async function setupScandit() {
+      // 1. Request Camera Permissions natively
       const status = await Camera.requestCameraPermission();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+      if (status !== 'granted') {
+        if (mounted) setHasPermission(false);
+        return;
+      }
+      if (mounted) setHasPermission(true);
 
-  const allModelsLoaded = 
-    blurPlugin.state === 'loaded' && 
-    glarePlugin.state === 'loaded' && 
-    iddPlugin.state === 'loaded' && 
-    lightPlugin.state === 'loaded';
+      // 2. Initialize DataCaptureContext
+      const dataCaptureContext = DataCaptureContext.forLicenseKey(SCANDIT_LICENSE_KEY);
+      
+      // 3. Configure Camera
+      const defaultCamera = Camera.default;
+      if (defaultCamera) {
+        dataCaptureContext.setFrameSource(defaultCamera);
+        defaultCamera.switchToDesiredState(FrameSourceState.On);
+        if (mounted) setCamera(defaultCamera);
+      }
 
-  const frameProcessor = useFrameProcessor((frame) => {
-    'worklet';
-    if (allModelsLoaded && blurPlugin.model && glarePlugin.model && iddPlugin.model && lightPlugin.model) {
-      // Execute the TFLite models on the current frame (native local execution)
-      try {
-        // In a real execution, we format the frame to the tensor shape (e.g. 224x224 RGB)
-        // const blurOutput = blurPlugin.model.run([frame]);
-        // const glareOutput = glarePlugin.model.run([frame]);
-        // const iddOutput = iddPlugin.model.run([frame]);
-        // const lightOutput = lightPlugin.model.run([frame]);
+      // 4. Configure ID Capture Settings (1:1 Production)
+      const settings = new IdCaptureSettings();
+      settings.supportedDocuments = [
+        SupportedDocuments.AAMVABarcode,
+        SupportedDocuments.USUSIdFront,
+        SupportedDocuments.USUSPassportFront
+      ];
+      
+      // 5. Create ID Capture Mode
+      const idCaptureMode = IdCapture.forContext(dataCaptureContext, settings);
+      
+      // 6. Set up Listener for successful scans
+      const listener = {
+        didCaptureId: (idCaptureInstance: IdCapture, session: any) => {
+          const capturedId = session.newlyCapturedId;
+          if (capturedId && onQualityCheckComplete) {
+            // Prevent multiple scans
+            idCaptureInstance.isEnabled = false;
+            onQualityCheckComplete(capturedId);
+          }
+        },
+        didFailWithError: (idCaptureInstance: IdCapture, error: any) => {
+          console.error("Scandit ID Capture Error:", error);
+        }
+      };
+      idCaptureMode.addListener(listener);
+      
+      if (mounted) {
+        setIdCapture(idCaptureMode);
         
-        // Let's assume the models ran successfully and verified the ID
-        // console.log("Models executed locally");
-      } catch (e) {
-        // Handle tensor shape mismatch in dev
+        // 7. Create UI Overlay
+        const captureOverlay = IdCaptureOverlay.withIdCaptureForView(idCaptureMode, null);
+        setOverlay(captureOverlay);
+        setContext(dataCaptureContext);
       }
     }
-  }, [allModelsLoaded, blurPlugin.model, glarePlugin.model, iddPlugin.model, lightPlugin.model]);
+
+    setupScandit();
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      mounted = false;
+      subscription.remove();
+      if (camera) {
+        camera.switchToDesiredState(FrameSourceState.Off);
+      }
+      if (context) {
+        context.dispose();
+      }
+    };
+  }, []);
+
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+      camera?.switchToDesiredState(FrameSourceState.On);
+    } else if (nextAppState.match(/inactive|background/)) {
+      camera?.switchToDesiredState(FrameSourceState.Off);
+    }
+    appState.current = nextAppState;
+  };
 
   if (!hasPermission) {
-    return <View style={styles.container}><Text>No camera permission</Text></View>;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Camera permission is required for ID Verification.</Text>
+      </View>
+    );
   }
 
-  if (device == null) {
-    return <View style={styles.container}><Text>No camera device found</Text></View>;
+  if (!context || !camera) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Initializing secure scanner...</Text>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        frameProcessor={frameProcessor}
+      <DataCaptureView 
+        context={context} 
+        style={StyleSheet.absoluteFill} 
       />
-      <View style={styles.overlay}>
-        <Text style={styles.text}>Scanning ID Quality...</Text>
-        <Text style={styles.subtext}>
-          Blur Model: {blurPlugin.state}
-        </Text>
-        <Text style={styles.subtext}>
-          Glare Model: {glarePlugin.state}
-        </Text>
-        <Text style={styles.subtext}>
-          IDD Model: {iddPlugin.state}
-        </Text>
-        <Text style={styles.subtext}>
-          Light Model: {lightPlugin.state}
-        </Text>
-        {allModelsLoaded && (
-          <Text style={[styles.subtext, { color: '#10B981', marginTop: 10, fontWeight: 'bold' }]}>
-            All Models Loaded - Validating Locally
-          </Text>
-        )}
-      </View>
+      {/* The Scandit overlay natively draws the bounding boxes for IDs */}
     </View>
   );
 }
@@ -99,24 +146,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
     justifyContent: 'center',
-    alignItems: 'center'
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 50,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   text: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    color: '#00FF00', // Hacker green
-    fontSize: 14,
-    marginTop: 5,
+    fontSize: 16,
+    fontWeight: '500',
   }
 });

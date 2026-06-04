@@ -10,6 +10,8 @@ import { useTrackScreen } from '../hooks/useTelemetry';
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
 
+import { GlobalErrorBoundary } from '../components/GlobalErrorBoundary';
+
 export default function RootLayout() {
   useTrackScreen('App_Launch', { version: '1.0.0' });
 
@@ -33,10 +35,12 @@ export default function RootLayout() {
         <coreTrpc.Provider client={coreTrpcClient} queryClient={queryClient}>
           <cryptoTrpc.Provider client={cryptoTrpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(main)" />
-              </Stack>
+              <GlobalErrorBoundary>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(main)" />
+                </Stack>
+              </GlobalErrorBoundary>
             </QueryClientProvider>
           </cryptoTrpc.Provider>
         </coreTrpc.Provider>
