@@ -38,9 +38,13 @@
       "expo-font",
       "./plugins/withMLKitMetaData",
       "expo-secure-store",
-      "@stripe/stripe-react-native",
-      "expo-status-bar",
-      "expo-web-browser"
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.harqer.quantumcoin",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "extra": {
       "router": {
