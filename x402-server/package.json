@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "patch-package"
+    "postinstall": "npx -y patch-package"
   },
   "keywords": [],
   "author": "",

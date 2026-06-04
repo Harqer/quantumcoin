@@ -34,7 +34,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <Text style={styles.header}>Oops! Something went wrong.</Text>
           <Text style={styles.message}>
-            One of our team members is currently handling this error.
+            One of our team members is currently handling this error. 404/500 API Fault
           </Text>
           <TouchableOpacity style={styles.button} onPress={this.handleContactSupport}>
             <Text style={styles.buttonText}>Contact Support</Text>
