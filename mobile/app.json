@@ -4,19 +4,12 @@
     "slug": "quantumcoin",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": [
-      "quantumcoin",
-      "cleo",
-      "plaid",
-      "stripe"
-    ],
+    "scheme": ["quantumcoin", "cleo", "plaid", "stripe"],
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#47201c"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -25,9 +18,7 @@
     },
     "android": {
       "package": "com.harqer.quantumcoin",
-      "permissions": [
-        "android.permission.CAMERA"
-      ],
+      "permissions": ["android.permission.CAMERA"],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -37,10 +28,7 @@
               "host": "cleo.onelink.me"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -49,7 +37,10 @@
       "expo-asset",
       "expo-font",
       "./plugins/withMLKitMetaData",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@stripe/stripe-react-native",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
       "router": {
