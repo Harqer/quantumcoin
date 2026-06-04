@@ -6,7 +6,8 @@
     "dev": "doppler run -- next dev",
     "build": "doppler run -- next build",
     "start": "doppler run -- next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
@@ -52,7 +53,6 @@
     "minimatch": "^5.1.6",
     "sha.js": "^2.4.11",
     "ws": "8.20.1",
-    "axios": "0.32.0",
     "uuid": "11.1.1"
   }
 }
