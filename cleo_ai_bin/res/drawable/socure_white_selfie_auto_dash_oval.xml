@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape android:shape="rectangle"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners android:radius="@dimen/selfie_corner_radius" />
-    <stroke android:width="6.0dp" android:color="#ffffffff" android:dashWidth="15.0dp" android:dashGap="12.0dp" />
-</shape>

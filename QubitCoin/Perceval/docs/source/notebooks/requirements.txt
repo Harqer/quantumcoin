@@ -1,3 +1,0 @@
-jupyter
-nbconvert
-scikit-learn>=1.4

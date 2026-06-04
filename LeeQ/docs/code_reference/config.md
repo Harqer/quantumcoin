@@ -1,2 +1,0 @@
-# leeq.config
-::: leeq.config

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list android:color="#ffffff"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@id/button_background">
-        <shape android:shape="oval" />
-    </item>
-</layer-list>
