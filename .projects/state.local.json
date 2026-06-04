@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "project": {
+    "initializedAt": "2026-06-02T11:26:34.611Z",
+    "merchantDisplayName": null,
+    "merchantId": "acct_1TdqJWEJP7exC6So",
+    "projectId": "project_61UnEQEd44bEh3TvL16UnEGsNCSQpr41sm3Y3R9d2I1Y",
+    "projectName": "QuantumCoin"
+  },
+  "providers": {
+    "auth0": {
+      "accountRequestId": "facctrq_61UnEWppYt12K9vkF16UnEGsNCSQpr41sm3Y3R9d2AEK",
+      "configuration": {
+        "locality": "us",
+        "naming_prefix": "quantumcoin"
+      },
+      "linkedAt": "2026-06-02T11:33:30.115Z",
+      "providerId": "prvdr_61UVctyxfLOj4FpVw5Bmi",
+      "providerName": "Auth0",
+      "redirectUrl": null,
+      "requestedAt": "2026-06-02T11:33:30.115Z",
+      "status": "expired"
+    },
+    "neon": {
+      "accountRequestId": "facctrq_61UnERldqd1oZ8R3X16UnEGsNCSQpr41sm3Y3R9d2KvY",
+      "configuration": {},
+      "linkedAt": "2026-06-02T11:28:10.719Z",
+      "providerId": "prvdr_61UH8uNXFdoJUJOtT54AC",
+      "providerName": "Neon",
+      "redirectUrl": null,
+      "requestedAt": "2026-06-02T11:28:10.718Z",
+      "status": "complete"
+    },
+    "sentry": {
+      "accountRequestId": "facctrq_61UnF6G5VNUYPFabm16UnEGsNCSQpr41sm3Y3R9d27Tk",
+      "configuration": {},
+      "linkedAt": "2026-06-02T12:10:07.841Z",
+      "providerId": "prvdr_61UWhMpOMGYc7qQhs53su",
+      "providerName": "Sentry",
+      "redirectUrl": null,
+      "requestedAt": "2026-06-02T12:10:07.840Z",
+      "status": "complete"
+    },
+    "vercel": {
+      "accountRequestId": "facctrq_61UnF51CGdlXG9zAB16UnEGsNCSQpr41sm3Y3R9d21LM",
+      "configuration": {},
+      "linkedAt": "2026-06-02T12:09:13.162Z",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "redirectUrl": null,
+      "requestedAt": "2026-06-02T12:09:13.162Z",
+      "status": "complete"
+    }
+  },
+  "resources": {
+    "auth": {
+      "configuration": {
+        "name": "QuantumCoin"
+      },
+      "createdAt": "2026-06-02T11:33:43.399Z",
+      "lastRevealedAt": "2026-06-02T11:33:43.882Z",
+      "lastStatus": "complete",
+      "name": "auth",
+      "providerId": "prvdr_61UVctyxfLOj4FpVw5Bmi",
+      "providerName": "Auth0",
+      "resourceId": "fres_61UnEX52ttVlcGlQu16UnEGsNCSQpr41sm3Y3R9d2ATA",
+      "serviceId": "client"
+    },
+    "auth0-plan": {
+      "configuration": {},
+      "createdAt": "2026-06-02T11:33:34.149Z",
+      "lastRevealedAt": "2026-06-02T11:33:34.538Z",
+      "lastStatus": "complete",
+      "name": "auth0-plan",
+      "providerId": "prvdr_61UVctyxfLOj4FpVw5Bmi",
+      "providerName": "Auth0",
+      "resourceId": "fres_61UnEWxDGoM0FV31n16UnEGsNCSQpr41sm3Y3R9d2Ups",
+      "serviceId": "free"
+    },
+    "neon-plan": {
+      "configuration": {},
+      "createdAt": "2026-06-02T11:28:12.623Z",
+      "lastRevealedAt": "2026-06-02T11:28:13.263Z",
+      "lastStatus": "complete",
+      "name": "neon-plan",
+      "providerId": "prvdr_61UH8uNXFdoJUJOtT54AC",
+      "providerName": "Neon",
+      "resourceId": "fres_61UnERntpTf3o3orr16UnEGsNCSQpr41sm3Y3R9d2Ufg",
+      "serviceId": "free"
+    },
+    "primary-db": {
+      "configuration": {},
+      "createdAt": "2026-06-02T11:28:27.087Z",
+      "lastRevealedAt": "2026-06-02T11:28:27.443Z",
+      "lastStatus": "complete",
+      "name": "primary-db",
+      "providerId": "prvdr_61UH8uNXFdoJUJOtT54AC",
+      "providerName": "Neon",
+      "resourceId": "fres_61UnES10SwLaePUX716UnEGsNCSQpr41sm3Y3R9d24FE",
+      "serviceId": "postgres"
+    },
+    "quantumcoin-v2": {
+      "configuration": {
+        "name": "QuantumCoin"
+      },
+      "createdAt": "2026-06-04T04:06:52.140Z",
+      "lastRevealedAt": "2026-06-04T04:06:52.601Z",
+      "lastStatus": "complete",
+      "name": "quantumcoin-v2",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "resourceId": "fres_61UnqVmdYJ5ksnkFY16UnEGsNCSQpr41sm3Y3R9d24Dg",
+      "serviceId": "project"
+    },
+    "sentry-project": {
+      "configuration": {
+        "project_name": "QuantumCoin"
+      },
+      "createdAt": "2026-06-02T12:10:11.311Z",
+      "lastRevealedAt": "2026-06-02T12:10:11.686Z",
+      "lastStatus": "complete",
+      "name": "sentry-project",
+      "providerId": "prvdr_61UWhMpOMGYc7qQhs53su",
+      "providerName": "Sentry",
+      "resourceId": "fres_61UnF6P1v54JxZi7N16UnEGsNCSQpr41sm3Y3R9d2Gro",
+      "serviceId": "project"
+    },
+    "sentry-project-2": {
+      "configuration": {
+        "project_name": "QuantumCoin"
+      },
+      "createdAt": "2026-06-03T14:41:18.257Z",
+      "lastRevealedAt": "2026-06-03T14:41:19.041Z",
+      "lastStatus": "complete",
+      "name": "sentry-project-2",
+      "providerId": "prvdr_61UWhMpOMGYc7qQhs53su",
+      "providerName": "Sentry",
+      "resourceId": "fres_61UndwCnFPqjZsgOn16UnEGsNCSQpr41sm3Y3R9d2ErI",
+      "serviceId": "project"
+    },
+    "vercel-plan": {
+      "configuration": {},
+      "createdAt": "2026-06-02T12:09:14.803Z",
+      "lastRevealedAt": "2026-06-02T12:09:15.257Z",
+      "lastStatus": "complete",
+      "name": "vercel-plan",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "resourceId": "fres_61UnF5WR2nNcywz5z16UnEGsNCSQpr41sm3Y3R9d2X1E",
+      "serviceId": "hobby"
+    },
+    "vercel-project": {
+      "configuration": {
+        "name": "QuantumCoin"
+      },
+      "createdAt": "2026-06-02T12:09:42.765Z",
+      "lastRevealedAt": "2026-06-02T12:09:43.385Z",
+      "lastStatus": "complete",
+      "name": "vercel-project",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "resourceId": "fres_61UnF5yI7GuoRHuUR16UnEGsNCSQpr41sm3Y3R9d2CRU",
+      "serviceId": "project"
+    }
+  }
+}

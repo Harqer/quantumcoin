@@ -27,7 +27,6 @@ __pycache__/
 .vercel/
 .eas/
 .turbo/
-.projects/
 
 .agents/
 .antigravity/
@@ -82,3 +81,17 @@ miner.py
 .env
 .env.*
 !.env.example
+
+# Custom user exclusions
+vibe-coding-playbook-main/
+bitcoin_regtest.conf
+btc_cli_guide.md
+mcp.json
+.mcp.json
+railway.json
+turbo.json
+.turbo/
+vercel.json
+.vercel/
+sdk-key-s_*.json
+.vercelignore
