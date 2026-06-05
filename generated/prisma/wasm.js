@@ -130,6 +130,7 @@ exports.Prisma.UserScalarFieldEnum = {
   lastName: 'lastName',
   dob: 'dob',
   ssn: 'ssn',
+  ssnLast4: 'ssnLast4',
   addressStreet: 'addressStreet',
   addressCity: 'addressCity',
   addressState: 'addressState',
@@ -145,7 +146,10 @@ exports.Prisma.UserScalarFieldEnum = {
   boosts: 'boosts',
   last4_digits: 'last4_digits',
   cleo_card: 'cleo_card',
+  phoneNumber: 'phoneNumber',
+  preferences: 'preferences',
   kycStatus: 'kycStatus',
+  ewaDisclaimerAccepted: 'ewaDisclaimerAccepted',
   socureDeviceId: 'socureDeviceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -171,10 +175,12 @@ exports.Prisma.TransactionScalarFieldEnum = {
   categoryId: 'categoryId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   type: 'type',
+  direction: 'direction',
   amount: 'amount',
   selectedAmount: 'selectedAmount',
   currency: 'currency',
   status: 'status',
+  logoUrl: 'logoUrl',
   lastFormatted: 'lastFormatted',
   merchantName: 'merchantName',
   description: 'description',
@@ -230,6 +236,7 @@ exports.Prisma.CategoryScalarFieldEnum = {
   limit: 'limit',
   spent: 'spent',
   icon: 'icon',
+  color: 'color',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -239,6 +246,7 @@ exports.Prisma.ChatSessionScalarFieldEnum = {
   userId: 'userId',
   subscriptionName: 'subscriptionName',
   bankName: 'bankName',
+  mode: 'mode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -248,6 +256,7 @@ exports.Prisma.ChatMessageScalarFieldEnum = {
   chatSessionId: 'chatSessionId',
   role: 'role',
   content: 'content',
+  metadata: 'metadata',
   createdAt: 'createdAt'
 };
 
@@ -262,6 +271,54 @@ exports.Prisma.CashAdvanceScalarFieldEnum = {
   serviceFeeCap: 'serviceFeeCap',
   status: 'status',
   repaymentDate: 'repaymentDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PasskeyCredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  signCount: 'signCount',
+  transports: 'transports',
+  deviceName: 'deviceName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DeviceSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  socureDeviceId: 'socureDeviceId',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  appCheckToken: 'appCheckToken',
+  integrityVerdict: 'integrityVerdict',
+  seonFingerprint: 'seonFingerprint',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  requestId: 'requestId',
+  action: 'action',
+  providerOutcome: 'providerOutcome',
+  metadata: 'metadata',
+  timestamp: 'timestamp'
+};
+
+exports.Prisma.InsightScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  amount: 'amount',
+  actionUrl: 'actionUrl',
+  isRead: 'isRead',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -309,7 +366,11 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   ChatSession: 'ChatSession',
   ChatMessage: 'ChatMessage',
-  CashAdvance: 'CashAdvance'
+  CashAdvance: 'CashAdvance',
+  PasskeyCredential: 'PasskeyCredential',
+  DeviceSession: 'DeviceSession',
+  AuditLog: 'AuditLog',
+  Insight: 'Insight'
 };
 
 /**

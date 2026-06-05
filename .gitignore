@@ -74,13 +74,6 @@ verify-ai-code.sh
 cleobin/
 miner.py
 
-.projects/cache
-.projects/vault
-.projects/state.test.json
-.projects/state.local.test.json
-.env
-.env.*
-!.env.example
 
 # Custom user exclusions
 vibe-coding-playbook-main/
@@ -106,3 +99,15 @@ venv_new/
 !.npmrc
 !.prettierrc
 !.eslintrc*
+
+.projects/cache
+.projects/vault
+.projects/state.test.json
+.projects/state.local.test.json
+.env
+.env.*
+!.env.example
+ffuf
+dependabot
+hermes-decomp/
+mobile_backup/

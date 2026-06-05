@@ -14,40 +14,48 @@ datasource db {
 }
 
 model User {
-  id                          String          @id @default(uuid())
-  email                       String          @unique
+  id                          String              @id @default(uuid())
+  email                       String              @unique
   name                        String?
   firstName                   String?
   lastName                    String?
   dob                         String? // YYYY-MM-DD
   ssn                         String?
+  ssnLast4                    String?
   addressStreet               String?
   addressCity                 String?
   addressState                String?
   addressZip                  String?
   stripeCustomerId            String? // Added for Stripe Customer flow
   stripeConnectAccountId      String? // Added for Stripe Connect payouts
-  spendingPower               Float           @default(0) // Maximum limit or available funds for advances.
+  spendingPower               Float               @default(0) // Maximum limit or available funds for advances.
   subscriptionNextBillingDate DateTime? // Relevant for premium subscriptions.
-  invitedUserReward           Float           @default(0) // Reward amount for successful referrals.
-  totalToRepay                Float           @default(0) // The total outstanding balance the user owes.
-  walletBalance               Float           @default(0) // Centralized wallet balance tracked across transactions.
-  minDepositAmount            Float           @default(0) // Minimum limit for deposit thresholds.
+  invitedUserReward           Float               @default(0) // Reward amount for successful referrals.
+  totalToRepay                Float               @default(0) // The total outstanding balance the user owes.
+  walletBalance               Float               @default(0) // Centralized wallet balance tracked across transactions.
+  minDepositAmount            Float               @default(0) // Minimum limit for deposit thresholds.
   boosts                      Json? // Rewards or score multipliers that increase limits.
   last4_digits                String? // Last four digits of linked bank account.
-  cleo_card                   Boolean         @default(false) // States whether the user has the Credit Builder Card.
+  cleo_card                   Boolean             @default(false) // States whether the user has the Credit Builder Card.
+  phoneNumber                 String?
+  preferences                 Json?
   bankAccounts                BankAccount[]
   transactions                Transaction[]
   paymentMethods              PaymentMethod[]
   kycStatus                   String? // e.g., 'pending', 'verified', 'rejected'
+  ewaDisclaimerAccepted       Boolean             @default(false)
   socureDeviceId              String? // For identity verification device tracking
   subscriptions               Subscription[]
   incomeSources               IncomeSource[]
   budgets                     Budget[]
   chatSessions                ChatSession[]
   cashAdvances                CashAdvance[]
-  createdAt                   DateTime        @default(now())
-  updatedAt                   DateTime        @updatedAt
+  passkeys                    PasskeyCredential[]
+  deviceSessions              DeviceSession[]
+  auditLogs                   AuditLog[]
+  insights                    Insight[]
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
 }
 
 model BankAccount {
@@ -63,6 +71,8 @@ model BankAccount {
   transactions     Transaction[]
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+
+  @@index([itemId])
 }
 
 model Transaction {
@@ -74,16 +84,21 @@ model Transaction {
   categoryId            String?
   category              Category?    @relation(fields: [categoryId], references: [id])
   stripePaymentIntentId String?      @unique // Used to deduplicate Stripe webhooks
-  type                  String       @default("debit") // 'credit' or 'debit'
+  type                  String       @default("debit") // 'credit', 'debit', 'salary_advance', 'auto_save', 'repayment'
+  direction             String? // 'in' or 'out'
   amount                Float
   selectedAmount        Float? // The amount chosen for a transaction or withdrawal.
   currency              String       @default("usd")
-  status                String       @default("pending") // 'pending', 'succeeded', 'failed'
+  status                String       @default("completed") // 'pending', 'completed', 'failed'
+  logoUrl               String?
   lastFormatted         String? // Formatted string representation of the last transaction or balance.
   merchantName          String? // The name of the merchant/connected institution.
   description           String?
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([bankAccountId])
 }
 
 model PaymentMethod {
@@ -138,6 +153,8 @@ model Budget {
   categories    Category[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
 }
 
 model Category {
@@ -148,9 +165,12 @@ model Category {
   limit        Float
   spent        Float         @default(0)
   icon         String?
+  color        String?
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@index([budgetId])
 }
 
 model ChatSession {
@@ -159,6 +179,7 @@ model ChatSession {
   user             User          @relation(fields: [userId], references: [id])
   subscriptionName String? // Detects the user's tier to dictate chatbot tone or feature access.
   bankName         String? // Contextualizes the chat based on user's linked institutions.
+  mode             String? // 'roast' or 'hype'
   messages         ChatMessage[]
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -170,7 +191,10 @@ model ChatMessage {
   session       ChatSession @relation(fields: [chatSessionId], references: [id])
   role          String // 'user' or 'ai'
   content       String      @db.Text
+  metadata      Json?
   createdAt     DateTime    @default(now())
+
+  @@index([chatSessionId])
 }
 
 model CashAdvance {
@@ -188,4 +212,56 @@ model CashAdvance {
   repaymentDate     DateTime?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+}
+
+model PasskeyCredential {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  credentialId String   @unique
+  publicKey    Bytes
+  signCount    Int      @default(0)
+  transports   String? // JSON array of transports
+  deviceName   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DeviceSession {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  socureDeviceId   String
+  ipAddress        String?
+  userAgent        String?
+  appCheckToken    String?
+  integrityVerdict String?
+  seonFingerprint  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model AuditLog {
+  id              String   @id @default(uuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  requestId       String
+  action          String
+  providerOutcome String?
+  metadata        Json?
+  timestamp       DateTime @default(now())
+}
+
+model Insight {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String // e.g., 'SPENDING_ALERT', 'SUBSCRIPTION_FEE'
+  title       String
+  description String?
+  amount      Float?
+  actionUrl   String?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

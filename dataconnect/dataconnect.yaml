@@ -1,0 +1,11 @@
+specVersion: "v1alpha"
+serviceId: "quantumcoin-dataconnect"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "neondb"
+      cloudSql:
+        instanceId: "quantumcoin-instance"
+connectorDirs: ["./connector"]

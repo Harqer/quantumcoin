@@ -35,6 +35,23 @@ export const cashAdvanceRouter = router({
       return user?.cashAdvances?.[0] || null;
     }),
 
+  getOutstandingAdvance: protectedProcedure
+    .query(async ({ ctx }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: ctx.user.id },
+        include: {
+          cashAdvances: {
+            where: { status: { in: ['pending', 'funded'] } },
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          }
+        }
+      });
+      const advance = user?.cashAdvances?.[0] || null;
+      if (!advance) return { amount: 0 };
+      return { amount: advance.amount };
+    }),
+
   requestAdvance: protectedProcedure
     .input(z.object({
       amount: z.number()

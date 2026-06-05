@@ -38,4 +38,11 @@ export const userRouter = router({
       }
       return user;
     }),
+
+  updateIntent: publicProcedure
+    .input(z.object({ intent: z.string(), email: z.string().optional() }))
+    .mutation(async ({ input }) => {
+      // Mocking intent update logic
+      return { success: true, intent: input.intent };
+    }),
 });

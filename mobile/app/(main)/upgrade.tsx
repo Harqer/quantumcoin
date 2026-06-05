@@ -1,91 +1,81 @@
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@clerk/clerk-expo';
-import * as Linking from 'expo-linking';
-import { useTrackScreen } from '../../hooks/useTelemetry';
+import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
+import PressableScale from '../../components/PressableScale';
+import AudioHapticsManager from '../../utils/AudioHapticsManager';
 
 export default function UpgradeScreen() {
   const router = useRouter();
-  const { getToken } = useAuth();
-  
-  useTrackScreen('Upgrade_Screen');
+  const { colorRoles, typography, spacing } = useGlobalTheme();
 
-  const handleUpgrade = async () => {
-    // In a real app with Clerk Billing, you'd redirect to the Clerk Customer Portal
-    // For now, we simulate opening the portal:
-    Linking.openURL('https://billing.clerk.com/quantumcoin');
+  const handleBack = () => {
+    AudioHapticsManager.lightInteraction();
+    router.back();
+  };
+
+  const handleSubscribe = () => {
+    AudioHapticsManager.success();
+    router.back(); // Normally opens a Stripe checkout sheet
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="px-4 py-2 border-b border-gray-100 flex-row items-center justify-between">
-        <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 justify-center">
-          <Ionicons name="arrow-back" size={28} color="#1F2937" />
-        </TouchableOpacity>
-        <Text className="text-xl font-montrealBold text-gray-900">Upgrade</Text>
-        <View className="w-10" />
-      </View>
-
-      <ScrollView className="flex-1 p-6">
-        <Text className="text-4xl font-montrealBold text-gray-900 mb-2">Level Up Your Finances</Text>
-        <Text className="text-gray-500 font-montreal text-lg mb-8">Unlock cash advances, credit building, and the infamous AI Roast persona.</Text>
-
-        {/* Plus Tier */}
-        <View className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-2xl font-montrealBold text-blue-900">Quantum Plus</Text>
-            <Text className="text-lg font-montrealBold text-blue-900">$5.99/mo</Text>
-          </View>
-          <Text className="text-blue-800 font-montreal mb-6">For the everyday hustler.</Text>
-          
-          <View className="space-y-3 mb-8">
-            <View className="flex-row items-center">
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
-              <Text className="ml-3 text-blue-900 font-montrealMedium text-lg">Cash Advances up to $250</Text>
-            </View>
-            <View className="flex-row items-center mt-3">
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
-              <Text className="ml-3 text-blue-900 font-montrealMedium text-lg">AI Roast Persona</Text>
-            </View>
-            <View className="flex-row items-center mt-3">
-              <Ionicons name="checkmark-circle" size={24} color="#2563EB" />
-              <Text className="ml-3 text-blue-900 font-montrealMedium text-lg">Custom Budget Categories</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity onPress={handleUpgrade} className="bg-blue-600 rounded-full py-4 items-center shadow-sm">
-            <Text className="text-white font-montrealBold text-lg">Get Plus</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
+      <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl }}>
+          <TouchableOpacity onPress={handleBack} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+            <Ionicons name="close" size={28} color={colorRoles.content.primary} />
           </TouchableOpacity>
         </View>
 
-        {/* Builder Tier */}
-        <View className="bg-purple-50 border border-purple-200 rounded-3xl p-6 mb-12">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-2xl font-montrealBold text-purple-900">Quantum Builder</Text>
-            <Text className="text-lg font-montrealBold text-purple-900">$14.99/mo</Text>
+        <Animated.View entering={FadeInDown.springify()} style={{ alignItems: 'center', marginBottom: spacing.xl }}>
+          <View style={{ backgroundColor: colorRoles.content.accentMid, padding: 24, borderRadius: 999, marginBottom: spacing.m }}>
+            <Ionicons name="star" size={64} color={colorRoles.content.onPrimary} />
           </View>
-          <Text className="text-purple-800 font-montreal mb-6">Master your credit score.</Text>
-          
-          <View className="space-y-3 mb-8">
-            <View className="flex-row items-center">
-              <Ionicons name="checkmark-circle" size={24} color="#9333EA" />
-              <Text className="ml-3 text-purple-900 font-montrealMedium text-lg">Credit Building Tools</Text>
-            </View>
-            <View className="flex-row items-center mt-3">
-              <Ionicons name="checkmark-circle" size={24} color="#9333EA" />
-              <Text className="ml-3 text-purple-900 font-montrealMedium text-lg">Cash Advances up to $500</Text>
-            </View>
-            <View className="flex-row items-center mt-3">
-              <Ionicons name="checkmark-circle" size={24} color="#9333EA" />
-              <Text className="ml-3 text-purple-900 font-montrealMedium text-lg">Priority Support</Text>
-            </View>
+          <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, color: colorRoles.content.primary, textAlign: 'center', marginBottom: spacing.s, fontWeight: '800' }}>
+            Quantum Pro
+          </Text>
+          <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, color: colorRoles.content.secondary, textAlign: 'center' }}>
+            Unlock exclusive features and premium benefits.
+          </Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View style={{ gap: spacing.l, marginBottom: spacing.xxl }}>
+            {[
+              { icon: 'cash-outline', title: 'Cashback on every purchase', text: 'Earn 3% unlimited cashback.' },
+              { icon: 'shield-checkmark-outline', title: 'Advanced Security', text: 'Get priority identity protection.' },
+              { icon: 'headset-outline', title: 'Priority Support', text: '24/7 dedicated pro advisors.' },
+            ].map((item, index) => (
+              <View key={index} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.m }}>
+                <View style={{ backgroundColor: colorRoles.background.baseLight, padding: 12, borderRadius: 999 }}>
+                  <Ionicons name={item.icon as any} size={24} color={colorRoles.content.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.primary, fontWeight: '700' }}>
+                    {item.title}
+                  </Text>
+                  <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: 14, color: colorRoles.content.secondary }}>
+                    {item.text}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
 
-          <TouchableOpacity onPress={handleUpgrade} className="bg-purple-600 rounded-full py-4 items-center shadow-sm">
-            <Text className="text-white font-montrealBold text-lg">Get Builder</Text>
-          </TouchableOpacity>
-        </View>
+          <PressableScale 
+            haptics="heavy"
+            onPress={handleSubscribe}
+            style={{ backgroundColor: colorRoles.content.primary, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}
+          >
+            <Text style={{ color: colorRoles.content.onPrimary, fontSize: 18, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '700' }}>
+              Subscribe for $9.99/mo
+            </Text>
+          </PressableScale>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -39,5 +39,5 @@ def run_fuzzing(api_url):
         print("Fuzzing finished successfully (no failures).")
 
 if __name__ == "__main__":
-    target = os.getenv("FUZZ_OPENAPI_URL", "http://localhost:8001/openapi.json")
+    target = os.getenv("FUZZ_OPENAPI_URL", "https://api.quantumcoin.com/openapi.json")
     run_fuzzing(target)

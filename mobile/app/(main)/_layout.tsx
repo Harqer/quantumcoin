@@ -1,15 +1,17 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 
 export default function MainLayout() {
+  const { colorRoles, typography, spacing } = useGlobalTheme();
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: '#FF6B6B',
-      tabBarInactiveTintColor: '#A0A0B0',
+      tabBarActiveTintColor: colorRoles.content.accentMid,
+      tabBarInactiveTintColor: colorRoles.content.tertiary,
       tabBarStyle: {
-        backgroundColor: '#FFF',
+        backgroundColor: colorRoles.background.primary,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colorRoles.border.default,
       },
       headerShown: false,
     }}>
@@ -28,6 +30,15 @@ export default function MainLayout() {
           title: 'Budget',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="pie-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Wallet',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={size} color={color} />
           ),
         }}
       />

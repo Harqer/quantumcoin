@@ -4,21 +4,32 @@
     "slug": "quantumcoin",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": ["quantumcoin", "cleo", "plaid", "stripe"],
+    "scheme": [
+      "quantumcoin",
+      "cleo",
+      "plaid",
+      "stripe"
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#47201c"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera for ID Verification."
       }
     },
     "android": {
       "package": "com.harqer.quantumcoin",
-      "permissions": ["android.permission.CAMERA"],
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -28,7 +39,10 @@
               "host": "cleo.onelink.me"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -44,7 +58,19 @@
           "merchantIdentifier": "merchant.com.harqer.quantumcoin",
           "enableGooglePay": true
         }
-      ]
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/app-check",
+      [
+        "@intercom/intercom-react-native",
+        {
+          "intercomRegion": "US",
+          "intercomAppId": "quantumcoin_intercom",
+          "androidApiKey": "dummy_android_key",
+          "iosApiKey": "dummy_ios_key"
+        }
+      ],
+      "@react-native-firebase/messaging"
     ],
     "extra": {
       "router": {
@@ -58,6 +84,7 @@
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/47da65ff-b32c-48a1-abf9-507f9090ca7f"
-    }
+    },
+    "jsEngine": "hermes"
   }
 }

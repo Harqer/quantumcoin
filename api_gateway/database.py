@@ -1,34 +1,26 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+import structlog
+from prisma import Prisma
 
-# Primary database engine (Write)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./quantumcoin_primary.db"
-engine_primary = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+logger = structlog.get_logger()
 
-# Replica database engine (Read)
-SQLALCHEMY_REPLICA_URL = "sqlite:///./quantumcoin_replica.db"
-engine_replica = create_engine(
-    SQLALCHEMY_REPLICA_URL, connect_args={"check_same_thread": False}
-)
+# We no longer use SecretsManager in Python.
+# Orchestration pushes secrets directly into os.environ before this script boots.
+class SecretsManager:
+    @classmethod
+    def get_secret(cls, secret_name: str, default: str = None) -> str:
+        return os.environ.get(secret_name, default)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_primary)
-SessionLocalReplica = sessionmaker(autocommit=False, autoflush=False, bind=engine_replica)
+prisma_client = Prisma()
 
-Base = declarative_base()
-
-def get_db():
-    db = SessionLocal()
+async def connect_db():
     try:
-        yield db
-    finally:
-        db.close()
+        await prisma_client.connect()
+        logger.info("database_connected", engine="prisma_postgresql")
+    except Exception as e:
+        logger.exception("database_connection_failed", error=str(e))
+        raise
 
-def get_db_replica():
-    db = SessionLocalReplica()
-    try:
-        yield db
-    finally:
-        db.close()
+async def disconnect_db():
+    await prisma_client.disconnect()
+    logger.info("database_disconnected")

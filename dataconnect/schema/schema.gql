@@ -1,0 +1,8 @@
+type ChatMessage @table {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: String!
+  content: String!
+  role: String! # "user" or "assistant"
+  createTime: Timestamp! @default(expr: "request.time")
+  isComplete: Boolean! @default(value: false)
+}

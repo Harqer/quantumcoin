@@ -1,0 +1,5 @@
+connectorId: "default"
+generate:
+  javascriptSdk:
+    outputDir: "../../mobile/src/lib/dataconnect"
+    package: "@quantumcoin/dataconnect"

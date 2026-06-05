@@ -1,198 +1,142 @@
-import { useCallback, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useTrackScreen } from '../../hooks/useTelemetry';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import { useSignIn } from '@clerk/clerk-expo';
-import { useTrackScreen, trackEvent } from '../../hooks/useTelemetry';
+import { useDeviceRisk } from '../../hooks/useDeviceRisk';
 
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+// Premium UX
+import AudioHapticsManager from '../../utils/AudioHapticsManager';
+import PressableScale from '../../components/PressableScale';
 
 export default function LoginScreen() {
+  const { colorRoles, typography, spacing } = useGlobalTheme();
   const router = useRouter();
   const { signIn, setActive, isLoaded } = useSignIn();
-  const [loading, setLoading] = useState(false);
+  const { deviceSessionId, deviceToken, isRiskEngineReady } = useDeviceRisk();
   
-  useTrackScreen('Auth_Login');
-  const [pendingMFA, setPendingMFA] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  // Rate Limiting / Debounce State
+  const lastActionTime = useRef<number>(0);
+  const DEBOUNCE_TIMEOUT_LIMIT = 500; // 500ms rate limit to prevent OTP/Biometric spam
+  
+  useTrackScreen('Auth_LoginScreen');
 
-  const { control, handleSubmit, formState: { errors, isValid } } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onChange',
-  });
+  const handlePasskeyLogin = useCallback(async () => {
+    const now = Date.now();
+    if (now - lastActionTime.current < DEBOUNCE_TIMEOUT_LIMIT) return; // Debounce
+    lastActionTime.current = now;
 
-  const onSubmit = useCallback(async (data: LoginFormValues) => {
-    if (!isLoaded) return;
-    
-    setLoading(true);
-    trackEvent('Login_Submitted', { emailDomain: data.email.split('@')[1] });
-    
+    if (!isLoaded || !isRiskEngineReady) return;
+
+    AudioHapticsManager.mediumInteraction();
+    setIsLoading(true);
+    setErrorMsg('');
+
     try {
-      const signInAttempt = await signIn.create({
-        identifier: data.email,
-        password: data.password,
-      });
-      
+      // 1. Trigger native biometric prompt for Passkey attestation
+      const signInAttempt = await signIn.authenticateWithPasskey();
+
+      // 2. If successful, set session active and route to dashboard
       if (signInAttempt.status === 'complete') {
+        
+        // Fraud Prevention: At this point, we would theoretically send the `deviceSessionId` and `deviceToken` 
+        // to our TRPC backend to register this exact device as a trusted session and update push notification tokens.
+        console.log(`Device Token Binding: ${deviceToken}, Fingerprint: ${deviceSessionId}`);
+
         await setActive({ session: signInAttempt.createdSessionId });
+        AudioHapticsManager.success();
         router.replace('/(main)/dashboard');
-      } else if (signInAttempt.status === 'needs_second_factor') {
-        setPendingMFA(true);
       } else {
-        console.error("Clerk SignIn incomplete:", signInAttempt);
+        setErrorMsg('Passkey authentication incomplete.');
+        AudioHapticsManager.error();
       }
     } catch (err: any) {
-      console.error(err.errors[0]?.message);
+      AudioHapticsManager.error();
+      setErrorMsg(err.errors?.[0]?.message || 'Passkey login failed. Please try again or use another method.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [router, isLoaded, signIn, setActive]);
-
-  const onVerifyMFA = useCallback(async () => {
-    if (!isLoaded) return;
-    setLoading(true);
-    try {
-      const attempt = await signIn.attemptSecondFactor({
-        strategy: 'totp',
-        code: mfaCode,
-      });
-      if (attempt.status === 'complete') {
-        await setActive({ session: attempt.createdSessionId });
-        router.replace('/(main)/dashboard');
-      }
-    } catch (err: any) {
-      console.error(err.errors[0]?.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [isLoaded, mfaCode, signIn, setActive, router]);
-
-  if (pendingMFA) {
-    return (
-      <SafeAreaView className="flex-1 bg-white">
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-          <View className="px-4 py-2">
-            <TouchableOpacity onPress={() => setPendingMFA(false)} className="w-10 h-10 justify-center">
-              <Ionicons name="arrow-back" size={28} color="#1F2937" />
-            </TouchableOpacity>
-          </View>
-          <View className="flex-1 px-6 pt-6 justify-between pb-6">
-            <View>
-              <Text className="text-4xl font-montrealBold text-gray-900 mb-2">Two-Factor Auth</Text>
-              <Text className="text-gray-500 font-montreal text-lg mb-8">Enter the 6-digit code from your authenticator app.</Text>
-              
-              <View className="border-b-2 py-2 mb-6 border-gray-200 focus-within:border-blue-600">
-                <TextInput
-                  value={mfaCode}
-                  onChangeText={setMfaCode}
-                  placeholder="000000"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  className="text-4xl text-gray-900 font-montrealBold tracking-[0.5em] text-center"
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity 
-              onPress={onVerifyMFA}
-              disabled={mfaCode.length !== 6 || loading}
-              className={`w-full py-4 rounded-full items-center shadow-sm flex-row justify-center ${mfaCode.length === 6 && !loading ? 'bg-blue-600' : 'bg-gray-200'}`}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className={`text-lg font-montrealBold ${mfaCode.length === 6 ? 'text-white' : 'text-gray-400'}`}>Verify Code</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    );
-  }
+  }, [isLoaded, isRiskEngineReady, deviceSessionId, deviceToken, signIn, setActive, router]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        <View className="px-4 py-2">
-          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 justify-center">
-            <Ionicons name="arrow-back" size={28} color="#1F2937" />
-          </TouchableOpacity>
-        </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
+        
+      {/* Header */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.m, paddingVertical: spacing.s }}>
+        <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+          <Ionicons name="arrow-back" size={28} color={colorRoles.content.primary} />
+        </TouchableOpacity>
+      </View>
 
-        <View className="flex-1 px-6 pt-6 justify-between pb-6">
-          <View>
-            <Text className="text-4xl font-montrealBold text-gray-900 mb-2">Welcome back.</Text>
-            <Text className="text-gray-500 font-montreal text-lg mb-8">Enter your details to log in.</Text>
-            
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View className={`border-b-2 py-2 mb-6 focus-within:border-blue-600 ${errors.email ? 'border-red-500' : 'border-gray-200'}`}>
-                  <TextInput
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    placeholder="Email address"
-                    placeholderTextColor="#9CA3AF"
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    className="text-2xl text-gray-900 font-montrealMedium"
-                  />
-                </View>
-              )}
-            />
-            {errors.email && (
-              <Text className="text-red-500 text-sm mb-4">{errors.email.message}</Text>
-            )}
-
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View className={`border-b-2 py-2 focus-within:border-blue-600 ${errors.password ? 'border-red-500' : 'border-gray-200'}`}>
-                  <TextInput
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    placeholder="Password"
-                    placeholderTextColor="#9CA3AF"
-                    secureTextEntry
-                    className="text-2xl text-gray-900 font-montrealMedium"
-                  />
-                </View>
-              )}
-            />
-            {errors.password && (
-              <Text className="text-red-500 text-sm mt-2">{errors.password.message}</Text>
-            )}
+      <View style={{ flex: 1, paddingHorizontal: spacing.l, paddingTop: spacing.xl, justifyContent: 'center' }}>
+        
+        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)} style={{ alignItems: 'center', marginBottom: spacing.xxl }}>
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: colorRoles.background.baseLight, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.l }}>
+            <Ionicons name="finger-print" size={40} color={colorRoles.content.accentMid} />
           </View>
+          <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, fontWeight: '700', color: colorRoles.content.primary, marginBottom: spacing.s, textAlign: 'center' }}>
+            Welcome back.
+          </Text>
+          <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, textAlign: 'center', paddingHorizontal: spacing.l, lineHeight: 24 }}>
+            Sign in instantly with your FaceID or TouchID.
+          </Text>
+        </Animated.View>
 
-          <TouchableOpacity 
-            onPress={handleSubmit(onSubmit)}
-            disabled={!isValid || loading}
-            className={`w-full py-4 rounded-full items-center shadow-sm flex-row justify-center ${isValid && !loading ? 'bg-blue-600' : 'bg-gray-200'}`}
+        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)} style={{ width: '100%' }}>
+          <PressableScale
+            haptics="heavy"
+            onPress={handlePasskeyLogin}
+            disabled={isLoading || !isRiskEngineReady}
+            style={{ 
+              backgroundColor: isRiskEngineReady ? colorRoles.content.primary : colorRoles.background.disabled, 
+              paddingVertical: 18, 
+              borderRadius: 9999, 
+              alignItems: 'center', 
+              width: '100%',
+              flexDirection: 'row',
+              justifyContent: 'center'
+            }}
           >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
+            {isLoading ? (
+              <ActivityIndicator color={colorRoles.content.onPrimary} />
             ) : (
-              <Text className={`text-lg font-montrealBold ${isValid ? 'text-white' : 'text-gray-400'}`}>Continue</Text>
+              <>
+                <Ionicons name="scan" size={20} color={isRiskEngineReady ? colorRoles.content.onPrimary : colorRoles.content.secondary} style={{ marginRight: spacing.s }} />
+                <Text style={{ color: isRiskEngineReady ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700' }}>
+                  Sign in with Passkey
+                </Text>
+              </>
             )}
+          </PressableScale>
+
+          {errorMsg ? (
+            <Text style={{ fontFamily: typography.bodyMedium.fontFamily, color: colorRoles.content.negativeDark, marginTop: spacing.l, textAlign: 'center' }}>
+              {errorMsg}
+            </Text>
+          ) : null}
+
+          {/* Fallback Option */}
+          <TouchableOpacity 
+            style={{ marginTop: spacing.xl, alignItems: 'center', paddingVertical: spacing.s }}
+            onPress={() => {
+              AudioHapticsManager.lightInteraction();
+              router.push('/(auth)/email-fallback');
+            }}
+          >
+            <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: 16, color: colorRoles.content.secondary, fontWeight: '600' }}>
+              Lost your device? Use Email
+            </Text>
           </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+        </Animated.View>
+
+      </View>
     </SafeAreaView>
   );
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "733416228618",
+    "project_id": "qubits-1b76c",
+    "storage_bucket": "qubits-1b76c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733416228618:android:b7560bc20439f8e0b21cf3",
+        "android_client_info": {
+          "package_name": "com.harqer.quantumcoin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuYlbjrfP4dnt389cGBLkwLlyF1t35EoM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

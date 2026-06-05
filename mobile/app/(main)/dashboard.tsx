@@ -1,174 +1,346 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { coreTrpc } from '../../utils/trpc';
-import { useTrackScreen } from '../../hooks/useTelemetry';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useTrackScreen, trackEvent } from '../../hooks/useTelemetry';
+import Animated, { FadeInDown, FadeOutUp, useAnimatedStyle, useSharedValue, withRepeat, withTiming, withSequence, withDelay } from 'react-native-reanimated';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import { useUser } from '@clerk/clerk-expo';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store';
+import { addMessage, addMessages, setMode } from '../../store/slices/chatSlice';
+import { coreTrpc } from '../../utils/trpc';
 
-export default function DashboardScreen() {
+// Premium UX & Monetization Components
+import AudioHapticsManager from '../../utils/AudioHapticsManager';
+import PressableScale from '../../components/PressableScale';
+import ChatModelGatingModal from '../../components/ChatModelGatingModal';
+import TypewriterText from '../../components/TypewriterText';
+
+// --- WIDGET TYPES ---
+type WidgetType = 'budget_summary' | 'plaid_link' | 'sponsored_ad';
+
+interface Message {
+  id: string;
+  role: 'user' | 'ai';
+  type: 'text' | 'widget';
+  content?: string;
+  widgetType?: WidgetType;
+  isError?: boolean;
+  shouldStream?: boolean; // Controls whether this message uses TypewriterText
+}
+
+const chatSchema = z.object({
+  message: z.string().trim().min(1, "Message cannot be empty").max(200, "Message is too long"),
+});
+type ChatFormValues = z.infer<typeof chatSchema>;
+
+// --- INLINE WIDGETS ---
+const BudgetWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
   const router = useRouter();
-  const { user } = useUser();
-  useTrackScreen('Main_Dashboard');
+  return (
+    <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
+        <Ionicons name="pie-chart" size={24} color={colorRoles.content.accentMid} style={{ marginRight: spacing.s }} />
+        <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: colorRoles.content.primary }}>Budget Summary</Text>
+      </View>
+      <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
+        You've spent <Text style={{ color: colorRoles.content.negativeDark, fontWeight: '700' }}>$450</Text> on Food & Drink this month. You're tracking $50 over your limit.
+      </Text>
+      <PressableScale haptics="medium" onPress={() => router.push('/(main)/budget')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+        <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>View Breakdown</Text>
+      </PressableScale>
+    </Animated.View>
+  );
+});
 
-  // Fetching real balance from the Core Backend via tRPC
-  const { data, isLoading } = coreTrpc.dashboard.balance.useQuery(undefined, {
-    staleTime: 1000 * 60 * 5, // 5 min cache
-  });
+const CashAdvanceWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
+  const router = useRouter();
+  return (
+    <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: '#DBEAFE', borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
+        <Ionicons name="cash" size={24} color="#2563EB" style={{ marginRight: spacing.s }} />
+        <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: '#1E3A8A' }}>Need a Spot?</Text>
+      </View>
+      <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: '#1E3A8A', marginBottom: spacing.l }}>
+        I can spot you up to $250 interest-free right now.
+      </Text>
+      <PressableScale haptics="heavy" onPress={() => router.push('/(main)/advance')} style={{ backgroundColor: '#2563EB', paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Check Eligibility</Text>
+      </PressableScale>
+    </Animated.View>
+  );
+});
+
+const PlaidWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
+  const router = useRouter();
+  return (
+    <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start', borderWidth: 1, borderColor: colorRoles.border.default }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
+        <Ionicons name="business" size={24} color={colorRoles.content.primary} style={{ marginRight: spacing.s }} />
+        <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: colorRoles.content.primary }}>Connect Bank</Text>
+      </View>
+      <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
+        Securely link your accounts via Plaid to unleash my full potential.
+      </Text>
+      <PressableScale haptics="medium" onPress={() => router.push('/(main)/banks-list')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+        <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Link Account</Text>
+      </PressableScale>
+    </Animated.View>
+  );
+});
+
+const SponsoredAdWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
+  return (
+    <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: '#FFFBEB', borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start', borderWidth: 1, borderColor: '#FDE68A' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.xs }}>
+        <Text style={{ fontFamily: typography.labelSmall.fontFamily, fontSize: 10, fontWeight: '700', color: '#D97706', textTransform: 'uppercase' }}>Sponsored</Text>
+        <Ionicons name="star" size={12} color="#D97706" />
+      </View>
+      <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, fontWeight: '700', color: '#92400E', marginBottom: spacing.xs }}>Get the Quantum Credit Card</Text>
+      <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: 14, color: '#B45309', marginBottom: spacing.m }}>
+        Stop paying interest. Build credit instantly. Apply today.
+      </Text>
+      <PressableScale haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ backgroundColor: '#D97706', paddingVertical: 10, borderRadius: 999, alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Learn More</Text>
+      </PressableScale>
+    </Animated.View>
+  );
+});
+
+// --- MESSAGE BUBBLES ---
+const MessageBubble = React.memo(({ msg, colorRoles, typography, spacing, onStreamComplete }: { msg: Message, colorRoles: any, typography: any, spacing: any, onStreamComplete?: () => void }) => {
+  const isUser = msg.role === 'user';
   
-  const balance = data?.balance ?? 0;
-  const tier = (user?.publicMetadata?.tier as string) || 'free';
-  const isPremium = tier === 'plus' || tier === 'builder';
+  if (msg.type === 'widget') {
+    if (msg.widgetType === 'budget_summary') return <BudgetWidget colorRoles={colorRoles} typography={typography} spacing={spacing} />;
+    if (msg.widgetType === 'cash_advance') return <CashAdvanceWidget colorRoles={colorRoles} typography={typography} spacing={spacing} />;
+    if (msg.widgetType === 'plaid_link') return <PlaidWidget colorRoles={colorRoles} typography={typography} spacing={spacing} />;
+    if (msg.widgetType === 'sponsored_ad') return <SponsoredAdWidget colorRoles={colorRoles} typography={typography} spacing={spacing} />;
+    return null;
+  }
 
-  const handleCashAdvance = () => {
-    if (isPremium) {
-      router.push('/(main)/advance');
-    } else {
-      router.push('/(main)/upgrade');
-    }
+  return (
+    <Animated.View 
+      entering={FadeInDown.springify().stiffness(80).damping(28)}
+      style={[{
+        maxWidth: '85%', padding: spacing.l, borderRadius: 24, marginBottom: spacing.m, 
+        backgroundColor: msg.isError ? colorRoles.content.negativeLight : (isUser ? colorRoles.content.accentMid : colorRoles.background.secondary), 
+        alignSelf: isUser ? 'flex-end' : 'flex-start'
+      }, isUser ? { borderBottomRightRadius: 4 } : { borderBottomLeftRadius: 4 }]}
+    >
+      {isUser || !msg.shouldStream ? (
+        <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, lineHeight: 24, color: msg.isError ? colorRoles.content.negativeDark : (isUser ? colorRoles.content.onPrimary : colorRoles.content.primary) }}>
+          {msg.content}
+        </Text>
+      ) : (
+        <TypewriterText 
+          text={msg.content || ''} 
+          typingSpeed={15} 
+          onComplete={onStreamComplete}
+          style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, lineHeight: 24, color: msg.isError ? colorRoles.content.negativeDark : colorRoles.content.primary }} 
+        />
+      )}
+    </Animated.View>
+  );
+});
+
+// --- TYPING INDICATOR ---
+const TypingIndicator = ({ colorRoles, spacing }: any) => {
+  const Dot = ({ delay }: { delay: number }) => {
+    const translateY = useSharedValue(0);
+    useEffect(() => {
+      translateY.value = withDelay(delay, withRepeat(withSequence(withTiming(-5, { duration: 300 }), withTiming(0, { duration: 300 })), -1, true));
+    }, []);
+    const style = useAnimatedStyle(() => ({ transform: [{ translateY: translateY.value }] }));
+    return <Animated.View style={[{ width: 8, height: 8, borderRadius: 4, backgroundColor: colorRoles.content.secondary, marginHorizontal: 3 }, style]} />;
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView contentContainerClassName="p-6 pb-12">
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
-          <View>
-            <Text className="text-3xl font-montrealBold text-gray-900 tracking-tight">Hey there,</Text>
-            <View className="flex-row items-center mt-1">
-              <View className={`px-2 py-0.5 rounded-md mr-2 ${isPremium ? 'bg-purple-100' : 'bg-gray-200'}`}>
-                <Text className={`text-xs font-montrealBold uppercase ${isPremium ? 'text-purple-700' : 'text-gray-600'}`}>
-                  {tier === 'builder' ? 'Quantum Builder' : tier === 'plus' ? 'Quantum Plus' : 'Quantum Free'}
-                </Text>
-              </View>
-              <Text className="text-gray-500 font-montreal text-sm">Ready for a reality check?</Text>
-            </View>
-          </View>
-          <TouchableOpacity 
-            onPress={() => router.push('/(main)/settings')}
-            className="w-14 h-14 rounded-full bg-white items-center justify-center shadow-sm border border-gray-100"
-          >
-            <Ionicons name="settings-outline" size={28} color="#374151" />
+    <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} exiting={FadeOutUp} style={{ alignSelf: 'flex-start', backgroundColor: colorRoles.background.secondary, paddingHorizontal: spacing.l, paddingVertical: spacing.m, borderRadius: 24, borderBottomLeftRadius: 4, marginBottom: spacing.m, flexDirection: 'row', alignItems: 'center' }}>
+      <Dot delay={0} />
+      <Dot delay={150} />
+      <Dot delay={300} />
+    </Animated.View>
+  );
+};
+
+export default function DashboardScreen() {
+  const { colorRoles, typography, spacing } = useGlobalTheme();
+  const insets = useSafeAreaInsets();
+  const { user } = useUser();
+  useTrackScreen('Main_Dashboard_Chat');
+
+  // Monetization State
+  const [isProTier, setIsProTier] = useState(false); // Defaulting to False to simulate Free Tier
+  const [showGatingModal, setShowGatingModal] = useState(false);
+
+  const dispatch = useDispatch();
+  const messages = useSelector((state: RootState) => state.chat.messages);
+  const mode = useSelector((state: RootState) => state.chat.mode);
+  const listRef = useRef<FlashList<Message>>(null);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const { control, handleSubmit, reset, formState: { isValid } } = useForm<ChatFormValues>({
+    resolver: zodResolver(chatSchema),
+    mode: 'onChange',
+    defaultValues: { message: '' }
+  });
+
+  // --- FIREBASE DATA CONNECT (SQL CONNECT) REAL-TIME SUBSCRIPTION SIMULATION ---
+  // In production, this uses generated SDK: const { data } = useListChatMessages({ userId: user.id }, { subscribe: true });
+  const triggerDatabaseSync = (newMessages: Message[]) => {
+    dispatch(addMessages(newMessages));
+    setIsTyping(false);
+    AudioHapticsManager.lightInteraction();
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+  };
+
+  // --- FIREBASE CLOUD MESSAGING (FCM) BACKGROUND SYNC HOOK ---
+  useEffect(() => {
+    // Simulated FCM onMessage handler for Background Sync
+    // If the LLM takes 15s to process a deep financial query while app is backgrounded,
+    // the server writes to SQL Connect and sends a silent data push notification here.
+    const fcmListener = () => {
+      console.log('FCM Payload received: Re-fetching SQL Connect Data automatically.');
+      // The SQL Connect `useListChatMessages` would automatically update here due to the @refresh directive.
+    };
+    return () => {}; // Cleanup listener
+  }, []);
+
+  // Real AI Logic executing server-side via tRPC
+  const chatMutation = coreTrpc.ai.chat.useMutation({
+    onSuccess: (data: any) => {
+      // Backend returns { responses: Message[] }
+      triggerDatabaseSync(data.responses || []);
+    },
+    onError: (err: any) => {
+      triggerDatabaseSync([{ id: Date.now().toString(), role: 'ai', type: 'text', content: "My quantum link to the mainframe is down. Try again.", isError: true, shouldStream: false }]);
+    }
+  });
+
+  const handleSimulatedAIResponseFallback = (userText: string) => {
+    setIsTyping(true);
+    chatMutation.mutate({ message: userText, mode });
+  };
+
+  const onSubmit = useCallback((data: ChatFormValues) => {
+    trackEvent('Chat_Message_Sent');
+    const lowerMsg = data.message.toLowerCase();
+
+    // MODEL GATING LOGIC: Intercept complex queries if the user is on the Free Tier
+    if (!isProTier && (lowerMsg.includes('analyze') || lowerMsg.includes('crypto') || lowerMsg.includes('invest') || lowerMsg.includes('predict'))) {
+      reset({ message: '' }); // Clear input
+      setShowGatingModal(true); // Trigger Paywall
+      return;
+    }
+
+    // 1. Write Optimistic Message to local state / Data Connect Cache
+    const tempId = Date.now().toString();
+    const optimisticMsg: Message = { id: tempId, role: 'user', type: 'text', content: data.message };
+    dispatch(addMessage(optimisticMsg));
+    setIsTyping(true);
+    reset({ message: '' });
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+
+    // 2. Trigger Server Execution (simulated)
+    handleSimulatedAIResponseFallback(data.message);
+
+  }, [mode, user, isProTier]);
+
+  const toggleMode = () => {
+    AudioHapticsManager.lightInteraction();
+    const newMode = mode === 'roast' ? 'hype' : 'roast';
+    dispatch(setMode(newMode));
+    dispatch(addMessage({ 
+      id: Date.now().toString(), 
+      role: 'ai', 
+      type: 'text', 
+      content: newMode === 'roast' ? "Ugh. Fine. Switching back to Roast Mode. Prepare yourself." : "🌟 OMG Switching to Hype Mode! You are doing amazing sweetie!",
+      shouldStream: true
+    }));
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top']}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        
+        {/* Dynamic Header */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.m, paddingVertical: spacing.s, borderBottomWidth: 1, borderBottomColor: colorRoles.border.default, zIndex: 10 }}>
+          <Text style={{ flex: 1, fontSize: 20, fontFamily: typography.titleLarge.fontFamily, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.5, color: mode === 'roast' ? colorRoles.content.accentMid : '#2DD4BF' }}>
+            Quantum AI {isProTier && <Text style={{ color: '#D97706', fontSize: 16 }}>PRO</Text>}
+          </Text>
+          <TouchableOpacity onPress={toggleMode} style={{ backgroundColor: colorRoles.background.baseLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }}>
+            <Text style={{ fontFamily: typography.labelSmall.fontFamily, fontSize: 12, fontWeight: '700', color: colorRoles.content.primary }}>
+              {mode === 'roast' ? '🔥 Roast Mode' : '✨ Hype Mode'}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Balance Card */}
-        <View className="bg-blue-600 rounded-[32px] p-8 mb-6 shadow-lg">
-          <Text className="text-blue-200 text-sm font-semibold uppercase tracking-widest">Available Balance</Text>
-          {isLoading ? (
-            <Text className="text-white text-5xl font-black my-2">...</Text>
-          ) : (
-            <Text className="text-white text-5xl font-black my-2">
-              ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </Text>
-          )}
-          <View className="bg-blue-500/50 self-start px-3 py-1 rounded-full mt-2">
-            <Text className="text-white text-sm font-medium">You're doing okay... for now.</Text>
-          </View>
+        {/* Chat Stream */}
+        <View style={{ flex: 1 }}>
+          <FlashList
+            ref={listRef}
+            data={messages}
+            renderItem={({ item }) => <MessageBubble msg={item} colorRoles={colorRoles} typography={typography} spacing={spacing} />}
+            estimatedItemSize={100}
+            contentContainerStyle={{ paddingTop: spacing.m, paddingHorizontal: spacing.m, paddingBottom: spacing.xxl }}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={() => isTyping ? <TypingIndicator colorRoles={colorRoles} spacing={spacing} /> : null}
+            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+          />
         </View>
 
-        {/* Primary Actions Grid */}
-        <View className="flex-row justify-between mb-8 gap-4">
+        {/* Input Footer */}
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', padding: spacing.m, paddingBottom: Math.max(insets.bottom, spacing.m), borderTopWidth: 1, borderTopColor: colorRoles.border.default, backgroundColor: colorRoles.background.primary }}>
+          <View style={{ flex: 1, backgroundColor: colorRoles.background.baseLight, borderRadius: 24, paddingHorizontal: spacing.l, paddingVertical: Platform.OS === 'ios' ? 12 : 8, marginRight: spacing.s }}>
+            <Controller
+              control={control}
+              name="message"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder={isProTier ? "Ask GPT-4 anything..." : "Ask me anything..."}
+                  placeholderTextColor={colorRoles.content.secondary}
+                  style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.primary, maxHeight: 100 }}
+                  multiline
+                />
+              )}
+            />
+          </View>
           <TouchableOpacity 
-            onPress={() => {
-              if (isPremium) {
-                router.push('/(main)/ai-chat?persona=roast');
-              } else {
-                router.push('/(main)/upgrade');
-              }
+            style={{ 
+              backgroundColor: isValid ? colorRoles.content.accentMid : colorRoles.background.disabled, 
+              width: 48, height: 48, borderRadius: 24, 
+              alignItems: 'center', justifyContent: 'center' 
             }}
-            className="flex-1 bg-pink-500 rounded-[28px] p-6 items-center shadow-sm active:bg-pink-600"
+            onPress={handleSubmit(onSubmit)}
+            disabled={!isValid || isTyping}
           >
-            <Ionicons name="flame" size={36} color="#FFF" />
-            <Text className="text-white text-xl font-bold mt-3">Roast Me</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => router.push('/(main)/ai-chat?persona=hype')}
-            className="flex-1 bg-teal-400 rounded-[28px] p-6 items-center shadow-sm active:bg-teal-500"
-          >
-            <Ionicons name="star" size={36} color="#FFF" />
-            <Text className="text-white text-xl font-bold mt-3">Hype Me</Text>
+            <Ionicons name="arrow-up" size={24} color={isValid ? colorRoles.content.onPrimary : colorRoles.content.secondary} />
           </TouchableOpacity>
         </View>
+      </KeyboardAvoidingView>
 
-        {/* Features List */}
-        <Text className="text-xl font-montrealBold text-gray-900 mb-4">Quick Actions</Text>
-        <View className="bg-white rounded-[24px] p-2 mb-6 shadow-sm border border-gray-100">
-          
-          <TouchableOpacity 
-            onPress={() => router.push('/(main)/wallet')}
-            className="flex-row items-center p-4 border-b border-gray-100"
-          >
-            <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4">
-              <Ionicons name="wallet-outline" size={24} color="#2563EB" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-lg font-montrealBold text-gray-900">Wallet</Text>
-              <Text className="text-gray-500 font-montreal text-sm">Manage fiat and crypto.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => router.push('/(main)/budget')}
-            className="flex-row items-center p-4 border-b border-gray-100"
-          >
-            <View className="w-12 h-12 rounded-full bg-indigo-50 items-center justify-center mr-4">
-              <Ionicons name="pie-chart" size={24} color="#4F46E5" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-lg font-montrealBold text-gray-900">Budget</Text>
-              <Text className="text-gray-500 font-montreal text-sm">See where your money went.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={handleCashAdvance}
-            className="flex-row items-center p-4 border-b border-gray-100"
-          >
-            <View className="w-12 h-12 rounded-full bg-green-50 items-center justify-center mr-4">
-              <Ionicons name="cash" size={24} color="#10B981" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-lg font-montrealBold text-gray-900">Cash Advance</Text>
-              <Text className="text-gray-500 font-montreal text-sm">Need a spot? We got you.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => router.push('/(main)/link-bank')}
-            className="flex-row items-center p-4"
-          >
-            <View className="w-12 h-12 rounded-full bg-orange-50 items-center justify-center mr-4">
-              <Ionicons name="business" size={24} color="#F59E0B" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-lg font-montrealBold text-gray-900">Link Bank</Text>
-              <Text className="text-gray-500 font-montreal text-sm">Connect via Plaid.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#D1D5DB" />
-          </TouchableOpacity>
-
-        </View>
-
-        {/* Dynamic Ad/Promotion */}
-        {!isPremium && (
-          <View className="bg-indigo-600 rounded-[28px] p-6 shadow-md">
-            <Text className="text-white text-2xl font-bold mb-2">Quantum Plus 🚀</Text>
-            <Text className="text-indigo-200 text-base leading-relaxed mb-6">
-              Get access to larger advances, custom budgeting, and premium credit building.
-            </Text>
-            <TouchableOpacity onPress={() => router.push('/(main)/upgrade')} className="bg-white py-3 px-6 rounded-full self-start">
-              <Text className="text-indigo-600 font-bold text-base">Explore Plus</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-      </ScrollView>
+      {/* Monetization Gating Modal */}
+      <ChatModelGatingModal 
+        visible={showGatingModal} 
+        onClose={() => setShowGatingModal(false)}
+        onUpgrade={() => {
+          setShowGatingModal(false);
+          setIsProTier(true);
+          AudioHapticsManager.success();
+          // In a real app, this would trigger Stripe checkout or RevenueCat
+          dispatch(addMessage({ id: Date.now().toString(), role: 'ai', type: 'text', content: "Payment confirmed. Quantum Pro unlocked. You now have access to the GPT-4 financial engine.", shouldStream: true }));
+        }}
+      />
     </SafeAreaView>
   );
 }

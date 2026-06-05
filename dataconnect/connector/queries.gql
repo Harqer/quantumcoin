@@ -1,0 +1,15 @@
+query ListChatMessages($userId: String!) 
+  @auth(level: USER)
+  @refresh(every: { seconds: 10 })
+  @refresh(onMutationExecuted: {
+    operation: "CreateChatMessage",
+    condition: "request.variables.userId == mutation.variables.userId"
+  }) {
+  chatMessages(where: { userId: { eq: $userId } }, orderBy: [{ createTime: ASC }]) {
+    id
+    content
+    role
+    createTime
+    isComplete
+  }
+}

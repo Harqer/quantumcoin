@@ -1,117 +1,40 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, AppState, AppStateStatus } from 'react-native';
-import {
-  Camera,
-  DataCaptureContext,
-  DataCaptureView,
-  FrameSourceState,
-} from 'scandit-react-native-datacapture-core';
-import {
-  IdCapture,
-  IdCaptureSettings,
-  IdCaptureOverlay,
-  SupportedDocuments,
-  IdDocumentType,
-} from 'scandit-react-native-datacapture-id';
+import React, { useRef, useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
 interface VisionScannerProps {
   onQualityCheckComplete?: (documentData: any) => void;
 }
 
-// In production, SCANDIT_LICENSE_KEY should be loaded from env / secrets vault
-const SCANDIT_LICENSE_KEY = process.env.EXPO_PUBLIC_SCANDIT_LICENSE_KEY || '--placeholder-license--';
-
 export default function VisionScanner({ onQualityCheckComplete }: VisionScannerProps) {
-  const [hasPermission, setHasPermission] = useState(false);
-  const [context, setContext] = useState<DataCaptureContext | null>(null);
-  const [camera, setCamera] = useState<Camera | null>(null);
-  const [idCapture, setIdCapture] = useState<IdCapture | null>(null);
-  const [overlay, setOverlay] = useState<IdCaptureOverlay | null>(null);
-  const appState = useRef(AppState.currentState);
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+    if (!hasPermission) {
+      requestPermission();
+    }
+  }, [hasPermission]);
 
-    async function setupScandit() {
-      // 1. Request Camera Permissions natively
-      const status = await Camera.requestCameraPermission();
-      if (status !== 'granted') {
-        if (mounted) setHasPermission(false);
-        return;
-      }
-      if (mounted) setHasPermission(true);
-
-      // 2. Initialize DataCaptureContext
-      const dataCaptureContext = DataCaptureContext.forLicenseKey(SCANDIT_LICENSE_KEY);
-      
-      // 3. Configure Camera
-      const defaultCamera = Camera.default;
-      if (defaultCamera) {
-        dataCaptureContext.setFrameSource(defaultCamera);
-        defaultCamera.switchToDesiredState(FrameSourceState.On);
-        if (mounted) setCamera(defaultCamera);
-      }
-
-      // 4. Configure ID Capture Settings (1:1 Production)
-      const settings = new IdCaptureSettings();
-      settings.supportedDocuments = [
-        SupportedDocuments.AAMVABarcode,
-        SupportedDocuments.USUSIdFront,
-        SupportedDocuments.USUSPassportFront
-      ];
-      
-      // 5. Create ID Capture Mode
-      const idCaptureMode = IdCapture.forContext(dataCaptureContext, settings);
-      
-      // 6. Set up Listener for successful scans
-      const listener = {
-        didCaptureId: (idCaptureInstance: IdCapture, session: any) => {
-          const capturedId = session.newlyCapturedId;
-          if (capturedId && onQualityCheckComplete) {
-            // Prevent multiple scans
-            idCaptureInstance.isEnabled = false;
-            onQualityCheckComplete(capturedId);
-          }
-        },
-        didFailWithError: (idCaptureInstance: IdCapture, error: any) => {
-          console.error("Scandit ID Capture Error:", error);
-        }
-      };
-      idCaptureMode.addListener(listener);
-      
-      if (mounted) {
-        setIdCapture(idCaptureMode);
+  const captureId = async () => {
+    if (camera.current && !isCapturing && onQualityCheckComplete) {
+      setIsCapturing(true);
+      try {
+        const photo = await camera.current.takePhoto({
+          qualityPrioritization: 'quality',
+          flash: 'off',
+        });
         
-        // 7. Create UI Overlay
-        const captureOverlay = IdCaptureOverlay.withIdCaptureForView(idCaptureMode, null);
-        setOverlay(captureOverlay);
-        setContext(dataCaptureContext);
+        // Pass the actual photo URI to the parent component
+        onQualityCheckComplete(`file://${photo.path}`);
+      } catch (error) {
+        console.error("Vision Camera Error:", error);
+      } finally {
+        setIsCapturing(false);
       }
     }
-
-    setupScandit();
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      mounted = false;
-      subscription.remove();
-      if (camera) {
-        camera.switchToDesiredState(FrameSourceState.Off);
-      }
-      if (context) {
-        context.dispose();
-      }
-    };
-  }, []);
-
-  const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-      camera?.switchToDesiredState(FrameSourceState.On);
-    } else if (nextAppState.match(/inactive|background/)) {
-      camera?.switchToDesiredState(FrameSourceState.Off);
-    }
-    appState.current = nextAppState;
   };
 
   if (!hasPermission) {
@@ -122,7 +45,7 @@ export default function VisionScanner({ onQualityCheckComplete }: VisionScannerP
     );
   }
 
-  if (!context || !camera) {
+  if (device == null) {
     return (
       <View style={styles.container}>
         <Text style={styles.text}>Initializing secure scanner...</Text>
@@ -132,11 +55,27 @@ export default function VisionScanner({ onQualityCheckComplete }: VisionScannerP
 
   return (
     <View style={styles.container}>
-      <DataCaptureView 
-        context={context} 
-        style={StyleSheet.absoluteFill} 
+      <Camera
+        ref={camera}
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        photo={true}
       />
-      {/* The Scandit overlay natively draws the bounding boxes for IDs */}
+      
+      {/* Overlay to guide the user */}
+      <View style={styles.overlay}>
+        <View style={styles.guideBox} />
+        <Text style={styles.guideText}>Position your ID within the frame</Text>
+      </View>
+
+      <TouchableOpacity 
+        style={styles.captureButton}
+        onPress={captureId}
+        disabled={isCapturing}
+      >
+        <View style={styles.captureButtonInner} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -152,5 +91,41 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '500',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  guideBox: {
+    width: '90%',
+    height: 220,
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  guideText: {
+    color: 'white',
+    marginTop: 20,
+    fontSize: 16,
+    fontFamily: 'Montreal-Medium',
+  },
+  captureButton: {
+    position: 'absolute',
+    bottom: 50,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButtonInner: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: 'white',
   }
 });

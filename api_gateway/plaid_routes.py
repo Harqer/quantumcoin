@@ -1,8 +1,8 @@
-import os
 import time
+import structlog
 from fastapi import APIRouter, Depends, Request, HTTPException
 from pydantic import BaseModel
-from auth import verify_token
+from auth import verify_token, verify_payload_signature
 import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
@@ -11,10 +11,14 @@ from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchan
 from plaid.model.processor_stripe_bank_account_token_create_request import ProcessorStripeBankAccountTokenCreateRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
-import psycopg2
-from psycopg2.extras import RealDictCursor
 
-# Pydantic Schemas
+from database import prisma_client, SecretsManager
+from telemetry import TelemetryStream
+from remote_config import ConfigManager
+
+logger = structlog.get_logger()
+router = APIRouter()
+
 class PublicTokenExchangeRequest(BaseModel):
     public_token: str
     account_id: str
@@ -25,31 +29,28 @@ class PlaidWebhookPayload(BaseModel):
     item_id: str
     error: dict | None = None
 
-PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
-if not PLAID_CLIENT_ID:
-    raise ValueError("PLAID_CLIENT_ID is required for production.")
+def get_plaid_client():
+    if not ConfigManager.is_feature_enabled("plaid_integration"):
+        logger.warning("plaid_integration_disabled_via_remote_config")
+        raise HTTPException(status_code=503, detail="Bank integration is currently unavailable.")
 
-PLAID_SECRET = os.environ.get("PLAID_SECRET")
-if not PLAID_SECRET:
-    raise ValueError("PLAID_SECRET is required for production.")
-PLAID_ENV = os.environ.get("PLAID_ENV", "production")
-POSTGRES_URL = os.environ.get("PRIMARY_DB_CONNECTION_STRING")
-
-if PLAID_ENV == "sandbox":
-    host = plaid.Environment.Sandbox
-elif PLAID_ENV == "development":
-    host = plaid.Environment.Development
-else:
-    host = plaid.Environment.Production
-
-configuration = plaid.Configuration(host=host, api_key={'clientId': PLAID_CLIENT_ID, 'secret': PLAID_SECRET})
-api_client = plaid.ApiClient(configuration)
-client = plaid_api.PlaidApi(api_client)
-
-router = APIRouter()
-
-def get_pg_connection():
-    return psycopg2.connect(POSTGRES_URL)
+    client_id = SecretsManager.get_secret("PLAID_CLIENT_ID")
+    secret = SecretsManager.get_secret("PLAID_SECRET")
+    env = SecretsManager.get_secret("PLAID_ENV", default="production")
+    
+    if not client_id or not secret:
+        raise HTTPException(status_code=500, detail="Plaid API keys missing")
+        
+    if env == "sandbox":
+        host = plaid.Environment.Sandbox
+    elif env == "development":
+        host = plaid.Environment.Development
+    else:
+        host = plaid.Environment.Production
+        
+    configuration = plaid.Configuration(host=host, api_key={'clientId': client_id, 'secret': secret})
+    api_client = plaid.ApiClient(configuration)
+    return plaid_api.PlaidApi(api_client)
 
 def retry_api_call(max_retries=3, backoff_factor=2):
     def decorator(func):
@@ -61,25 +62,25 @@ def retry_api_call(max_retries=3, backoff_factor=2):
                 except Exception as e:
                     retries += 1
                     if retries == max_retries:
+                        logger.error("api_call_failed_after_retries", error=str(e))
                         raise e
-                    print(f"⚠️ Network error, retrying in {backoff_factor ** retries} seconds... ({retries}/{max_retries})")
+                    logger.warning("network_error_retrying", retries=retries, max=max_retries, error=str(e))
                     time.sleep(backoff_factor ** retries)
         return wrapper
     return decorator
 
 @retry_api_call()
-def execute_plaid_exchange(exchange_request):
+def execute_plaid_exchange(client, exchange_request):
     return client.item_public_token_exchange(exchange_request)
 
 @retry_api_call()
-def execute_stripe_token_create(stripe_request):
+def execute_stripe_token_create(client, stripe_request):
     return client.processor_stripe_bank_account_token_create(stripe_request)
 
 @router.post("/create_link_token")
-async def create_link_token(request: Request, payload: dict = Depends(verify_token)):
+async def create_link_token(request: Request, payload: dict = Depends(verify_payload_signature)):
     try:
-        if not PLAID_CLIENT_ID or not PLAID_SECRET:
-            raise HTTPException(status_code=500, detail="Plaid API keys missing")
+        client = get_plaid_client()
         clerk_id = payload.get("sub", "anonymous")
         request_obj = LinkTokenCreateRequest(
             products=[Products("auth"), Products("transactions")],
@@ -90,17 +91,19 @@ async def create_link_token(request: Request, payload: dict = Depends(verify_tok
             android_package_name="com.quantumcoin.mobile"
         )
         response = client.link_token_create(request_obj)
+        
+        TelemetryStream.track_event("plaid_link_token_created", {"status": "success"}, user_id=clerk_id)
         return {"link_token": response['link_token']}
     except Exception as e:
-        print(f"Error creating link token: {e}")
+        logger.exception("create_link_token_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error occurred")
 
 @router.post("/exchange_public_token")
-async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict = Depends(verify_token)):
-    conn = None
+async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict = Depends(verify_payload_signature)):
     try:
+        client = get_plaid_client()
         exchange_request = ItemPublicTokenExchangeRequest(public_token=data.public_token)
-        exchange_response = execute_plaid_exchange(exchange_request)
+        exchange_response = execute_plaid_exchange(client, exchange_request)
         
         access_token = exchange_response['access_token']
         item_id = exchange_response['item_id']
@@ -110,45 +113,45 @@ async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict 
             access_token=access_token,
             account_id=data.account_id
         )
-        stripe_response = execute_stripe_token_create(stripe_request)
+        stripe_response = execute_stripe_token_create(client, stripe_request)
         stripe_bank_account_token = stripe_response['stripe_bank_account_token']
         
-        conn = get_pg_connection()
-        with conn.cursor() as cur:
-            cur.execute('SELECT "id" FROM "User" WHERE "id" = %s OR email = %s LIMIT 1', (clerk_id, payload.get("email", "")))
-            user = cur.fetchone()
-            if not user:
-                raise HTTPException(status_code=404, detail="User not found")
-            
-            cur.execute(
-                '''INSERT INTO "BankAccount" ("id", "userId", "accessToken", "itemId", "stripeBankId", "updatedAt") 
-                VALUES (gen_random_uuid(), %s, %s, %s, %s, NOW())''',
-                (user[0], access_token, item_id, stripe_bank_account_token)
-            )
-            conn.commit()
+        # Prisma DB interaction
+        user = await prisma_client.user.find_first(where={"id": clerk_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        await prisma_client.bankaccount.create(
+            data={
+                "userId": user.id,
+                "accessToken": access_token,
+                "itemId": item_id,
+                "stripeBankId": stripe_bank_account_token,
+            }
+        )
+        logger.info("plaid_public_token_exchanged", user_id=user.id, item_id=item_id)
+        TelemetryStream.track_event("bank_account_linked", {"item_id": item_id}, user_id=user.id)
+        
         return {"status": "success"}
     except Exception as e:
-        if conn: conn.rollback()
-        print(f"Error exchanging public token: {e}")
+        logger.exception("exchange_public_token_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error occurred")
-    finally:
-        if conn: conn.close()
 
 @router.post("/webhook")
 async def plaid_webhook(payload: PlaidWebhookPayload):
-    # Plaid sends webhooks here (e.g. ITEM_LOGIN_REQUIRED when bank passwords change)
+    TelemetryStream.track_event("plaid_webhook_received", payload.model_dump())
+    
     if payload.webhook_type == "ITEM" and payload.webhook_code == "ITEM_LOGIN_REQUIRED":
-        conn = get_pg_connection()
         try:
-            with conn.cursor() as cur:
-                # Mark the item as requiring re-auth
-                cur.execute('UPDATE "BankAccount" SET "accessToken" = %s WHERE "itemId" = %s', ('NEEDS_REAUTH', payload.item_id))
-                conn.commit()
-                print(f"⚠️ Marked bank item {payload.item_id} as disconnected.")
+            bank_accounts = await prisma_client.bankaccount.find_many(where={"itemId": payload.item_id})
+            for acc in bank_accounts:
+                await prisma_client.bankaccount.update(
+                    where={"id": acc.id},
+                    data={"accessToken": "NEEDS_REAUTH"}
+                )
+            logger.warning("plaid_item_needs_reauth", item_id=payload.item_id)
+            TelemetryStream.track_event("plaid_item_disconnected", {"item_id": payload.item_id})
         except Exception as e:
-            conn.rollback()
-            print(f"Error in plaid webhook: {e}")
+            logger.exception("plaid_webhook_error", error=str(e))
             raise HTTPException(status_code=500, detail="Internal server error occurred")
-        finally:
-            conn.close()
     return {"status": "webhook_received"}

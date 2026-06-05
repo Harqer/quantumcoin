@@ -1,0 +1,8 @@
+mutation CreateChatMessage($userId: String!, $content: String!, $role: String!) 
+  @auth(level: USER) {
+  chatMessage_insert(data: {
+    userId: $userId
+    content: $content
+    role: $role
+  })
+}

@@ -68,6 +68,26 @@ export type ChatMessage = $Result.DefaultSelection<Prisma.$ChatMessagePayload>
  * 
  */
 export type CashAdvance = $Result.DefaultSelection<Prisma.$CashAdvancePayload>
+/**
+ * Model PasskeyCredential
+ * 
+ */
+export type PasskeyCredential = $Result.DefaultSelection<Prisma.$PasskeyCredentialPayload>
+/**
+ * Model DeviceSession
+ * 
+ */
+export type DeviceSession = $Result.DefaultSelection<Prisma.$DeviceSessionPayload>
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
+/**
+ * Model Insight
+ * 
+ */
+export type Insight = $Result.DefaultSelection<Prisma.$InsightPayload>
 
 /**
  * Enums
@@ -320,6 +340,46 @@ export class PrismaClient<
     * ```
     */
   get cashAdvance(): Prisma.CashAdvanceDelegate<ExtArgs>;
+
+  /**
+   * `prisma.passkeyCredential`: Exposes CRUD operations for the **PasskeyCredential** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PasskeyCredentials
+    * const passkeyCredentials = await prisma.passkeyCredential.findMany()
+    * ```
+    */
+  get passkeyCredential(): Prisma.PasskeyCredentialDelegate<ExtArgs>;
+
+  /**
+   * `prisma.deviceSession`: Exposes CRUD operations for the **DeviceSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DeviceSessions
+    * const deviceSessions = await prisma.deviceSession.findMany()
+    * ```
+    */
+  get deviceSession(): Prisma.DeviceSessionDelegate<ExtArgs>;
+
+  /**
+   * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AuditLogs
+    * const auditLogs = await prisma.auditLog.findMany()
+    * ```
+    */
+  get auditLog(): Prisma.AuditLogDelegate<ExtArgs>;
+
+  /**
+   * `prisma.insight`: Exposes CRUD operations for the **Insight** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Insights
+    * const insights = await prisma.insight.findMany()
+    * ```
+    */
+  get insight(): Prisma.InsightDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -771,7 +831,11 @@ export namespace Prisma {
     Category: 'Category',
     ChatSession: 'ChatSession',
     ChatMessage: 'ChatMessage',
-    CashAdvance: 'CashAdvance'
+    CashAdvance: 'CashAdvance',
+    PasskeyCredential: 'PasskeyCredential',
+    DeviceSession: 'DeviceSession',
+    AuditLog: 'AuditLog',
+    Insight: 'Insight'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -787,7 +851,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "bankAccount" | "transaction" | "paymentMethod" | "subscription" | "incomeSource" | "budget" | "category" | "chatSession" | "chatMessage" | "cashAdvance"
+      modelProps: "user" | "bankAccount" | "transaction" | "paymentMethod" | "subscription" | "incomeSource" | "budget" | "category" | "chatSession" | "chatMessage" | "cashAdvance" | "passkeyCredential" | "deviceSession" | "auditLog" | "insight"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1561,6 +1625,286 @@ export namespace Prisma {
           }
         }
       }
+      PasskeyCredential: {
+        payload: Prisma.$PasskeyCredentialPayload<ExtArgs>
+        fields: Prisma.PasskeyCredentialFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PasskeyCredentialFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PasskeyCredentialFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          findFirst: {
+            args: Prisma.PasskeyCredentialFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PasskeyCredentialFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          findMany: {
+            args: Prisma.PasskeyCredentialFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>[]
+          }
+          create: {
+            args: Prisma.PasskeyCredentialCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          createMany: {
+            args: Prisma.PasskeyCredentialCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PasskeyCredentialCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>[]
+          }
+          delete: {
+            args: Prisma.PasskeyCredentialDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          update: {
+            args: Prisma.PasskeyCredentialUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          deleteMany: {
+            args: Prisma.PasskeyCredentialDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PasskeyCredentialUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PasskeyCredentialUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasskeyCredentialPayload>
+          }
+          aggregate: {
+            args: Prisma.PasskeyCredentialAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePasskeyCredential>
+          }
+          groupBy: {
+            args: Prisma.PasskeyCredentialGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PasskeyCredentialGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PasskeyCredentialCountArgs<ExtArgs>
+            result: $Utils.Optional<PasskeyCredentialCountAggregateOutputType> | number
+          }
+        }
+      }
+      DeviceSession: {
+        payload: Prisma.$DeviceSessionPayload<ExtArgs>
+        fields: Prisma.DeviceSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DeviceSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DeviceSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.DeviceSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DeviceSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          findMany: {
+            args: Prisma.DeviceSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>[]
+          }
+          create: {
+            args: Prisma.DeviceSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          createMany: {
+            args: Prisma.DeviceSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DeviceSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.DeviceSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          update: {
+            args: Prisma.DeviceSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.DeviceSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DeviceSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.DeviceSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.DeviceSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDeviceSession>
+          }
+          groupBy: {
+            args: Prisma.DeviceSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DeviceSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DeviceSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<DeviceSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      AuditLog: {
+        payload: Prisma.$AuditLogPayload<ExtArgs>
+        fields: Prisma.AuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.AuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.AuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.AuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          update: {
+            args: Prisma.AuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.AuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAuditLog>
+          }
+          groupBy: {
+            args: Prisma.AuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<AuditLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      Insight: {
+        payload: Prisma.$InsightPayload<ExtArgs>
+        fields: Prisma.InsightFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InsightFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InsightFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findFirst: {
+            args: Prisma.InsightFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InsightFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findMany: {
+            args: Prisma.InsightFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          create: {
+            args: Prisma.InsightCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          createMany: {
+            args: Prisma.InsightCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InsightCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          delete: {
+            args: Prisma.InsightDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          update: {
+            args: Prisma.InsightUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          deleteMany: {
+            args: Prisma.InsightDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InsightUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.InsightUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          aggregate: {
+            args: Prisma.InsightAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInsight>
+          }
+          groupBy: {
+            args: Prisma.InsightGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InsightGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InsightCountArgs<ExtArgs>
+            result: $Utils.Optional<InsightCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1730,6 +2074,10 @@ export namespace Prisma {
     budgets: number
     chatSessions: number
     cashAdvances: number
+    passkeys: number
+    deviceSessions: number
+    auditLogs: number
+    insights: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1741,6 +2089,10 @@ export namespace Prisma {
     budgets?: boolean | UserCountOutputTypeCountBudgetsArgs
     chatSessions?: boolean | UserCountOutputTypeCountChatSessionsArgs
     cashAdvances?: boolean | UserCountOutputTypeCountCashAdvancesArgs
+    passkeys?: boolean | UserCountOutputTypeCountPasskeysArgs
+    deviceSessions?: boolean | UserCountOutputTypeCountDeviceSessionsArgs
+    auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+    insights?: boolean | UserCountOutputTypeCountInsightsArgs
   }
 
   // Custom InputTypes
@@ -1808,6 +2160,34 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountCashAdvancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CashAdvanceWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPasskeysArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PasskeyCredentialWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDeviceSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DeviceSessionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuditLogWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountInsightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightWhereInput
   }
 
 
@@ -2006,6 +2386,7 @@ export namespace Prisma {
     lastName: string | null
     dob: string | null
     ssn: string | null
+    ssnLast4: string | null
     addressStreet: string | null
     addressCity: string | null
     addressState: string | null
@@ -2020,7 +2401,9 @@ export namespace Prisma {
     minDepositAmount: number | null
     last4_digits: string | null
     cleo_card: boolean | null
+    phoneNumber: string | null
     kycStatus: string | null
+    ewaDisclaimerAccepted: boolean | null
     socureDeviceId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2034,6 +2417,7 @@ export namespace Prisma {
     lastName: string | null
     dob: string | null
     ssn: string | null
+    ssnLast4: string | null
     addressStreet: string | null
     addressCity: string | null
     addressState: string | null
@@ -2048,7 +2432,9 @@ export namespace Prisma {
     minDepositAmount: number | null
     last4_digits: string | null
     cleo_card: boolean | null
+    phoneNumber: string | null
     kycStatus: string | null
+    ewaDisclaimerAccepted: boolean | null
     socureDeviceId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2062,6 +2448,7 @@ export namespace Prisma {
     lastName: number
     dob: number
     ssn: number
+    ssnLast4: number
     addressStreet: number
     addressCity: number
     addressState: number
@@ -2077,7 +2464,10 @@ export namespace Prisma {
     boosts: number
     last4_digits: number
     cleo_card: number
+    phoneNumber: number
+    preferences: number
     kycStatus: number
+    ewaDisclaimerAccepted: number
     socureDeviceId: number
     createdAt: number
     updatedAt: number
@@ -2109,6 +2499,7 @@ export namespace Prisma {
     lastName?: true
     dob?: true
     ssn?: true
+    ssnLast4?: true
     addressStreet?: true
     addressCity?: true
     addressState?: true
@@ -2123,7 +2514,9 @@ export namespace Prisma {
     minDepositAmount?: true
     last4_digits?: true
     cleo_card?: true
+    phoneNumber?: true
     kycStatus?: true
+    ewaDisclaimerAccepted?: true
     socureDeviceId?: true
     createdAt?: true
     updatedAt?: true
@@ -2137,6 +2530,7 @@ export namespace Prisma {
     lastName?: true
     dob?: true
     ssn?: true
+    ssnLast4?: true
     addressStreet?: true
     addressCity?: true
     addressState?: true
@@ -2151,7 +2545,9 @@ export namespace Prisma {
     minDepositAmount?: true
     last4_digits?: true
     cleo_card?: true
+    phoneNumber?: true
     kycStatus?: true
+    ewaDisclaimerAccepted?: true
     socureDeviceId?: true
     createdAt?: true
     updatedAt?: true
@@ -2165,6 +2561,7 @@ export namespace Prisma {
     lastName?: true
     dob?: true
     ssn?: true
+    ssnLast4?: true
     addressStreet?: true
     addressCity?: true
     addressState?: true
@@ -2180,7 +2577,10 @@ export namespace Prisma {
     boosts?: true
     last4_digits?: true
     cleo_card?: true
+    phoneNumber?: true
+    preferences?: true
     kycStatus?: true
+    ewaDisclaimerAccepted?: true
     socureDeviceId?: true
     createdAt?: true
     updatedAt?: true
@@ -2281,6 +2681,7 @@ export namespace Prisma {
     lastName: string | null
     dob: string | null
     ssn: string | null
+    ssnLast4: string | null
     addressStreet: string | null
     addressCity: string | null
     addressState: string | null
@@ -2296,7 +2697,10 @@ export namespace Prisma {
     boosts: JsonValue | null
     last4_digits: string | null
     cleo_card: boolean
+    phoneNumber: string | null
+    preferences: JsonValue | null
     kycStatus: string | null
+    ewaDisclaimerAccepted: boolean
     socureDeviceId: string | null
     createdAt: Date
     updatedAt: Date
@@ -2329,6 +2733,7 @@ export namespace Prisma {
     lastName?: boolean
     dob?: boolean
     ssn?: boolean
+    ssnLast4?: boolean
     addressStreet?: boolean
     addressCity?: boolean
     addressState?: boolean
@@ -2344,7 +2749,10 @@ export namespace Prisma {
     boosts?: boolean
     last4_digits?: boolean
     cleo_card?: boolean
+    phoneNumber?: boolean
+    preferences?: boolean
     kycStatus?: boolean
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2356,6 +2764,10 @@ export namespace Prisma {
     budgets?: boolean | User$budgetsArgs<ExtArgs>
     chatSessions?: boolean | User$chatSessionsArgs<ExtArgs>
     cashAdvances?: boolean | User$cashAdvancesArgs<ExtArgs>
+    passkeys?: boolean | User$passkeysArgs<ExtArgs>
+    deviceSessions?: boolean | User$deviceSessionsArgs<ExtArgs>
+    auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    insights?: boolean | User$insightsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2367,6 +2779,7 @@ export namespace Prisma {
     lastName?: boolean
     dob?: boolean
     ssn?: boolean
+    ssnLast4?: boolean
     addressStreet?: boolean
     addressCity?: boolean
     addressState?: boolean
@@ -2382,7 +2795,10 @@ export namespace Prisma {
     boosts?: boolean
     last4_digits?: boolean
     cleo_card?: boolean
+    phoneNumber?: boolean
+    preferences?: boolean
     kycStatus?: boolean
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2396,6 +2812,7 @@ export namespace Prisma {
     lastName?: boolean
     dob?: boolean
     ssn?: boolean
+    ssnLast4?: boolean
     addressStreet?: boolean
     addressCity?: boolean
     addressState?: boolean
@@ -2411,7 +2828,10 @@ export namespace Prisma {
     boosts?: boolean
     last4_digits?: boolean
     cleo_card?: boolean
+    phoneNumber?: boolean
+    preferences?: boolean
     kycStatus?: boolean
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2426,6 +2846,10 @@ export namespace Prisma {
     budgets?: boolean | User$budgetsArgs<ExtArgs>
     chatSessions?: boolean | User$chatSessionsArgs<ExtArgs>
     cashAdvances?: boolean | User$cashAdvancesArgs<ExtArgs>
+    passkeys?: boolean | User$passkeysArgs<ExtArgs>
+    deviceSessions?: boolean | User$deviceSessionsArgs<ExtArgs>
+    auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    insights?: boolean | User$insightsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2441,6 +2865,10 @@ export namespace Prisma {
       budgets: Prisma.$BudgetPayload<ExtArgs>[]
       chatSessions: Prisma.$ChatSessionPayload<ExtArgs>[]
       cashAdvances: Prisma.$CashAdvancePayload<ExtArgs>[]
+      passkeys: Prisma.$PasskeyCredentialPayload<ExtArgs>[]
+      deviceSessions: Prisma.$DeviceSessionPayload<ExtArgs>[]
+      auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+      insights: Prisma.$InsightPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2450,6 +2878,7 @@ export namespace Prisma {
       lastName: string | null
       dob: string | null
       ssn: string | null
+      ssnLast4: string | null
       addressStreet: string | null
       addressCity: string | null
       addressState: string | null
@@ -2465,7 +2894,10 @@ export namespace Prisma {
       boosts: Prisma.JsonValue | null
       last4_digits: string | null
       cleo_card: boolean
+      phoneNumber: string | null
+      preferences: Prisma.JsonValue | null
       kycStatus: string | null
+      ewaDisclaimerAccepted: boolean
       socureDeviceId: string | null
       createdAt: Date
       updatedAt: Date
@@ -2841,6 +3273,10 @@ export namespace Prisma {
     budgets<T extends User$budgetsArgs<ExtArgs> = {}>(args?: Subset<T, User$budgetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BudgetPayload<ExtArgs>, T, "findMany"> | Null>
     chatSessions<T extends User$chatSessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$chatSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findMany"> | Null>
     cashAdvances<T extends User$cashAdvancesArgs<ExtArgs> = {}>(args?: Subset<T, User$cashAdvancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CashAdvancePayload<ExtArgs>, T, "findMany"> | Null>
+    passkeys<T extends User$passkeysArgs<ExtArgs> = {}>(args?: Subset<T, User$passkeysArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findMany"> | Null>
+    deviceSessions<T extends User$deviceSessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$deviceSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findMany"> | Null>
+    auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany"> | Null>
+    insights<T extends User$insightsArgs<ExtArgs> = {}>(args?: Subset<T, User$insightsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2877,6 +3313,7 @@ export namespace Prisma {
     readonly lastName: FieldRef<"User", 'String'>
     readonly dob: FieldRef<"User", 'String'>
     readonly ssn: FieldRef<"User", 'String'>
+    readonly ssnLast4: FieldRef<"User", 'String'>
     readonly addressStreet: FieldRef<"User", 'String'>
     readonly addressCity: FieldRef<"User", 'String'>
     readonly addressState: FieldRef<"User", 'String'>
@@ -2892,7 +3329,10 @@ export namespace Prisma {
     readonly boosts: FieldRef<"User", 'Json'>
     readonly last4_digits: FieldRef<"User", 'String'>
     readonly cleo_card: FieldRef<"User", 'Boolean'>
+    readonly phoneNumber: FieldRef<"User", 'String'>
+    readonly preferences: FieldRef<"User", 'Json'>
     readonly kycStatus: FieldRef<"User", 'String'>
+    readonly ewaDisclaimerAccepted: FieldRef<"User", 'Boolean'>
     readonly socureDeviceId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -3367,6 +3807,86 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CashAdvanceScalarFieldEnum | CashAdvanceScalarFieldEnum[]
+  }
+
+  /**
+   * User.passkeys
+   */
+  export type User$passkeysArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    where?: PasskeyCredentialWhereInput
+    orderBy?: PasskeyCredentialOrderByWithRelationInput | PasskeyCredentialOrderByWithRelationInput[]
+    cursor?: PasskeyCredentialWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PasskeyCredentialScalarFieldEnum | PasskeyCredentialScalarFieldEnum[]
+  }
+
+  /**
+   * User.deviceSessions
+   */
+  export type User$deviceSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    where?: DeviceSessionWhereInput
+    orderBy?: DeviceSessionOrderByWithRelationInput | DeviceSessionOrderByWithRelationInput[]
+    cursor?: DeviceSessionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DeviceSessionScalarFieldEnum | DeviceSessionScalarFieldEnum[]
+  }
+
+  /**
+   * User.auditLogs
+   */
+  export type User$auditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    where?: AuditLogWhereInput
+    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
+    cursor?: AuditLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.insights
+   */
+  export type User$insightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    where?: InsightWhereInput
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    cursor?: InsightWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
   }
 
   /**
@@ -4470,10 +4990,12 @@ export namespace Prisma {
     categoryId: string | null
     stripePaymentIntentId: string | null
     type: string | null
+    direction: string | null
     amount: number | null
     selectedAmount: number | null
     currency: string | null
     status: string | null
+    logoUrl: string | null
     lastFormatted: string | null
     merchantName: string | null
     description: string | null
@@ -4488,10 +5010,12 @@ export namespace Prisma {
     categoryId: string | null
     stripePaymentIntentId: string | null
     type: string | null
+    direction: string | null
     amount: number | null
     selectedAmount: number | null
     currency: string | null
     status: string | null
+    logoUrl: string | null
     lastFormatted: string | null
     merchantName: string | null
     description: string | null
@@ -4506,10 +5030,12 @@ export namespace Prisma {
     categoryId: number
     stripePaymentIntentId: number
     type: number
+    direction: number
     amount: number
     selectedAmount: number
     currency: number
     status: number
+    logoUrl: number
     lastFormatted: number
     merchantName: number
     description: number
@@ -4536,10 +5062,12 @@ export namespace Prisma {
     categoryId?: true
     stripePaymentIntentId?: true
     type?: true
+    direction?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
+    logoUrl?: true
     lastFormatted?: true
     merchantName?: true
     description?: true
@@ -4554,10 +5082,12 @@ export namespace Prisma {
     categoryId?: true
     stripePaymentIntentId?: true
     type?: true
+    direction?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
+    logoUrl?: true
     lastFormatted?: true
     merchantName?: true
     description?: true
@@ -4572,10 +5102,12 @@ export namespace Prisma {
     categoryId?: true
     stripePaymentIntentId?: true
     type?: true
+    direction?: true
     amount?: true
     selectedAmount?: true
     currency?: true
     status?: true
+    logoUrl?: true
     lastFormatted?: true
     merchantName?: true
     description?: true
@@ -4677,10 +5209,12 @@ export namespace Prisma {
     categoryId: string | null
     stripePaymentIntentId: string | null
     type: string
+    direction: string | null
     amount: number
     selectedAmount: number | null
     currency: string
     status: string
+    logoUrl: string | null
     lastFormatted: string | null
     merchantName: string | null
     description: string | null
@@ -4714,10 +5248,12 @@ export namespace Prisma {
     categoryId?: boolean
     stripePaymentIntentId?: boolean
     type?: boolean
+    direction?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    logoUrl?: boolean
     lastFormatted?: boolean
     merchantName?: boolean
     description?: boolean
@@ -4735,10 +5271,12 @@ export namespace Prisma {
     categoryId?: boolean
     stripePaymentIntentId?: boolean
     type?: boolean
+    direction?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    logoUrl?: boolean
     lastFormatted?: boolean
     merchantName?: boolean
     description?: boolean
@@ -4756,10 +5294,12 @@ export namespace Prisma {
     categoryId?: boolean
     stripePaymentIntentId?: boolean
     type?: boolean
+    direction?: boolean
     amount?: boolean
     selectedAmount?: boolean
     currency?: boolean
     status?: boolean
+    logoUrl?: boolean
     lastFormatted?: boolean
     merchantName?: boolean
     description?: boolean
@@ -4792,10 +5332,12 @@ export namespace Prisma {
       categoryId: string | null
       stripePaymentIntentId: string | null
       type: string
+      direction: string | null
       amount: number
       selectedAmount: number | null
       currency: string
       status: string
+      logoUrl: string | null
       lastFormatted: string | null
       merchantName: string | null
       description: string | null
@@ -5203,10 +5745,12 @@ export namespace Prisma {
     readonly categoryId: FieldRef<"Transaction", 'String'>
     readonly stripePaymentIntentId: FieldRef<"Transaction", 'String'>
     readonly type: FieldRef<"Transaction", 'String'>
+    readonly direction: FieldRef<"Transaction", 'String'>
     readonly amount: FieldRef<"Transaction", 'Float'>
     readonly selectedAmount: FieldRef<"Transaction", 'Float'>
     readonly currency: FieldRef<"Transaction", 'String'>
     readonly status: FieldRef<"Transaction", 'String'>
+    readonly logoUrl: FieldRef<"Transaction", 'String'>
     readonly lastFormatted: FieldRef<"Transaction", 'String'>
     readonly merchantName: FieldRef<"Transaction", 'String'>
     readonly description: FieldRef<"Transaction", 'String'>
@@ -9571,6 +10115,7 @@ export namespace Prisma {
     limit: number | null
     spent: number | null
     icon: string | null
+    color: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9582,6 +10127,7 @@ export namespace Prisma {
     limit: number | null
     spent: number | null
     icon: string | null
+    color: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9593,6 +10139,7 @@ export namespace Prisma {
     limit: number
     spent: number
     icon: number
+    color: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -9616,6 +10163,7 @@ export namespace Prisma {
     limit?: true
     spent?: true
     icon?: true
+    color?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9627,6 +10175,7 @@ export namespace Prisma {
     limit?: true
     spent?: true
     icon?: true
+    color?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9638,6 +10187,7 @@ export namespace Prisma {
     limit?: true
     spent?: true
     icon?: true
+    color?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -9736,6 +10286,7 @@ export namespace Prisma {
     limit: number
     spent: number
     icon: string | null
+    color: string | null
     createdAt: Date
     updatedAt: Date
     _count: CategoryCountAggregateOutputType | null
@@ -9766,6 +10317,7 @@ export namespace Prisma {
     limit?: boolean
     spent?: boolean
     icon?: boolean
+    color?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     budget?: boolean | BudgetDefaultArgs<ExtArgs>
@@ -9780,6 +10332,7 @@ export namespace Prisma {
     limit?: boolean
     spent?: boolean
     icon?: boolean
+    color?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     budget?: boolean | BudgetDefaultArgs<ExtArgs>
@@ -9792,6 +10345,7 @@ export namespace Prisma {
     limit?: boolean
     spent?: boolean
     icon?: boolean
+    color?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -9818,6 +10372,7 @@ export namespace Prisma {
       limit: number
       spent: number
       icon: string | null
+      color: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["category"]>
@@ -10221,6 +10776,7 @@ export namespace Prisma {
     readonly limit: FieldRef<"Category", 'Float'>
     readonly spent: FieldRef<"Category", 'Float'>
     readonly icon: FieldRef<"Category", 'String'>
+    readonly color: FieldRef<"Category", 'String'>
     readonly createdAt: FieldRef<"Category", 'DateTime'>
     readonly updatedAt: FieldRef<"Category", 'DateTime'>
   }
@@ -10590,6 +11146,7 @@ export namespace Prisma {
     userId: string | null
     subscriptionName: string | null
     bankName: string | null
+    mode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10599,6 +11156,7 @@ export namespace Prisma {
     userId: string | null
     subscriptionName: string | null
     bankName: string | null
+    mode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10608,6 +11166,7 @@ export namespace Prisma {
     userId: number
     subscriptionName: number
     bankName: number
+    mode: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10619,6 +11178,7 @@ export namespace Prisma {
     userId?: true
     subscriptionName?: true
     bankName?: true
+    mode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10628,6 +11188,7 @@ export namespace Prisma {
     userId?: true
     subscriptionName?: true
     bankName?: true
+    mode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10637,6 +11198,7 @@ export namespace Prisma {
     userId?: true
     subscriptionName?: true
     bankName?: true
+    mode?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10719,6 +11281,7 @@ export namespace Prisma {
     userId: string
     subscriptionName: string | null
     bankName: string | null
+    mode: string | null
     createdAt: Date
     updatedAt: Date
     _count: ChatSessionCountAggregateOutputType | null
@@ -10745,6 +11308,7 @@ export namespace Prisma {
     userId?: boolean
     subscriptionName?: boolean
     bankName?: boolean
+    mode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -10757,6 +11321,7 @@ export namespace Prisma {
     userId?: boolean
     subscriptionName?: boolean
     bankName?: boolean
+    mode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -10767,6 +11332,7 @@ export namespace Prisma {
     userId?: boolean
     subscriptionName?: boolean
     bankName?: boolean
+    mode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -10791,6 +11357,7 @@ export namespace Prisma {
       userId: string
       subscriptionName: string | null
       bankName: string | null
+      mode: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["chatSession"]>
@@ -11192,6 +11759,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"ChatSession", 'String'>
     readonly subscriptionName: FieldRef<"ChatSession", 'String'>
     readonly bankName: FieldRef<"ChatSession", 'String'>
+    readonly mode: FieldRef<"ChatSession", 'String'>
     readonly createdAt: FieldRef<"ChatSession", 'DateTime'>
     readonly updatedAt: FieldRef<"ChatSession", 'DateTime'>
   }
@@ -11577,6 +12145,7 @@ export namespace Prisma {
     chatSessionId: number
     role: number
     content: number
+    metadata: number
     createdAt: number
     _all: number
   }
@@ -11603,6 +12172,7 @@ export namespace Prisma {
     chatSessionId?: true
     role?: true
     content?: true
+    metadata?: true
     createdAt?: true
     _all?: true
   }
@@ -11684,6 +12254,7 @@ export namespace Prisma {
     chatSessionId: string
     role: string
     content: string
+    metadata: JsonValue | null
     createdAt: Date
     _count: ChatMessageCountAggregateOutputType | null
     _min: ChatMessageMinAggregateOutputType | null
@@ -11709,6 +12280,7 @@ export namespace Prisma {
     chatSessionId?: boolean
     role?: boolean
     content?: boolean
+    metadata?: boolean
     createdAt?: boolean
     session?: boolean | ChatSessionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["chatMessage"]>
@@ -11718,6 +12290,7 @@ export namespace Prisma {
     chatSessionId?: boolean
     role?: boolean
     content?: boolean
+    metadata?: boolean
     createdAt?: boolean
     session?: boolean | ChatSessionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["chatMessage"]>
@@ -11727,6 +12300,7 @@ export namespace Prisma {
     chatSessionId?: boolean
     role?: boolean
     content?: boolean
+    metadata?: boolean
     createdAt?: boolean
   }
 
@@ -11747,6 +12321,7 @@ export namespace Prisma {
       chatSessionId: string
       role: string
       content: string
+      metadata: Prisma.JsonValue | null
       createdAt: Date
     }, ExtArgs["result"]["chatMessage"]>
     composites: {}
@@ -12146,6 +12721,7 @@ export namespace Prisma {
     readonly chatSessionId: FieldRef<"ChatMessage", 'String'>
     readonly role: FieldRef<"ChatMessage", 'String'>
     readonly content: FieldRef<"ChatMessage", 'String'>
+    readonly metadata: FieldRef<"ChatMessage", 'Json'>
     readonly createdAt: FieldRef<"ChatMessage", 'DateTime'>
   }
     
@@ -13568,6 +14144,4009 @@ export namespace Prisma {
 
 
   /**
+   * Model PasskeyCredential
+   */
+
+  export type AggregatePasskeyCredential = {
+    _count: PasskeyCredentialCountAggregateOutputType | null
+    _avg: PasskeyCredentialAvgAggregateOutputType | null
+    _sum: PasskeyCredentialSumAggregateOutputType | null
+    _min: PasskeyCredentialMinAggregateOutputType | null
+    _max: PasskeyCredentialMaxAggregateOutputType | null
+  }
+
+  export type PasskeyCredentialAvgAggregateOutputType = {
+    signCount: number | null
+  }
+
+  export type PasskeyCredentialSumAggregateOutputType = {
+    signCount: number | null
+  }
+
+  export type PasskeyCredentialMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    credentialId: string | null
+    publicKey: Buffer | null
+    signCount: number | null
+    transports: string | null
+    deviceName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PasskeyCredentialMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    credentialId: string | null
+    publicKey: Buffer | null
+    signCount: number | null
+    transports: string | null
+    deviceName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PasskeyCredentialCountAggregateOutputType = {
+    id: number
+    userId: number
+    credentialId: number
+    publicKey: number
+    signCount: number
+    transports: number
+    deviceName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PasskeyCredentialAvgAggregateInputType = {
+    signCount?: true
+  }
+
+  export type PasskeyCredentialSumAggregateInputType = {
+    signCount?: true
+  }
+
+  export type PasskeyCredentialMinAggregateInputType = {
+    id?: true
+    userId?: true
+    credentialId?: true
+    publicKey?: true
+    signCount?: true
+    transports?: true
+    deviceName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PasskeyCredentialMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    credentialId?: true
+    publicKey?: true
+    signCount?: true
+    transports?: true
+    deviceName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PasskeyCredentialCountAggregateInputType = {
+    id?: true
+    userId?: true
+    credentialId?: true
+    publicKey?: true
+    signCount?: true
+    transports?: true
+    deviceName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PasskeyCredentialAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PasskeyCredential to aggregate.
+     */
+    where?: PasskeyCredentialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasskeyCredentials to fetch.
+     */
+    orderBy?: PasskeyCredentialOrderByWithRelationInput | PasskeyCredentialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PasskeyCredentialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasskeyCredentials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasskeyCredentials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PasskeyCredentials
+    **/
+    _count?: true | PasskeyCredentialCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PasskeyCredentialAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PasskeyCredentialSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PasskeyCredentialMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PasskeyCredentialMaxAggregateInputType
+  }
+
+  export type GetPasskeyCredentialAggregateType<T extends PasskeyCredentialAggregateArgs> = {
+        [P in keyof T & keyof AggregatePasskeyCredential]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePasskeyCredential[P]>
+      : GetScalarType<T[P], AggregatePasskeyCredential[P]>
+  }
+
+
+
+
+  export type PasskeyCredentialGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PasskeyCredentialWhereInput
+    orderBy?: PasskeyCredentialOrderByWithAggregationInput | PasskeyCredentialOrderByWithAggregationInput[]
+    by: PasskeyCredentialScalarFieldEnum[] | PasskeyCredentialScalarFieldEnum
+    having?: PasskeyCredentialScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PasskeyCredentialCountAggregateInputType | true
+    _avg?: PasskeyCredentialAvgAggregateInputType
+    _sum?: PasskeyCredentialSumAggregateInputType
+    _min?: PasskeyCredentialMinAggregateInputType
+    _max?: PasskeyCredentialMaxAggregateInputType
+  }
+
+  export type PasskeyCredentialGroupByOutputType = {
+    id: string
+    userId: string
+    credentialId: string
+    publicKey: Buffer
+    signCount: number
+    transports: string | null
+    deviceName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PasskeyCredentialCountAggregateOutputType | null
+    _avg: PasskeyCredentialAvgAggregateOutputType | null
+    _sum: PasskeyCredentialSumAggregateOutputType | null
+    _min: PasskeyCredentialMinAggregateOutputType | null
+    _max: PasskeyCredentialMaxAggregateOutputType | null
+  }
+
+  type GetPasskeyCredentialGroupByPayload<T extends PasskeyCredentialGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PasskeyCredentialGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PasskeyCredentialGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PasskeyCredentialGroupByOutputType[P]>
+            : GetScalarType<T[P], PasskeyCredentialGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PasskeyCredentialSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    credentialId?: boolean
+    publicKey?: boolean
+    signCount?: boolean
+    transports?: boolean
+    deviceName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["passkeyCredential"]>
+
+  export type PasskeyCredentialSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    credentialId?: boolean
+    publicKey?: boolean
+    signCount?: boolean
+    transports?: boolean
+    deviceName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["passkeyCredential"]>
+
+  export type PasskeyCredentialSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    credentialId?: boolean
+    publicKey?: boolean
+    signCount?: boolean
+    transports?: boolean
+    deviceName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PasskeyCredentialInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PasskeyCredentialIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $PasskeyCredentialPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PasskeyCredential"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      credentialId: string
+      publicKey: Buffer
+      signCount: number
+      transports: string | null
+      deviceName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["passkeyCredential"]>
+    composites: {}
+  }
+
+  type PasskeyCredentialGetPayload<S extends boolean | null | undefined | PasskeyCredentialDefaultArgs> = $Result.GetResult<Prisma.$PasskeyCredentialPayload, S>
+
+  type PasskeyCredentialCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PasskeyCredentialFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PasskeyCredentialCountAggregateInputType | true
+    }
+
+  export interface PasskeyCredentialDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PasskeyCredential'], meta: { name: 'PasskeyCredential' } }
+    /**
+     * Find zero or one PasskeyCredential that matches the filter.
+     * @param {PasskeyCredentialFindUniqueArgs} args - Arguments to find a PasskeyCredential
+     * @example
+     * // Get one PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PasskeyCredentialFindUniqueArgs>(args: SelectSubset<T, PasskeyCredentialFindUniqueArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PasskeyCredential that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PasskeyCredentialFindUniqueOrThrowArgs} args - Arguments to find a PasskeyCredential
+     * @example
+     * // Get one PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PasskeyCredentialFindUniqueOrThrowArgs>(args: SelectSubset<T, PasskeyCredentialFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PasskeyCredential that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialFindFirstArgs} args - Arguments to find a PasskeyCredential
+     * @example
+     * // Get one PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PasskeyCredentialFindFirstArgs>(args?: SelectSubset<T, PasskeyCredentialFindFirstArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PasskeyCredential that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialFindFirstOrThrowArgs} args - Arguments to find a PasskeyCredential
+     * @example
+     * // Get one PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PasskeyCredentialFindFirstOrThrowArgs>(args?: SelectSubset<T, PasskeyCredentialFindFirstOrThrowArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PasskeyCredentials that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PasskeyCredentials
+     * const passkeyCredentials = await prisma.passkeyCredential.findMany()
+     * 
+     * // Get first 10 PasskeyCredentials
+     * const passkeyCredentials = await prisma.passkeyCredential.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const passkeyCredentialWithIdOnly = await prisma.passkeyCredential.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PasskeyCredentialFindManyArgs>(args?: SelectSubset<T, PasskeyCredentialFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PasskeyCredential.
+     * @param {PasskeyCredentialCreateArgs} args - Arguments to create a PasskeyCredential.
+     * @example
+     * // Create one PasskeyCredential
+     * const PasskeyCredential = await prisma.passkeyCredential.create({
+     *   data: {
+     *     // ... data to create a PasskeyCredential
+     *   }
+     * })
+     * 
+     */
+    create<T extends PasskeyCredentialCreateArgs>(args: SelectSubset<T, PasskeyCredentialCreateArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PasskeyCredentials.
+     * @param {PasskeyCredentialCreateManyArgs} args - Arguments to create many PasskeyCredentials.
+     * @example
+     * // Create many PasskeyCredentials
+     * const passkeyCredential = await prisma.passkeyCredential.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PasskeyCredentialCreateManyArgs>(args?: SelectSubset<T, PasskeyCredentialCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PasskeyCredentials and returns the data saved in the database.
+     * @param {PasskeyCredentialCreateManyAndReturnArgs} args - Arguments to create many PasskeyCredentials.
+     * @example
+     * // Create many PasskeyCredentials
+     * const passkeyCredential = await prisma.passkeyCredential.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PasskeyCredentials and only return the `id`
+     * const passkeyCredentialWithIdOnly = await prisma.passkeyCredential.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PasskeyCredentialCreateManyAndReturnArgs>(args?: SelectSubset<T, PasskeyCredentialCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PasskeyCredential.
+     * @param {PasskeyCredentialDeleteArgs} args - Arguments to delete one PasskeyCredential.
+     * @example
+     * // Delete one PasskeyCredential
+     * const PasskeyCredential = await prisma.passkeyCredential.delete({
+     *   where: {
+     *     // ... filter to delete one PasskeyCredential
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PasskeyCredentialDeleteArgs>(args: SelectSubset<T, PasskeyCredentialDeleteArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PasskeyCredential.
+     * @param {PasskeyCredentialUpdateArgs} args - Arguments to update one PasskeyCredential.
+     * @example
+     * // Update one PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PasskeyCredentialUpdateArgs>(args: SelectSubset<T, PasskeyCredentialUpdateArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PasskeyCredentials.
+     * @param {PasskeyCredentialDeleteManyArgs} args - Arguments to filter PasskeyCredentials to delete.
+     * @example
+     * // Delete a few PasskeyCredentials
+     * const { count } = await prisma.passkeyCredential.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PasskeyCredentialDeleteManyArgs>(args?: SelectSubset<T, PasskeyCredentialDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PasskeyCredentials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PasskeyCredentials
+     * const passkeyCredential = await prisma.passkeyCredential.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PasskeyCredentialUpdateManyArgs>(args: SelectSubset<T, PasskeyCredentialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PasskeyCredential.
+     * @param {PasskeyCredentialUpsertArgs} args - Arguments to update or create a PasskeyCredential.
+     * @example
+     * // Update or create a PasskeyCredential
+     * const passkeyCredential = await prisma.passkeyCredential.upsert({
+     *   create: {
+     *     // ... data to create a PasskeyCredential
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PasskeyCredential we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PasskeyCredentialUpsertArgs>(args: SelectSubset<T, PasskeyCredentialUpsertArgs<ExtArgs>>): Prisma__PasskeyCredentialClient<$Result.GetResult<Prisma.$PasskeyCredentialPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PasskeyCredentials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialCountArgs} args - Arguments to filter PasskeyCredentials to count.
+     * @example
+     * // Count the number of PasskeyCredentials
+     * const count = await prisma.passkeyCredential.count({
+     *   where: {
+     *     // ... the filter for the PasskeyCredentials we want to count
+     *   }
+     * })
+    **/
+    count<T extends PasskeyCredentialCountArgs>(
+      args?: Subset<T, PasskeyCredentialCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PasskeyCredentialCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PasskeyCredential.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PasskeyCredentialAggregateArgs>(args: Subset<T, PasskeyCredentialAggregateArgs>): Prisma.PrismaPromise<GetPasskeyCredentialAggregateType<T>>
+
+    /**
+     * Group by PasskeyCredential.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasskeyCredentialGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PasskeyCredentialGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PasskeyCredentialGroupByArgs['orderBy'] }
+        : { orderBy?: PasskeyCredentialGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PasskeyCredentialGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPasskeyCredentialGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PasskeyCredential model
+   */
+  readonly fields: PasskeyCredentialFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PasskeyCredential.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PasskeyCredentialClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PasskeyCredential model
+   */ 
+  interface PasskeyCredentialFieldRefs {
+    readonly id: FieldRef<"PasskeyCredential", 'String'>
+    readonly userId: FieldRef<"PasskeyCredential", 'String'>
+    readonly credentialId: FieldRef<"PasskeyCredential", 'String'>
+    readonly publicKey: FieldRef<"PasskeyCredential", 'Bytes'>
+    readonly signCount: FieldRef<"PasskeyCredential", 'Int'>
+    readonly transports: FieldRef<"PasskeyCredential", 'String'>
+    readonly deviceName: FieldRef<"PasskeyCredential", 'String'>
+    readonly createdAt: FieldRef<"PasskeyCredential", 'DateTime'>
+    readonly updatedAt: FieldRef<"PasskeyCredential", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PasskeyCredential findUnique
+   */
+  export type PasskeyCredentialFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter, which PasskeyCredential to fetch.
+     */
+    where: PasskeyCredentialWhereUniqueInput
+  }
+
+  /**
+   * PasskeyCredential findUniqueOrThrow
+   */
+  export type PasskeyCredentialFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter, which PasskeyCredential to fetch.
+     */
+    where: PasskeyCredentialWhereUniqueInput
+  }
+
+  /**
+   * PasskeyCredential findFirst
+   */
+  export type PasskeyCredentialFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter, which PasskeyCredential to fetch.
+     */
+    where?: PasskeyCredentialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasskeyCredentials to fetch.
+     */
+    orderBy?: PasskeyCredentialOrderByWithRelationInput | PasskeyCredentialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PasskeyCredentials.
+     */
+    cursor?: PasskeyCredentialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasskeyCredentials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasskeyCredentials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PasskeyCredentials.
+     */
+    distinct?: PasskeyCredentialScalarFieldEnum | PasskeyCredentialScalarFieldEnum[]
+  }
+
+  /**
+   * PasskeyCredential findFirstOrThrow
+   */
+  export type PasskeyCredentialFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter, which PasskeyCredential to fetch.
+     */
+    where?: PasskeyCredentialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasskeyCredentials to fetch.
+     */
+    orderBy?: PasskeyCredentialOrderByWithRelationInput | PasskeyCredentialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PasskeyCredentials.
+     */
+    cursor?: PasskeyCredentialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasskeyCredentials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasskeyCredentials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PasskeyCredentials.
+     */
+    distinct?: PasskeyCredentialScalarFieldEnum | PasskeyCredentialScalarFieldEnum[]
+  }
+
+  /**
+   * PasskeyCredential findMany
+   */
+  export type PasskeyCredentialFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter, which PasskeyCredentials to fetch.
+     */
+    where?: PasskeyCredentialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasskeyCredentials to fetch.
+     */
+    orderBy?: PasskeyCredentialOrderByWithRelationInput | PasskeyCredentialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PasskeyCredentials.
+     */
+    cursor?: PasskeyCredentialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasskeyCredentials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasskeyCredentials.
+     */
+    skip?: number
+    distinct?: PasskeyCredentialScalarFieldEnum | PasskeyCredentialScalarFieldEnum[]
+  }
+
+  /**
+   * PasskeyCredential create
+   */
+  export type PasskeyCredentialCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PasskeyCredential.
+     */
+    data: XOR<PasskeyCredentialCreateInput, PasskeyCredentialUncheckedCreateInput>
+  }
+
+  /**
+   * PasskeyCredential createMany
+   */
+  export type PasskeyCredentialCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PasskeyCredentials.
+     */
+    data: PasskeyCredentialCreateManyInput | PasskeyCredentialCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PasskeyCredential createManyAndReturn
+   */
+  export type PasskeyCredentialCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PasskeyCredentials.
+     */
+    data: PasskeyCredentialCreateManyInput | PasskeyCredentialCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PasskeyCredential update
+   */
+  export type PasskeyCredentialUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PasskeyCredential.
+     */
+    data: XOR<PasskeyCredentialUpdateInput, PasskeyCredentialUncheckedUpdateInput>
+    /**
+     * Choose, which PasskeyCredential to update.
+     */
+    where: PasskeyCredentialWhereUniqueInput
+  }
+
+  /**
+   * PasskeyCredential updateMany
+   */
+  export type PasskeyCredentialUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PasskeyCredentials.
+     */
+    data: XOR<PasskeyCredentialUpdateManyMutationInput, PasskeyCredentialUncheckedUpdateManyInput>
+    /**
+     * Filter which PasskeyCredentials to update
+     */
+    where?: PasskeyCredentialWhereInput
+  }
+
+  /**
+   * PasskeyCredential upsert
+   */
+  export type PasskeyCredentialUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PasskeyCredential to update in case it exists.
+     */
+    where: PasskeyCredentialWhereUniqueInput
+    /**
+     * In case the PasskeyCredential found by the `where` argument doesn't exist, create a new PasskeyCredential with this data.
+     */
+    create: XOR<PasskeyCredentialCreateInput, PasskeyCredentialUncheckedCreateInput>
+    /**
+     * In case the PasskeyCredential was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PasskeyCredentialUpdateInput, PasskeyCredentialUncheckedUpdateInput>
+  }
+
+  /**
+   * PasskeyCredential delete
+   */
+  export type PasskeyCredentialDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+    /**
+     * Filter which PasskeyCredential to delete.
+     */
+    where: PasskeyCredentialWhereUniqueInput
+  }
+
+  /**
+   * PasskeyCredential deleteMany
+   */
+  export type PasskeyCredentialDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PasskeyCredentials to delete
+     */
+    where?: PasskeyCredentialWhereInput
+  }
+
+  /**
+   * PasskeyCredential without action
+   */
+  export type PasskeyCredentialDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasskeyCredential
+     */
+    select?: PasskeyCredentialSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasskeyCredentialInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DeviceSession
+   */
+
+  export type AggregateDeviceSession = {
+    _count: DeviceSessionCountAggregateOutputType | null
+    _min: DeviceSessionMinAggregateOutputType | null
+    _max: DeviceSessionMaxAggregateOutputType | null
+  }
+
+  export type DeviceSessionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    socureDeviceId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    appCheckToken: string | null
+    integrityVerdict: string | null
+    seonFingerprint: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DeviceSessionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    socureDeviceId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    appCheckToken: string | null
+    integrityVerdict: string | null
+    seonFingerprint: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DeviceSessionCountAggregateOutputType = {
+    id: number
+    userId: number
+    socureDeviceId: number
+    ipAddress: number
+    userAgent: number
+    appCheckToken: number
+    integrityVerdict: number
+    seonFingerprint: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DeviceSessionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    socureDeviceId?: true
+    ipAddress?: true
+    userAgent?: true
+    appCheckToken?: true
+    integrityVerdict?: true
+    seonFingerprint?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DeviceSessionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    socureDeviceId?: true
+    ipAddress?: true
+    userAgent?: true
+    appCheckToken?: true
+    integrityVerdict?: true
+    seonFingerprint?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DeviceSessionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    socureDeviceId?: true
+    ipAddress?: true
+    userAgent?: true
+    appCheckToken?: true
+    integrityVerdict?: true
+    seonFingerprint?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DeviceSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeviceSession to aggregate.
+     */
+    where?: DeviceSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeviceSessions to fetch.
+     */
+    orderBy?: DeviceSessionOrderByWithRelationInput | DeviceSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DeviceSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeviceSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeviceSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DeviceSessions
+    **/
+    _count?: true | DeviceSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DeviceSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DeviceSessionMaxAggregateInputType
+  }
+
+  export type GetDeviceSessionAggregateType<T extends DeviceSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateDeviceSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDeviceSession[P]>
+      : GetScalarType<T[P], AggregateDeviceSession[P]>
+  }
+
+
+
+
+  export type DeviceSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DeviceSessionWhereInput
+    orderBy?: DeviceSessionOrderByWithAggregationInput | DeviceSessionOrderByWithAggregationInput[]
+    by: DeviceSessionScalarFieldEnum[] | DeviceSessionScalarFieldEnum
+    having?: DeviceSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DeviceSessionCountAggregateInputType | true
+    _min?: DeviceSessionMinAggregateInputType
+    _max?: DeviceSessionMaxAggregateInputType
+  }
+
+  export type DeviceSessionGroupByOutputType = {
+    id: string
+    userId: string
+    socureDeviceId: string
+    ipAddress: string | null
+    userAgent: string | null
+    appCheckToken: string | null
+    integrityVerdict: string | null
+    seonFingerprint: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DeviceSessionCountAggregateOutputType | null
+    _min: DeviceSessionMinAggregateOutputType | null
+    _max: DeviceSessionMaxAggregateOutputType | null
+  }
+
+  type GetDeviceSessionGroupByPayload<T extends DeviceSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DeviceSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DeviceSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DeviceSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], DeviceSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DeviceSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    socureDeviceId?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    appCheckToken?: boolean
+    integrityVerdict?: boolean
+    seonFingerprint?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["deviceSession"]>
+
+  export type DeviceSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    socureDeviceId?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    appCheckToken?: boolean
+    integrityVerdict?: boolean
+    seonFingerprint?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["deviceSession"]>
+
+  export type DeviceSessionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    socureDeviceId?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    appCheckToken?: boolean
+    integrityVerdict?: boolean
+    seonFingerprint?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DeviceSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DeviceSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $DeviceSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DeviceSession"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      socureDeviceId: string
+      ipAddress: string | null
+      userAgent: string | null
+      appCheckToken: string | null
+      integrityVerdict: string | null
+      seonFingerprint: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["deviceSession"]>
+    composites: {}
+  }
+
+  type DeviceSessionGetPayload<S extends boolean | null | undefined | DeviceSessionDefaultArgs> = $Result.GetResult<Prisma.$DeviceSessionPayload, S>
+
+  type DeviceSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<DeviceSessionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: DeviceSessionCountAggregateInputType | true
+    }
+
+  export interface DeviceSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DeviceSession'], meta: { name: 'DeviceSession' } }
+    /**
+     * Find zero or one DeviceSession that matches the filter.
+     * @param {DeviceSessionFindUniqueArgs} args - Arguments to find a DeviceSession
+     * @example
+     * // Get one DeviceSession
+     * const deviceSession = await prisma.deviceSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DeviceSessionFindUniqueArgs>(args: SelectSubset<T, DeviceSessionFindUniqueArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one DeviceSession that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {DeviceSessionFindUniqueOrThrowArgs} args - Arguments to find a DeviceSession
+     * @example
+     * // Get one DeviceSession
+     * const deviceSession = await prisma.deviceSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DeviceSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, DeviceSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first DeviceSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionFindFirstArgs} args - Arguments to find a DeviceSession
+     * @example
+     * // Get one DeviceSession
+     * const deviceSession = await prisma.deviceSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DeviceSessionFindFirstArgs>(args?: SelectSubset<T, DeviceSessionFindFirstArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first DeviceSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionFindFirstOrThrowArgs} args - Arguments to find a DeviceSession
+     * @example
+     * // Get one DeviceSession
+     * const deviceSession = await prisma.deviceSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DeviceSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, DeviceSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more DeviceSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DeviceSessions
+     * const deviceSessions = await prisma.deviceSession.findMany()
+     * 
+     * // Get first 10 DeviceSessions
+     * const deviceSessions = await prisma.deviceSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const deviceSessionWithIdOnly = await prisma.deviceSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DeviceSessionFindManyArgs>(args?: SelectSubset<T, DeviceSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a DeviceSession.
+     * @param {DeviceSessionCreateArgs} args - Arguments to create a DeviceSession.
+     * @example
+     * // Create one DeviceSession
+     * const DeviceSession = await prisma.deviceSession.create({
+     *   data: {
+     *     // ... data to create a DeviceSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends DeviceSessionCreateArgs>(args: SelectSubset<T, DeviceSessionCreateArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many DeviceSessions.
+     * @param {DeviceSessionCreateManyArgs} args - Arguments to create many DeviceSessions.
+     * @example
+     * // Create many DeviceSessions
+     * const deviceSession = await prisma.deviceSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DeviceSessionCreateManyArgs>(args?: SelectSubset<T, DeviceSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DeviceSessions and returns the data saved in the database.
+     * @param {DeviceSessionCreateManyAndReturnArgs} args - Arguments to create many DeviceSessions.
+     * @example
+     * // Create many DeviceSessions
+     * const deviceSession = await prisma.deviceSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DeviceSessions and only return the `id`
+     * const deviceSessionWithIdOnly = await prisma.deviceSession.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DeviceSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, DeviceSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a DeviceSession.
+     * @param {DeviceSessionDeleteArgs} args - Arguments to delete one DeviceSession.
+     * @example
+     * // Delete one DeviceSession
+     * const DeviceSession = await prisma.deviceSession.delete({
+     *   where: {
+     *     // ... filter to delete one DeviceSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DeviceSessionDeleteArgs>(args: SelectSubset<T, DeviceSessionDeleteArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one DeviceSession.
+     * @param {DeviceSessionUpdateArgs} args - Arguments to update one DeviceSession.
+     * @example
+     * // Update one DeviceSession
+     * const deviceSession = await prisma.deviceSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DeviceSessionUpdateArgs>(args: SelectSubset<T, DeviceSessionUpdateArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more DeviceSessions.
+     * @param {DeviceSessionDeleteManyArgs} args - Arguments to filter DeviceSessions to delete.
+     * @example
+     * // Delete a few DeviceSessions
+     * const { count } = await prisma.deviceSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DeviceSessionDeleteManyArgs>(args?: SelectSubset<T, DeviceSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DeviceSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DeviceSessions
+     * const deviceSession = await prisma.deviceSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DeviceSessionUpdateManyArgs>(args: SelectSubset<T, DeviceSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one DeviceSession.
+     * @param {DeviceSessionUpsertArgs} args - Arguments to update or create a DeviceSession.
+     * @example
+     * // Update or create a DeviceSession
+     * const deviceSession = await prisma.deviceSession.upsert({
+     *   create: {
+     *     // ... data to create a DeviceSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DeviceSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DeviceSessionUpsertArgs>(args: SelectSubset<T, DeviceSessionUpsertArgs<ExtArgs>>): Prisma__DeviceSessionClient<$Result.GetResult<Prisma.$DeviceSessionPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of DeviceSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionCountArgs} args - Arguments to filter DeviceSessions to count.
+     * @example
+     * // Count the number of DeviceSessions
+     * const count = await prisma.deviceSession.count({
+     *   where: {
+     *     // ... the filter for the DeviceSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends DeviceSessionCountArgs>(
+      args?: Subset<T, DeviceSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DeviceSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DeviceSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DeviceSessionAggregateArgs>(args: Subset<T, DeviceSessionAggregateArgs>): Prisma.PrismaPromise<GetDeviceSessionAggregateType<T>>
+
+    /**
+     * Group by DeviceSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeviceSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DeviceSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DeviceSessionGroupByArgs['orderBy'] }
+        : { orderBy?: DeviceSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DeviceSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDeviceSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DeviceSession model
+   */
+  readonly fields: DeviceSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DeviceSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DeviceSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DeviceSession model
+   */ 
+  interface DeviceSessionFieldRefs {
+    readonly id: FieldRef<"DeviceSession", 'String'>
+    readonly userId: FieldRef<"DeviceSession", 'String'>
+    readonly socureDeviceId: FieldRef<"DeviceSession", 'String'>
+    readonly ipAddress: FieldRef<"DeviceSession", 'String'>
+    readonly userAgent: FieldRef<"DeviceSession", 'String'>
+    readonly appCheckToken: FieldRef<"DeviceSession", 'String'>
+    readonly integrityVerdict: FieldRef<"DeviceSession", 'String'>
+    readonly seonFingerprint: FieldRef<"DeviceSession", 'String'>
+    readonly createdAt: FieldRef<"DeviceSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"DeviceSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DeviceSession findUnique
+   */
+  export type DeviceSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which DeviceSession to fetch.
+     */
+    where: DeviceSessionWhereUniqueInput
+  }
+
+  /**
+   * DeviceSession findUniqueOrThrow
+   */
+  export type DeviceSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which DeviceSession to fetch.
+     */
+    where: DeviceSessionWhereUniqueInput
+  }
+
+  /**
+   * DeviceSession findFirst
+   */
+  export type DeviceSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which DeviceSession to fetch.
+     */
+    where?: DeviceSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeviceSessions to fetch.
+     */
+    orderBy?: DeviceSessionOrderByWithRelationInput | DeviceSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeviceSessions.
+     */
+    cursor?: DeviceSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeviceSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeviceSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeviceSessions.
+     */
+    distinct?: DeviceSessionScalarFieldEnum | DeviceSessionScalarFieldEnum[]
+  }
+
+  /**
+   * DeviceSession findFirstOrThrow
+   */
+  export type DeviceSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which DeviceSession to fetch.
+     */
+    where?: DeviceSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeviceSessions to fetch.
+     */
+    orderBy?: DeviceSessionOrderByWithRelationInput | DeviceSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeviceSessions.
+     */
+    cursor?: DeviceSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeviceSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeviceSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeviceSessions.
+     */
+    distinct?: DeviceSessionScalarFieldEnum | DeviceSessionScalarFieldEnum[]
+  }
+
+  /**
+   * DeviceSession findMany
+   */
+  export type DeviceSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which DeviceSessions to fetch.
+     */
+    where?: DeviceSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeviceSessions to fetch.
+     */
+    orderBy?: DeviceSessionOrderByWithRelationInput | DeviceSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DeviceSessions.
+     */
+    cursor?: DeviceSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeviceSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeviceSessions.
+     */
+    skip?: number
+    distinct?: DeviceSessionScalarFieldEnum | DeviceSessionScalarFieldEnum[]
+  }
+
+  /**
+   * DeviceSession create
+   */
+  export type DeviceSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DeviceSession.
+     */
+    data: XOR<DeviceSessionCreateInput, DeviceSessionUncheckedCreateInput>
+  }
+
+  /**
+   * DeviceSession createMany
+   */
+  export type DeviceSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DeviceSessions.
+     */
+    data: DeviceSessionCreateManyInput | DeviceSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DeviceSession createManyAndReturn
+   */
+  export type DeviceSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many DeviceSessions.
+     */
+    data: DeviceSessionCreateManyInput | DeviceSessionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DeviceSession update
+   */
+  export type DeviceSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DeviceSession.
+     */
+    data: XOR<DeviceSessionUpdateInput, DeviceSessionUncheckedUpdateInput>
+    /**
+     * Choose, which DeviceSession to update.
+     */
+    where: DeviceSessionWhereUniqueInput
+  }
+
+  /**
+   * DeviceSession updateMany
+   */
+  export type DeviceSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DeviceSessions.
+     */
+    data: XOR<DeviceSessionUpdateManyMutationInput, DeviceSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which DeviceSessions to update
+     */
+    where?: DeviceSessionWhereInput
+  }
+
+  /**
+   * DeviceSession upsert
+   */
+  export type DeviceSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DeviceSession to update in case it exists.
+     */
+    where: DeviceSessionWhereUniqueInput
+    /**
+     * In case the DeviceSession found by the `where` argument doesn't exist, create a new DeviceSession with this data.
+     */
+    create: XOR<DeviceSessionCreateInput, DeviceSessionUncheckedCreateInput>
+    /**
+     * In case the DeviceSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DeviceSessionUpdateInput, DeviceSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * DeviceSession delete
+   */
+  export type DeviceSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+    /**
+     * Filter which DeviceSession to delete.
+     */
+    where: DeviceSessionWhereUniqueInput
+  }
+
+  /**
+   * DeviceSession deleteMany
+   */
+  export type DeviceSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeviceSessions to delete
+     */
+    where?: DeviceSessionWhereInput
+  }
+
+  /**
+   * DeviceSession without action
+   */
+  export type DeviceSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceSession
+     */
+    select?: DeviceSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeviceSessionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AuditLog
+   */
+
+  export type AggregateAuditLog = {
+    _count: AuditLogCountAggregateOutputType | null
+    _min: AuditLogMinAggregateOutputType | null
+    _max: AuditLogMaxAggregateOutputType | null
+  }
+
+  export type AuditLogMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    requestId: string | null
+    action: string | null
+    providerOutcome: string | null
+    timestamp: Date | null
+  }
+
+  export type AuditLogMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    requestId: string | null
+    action: string | null
+    providerOutcome: string | null
+    timestamp: Date | null
+  }
+
+  export type AuditLogCountAggregateOutputType = {
+    id: number
+    userId: number
+    requestId: number
+    action: number
+    providerOutcome: number
+    metadata: number
+    timestamp: number
+    _all: number
+  }
+
+
+  export type AuditLogMinAggregateInputType = {
+    id?: true
+    userId?: true
+    requestId?: true
+    action?: true
+    providerOutcome?: true
+    timestamp?: true
+  }
+
+  export type AuditLogMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    requestId?: true
+    action?: true
+    providerOutcome?: true
+    timestamp?: true
+  }
+
+  export type AuditLogCountAggregateInputType = {
+    id?: true
+    userId?: true
+    requestId?: true
+    action?: true
+    providerOutcome?: true
+    metadata?: true
+    timestamp?: true
+    _all?: true
+  }
+
+  export type AuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AuditLog to aggregate.
+     */
+    where?: AuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuditLogs to fetch.
+     */
+    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AuditLogs
+    **/
+    _count?: true | AuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AuditLogMaxAggregateInputType
+  }
+
+  export type GetAuditLogAggregateType<T extends AuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAuditLog[P]>
+      : GetScalarType<T[P], AggregateAuditLog[P]>
+  }
+
+
+
+
+  export type AuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuditLogWhereInput
+    orderBy?: AuditLogOrderByWithAggregationInput | AuditLogOrderByWithAggregationInput[]
+    by: AuditLogScalarFieldEnum[] | AuditLogScalarFieldEnum
+    having?: AuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AuditLogCountAggregateInputType | true
+    _min?: AuditLogMinAggregateInputType
+    _max?: AuditLogMaxAggregateInputType
+  }
+
+  export type AuditLogGroupByOutputType = {
+    id: string
+    userId: string | null
+    requestId: string
+    action: string
+    providerOutcome: string | null
+    metadata: JsonValue | null
+    timestamp: Date
+    _count: AuditLogCountAggregateOutputType | null
+    _min: AuditLogMinAggregateOutputType | null
+    _max: AuditLogMaxAggregateOutputType | null
+  }
+
+  type GetAuditLogGroupByPayload<T extends AuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], AuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    requestId?: boolean
+    action?: boolean
+    providerOutcome?: boolean
+    metadata?: boolean
+    timestamp?: boolean
+    user?: boolean | AuditLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["auditLog"]>
+
+  export type AuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    requestId?: boolean
+    action?: boolean
+    providerOutcome?: boolean
+    metadata?: boolean
+    timestamp?: boolean
+    user?: boolean | AuditLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["auditLog"]>
+
+  export type AuditLogSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    requestId?: boolean
+    action?: boolean
+    providerOutcome?: boolean
+    metadata?: boolean
+    timestamp?: boolean
+  }
+
+  export type AuditLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | AuditLog$userArgs<ExtArgs>
+  }
+  export type AuditLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | AuditLog$userArgs<ExtArgs>
+  }
+
+  export type $AuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AuditLog"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string | null
+      requestId: string
+      action: string
+      providerOutcome: string | null
+      metadata: Prisma.JsonValue | null
+      timestamp: Date
+    }, ExtArgs["result"]["auditLog"]>
+    composites: {}
+  }
+
+  type AuditLogGetPayload<S extends boolean | null | undefined | AuditLogDefaultArgs> = $Result.GetResult<Prisma.$AuditLogPayload, S>
+
+  type AuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AuditLogFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: AuditLogCountAggregateInputType | true
+    }
+
+  export interface AuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuditLog'], meta: { name: 'AuditLog' } }
+    /**
+     * Find zero or one AuditLog that matches the filter.
+     * @param {AuditLogFindUniqueArgs} args - Arguments to find a AuditLog
+     * @example
+     * // Get one AuditLog
+     * const auditLog = await prisma.auditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AuditLogFindUniqueArgs>(args: SelectSubset<T, AuditLogFindUniqueArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AuditLog that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AuditLogFindUniqueOrThrowArgs} args - Arguments to find a AuditLog
+     * @example
+     * // Get one AuditLog
+     * const auditLog = await prisma.auditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, AuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogFindFirstArgs} args - Arguments to find a AuditLog
+     * @example
+     * // Get one AuditLog
+     * const auditLog = await prisma.auditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AuditLogFindFirstArgs>(args?: SelectSubset<T, AuditLogFindFirstArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogFindFirstOrThrowArgs} args - Arguments to find a AuditLog
+     * @example
+     * // Get one AuditLog
+     * const auditLog = await prisma.auditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, AuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AuditLogs
+     * const auditLogs = await prisma.auditLog.findMany()
+     * 
+     * // Get first 10 AuditLogs
+     * const auditLogs = await prisma.auditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const auditLogWithIdOnly = await prisma.auditLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AuditLogFindManyArgs>(args?: SelectSubset<T, AuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AuditLog.
+     * @param {AuditLogCreateArgs} args - Arguments to create a AuditLog.
+     * @example
+     * // Create one AuditLog
+     * const AuditLog = await prisma.auditLog.create({
+     *   data: {
+     *     // ... data to create a AuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends AuditLogCreateArgs>(args: SelectSubset<T, AuditLogCreateArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AuditLogs.
+     * @param {AuditLogCreateManyArgs} args - Arguments to create many AuditLogs.
+     * @example
+     * // Create many AuditLogs
+     * const auditLog = await prisma.auditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AuditLogCreateManyArgs>(args?: SelectSubset<T, AuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AuditLogs and returns the data saved in the database.
+     * @param {AuditLogCreateManyAndReturnArgs} args - Arguments to create many AuditLogs.
+     * @example
+     * // Create many AuditLogs
+     * const auditLog = await prisma.auditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AuditLogs and only return the `id`
+     * const auditLogWithIdOnly = await prisma.auditLog.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, AuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AuditLog.
+     * @param {AuditLogDeleteArgs} args - Arguments to delete one AuditLog.
+     * @example
+     * // Delete one AuditLog
+     * const AuditLog = await prisma.auditLog.delete({
+     *   where: {
+     *     // ... filter to delete one AuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AuditLogDeleteArgs>(args: SelectSubset<T, AuditLogDeleteArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AuditLog.
+     * @param {AuditLogUpdateArgs} args - Arguments to update one AuditLog.
+     * @example
+     * // Update one AuditLog
+     * const auditLog = await prisma.auditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AuditLogUpdateArgs>(args: SelectSubset<T, AuditLogUpdateArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AuditLogs.
+     * @param {AuditLogDeleteManyArgs} args - Arguments to filter AuditLogs to delete.
+     * @example
+     * // Delete a few AuditLogs
+     * const { count } = await prisma.auditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AuditLogDeleteManyArgs>(args?: SelectSubset<T, AuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AuditLogs
+     * const auditLog = await prisma.auditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AuditLogUpdateManyArgs>(args: SelectSubset<T, AuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AuditLog.
+     * @param {AuditLogUpsertArgs} args - Arguments to update or create a AuditLog.
+     * @example
+     * // Update or create a AuditLog
+     * const auditLog = await prisma.auditLog.upsert({
+     *   create: {
+     *     // ... data to create a AuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AuditLogUpsertArgs>(args: SelectSubset<T, AuditLogUpsertArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogCountArgs} args - Arguments to filter AuditLogs to count.
+     * @example
+     * // Count the number of AuditLogs
+     * const count = await prisma.auditLog.count({
+     *   where: {
+     *     // ... the filter for the AuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends AuditLogCountArgs>(
+      args?: Subset<T, AuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AuditLogAggregateArgs>(args: Subset<T, AuditLogAggregateArgs>): Prisma.PrismaPromise<GetAuditLogAggregateType<T>>
+
+    /**
+     * Group by AuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: AuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AuditLog model
+   */
+  readonly fields: AuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends AuditLog$userArgs<ExtArgs> = {}>(args?: Subset<T, AuditLog$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AuditLog model
+   */ 
+  interface AuditLogFieldRefs {
+    readonly id: FieldRef<"AuditLog", 'String'>
+    readonly userId: FieldRef<"AuditLog", 'String'>
+    readonly requestId: FieldRef<"AuditLog", 'String'>
+    readonly action: FieldRef<"AuditLog", 'String'>
+    readonly providerOutcome: FieldRef<"AuditLog", 'String'>
+    readonly metadata: FieldRef<"AuditLog", 'Json'>
+    readonly timestamp: FieldRef<"AuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AuditLog findUnique
+   */
+  export type AuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AuditLog to fetch.
+     */
+    where: AuditLogWhereUniqueInput
+  }
+
+  /**
+   * AuditLog findUniqueOrThrow
+   */
+  export type AuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AuditLog to fetch.
+     */
+    where: AuditLogWhereUniqueInput
+  }
+
+  /**
+   * AuditLog findFirst
+   */
+  export type AuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AuditLog to fetch.
+     */
+    where?: AuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuditLogs to fetch.
+     */
+    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AuditLogs.
+     */
+    cursor?: AuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AuditLogs.
+     */
+    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AuditLog findFirstOrThrow
+   */
+  export type AuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AuditLog to fetch.
+     */
+    where?: AuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuditLogs to fetch.
+     */
+    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AuditLogs.
+     */
+    cursor?: AuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AuditLogs.
+     */
+    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AuditLog findMany
+   */
+  export type AuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AuditLogs to fetch.
+     */
+    where?: AuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuditLogs to fetch.
+     */
+    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AuditLogs.
+     */
+    cursor?: AuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuditLogs.
+     */
+    skip?: number
+    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AuditLog create
+   */
+  export type AuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AuditLog.
+     */
+    data: XOR<AuditLogCreateInput, AuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * AuditLog createMany
+   */
+  export type AuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AuditLogs.
+     */
+    data: AuditLogCreateManyInput | AuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AuditLog createManyAndReturn
+   */
+  export type AuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AuditLogs.
+     */
+    data: AuditLogCreateManyInput | AuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AuditLog update
+   */
+  export type AuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AuditLog.
+     */
+    data: XOR<AuditLogUpdateInput, AuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which AuditLog to update.
+     */
+    where: AuditLogWhereUniqueInput
+  }
+
+  /**
+   * AuditLog updateMany
+   */
+  export type AuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AuditLogs.
+     */
+    data: XOR<AuditLogUpdateManyMutationInput, AuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AuditLogs to update
+     */
+    where?: AuditLogWhereInput
+  }
+
+  /**
+   * AuditLog upsert
+   */
+  export type AuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AuditLog to update in case it exists.
+     */
+    where: AuditLogWhereUniqueInput
+    /**
+     * In case the AuditLog found by the `where` argument doesn't exist, create a new AuditLog with this data.
+     */
+    create: XOR<AuditLogCreateInput, AuditLogUncheckedCreateInput>
+    /**
+     * In case the AuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AuditLogUpdateInput, AuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * AuditLog delete
+   */
+  export type AuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+    /**
+     * Filter which AuditLog to delete.
+     */
+    where: AuditLogWhereUniqueInput
+  }
+
+  /**
+   * AuditLog deleteMany
+   */
+  export type AuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AuditLogs to delete
+     */
+    where?: AuditLogWhereInput
+  }
+
+  /**
+   * AuditLog.user
+   */
+  export type AuditLog$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * AuditLog without action
+   */
+  export type AuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuditLog
+     */
+    select?: AuditLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuditLogInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Insight
+   */
+
+  export type AggregateInsight = {
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  export type InsightAvgAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type InsightSumAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type InsightMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    type: string | null
+    title: string | null
+    description: string | null
+    amount: number | null
+    actionUrl: string | null
+    isRead: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    type: string | null
+    title: string | null
+    description: string | null
+    amount: number | null
+    actionUrl: string | null
+    isRead: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightCountAggregateOutputType = {
+    id: number
+    userId: number
+    type: number
+    title: number
+    description: number
+    amount: number
+    actionUrl: number
+    isRead: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type InsightAvgAggregateInputType = {
+    amount?: true
+  }
+
+  export type InsightSumAggregateInputType = {
+    amount?: true
+  }
+
+  export type InsightMinAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    title?: true
+    description?: true
+    amount?: true
+    actionUrl?: true
+    isRead?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    title?: true
+    description?: true
+    amount?: true
+    actionUrl?: true
+    isRead?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightCountAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    title?: true
+    description?: true
+    amount?: true
+    actionUrl?: true
+    isRead?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type InsightAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insight to aggregate.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Insights
+    **/
+    _count?: true | InsightCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InsightAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InsightSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InsightMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type GetInsightAggregateType<T extends InsightAggregateArgs> = {
+        [P in keyof T & keyof AggregateInsight]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInsight[P]>
+      : GetScalarType<T[P], AggregateInsight[P]>
+  }
+
+
+
+
+  export type InsightGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightWhereInput
+    orderBy?: InsightOrderByWithAggregationInput | InsightOrderByWithAggregationInput[]
+    by: InsightScalarFieldEnum[] | InsightScalarFieldEnum
+    having?: InsightScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InsightCountAggregateInputType | true
+    _avg?: InsightAvgAggregateInputType
+    _sum?: InsightSumAggregateInputType
+    _min?: InsightMinAggregateInputType
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type InsightGroupByOutputType = {
+    id: string
+    userId: string
+    type: string
+    title: string
+    description: string | null
+    amount: number | null
+    actionUrl: string | null
+    isRead: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  type GetInsightGroupByPayload<T extends InsightGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InsightGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InsightGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InsightGroupByOutputType[P]>
+            : GetScalarType<T[P], InsightGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InsightSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    title?: boolean
+    description?: boolean
+    amount?: boolean
+    actionUrl?: boolean
+    isRead?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    title?: boolean
+    description?: boolean
+    amount?: boolean
+    actionUrl?: boolean
+    isRead?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    title?: boolean
+    description?: boolean
+    amount?: boolean
+    actionUrl?: boolean
+    isRead?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type InsightInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type InsightIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $InsightPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Insight"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      type: string
+      title: string
+      description: string | null
+      amount: number | null
+      actionUrl: string | null
+      isRead: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["insight"]>
+    composites: {}
+  }
+
+  type InsightGetPayload<S extends boolean | null | undefined | InsightDefaultArgs> = $Result.GetResult<Prisma.$InsightPayload, S>
+
+  type InsightCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<InsightFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: InsightCountAggregateInputType | true
+    }
+
+  export interface InsightDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Insight'], meta: { name: 'Insight' } }
+    /**
+     * Find zero or one Insight that matches the filter.
+     * @param {InsightFindUniqueArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InsightFindUniqueArgs>(args: SelectSubset<T, InsightFindUniqueArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Insight that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {InsightFindUniqueOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InsightFindUniqueOrThrowArgs>(args: SelectSubset<T, InsightFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Insight that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InsightFindFirstArgs>(args?: SelectSubset<T, InsightFindFirstArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Insight that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InsightFindFirstOrThrowArgs>(args?: SelectSubset<T, InsightFindFirstOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Insights that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Insights
+     * const insights = await prisma.insight.findMany()
+     * 
+     * // Get first 10 Insights
+     * const insights = await prisma.insight.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const insightWithIdOnly = await prisma.insight.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InsightFindManyArgs>(args?: SelectSubset<T, InsightFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Insight.
+     * @param {InsightCreateArgs} args - Arguments to create a Insight.
+     * @example
+     * // Create one Insight
+     * const Insight = await prisma.insight.create({
+     *   data: {
+     *     // ... data to create a Insight
+     *   }
+     * })
+     * 
+     */
+    create<T extends InsightCreateArgs>(args: SelectSubset<T, InsightCreateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Insights.
+     * @param {InsightCreateManyArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InsightCreateManyArgs>(args?: SelectSubset<T, InsightCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Insights and returns the data saved in the database.
+     * @param {InsightCreateManyAndReturnArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Insights and only return the `id`
+     * const insightWithIdOnly = await prisma.insight.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InsightCreateManyAndReturnArgs>(args?: SelectSubset<T, InsightCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Insight.
+     * @param {InsightDeleteArgs} args - Arguments to delete one Insight.
+     * @example
+     * // Delete one Insight
+     * const Insight = await prisma.insight.delete({
+     *   where: {
+     *     // ... filter to delete one Insight
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InsightDeleteArgs>(args: SelectSubset<T, InsightDeleteArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Insight.
+     * @param {InsightUpdateArgs} args - Arguments to update one Insight.
+     * @example
+     * // Update one Insight
+     * const insight = await prisma.insight.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InsightUpdateArgs>(args: SelectSubset<T, InsightUpdateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Insights.
+     * @param {InsightDeleteManyArgs} args - Arguments to filter Insights to delete.
+     * @example
+     * // Delete a few Insights
+     * const { count } = await prisma.insight.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InsightDeleteManyArgs>(args?: SelectSubset<T, InsightDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Insights
+     * const insight = await prisma.insight.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InsightUpdateManyArgs>(args: SelectSubset<T, InsightUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Insight.
+     * @param {InsightUpsertArgs} args - Arguments to update or create a Insight.
+     * @example
+     * // Update or create a Insight
+     * const insight = await prisma.insight.upsert({
+     *   create: {
+     *     // ... data to create a Insight
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Insight we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InsightUpsertArgs>(args: SelectSubset<T, InsightUpsertArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightCountArgs} args - Arguments to filter Insights to count.
+     * @example
+     * // Count the number of Insights
+     * const count = await prisma.insight.count({
+     *   where: {
+     *     // ... the filter for the Insights we want to count
+     *   }
+     * })
+    **/
+    count<T extends InsightCountArgs>(
+      args?: Subset<T, InsightCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InsightCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InsightAggregateArgs>(args: Subset<T, InsightAggregateArgs>): Prisma.PrismaPromise<GetInsightAggregateType<T>>
+
+    /**
+     * Group by Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InsightGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InsightGroupByArgs['orderBy'] }
+        : { orderBy?: InsightGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InsightGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInsightGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Insight model
+   */
+  readonly fields: InsightFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Insight.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InsightClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Insight model
+   */ 
+  interface InsightFieldRefs {
+    readonly id: FieldRef<"Insight", 'String'>
+    readonly userId: FieldRef<"Insight", 'String'>
+    readonly type: FieldRef<"Insight", 'String'>
+    readonly title: FieldRef<"Insight", 'String'>
+    readonly description: FieldRef<"Insight", 'String'>
+    readonly amount: FieldRef<"Insight", 'Float'>
+    readonly actionUrl: FieldRef<"Insight", 'String'>
+    readonly isRead: FieldRef<"Insight", 'Boolean'>
+    readonly createdAt: FieldRef<"Insight", 'DateTime'>
+    readonly updatedAt: FieldRef<"Insight", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Insight findUnique
+   */
+  export type InsightFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findUniqueOrThrow
+   */
+  export type InsightFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findFirst
+   */
+  export type InsightFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findFirstOrThrow
+   */
+  export type InsightFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findMany
+   */
+  export type InsightFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insights to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight create
+   */
+  export type InsightCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Insight.
+     */
+    data: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+  }
+
+  /**
+   * Insight createMany
+   */
+  export type InsightCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Insight createManyAndReturn
+   */
+  export type InsightCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Insight update
+   */
+  export type InsightUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Insight.
+     */
+    data: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+    /**
+     * Choose, which Insight to update.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight updateMany
+   */
+  export type InsightUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Insights.
+     */
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyInput>
+    /**
+     * Filter which Insights to update
+     */
+    where?: InsightWhereInput
+  }
+
+  /**
+   * Insight upsert
+   */
+  export type InsightUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Insight to update in case it exists.
+     */
+    where: InsightWhereUniqueInput
+    /**
+     * In case the Insight found by the `where` argument doesn't exist, create a new Insight with this data.
+     */
+    create: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+    /**
+     * In case the Insight was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+  }
+
+  /**
+   * Insight delete
+   */
+  export type InsightDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter which Insight to delete.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight deleteMany
+   */
+  export type InsightDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insights to delete
+     */
+    where?: InsightWhereInput
+  }
+
+  /**
+   * Insight without action
+   */
+  export type InsightDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -13589,6 +18168,7 @@ export namespace Prisma {
     lastName: 'lastName',
     dob: 'dob',
     ssn: 'ssn',
+    ssnLast4: 'ssnLast4',
     addressStreet: 'addressStreet',
     addressCity: 'addressCity',
     addressState: 'addressState',
@@ -13604,7 +18184,10 @@ export namespace Prisma {
     boosts: 'boosts',
     last4_digits: 'last4_digits',
     cleo_card: 'cleo_card',
+    phoneNumber: 'phoneNumber',
+    preferences: 'preferences',
     kycStatus: 'kycStatus',
+    ewaDisclaimerAccepted: 'ewaDisclaimerAccepted',
     socureDeviceId: 'socureDeviceId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -13636,10 +18219,12 @@ export namespace Prisma {
     categoryId: 'categoryId',
     stripePaymentIntentId: 'stripePaymentIntentId',
     type: 'type',
+    direction: 'direction',
     amount: 'amount',
     selectedAmount: 'selectedAmount',
     currency: 'currency',
     status: 'status',
+    logoUrl: 'logoUrl',
     lastFormatted: 'lastFormatted',
     merchantName: 'merchantName',
     description: 'description',
@@ -13710,6 +18295,7 @@ export namespace Prisma {
     limit: 'limit',
     spent: 'spent',
     icon: 'icon',
+    color: 'color',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13722,6 +18308,7 @@ export namespace Prisma {
     userId: 'userId',
     subscriptionName: 'subscriptionName',
     bankName: 'bankName',
+    mode: 'mode',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13734,6 +18321,7 @@ export namespace Prisma {
     chatSessionId: 'chatSessionId',
     role: 'role',
     content: 'content',
+    metadata: 'metadata',
     createdAt: 'createdAt'
   };
 
@@ -13756,6 +18344,66 @@ export namespace Prisma {
   };
 
   export type CashAdvanceScalarFieldEnum = (typeof CashAdvanceScalarFieldEnum)[keyof typeof CashAdvanceScalarFieldEnum]
+
+
+  export const PasskeyCredentialScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    credentialId: 'credentialId',
+    publicKey: 'publicKey',
+    signCount: 'signCount',
+    transports: 'transports',
+    deviceName: 'deviceName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PasskeyCredentialScalarFieldEnum = (typeof PasskeyCredentialScalarFieldEnum)[keyof typeof PasskeyCredentialScalarFieldEnum]
+
+
+  export const DeviceSessionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    socureDeviceId: 'socureDeviceId',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    appCheckToken: 'appCheckToken',
+    integrityVerdict: 'integrityVerdict',
+    seonFingerprint: 'seonFingerprint',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DeviceSessionScalarFieldEnum = (typeof DeviceSessionScalarFieldEnum)[keyof typeof DeviceSessionScalarFieldEnum]
+
+
+  export const AuditLogScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    requestId: 'requestId',
+    action: 'action',
+    providerOutcome: 'providerOutcome',
+    metadata: 'metadata',
+    timestamp: 'timestamp'
+  };
+
+  export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+  export const InsightScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    title: 'title',
+    description: 'description',
+    amount: 'amount',
+    actionUrl: 'actionUrl',
+    isRead: 'isRead',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type InsightScalarFieldEnum = (typeof InsightScalarFieldEnum)[keyof typeof InsightScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -13875,6 +18523,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Bytes'
+   */
+  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes[]'
+   */
+  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -13902,6 +18564,7 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"User"> | string | null
     dob?: StringNullableFilter<"User"> | string | null
     ssn?: StringNullableFilter<"User"> | string | null
+    ssnLast4?: StringNullableFilter<"User"> | string | null
     addressStreet?: StringNullableFilter<"User"> | string | null
     addressCity?: StringNullableFilter<"User"> | string | null
     addressState?: StringNullableFilter<"User"> | string | null
@@ -13917,7 +18580,10 @@ export namespace Prisma {
     boosts?: JsonNullableFilter<"User">
     last4_digits?: StringNullableFilter<"User"> | string | null
     cleo_card?: BoolFilter<"User"> | boolean
+    phoneNumber?: StringNullableFilter<"User"> | string | null
+    preferences?: JsonNullableFilter<"User">
     kycStatus?: StringNullableFilter<"User"> | string | null
+    ewaDisclaimerAccepted?: BoolFilter<"User"> | boolean
     socureDeviceId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -13929,6 +18595,10 @@ export namespace Prisma {
     budgets?: BudgetListRelationFilter
     chatSessions?: ChatSessionListRelationFilter
     cashAdvances?: CashAdvanceListRelationFilter
+    passkeys?: PasskeyCredentialListRelationFilter
+    deviceSessions?: DeviceSessionListRelationFilter
+    auditLogs?: AuditLogListRelationFilter
+    insights?: InsightListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -13939,6 +18609,7 @@ export namespace Prisma {
     lastName?: SortOrderInput | SortOrder
     dob?: SortOrderInput | SortOrder
     ssn?: SortOrderInput | SortOrder
+    ssnLast4?: SortOrderInput | SortOrder
     addressStreet?: SortOrderInput | SortOrder
     addressCity?: SortOrderInput | SortOrder
     addressState?: SortOrderInput | SortOrder
@@ -13954,7 +18625,10 @@ export namespace Prisma {
     boosts?: SortOrderInput | SortOrder
     last4_digits?: SortOrderInput | SortOrder
     cleo_card?: SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
+    preferences?: SortOrderInput | SortOrder
     kycStatus?: SortOrderInput | SortOrder
+    ewaDisclaimerAccepted?: SortOrder
     socureDeviceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13966,6 +18640,10 @@ export namespace Prisma {
     budgets?: BudgetOrderByRelationAggregateInput
     chatSessions?: ChatSessionOrderByRelationAggregateInput
     cashAdvances?: CashAdvanceOrderByRelationAggregateInput
+    passkeys?: PasskeyCredentialOrderByRelationAggregateInput
+    deviceSessions?: DeviceSessionOrderByRelationAggregateInput
+    auditLogs?: AuditLogOrderByRelationAggregateInput
+    insights?: InsightOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -13979,6 +18657,7 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"User"> | string | null
     dob?: StringNullableFilter<"User"> | string | null
     ssn?: StringNullableFilter<"User"> | string | null
+    ssnLast4?: StringNullableFilter<"User"> | string | null
     addressStreet?: StringNullableFilter<"User"> | string | null
     addressCity?: StringNullableFilter<"User"> | string | null
     addressState?: StringNullableFilter<"User"> | string | null
@@ -13994,7 +18673,10 @@ export namespace Prisma {
     boosts?: JsonNullableFilter<"User">
     last4_digits?: StringNullableFilter<"User"> | string | null
     cleo_card?: BoolFilter<"User"> | boolean
+    phoneNumber?: StringNullableFilter<"User"> | string | null
+    preferences?: JsonNullableFilter<"User">
     kycStatus?: StringNullableFilter<"User"> | string | null
+    ewaDisclaimerAccepted?: BoolFilter<"User"> | boolean
     socureDeviceId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -14006,6 +18688,10 @@ export namespace Prisma {
     budgets?: BudgetListRelationFilter
     chatSessions?: ChatSessionListRelationFilter
     cashAdvances?: CashAdvanceListRelationFilter
+    passkeys?: PasskeyCredentialListRelationFilter
+    deviceSessions?: DeviceSessionListRelationFilter
+    auditLogs?: AuditLogListRelationFilter
+    insights?: InsightListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -14016,6 +18702,7 @@ export namespace Prisma {
     lastName?: SortOrderInput | SortOrder
     dob?: SortOrderInput | SortOrder
     ssn?: SortOrderInput | SortOrder
+    ssnLast4?: SortOrderInput | SortOrder
     addressStreet?: SortOrderInput | SortOrder
     addressCity?: SortOrderInput | SortOrder
     addressState?: SortOrderInput | SortOrder
@@ -14031,7 +18718,10 @@ export namespace Prisma {
     boosts?: SortOrderInput | SortOrder
     last4_digits?: SortOrderInput | SortOrder
     cleo_card?: SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
+    preferences?: SortOrderInput | SortOrder
     kycStatus?: SortOrderInput | SortOrder
+    ewaDisclaimerAccepted?: SortOrder
     socureDeviceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -14053,6 +18743,7 @@ export namespace Prisma {
     lastName?: StringNullableWithAggregatesFilter<"User"> | string | null
     dob?: StringNullableWithAggregatesFilter<"User"> | string | null
     ssn?: StringNullableWithAggregatesFilter<"User"> | string | null
+    ssnLast4?: StringNullableWithAggregatesFilter<"User"> | string | null
     addressStreet?: StringNullableWithAggregatesFilter<"User"> | string | null
     addressCity?: StringNullableWithAggregatesFilter<"User"> | string | null
     addressState?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -14068,7 +18759,10 @@ export namespace Prisma {
     boosts?: JsonNullableWithAggregatesFilter<"User">
     last4_digits?: StringNullableWithAggregatesFilter<"User"> | string | null
     cleo_card?: BoolWithAggregatesFilter<"User"> | boolean
+    phoneNumber?: StringNullableWithAggregatesFilter<"User"> | string | null
+    preferences?: JsonNullableWithAggregatesFilter<"User">
     kycStatus?: StringNullableWithAggregatesFilter<"User"> | string | null
+    ewaDisclaimerAccepted?: BoolWithAggregatesFilter<"User"> | boolean
     socureDeviceId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -14169,10 +18863,12 @@ export namespace Prisma {
     categoryId?: StringNullableFilter<"Transaction"> | string | null
     stripePaymentIntentId?: StringNullableFilter<"Transaction"> | string | null
     type?: StringFilter<"Transaction"> | string
+    direction?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    logoUrl?: StringNullableFilter<"Transaction"> | string | null
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
     merchantName?: StringNullableFilter<"Transaction"> | string | null
     description?: StringNullableFilter<"Transaction"> | string | null
@@ -14190,10 +18886,12 @@ export namespace Prisma {
     categoryId?: SortOrderInput | SortOrder
     stripePaymentIntentId?: SortOrderInput | SortOrder
     type?: SortOrder
+    direction?: SortOrderInput | SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
     lastFormatted?: SortOrderInput | SortOrder
     merchantName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
@@ -14214,10 +18912,12 @@ export namespace Prisma {
     bankAccountId?: StringNullableFilter<"Transaction"> | string | null
     categoryId?: StringNullableFilter<"Transaction"> | string | null
     type?: StringFilter<"Transaction"> | string
+    direction?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    logoUrl?: StringNullableFilter<"Transaction"> | string | null
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
     merchantName?: StringNullableFilter<"Transaction"> | string | null
     description?: StringNullableFilter<"Transaction"> | string | null
@@ -14235,10 +18935,12 @@ export namespace Prisma {
     categoryId?: SortOrderInput | SortOrder
     stripePaymentIntentId?: SortOrderInput | SortOrder
     type?: SortOrder
+    direction?: SortOrderInput | SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrderInput | SortOrder
     currency?: SortOrder
     status?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
     lastFormatted?: SortOrderInput | SortOrder
     merchantName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
@@ -14261,10 +18963,12 @@ export namespace Prisma {
     categoryId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     stripePaymentIntentId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     type?: StringWithAggregatesFilter<"Transaction"> | string
+    direction?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     amount?: FloatWithAggregatesFilter<"Transaction"> | number
     selectedAmount?: FloatNullableWithAggregatesFilter<"Transaction"> | number | null
     currency?: StringWithAggregatesFilter<"Transaction"> | string
     status?: StringWithAggregatesFilter<"Transaction"> | string
+    logoUrl?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     lastFormatted?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     merchantName?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     description?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
@@ -14557,6 +19261,7 @@ export namespace Prisma {
     limit?: FloatFilter<"Category"> | number
     spent?: FloatFilter<"Category"> | number
     icon?: StringNullableFilter<"Category"> | string | null
+    color?: StringNullableFilter<"Category"> | string | null
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     budget?: XOR<BudgetRelationFilter, BudgetWhereInput>
@@ -14570,6 +19275,7 @@ export namespace Prisma {
     limit?: SortOrder
     spent?: SortOrder
     icon?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     budget?: BudgetOrderByWithRelationInput
@@ -14586,6 +19292,7 @@ export namespace Prisma {
     limit?: FloatFilter<"Category"> | number
     spent?: FloatFilter<"Category"> | number
     icon?: StringNullableFilter<"Category"> | string | null
+    color?: StringNullableFilter<"Category"> | string | null
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     budget?: XOR<BudgetRelationFilter, BudgetWhereInput>
@@ -14599,6 +19306,7 @@ export namespace Prisma {
     limit?: SortOrder
     spent?: SortOrder
     icon?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CategoryCountOrderByAggregateInput
@@ -14618,6 +19326,7 @@ export namespace Prisma {
     limit?: FloatWithAggregatesFilter<"Category"> | number
     spent?: FloatWithAggregatesFilter<"Category"> | number
     icon?: StringNullableWithAggregatesFilter<"Category"> | string | null
+    color?: StringNullableWithAggregatesFilter<"Category"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
   }
@@ -14630,6 +19339,7 @@ export namespace Prisma {
     userId?: StringFilter<"ChatSession"> | string
     subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
     bankName?: StringNullableFilter<"ChatSession"> | string | null
+    mode?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -14641,6 +19351,7 @@ export namespace Prisma {
     userId?: SortOrder
     subscriptionName?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
+    mode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -14655,6 +19366,7 @@ export namespace Prisma {
     userId?: StringFilter<"ChatSession"> | string
     subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
     bankName?: StringNullableFilter<"ChatSession"> | string | null
+    mode?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -14666,6 +19378,7 @@ export namespace Prisma {
     userId?: SortOrder
     subscriptionName?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
+    mode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ChatSessionCountOrderByAggregateInput
@@ -14681,6 +19394,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"ChatSession"> | string
     subscriptionName?: StringNullableWithAggregatesFilter<"ChatSession"> | string | null
     bankName?: StringNullableWithAggregatesFilter<"ChatSession"> | string | null
+    mode?: StringNullableWithAggregatesFilter<"ChatSession"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
   }
@@ -14693,6 +19407,7 @@ export namespace Prisma {
     chatSessionId?: StringFilter<"ChatMessage"> | string
     role?: StringFilter<"ChatMessage"> | string
     content?: StringFilter<"ChatMessage"> | string
+    metadata?: JsonNullableFilter<"ChatMessage">
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     session?: XOR<ChatSessionRelationFilter, ChatSessionWhereInput>
   }
@@ -14702,6 +19417,7 @@ export namespace Prisma {
     chatSessionId?: SortOrder
     role?: SortOrder
     content?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     session?: ChatSessionOrderByWithRelationInput
   }
@@ -14714,6 +19430,7 @@ export namespace Prisma {
     chatSessionId?: StringFilter<"ChatMessage"> | string
     role?: StringFilter<"ChatMessage"> | string
     content?: StringFilter<"ChatMessage"> | string
+    metadata?: JsonNullableFilter<"ChatMessage">
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     session?: XOR<ChatSessionRelationFilter, ChatSessionWhereInput>
   }, "id">
@@ -14723,6 +19440,7 @@ export namespace Prisma {
     chatSessionId?: SortOrder
     role?: SortOrder
     content?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
     _max?: ChatMessageMaxOrderByAggregateInput
@@ -14737,6 +19455,7 @@ export namespace Prisma {
     chatSessionId?: StringWithAggregatesFilter<"ChatMessage"> | string
     role?: StringWithAggregatesFilter<"ChatMessage"> | string
     content?: StringWithAggregatesFilter<"ChatMessage"> | string
+    metadata?: JsonNullableWithAggregatesFilter<"ChatMessage">
     createdAt?: DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
   }
 
@@ -14835,6 +19554,310 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"CashAdvance"> | Date | string
   }
 
+  export type PasskeyCredentialWhereInput = {
+    AND?: PasskeyCredentialWhereInput | PasskeyCredentialWhereInput[]
+    OR?: PasskeyCredentialWhereInput[]
+    NOT?: PasskeyCredentialWhereInput | PasskeyCredentialWhereInput[]
+    id?: StringFilter<"PasskeyCredential"> | string
+    userId?: StringFilter<"PasskeyCredential"> | string
+    credentialId?: StringFilter<"PasskeyCredential"> | string
+    publicKey?: BytesFilter<"PasskeyCredential"> | Buffer
+    signCount?: IntFilter<"PasskeyCredential"> | number
+    transports?: StringNullableFilter<"PasskeyCredential"> | string | null
+    deviceName?: StringNullableFilter<"PasskeyCredential"> | string | null
+    createdAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+    updatedAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type PasskeyCredentialOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    credentialId?: SortOrder
+    publicKey?: SortOrder
+    signCount?: SortOrder
+    transports?: SortOrderInput | SortOrder
+    deviceName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type PasskeyCredentialWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    credentialId?: string
+    AND?: PasskeyCredentialWhereInput | PasskeyCredentialWhereInput[]
+    OR?: PasskeyCredentialWhereInput[]
+    NOT?: PasskeyCredentialWhereInput | PasskeyCredentialWhereInput[]
+    userId?: StringFilter<"PasskeyCredential"> | string
+    publicKey?: BytesFilter<"PasskeyCredential"> | Buffer
+    signCount?: IntFilter<"PasskeyCredential"> | number
+    transports?: StringNullableFilter<"PasskeyCredential"> | string | null
+    deviceName?: StringNullableFilter<"PasskeyCredential"> | string | null
+    createdAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+    updatedAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "credentialId">
+
+  export type PasskeyCredentialOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    credentialId?: SortOrder
+    publicKey?: SortOrder
+    signCount?: SortOrder
+    transports?: SortOrderInput | SortOrder
+    deviceName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PasskeyCredentialCountOrderByAggregateInput
+    _avg?: PasskeyCredentialAvgOrderByAggregateInput
+    _max?: PasskeyCredentialMaxOrderByAggregateInput
+    _min?: PasskeyCredentialMinOrderByAggregateInput
+    _sum?: PasskeyCredentialSumOrderByAggregateInput
+  }
+
+  export type PasskeyCredentialScalarWhereWithAggregatesInput = {
+    AND?: PasskeyCredentialScalarWhereWithAggregatesInput | PasskeyCredentialScalarWhereWithAggregatesInput[]
+    OR?: PasskeyCredentialScalarWhereWithAggregatesInput[]
+    NOT?: PasskeyCredentialScalarWhereWithAggregatesInput | PasskeyCredentialScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PasskeyCredential"> | string
+    userId?: StringWithAggregatesFilter<"PasskeyCredential"> | string
+    credentialId?: StringWithAggregatesFilter<"PasskeyCredential"> | string
+    publicKey?: BytesWithAggregatesFilter<"PasskeyCredential"> | Buffer
+    signCount?: IntWithAggregatesFilter<"PasskeyCredential"> | number
+    transports?: StringNullableWithAggregatesFilter<"PasskeyCredential"> | string | null
+    deviceName?: StringNullableWithAggregatesFilter<"PasskeyCredential"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PasskeyCredential"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PasskeyCredential"> | Date | string
+  }
+
+  export type DeviceSessionWhereInput = {
+    AND?: DeviceSessionWhereInput | DeviceSessionWhereInput[]
+    OR?: DeviceSessionWhereInput[]
+    NOT?: DeviceSessionWhereInput | DeviceSessionWhereInput[]
+    id?: StringFilter<"DeviceSession"> | string
+    userId?: StringFilter<"DeviceSession"> | string
+    socureDeviceId?: StringFilter<"DeviceSession"> | string
+    ipAddress?: StringNullableFilter<"DeviceSession"> | string | null
+    userAgent?: StringNullableFilter<"DeviceSession"> | string | null
+    appCheckToken?: StringNullableFilter<"DeviceSession"> | string | null
+    integrityVerdict?: StringNullableFilter<"DeviceSession"> | string | null
+    seonFingerprint?: StringNullableFilter<"DeviceSession"> | string | null
+    createdAt?: DateTimeFilter<"DeviceSession"> | Date | string
+    updatedAt?: DateTimeFilter<"DeviceSession"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type DeviceSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    socureDeviceId?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    appCheckToken?: SortOrderInput | SortOrder
+    integrityVerdict?: SortOrderInput | SortOrder
+    seonFingerprint?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type DeviceSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DeviceSessionWhereInput | DeviceSessionWhereInput[]
+    OR?: DeviceSessionWhereInput[]
+    NOT?: DeviceSessionWhereInput | DeviceSessionWhereInput[]
+    userId?: StringFilter<"DeviceSession"> | string
+    socureDeviceId?: StringFilter<"DeviceSession"> | string
+    ipAddress?: StringNullableFilter<"DeviceSession"> | string | null
+    userAgent?: StringNullableFilter<"DeviceSession"> | string | null
+    appCheckToken?: StringNullableFilter<"DeviceSession"> | string | null
+    integrityVerdict?: StringNullableFilter<"DeviceSession"> | string | null
+    seonFingerprint?: StringNullableFilter<"DeviceSession"> | string | null
+    createdAt?: DateTimeFilter<"DeviceSession"> | Date | string
+    updatedAt?: DateTimeFilter<"DeviceSession"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type DeviceSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    socureDeviceId?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    appCheckToken?: SortOrderInput | SortOrder
+    integrityVerdict?: SortOrderInput | SortOrder
+    seonFingerprint?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DeviceSessionCountOrderByAggregateInput
+    _max?: DeviceSessionMaxOrderByAggregateInput
+    _min?: DeviceSessionMinOrderByAggregateInput
+  }
+
+  export type DeviceSessionScalarWhereWithAggregatesInput = {
+    AND?: DeviceSessionScalarWhereWithAggregatesInput | DeviceSessionScalarWhereWithAggregatesInput[]
+    OR?: DeviceSessionScalarWhereWithAggregatesInput[]
+    NOT?: DeviceSessionScalarWhereWithAggregatesInput | DeviceSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DeviceSession"> | string
+    userId?: StringWithAggregatesFilter<"DeviceSession"> | string
+    socureDeviceId?: StringWithAggregatesFilter<"DeviceSession"> | string
+    ipAddress?: StringNullableWithAggregatesFilter<"DeviceSession"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"DeviceSession"> | string | null
+    appCheckToken?: StringNullableWithAggregatesFilter<"DeviceSession"> | string | null
+    integrityVerdict?: StringNullableWithAggregatesFilter<"DeviceSession"> | string | null
+    seonFingerprint?: StringNullableWithAggregatesFilter<"DeviceSession"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DeviceSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DeviceSession"> | Date | string
+  }
+
+  export type AuditLogWhereInput = {
+    AND?: AuditLogWhereInput | AuditLogWhereInput[]
+    OR?: AuditLogWhereInput[]
+    NOT?: AuditLogWhereInput | AuditLogWhereInput[]
+    id?: StringFilter<"AuditLog"> | string
+    userId?: StringNullableFilter<"AuditLog"> | string | null
+    requestId?: StringFilter<"AuditLog"> | string
+    action?: StringFilter<"AuditLog"> | string
+    providerOutcome?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
+    timestamp?: DateTimeFilter<"AuditLog"> | Date | string
+    user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+  }
+
+  export type AuditLogOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    requestId?: SortOrder
+    action?: SortOrder
+    providerOutcome?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    timestamp?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AuditLogWhereInput | AuditLogWhereInput[]
+    OR?: AuditLogWhereInput[]
+    NOT?: AuditLogWhereInput | AuditLogWhereInput[]
+    userId?: StringNullableFilter<"AuditLog"> | string | null
+    requestId?: StringFilter<"AuditLog"> | string
+    action?: StringFilter<"AuditLog"> | string
+    providerOutcome?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
+    timestamp?: DateTimeFilter<"AuditLog"> | Date | string
+    user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type AuditLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    requestId?: SortOrder
+    action?: SortOrder
+    providerOutcome?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    timestamp?: SortOrder
+    _count?: AuditLogCountOrderByAggregateInput
+    _max?: AuditLogMaxOrderByAggregateInput
+    _min?: AuditLogMinOrderByAggregateInput
+  }
+
+  export type AuditLogScalarWhereWithAggregatesInput = {
+    AND?: AuditLogScalarWhereWithAggregatesInput | AuditLogScalarWhereWithAggregatesInput[]
+    OR?: AuditLogScalarWhereWithAggregatesInput[]
+    NOT?: AuditLogScalarWhereWithAggregatesInput | AuditLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AuditLog"> | string
+    userId?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    requestId?: StringWithAggregatesFilter<"AuditLog"> | string
+    action?: StringWithAggregatesFilter<"AuditLog"> | string
+    providerOutcome?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"AuditLog">
+    timestamp?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
+  }
+
+  export type InsightWhereInput = {
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    id?: StringFilter<"Insight"> | string
+    userId?: StringFilter<"Insight"> | string
+    type?: StringFilter<"Insight"> | string
+    title?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    amount?: FloatNullableFilter<"Insight"> | number | null
+    actionUrl?: StringNullableFilter<"Insight"> | string | null
+    isRead?: BoolFilter<"Insight"> | boolean
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type InsightOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    amount?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
+    isRead?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type InsightWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    userId?: StringFilter<"Insight"> | string
+    type?: StringFilter<"Insight"> | string
+    title?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    amount?: FloatNullableFilter<"Insight"> | number | null
+    actionUrl?: StringNullableFilter<"Insight"> | string | null
+    isRead?: BoolFilter<"Insight"> | boolean
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type InsightOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    amount?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
+    isRead?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: InsightCountOrderByAggregateInput
+    _avg?: InsightAvgOrderByAggregateInput
+    _max?: InsightMaxOrderByAggregateInput
+    _min?: InsightMinOrderByAggregateInput
+    _sum?: InsightSumOrderByAggregateInput
+  }
+
+  export type InsightScalarWhereWithAggregatesInput = {
+    AND?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    OR?: InsightScalarWhereWithAggregatesInput[]
+    NOT?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Insight"> | string
+    userId?: StringWithAggregatesFilter<"Insight"> | string
+    type?: StringWithAggregatesFilter<"Insight"> | string
+    title?: StringWithAggregatesFilter<"Insight"> | string
+    description?: StringNullableWithAggregatesFilter<"Insight"> | string | null
+    amount?: FloatNullableWithAggregatesFilter<"Insight"> | number | null
+    actionUrl?: StringNullableWithAggregatesFilter<"Insight"> | string | null
+    isRead?: BoolWithAggregatesFilter<"Insight"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Insight"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -14843,6 +19866,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -14858,7 +19882,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14870,6 +19897,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -14880,6 +19911,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -14895,7 +19927,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14907,6 +19942,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -14917,6 +19956,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14932,7 +19972,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14944,6 +19987,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -14954,6 +20001,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14969,7 +20017,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14981,6 +20032,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -14991,6 +20046,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -15006,7 +20062,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15020,6 +20079,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15035,7 +20095,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15049,6 +20112,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15064,7 +20128,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15168,10 +20235,12 @@ export namespace Prisma {
     id?: string
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -15189,10 +20258,12 @@ export namespace Prisma {
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -15204,10 +20275,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15225,10 +20298,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15243,10 +20318,12 @@ export namespace Prisma {
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -15258,10 +20335,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15276,10 +20355,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15584,6 +20665,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     budget: BudgetCreateNestedOneWithoutCategoriesInput
@@ -15597,6 +20679,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
@@ -15608,6 +20691,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     budget?: BudgetUpdateOneRequiredWithoutCategoriesNestedInput
@@ -15621,6 +20705,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
@@ -15633,6 +20718,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15643,6 +20729,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15654,6 +20741,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15662,6 +20750,7 @@ export namespace Prisma {
     id?: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutChatSessionsInput
@@ -15673,6 +20762,7 @@ export namespace Prisma {
     userId: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageUncheckedCreateNestedManyWithoutSessionInput
@@ -15682,6 +20772,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutChatSessionsNestedInput
@@ -15693,6 +20784,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUncheckedUpdateManyWithoutSessionNestedInput
@@ -15703,6 +20795,7 @@ export namespace Prisma {
     userId: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15711,6 +20804,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15720,6 +20814,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15728,6 +20823,7 @@ export namespace Prisma {
     id?: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     session: ChatSessionCreateNestedOneWithoutMessagesInput
   }
@@ -15737,6 +20833,7 @@ export namespace Prisma {
     chatSessionId: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -15744,6 +20841,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     session?: ChatSessionUpdateOneRequiredWithoutMessagesNestedInput
   }
@@ -15753,6 +20851,7 @@ export namespace Prisma {
     chatSessionId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15761,6 +20860,7 @@ export namespace Prisma {
     chatSessionId: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -15768,6 +20868,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15776,6 +20877,7 @@ export namespace Prisma {
     chatSessionId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15878,6 +20980,338 @@ export namespace Prisma {
     serviceFeeCap?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     repaymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasskeyCredentialCreateInput = {
+    id?: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutPasskeysInput
+  }
+
+  export type PasskeyCredentialUncheckedCreateInput = {
+    id?: string
+    userId: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasskeyCredentialUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPasskeysNestedInput
+  }
+
+  export type PasskeyCredentialUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasskeyCredentialCreateManyInput = {
+    id?: string
+    userId: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasskeyCredentialUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasskeyCredentialUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionCreateInput = {
+    id?: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDeviceSessionsInput
+  }
+
+  export type DeviceSessionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeviceSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDeviceSessionsNestedInput
+  }
+
+  export type DeviceSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionCreateManyInput = {
+    id?: string
+    userId: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeviceSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogCreateInput = {
+    id?: string
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+    user?: UserCreateNestedOneWithoutAuditLogsInput
+  }
+
+  export type AuditLogUncheckedCreateInput = {
+    id?: string
+    userId?: string | null
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+  }
+
+  export type AuditLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutAuditLogsNestedInput
+  }
+
+  export type AuditLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogCreateManyInput = {
+    id?: string
+    userId?: string | null
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+  }
+
+  export type AuditLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightCreateInput = {
+    id?: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutInsightsInput
+  }
+
+  export type InsightUncheckedCreateInput = {
+    id?: string
+    userId: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutInsightsNestedInput
+  }
+
+  export type InsightUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightCreateManyInput = {
+    id?: string
+    userId: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16020,6 +21454,30 @@ export namespace Prisma {
     none?: CashAdvanceWhereInput
   }
 
+  export type PasskeyCredentialListRelationFilter = {
+    every?: PasskeyCredentialWhereInput
+    some?: PasskeyCredentialWhereInput
+    none?: PasskeyCredentialWhereInput
+  }
+
+  export type DeviceSessionListRelationFilter = {
+    every?: DeviceSessionWhereInput
+    some?: DeviceSessionWhereInput
+    none?: DeviceSessionWhereInput
+  }
+
+  export type AuditLogListRelationFilter = {
+    every?: AuditLogWhereInput
+    some?: AuditLogWhereInput
+    none?: AuditLogWhereInput
+  }
+
+  export type InsightListRelationFilter = {
+    every?: InsightWhereInput
+    some?: InsightWhereInput
+    none?: InsightWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -16057,6 +21515,22 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type PasskeyCredentialOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DeviceSessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AuditLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InsightOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
@@ -16065,6 +21539,7 @@ export namespace Prisma {
     lastName?: SortOrder
     dob?: SortOrder
     ssn?: SortOrder
+    ssnLast4?: SortOrder
     addressStreet?: SortOrder
     addressCity?: SortOrder
     addressState?: SortOrder
@@ -16080,7 +21555,10 @@ export namespace Prisma {
     boosts?: SortOrder
     last4_digits?: SortOrder
     cleo_card?: SortOrder
+    phoneNumber?: SortOrder
+    preferences?: SortOrder
     kycStatus?: SortOrder
+    ewaDisclaimerAccepted?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -16102,6 +21580,7 @@ export namespace Prisma {
     lastName?: SortOrder
     dob?: SortOrder
     ssn?: SortOrder
+    ssnLast4?: SortOrder
     addressStreet?: SortOrder
     addressCity?: SortOrder
     addressState?: SortOrder
@@ -16116,7 +21595,9 @@ export namespace Prisma {
     minDepositAmount?: SortOrder
     last4_digits?: SortOrder
     cleo_card?: SortOrder
+    phoneNumber?: SortOrder
     kycStatus?: SortOrder
+    ewaDisclaimerAccepted?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -16130,6 +21611,7 @@ export namespace Prisma {
     lastName?: SortOrder
     dob?: SortOrder
     ssn?: SortOrder
+    ssnLast4?: SortOrder
     addressStreet?: SortOrder
     addressCity?: SortOrder
     addressState?: SortOrder
@@ -16144,7 +21626,9 @@ export namespace Prisma {
     minDepositAmount?: SortOrder
     last4_digits?: SortOrder
     cleo_card?: SortOrder
+    phoneNumber?: SortOrder
     kycStatus?: SortOrder
+    ewaDisclaimerAccepted?: SortOrder
     socureDeviceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -16369,10 +21853,12 @@ export namespace Prisma {
     categoryId?: SortOrder
     stripePaymentIntentId?: SortOrder
     type?: SortOrder
+    direction?: SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    logoUrl?: SortOrder
     lastFormatted?: SortOrder
     merchantName?: SortOrder
     description?: SortOrder
@@ -16392,10 +21878,12 @@ export namespace Prisma {
     categoryId?: SortOrder
     stripePaymentIntentId?: SortOrder
     type?: SortOrder
+    direction?: SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    logoUrl?: SortOrder
     lastFormatted?: SortOrder
     merchantName?: SortOrder
     description?: SortOrder
@@ -16410,10 +21898,12 @@ export namespace Prisma {
     categoryId?: SortOrder
     stripePaymentIntentId?: SortOrder
     type?: SortOrder
+    direction?: SortOrder
     amount?: SortOrder
     selectedAmount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    logoUrl?: SortOrder
     lastFormatted?: SortOrder
     merchantName?: SortOrder
     description?: SortOrder
@@ -16608,6 +22098,7 @@ export namespace Prisma {
     limit?: SortOrder
     spent?: SortOrder
     icon?: SortOrder
+    color?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16624,6 +22115,7 @@ export namespace Prisma {
     limit?: SortOrder
     spent?: SortOrder
     icon?: SortOrder
+    color?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16635,6 +22127,7 @@ export namespace Prisma {
     limit?: SortOrder
     spent?: SortOrder
     icon?: SortOrder
+    color?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16659,6 +22152,7 @@ export namespace Prisma {
     userId?: SortOrder
     subscriptionName?: SortOrder
     bankName?: SortOrder
+    mode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16668,6 +22162,7 @@ export namespace Prisma {
     userId?: SortOrder
     subscriptionName?: SortOrder
     bankName?: SortOrder
+    mode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16677,6 +22172,7 @@ export namespace Prisma {
     userId?: SortOrder
     subscriptionName?: SortOrder
     bankName?: SortOrder
+    mode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16691,6 +22187,7 @@ export namespace Prisma {
     chatSessionId?: SortOrder
     role?: SortOrder
     content?: SortOrder
+    metadata?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -16776,6 +22273,213 @@ export namespace Prisma {
     serviceFeeCap?: SortOrder
   }
 
+  export type BytesFilter<$PrismaModel = never> = {
+    equals?: Buffer | BytesFieldRefInput<$PrismaModel>
+    in?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Buffer
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type PasskeyCredentialCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    credentialId?: SortOrder
+    publicKey?: SortOrder
+    signCount?: SortOrder
+    transports?: SortOrder
+    deviceName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PasskeyCredentialAvgOrderByAggregateInput = {
+    signCount?: SortOrder
+  }
+
+  export type PasskeyCredentialMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    credentialId?: SortOrder
+    publicKey?: SortOrder
+    signCount?: SortOrder
+    transports?: SortOrder
+    deviceName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PasskeyCredentialMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    credentialId?: SortOrder
+    publicKey?: SortOrder
+    signCount?: SortOrder
+    transports?: SortOrder
+    deviceName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PasskeyCredentialSumOrderByAggregateInput = {
+    signCount?: SortOrder
+  }
+
+  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Buffer | BytesFieldRefInput<$PrismaModel>
+    in?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Buffer
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type DeviceSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    socureDeviceId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    appCheckToken?: SortOrder
+    integrityVerdict?: SortOrder
+    seonFingerprint?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DeviceSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    socureDeviceId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    appCheckToken?: SortOrder
+    integrityVerdict?: SortOrder
+    seonFingerprint?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DeviceSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    socureDeviceId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    appCheckToken?: SortOrder
+    integrityVerdict?: SortOrder
+    seonFingerprint?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserNullableRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type AuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    requestId?: SortOrder
+    action?: SortOrder
+    providerOutcome?: SortOrder
+    metadata?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type AuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    requestId?: SortOrder
+    action?: SortOrder
+    providerOutcome?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type AuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    requestId?: SortOrder
+    action?: SortOrder
+    providerOutcome?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type InsightCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    amount?: SortOrder
+    actionUrl?: SortOrder
+    isRead?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightAvgOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type InsightMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    amount?: SortOrder
+    actionUrl?: SortOrder
+    isRead?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    amount?: SortOrder
+    actionUrl?: SortOrder
+    isRead?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightSumOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
   export type BankAccountCreateNestedManyWithoutUserInput = {
     create?: XOR<BankAccountCreateWithoutUserInput, BankAccountUncheckedCreateWithoutUserInput> | BankAccountCreateWithoutUserInput[] | BankAccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BankAccountCreateOrConnectWithoutUserInput | BankAccountCreateOrConnectWithoutUserInput[]
@@ -16832,6 +22536,34 @@ export namespace Prisma {
     connect?: CashAdvanceWhereUniqueInput | CashAdvanceWhereUniqueInput[]
   }
 
+  export type PasskeyCredentialCreateNestedManyWithoutUserInput = {
+    create?: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput> | PasskeyCredentialCreateWithoutUserInput[] | PasskeyCredentialUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasskeyCredentialCreateOrConnectWithoutUserInput | PasskeyCredentialCreateOrConnectWithoutUserInput[]
+    createMany?: PasskeyCredentialCreateManyUserInputEnvelope
+    connect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+  }
+
+  export type DeviceSessionCreateNestedManyWithoutUserInput = {
+    create?: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput> | DeviceSessionCreateWithoutUserInput[] | DeviceSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DeviceSessionCreateOrConnectWithoutUserInput | DeviceSessionCreateOrConnectWithoutUserInput[]
+    createMany?: DeviceSessionCreateManyUserInputEnvelope
+    connect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+  }
+
+  export type AuditLogCreateNestedManyWithoutUserInput = {
+    create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
+    createMany?: AuditLogCreateManyUserInputEnvelope
+    connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+  }
+
+  export type InsightCreateNestedManyWithoutUserInput = {
+    create?: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput> | InsightCreateWithoutUserInput[] | InsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutUserInput | InsightCreateOrConnectWithoutUserInput[]
+    createMany?: InsightCreateManyUserInputEnvelope
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+  }
+
   export type BankAccountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<BankAccountCreateWithoutUserInput, BankAccountUncheckedCreateWithoutUserInput> | BankAccountCreateWithoutUserInput[] | BankAccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BankAccountCreateOrConnectWithoutUserInput | BankAccountCreateOrConnectWithoutUserInput[]
@@ -16886,6 +22618,34 @@ export namespace Prisma {
     connectOrCreate?: CashAdvanceCreateOrConnectWithoutUserInput | CashAdvanceCreateOrConnectWithoutUserInput[]
     createMany?: CashAdvanceCreateManyUserInputEnvelope
     connect?: CashAdvanceWhereUniqueInput | CashAdvanceWhereUniqueInput[]
+  }
+
+  export type PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput> | PasskeyCredentialCreateWithoutUserInput[] | PasskeyCredentialUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasskeyCredentialCreateOrConnectWithoutUserInput | PasskeyCredentialCreateOrConnectWithoutUserInput[]
+    createMany?: PasskeyCredentialCreateManyUserInputEnvelope
+    connect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+  }
+
+  export type DeviceSessionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput> | DeviceSessionCreateWithoutUserInput[] | DeviceSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DeviceSessionCreateOrConnectWithoutUserInput | DeviceSessionCreateOrConnectWithoutUserInput[]
+    createMany?: DeviceSessionCreateManyUserInputEnvelope
+    connect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+  }
+
+  export type AuditLogUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
+    createMany?: AuditLogCreateManyUserInputEnvelope
+    connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+  }
+
+  export type InsightUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput> | InsightCreateWithoutUserInput[] | InsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutUserInput | InsightCreateOrConnectWithoutUserInput[]
+    createMany?: InsightCreateManyUserInputEnvelope
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -17028,6 +22788,62 @@ export namespace Prisma {
     deleteMany?: CashAdvanceScalarWhereInput | CashAdvanceScalarWhereInput[]
   }
 
+  export type PasskeyCredentialUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput> | PasskeyCredentialCreateWithoutUserInput[] | PasskeyCredentialUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasskeyCredentialCreateOrConnectWithoutUserInput | PasskeyCredentialCreateOrConnectWithoutUserInput[]
+    upsert?: PasskeyCredentialUpsertWithWhereUniqueWithoutUserInput | PasskeyCredentialUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PasskeyCredentialCreateManyUserInputEnvelope
+    set?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    disconnect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    delete?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    connect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    update?: PasskeyCredentialUpdateWithWhereUniqueWithoutUserInput | PasskeyCredentialUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PasskeyCredentialUpdateManyWithWhereWithoutUserInput | PasskeyCredentialUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PasskeyCredentialScalarWhereInput | PasskeyCredentialScalarWhereInput[]
+  }
+
+  export type DeviceSessionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput> | DeviceSessionCreateWithoutUserInput[] | DeviceSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DeviceSessionCreateOrConnectWithoutUserInput | DeviceSessionCreateOrConnectWithoutUserInput[]
+    upsert?: DeviceSessionUpsertWithWhereUniqueWithoutUserInput | DeviceSessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DeviceSessionCreateManyUserInputEnvelope
+    set?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    disconnect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    delete?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    connect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    update?: DeviceSessionUpdateWithWhereUniqueWithoutUserInput | DeviceSessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DeviceSessionUpdateManyWithWhereWithoutUserInput | DeviceSessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DeviceSessionScalarWhereInput | DeviceSessionScalarWhereInput[]
+  }
+
+  export type AuditLogUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
+    upsert?: AuditLogUpsertWithWhereUniqueWithoutUserInput | AuditLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AuditLogCreateManyUserInputEnvelope
+    set?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    disconnect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    delete?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    update?: AuditLogUpdateWithWhereUniqueWithoutUserInput | AuditLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AuditLogUpdateManyWithWhereWithoutUserInput | AuditLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+  }
+
+  export type InsightUpdateManyWithoutUserNestedInput = {
+    create?: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput> | InsightCreateWithoutUserInput[] | InsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutUserInput | InsightCreateOrConnectWithoutUserInput[]
+    upsert?: InsightUpsertWithWhereUniqueWithoutUserInput | InsightUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: InsightCreateManyUserInputEnvelope
+    set?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    disconnect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    delete?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    update?: InsightUpdateWithWhereUniqueWithoutUserInput | InsightUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: InsightUpdateManyWithWhereWithoutUserInput | InsightUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: InsightScalarWhereInput | InsightScalarWhereInput[]
+  }
+
   export type BankAccountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<BankAccountCreateWithoutUserInput, BankAccountUncheckedCreateWithoutUserInput> | BankAccountCreateWithoutUserInput[] | BankAccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BankAccountCreateOrConnectWithoutUserInput | BankAccountCreateOrConnectWithoutUserInput[]
@@ -17138,6 +22954,62 @@ export namespace Prisma {
     update?: CashAdvanceUpdateWithWhereUniqueWithoutUserInput | CashAdvanceUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: CashAdvanceUpdateManyWithWhereWithoutUserInput | CashAdvanceUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: CashAdvanceScalarWhereInput | CashAdvanceScalarWhereInput[]
+  }
+
+  export type PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput> | PasskeyCredentialCreateWithoutUserInput[] | PasskeyCredentialUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasskeyCredentialCreateOrConnectWithoutUserInput | PasskeyCredentialCreateOrConnectWithoutUserInput[]
+    upsert?: PasskeyCredentialUpsertWithWhereUniqueWithoutUserInput | PasskeyCredentialUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PasskeyCredentialCreateManyUserInputEnvelope
+    set?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    disconnect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    delete?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    connect?: PasskeyCredentialWhereUniqueInput | PasskeyCredentialWhereUniqueInput[]
+    update?: PasskeyCredentialUpdateWithWhereUniqueWithoutUserInput | PasskeyCredentialUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PasskeyCredentialUpdateManyWithWhereWithoutUserInput | PasskeyCredentialUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PasskeyCredentialScalarWhereInput | PasskeyCredentialScalarWhereInput[]
+  }
+
+  export type DeviceSessionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput> | DeviceSessionCreateWithoutUserInput[] | DeviceSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DeviceSessionCreateOrConnectWithoutUserInput | DeviceSessionCreateOrConnectWithoutUserInput[]
+    upsert?: DeviceSessionUpsertWithWhereUniqueWithoutUserInput | DeviceSessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DeviceSessionCreateManyUserInputEnvelope
+    set?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    disconnect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    delete?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    connect?: DeviceSessionWhereUniqueInput | DeviceSessionWhereUniqueInput[]
+    update?: DeviceSessionUpdateWithWhereUniqueWithoutUserInput | DeviceSessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DeviceSessionUpdateManyWithWhereWithoutUserInput | DeviceSessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DeviceSessionScalarWhereInput | DeviceSessionScalarWhereInput[]
+  }
+
+  export type AuditLogUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
+    upsert?: AuditLogUpsertWithWhereUniqueWithoutUserInput | AuditLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AuditLogCreateManyUserInputEnvelope
+    set?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    disconnect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    delete?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+    update?: AuditLogUpdateWithWhereUniqueWithoutUserInput | AuditLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AuditLogUpdateManyWithWhereWithoutUserInput | AuditLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+  }
+
+  export type InsightUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput> | InsightCreateWithoutUserInput[] | InsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutUserInput | InsightCreateOrConnectWithoutUserInput[]
+    upsert?: InsightUpsertWithWhereUniqueWithoutUserInput | InsightUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: InsightCreateManyUserInputEnvelope
+    set?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    disconnect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    delete?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    update?: InsightUpdateWithWhereUniqueWithoutUserInput | InsightUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: InsightUpdateManyWithWhereWithoutUserInput | InsightUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: InsightScalarWhereInput | InsightScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutBankAccountsInput = {
@@ -17550,6 +23422,76 @@ export namespace Prisma {
     update?: XOR<XOR<IncomeSourceUpdateToOneWithWhereWithoutCashAdvancesInput, IncomeSourceUpdateWithoutCashAdvancesInput>, IncomeSourceUncheckedUpdateWithoutCashAdvancesInput>
   }
 
+  export type UserCreateNestedOneWithoutPasskeysInput = {
+    create?: XOR<UserCreateWithoutPasskeysInput, UserUncheckedCreateWithoutPasskeysInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPasskeysInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BytesFieldUpdateOperationsInput = {
+    set?: Buffer
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutPasskeysNestedInput = {
+    create?: XOR<UserCreateWithoutPasskeysInput, UserUncheckedCreateWithoutPasskeysInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPasskeysInput
+    upsert?: UserUpsertWithoutPasskeysInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPasskeysInput, UserUpdateWithoutPasskeysInput>, UserUncheckedUpdateWithoutPasskeysInput>
+  }
+
+  export type UserCreateNestedOneWithoutDeviceSessionsInput = {
+    create?: XOR<UserCreateWithoutDeviceSessionsInput, UserUncheckedCreateWithoutDeviceSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDeviceSessionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutDeviceSessionsNestedInput = {
+    create?: XOR<UserCreateWithoutDeviceSessionsInput, UserUncheckedCreateWithoutDeviceSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDeviceSessionsInput
+    upsert?: UserUpsertWithoutDeviceSessionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDeviceSessionsInput, UserUpdateWithoutDeviceSessionsInput>, UserUncheckedUpdateWithoutDeviceSessionsInput>
+  }
+
+  export type UserCreateNestedOneWithoutAuditLogsInput = {
+    create?: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuditLogsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneWithoutAuditLogsNestedInput = {
+    create?: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuditLogsInput
+    upsert?: UserUpsertWithoutAuditLogsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAuditLogsInput, UserUpdateWithoutAuditLogsInput>, UserUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type UserCreateNestedOneWithoutInsightsInput = {
+    create?: XOR<UserCreateWithoutInsightsInput, UserUncheckedCreateWithoutInsightsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInsightsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutInsightsNestedInput = {
+    create?: XOR<UserCreateWithoutInsightsInput, UserUncheckedCreateWithoutInsightsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInsightsInput
+    upsert?: UserUpsertWithoutInsightsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInsightsInput, UserUpdateWithoutInsightsInput>, UserUncheckedUpdateWithoutInsightsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -17790,6 +23732,39 @@ export namespace Prisma {
     _max?: NestedEnumBillingCycleNullableFilter<$PrismaModel>
   }
 
+  export type NestedBytesFilter<$PrismaModel = never> = {
+    equals?: Buffer | BytesFieldRefInput<$PrismaModel>
+    in?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Buffer
+  }
+
+  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Buffer | BytesFieldRefInput<$PrismaModel>
+    in?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Buffer[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Buffer
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type BankAccountCreateWithoutUserInput = {
     id?: string
     accessToken: string
@@ -17830,10 +23805,12 @@ export namespace Prisma {
     id?: string
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -17849,10 +23826,12 @@ export namespace Prisma {
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -17992,6 +23971,7 @@ export namespace Prisma {
     id?: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageCreateNestedManyWithoutSessionInput
@@ -18001,6 +23981,7 @@ export namespace Prisma {
     id?: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: ChatMessageUncheckedCreateNestedManyWithoutSessionInput
@@ -18051,6 +24032,134 @@ export namespace Prisma {
 
   export type CashAdvanceCreateManyUserInputEnvelope = {
     data: CashAdvanceCreateManyUserInput | CashAdvanceCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PasskeyCredentialCreateWithoutUserInput = {
+    id?: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasskeyCredentialUncheckedCreateWithoutUserInput = {
+    id?: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasskeyCredentialCreateOrConnectWithoutUserInput = {
+    where: PasskeyCredentialWhereUniqueInput
+    create: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput>
+  }
+
+  export type PasskeyCredentialCreateManyUserInputEnvelope = {
+    data: PasskeyCredentialCreateManyUserInput | PasskeyCredentialCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DeviceSessionCreateWithoutUserInput = {
+    id?: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeviceSessionUncheckedCreateWithoutUserInput = {
+    id?: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeviceSessionCreateOrConnectWithoutUserInput = {
+    where: DeviceSessionWhereUniqueInput
+    create: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type DeviceSessionCreateManyUserInputEnvelope = {
+    data: DeviceSessionCreateManyUserInput | DeviceSessionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AuditLogCreateWithoutUserInput = {
+    id?: string
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+  }
+
+  export type AuditLogUncheckedCreateWithoutUserInput = {
+    id?: string
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+  }
+
+  export type AuditLogCreateOrConnectWithoutUserInput = {
+    where: AuditLogWhereUniqueInput
+    create: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type AuditLogCreateManyUserInputEnvelope = {
+    data: AuditLogCreateManyUserInput | AuditLogCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InsightCreateWithoutUserInput = {
+    id?: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightUncheckedCreateWithoutUserInput = {
+    id?: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightCreateOrConnectWithoutUserInput = {
+    where: InsightWhereUniqueInput
+    create: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput>
+  }
+
+  export type InsightCreateManyUserInputEnvelope = {
+    data: InsightCreateManyUserInput | InsightCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -18112,10 +24221,12 @@ export namespace Prisma {
     categoryId?: StringNullableFilter<"Transaction"> | string | null
     stripePaymentIntentId?: StringNullableFilter<"Transaction"> | string | null
     type?: StringFilter<"Transaction"> | string
+    direction?: StringNullableFilter<"Transaction"> | string | null
     amount?: FloatFilter<"Transaction"> | number
     selectedAmount?: FloatNullableFilter<"Transaction"> | number | null
     currency?: StringFilter<"Transaction"> | string
     status?: StringFilter<"Transaction"> | string
+    logoUrl?: StringNullableFilter<"Transaction"> | string | null
     lastFormatted?: StringNullableFilter<"Transaction"> | string | null
     merchantName?: StringNullableFilter<"Transaction"> | string | null
     description?: StringNullableFilter<"Transaction"> | string | null
@@ -18264,6 +24375,7 @@ export namespace Prisma {
     userId?: StringFilter<"ChatSession"> | string
     subscriptionName?: StringNullableFilter<"ChatSession"> | string | null
     bankName?: StringNullableFilter<"ChatSession"> | string | null
+    mode?: StringNullableFilter<"ChatSession"> | string | null
     createdAt?: DateTimeFilter<"ChatSession"> | Date | string
     updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
   }
@@ -18302,6 +24414,130 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CashAdvance"> | Date | string
   }
 
+  export type PasskeyCredentialUpsertWithWhereUniqueWithoutUserInput = {
+    where: PasskeyCredentialWhereUniqueInput
+    update: XOR<PasskeyCredentialUpdateWithoutUserInput, PasskeyCredentialUncheckedUpdateWithoutUserInput>
+    create: XOR<PasskeyCredentialCreateWithoutUserInput, PasskeyCredentialUncheckedCreateWithoutUserInput>
+  }
+
+  export type PasskeyCredentialUpdateWithWhereUniqueWithoutUserInput = {
+    where: PasskeyCredentialWhereUniqueInput
+    data: XOR<PasskeyCredentialUpdateWithoutUserInput, PasskeyCredentialUncheckedUpdateWithoutUserInput>
+  }
+
+  export type PasskeyCredentialUpdateManyWithWhereWithoutUserInput = {
+    where: PasskeyCredentialScalarWhereInput
+    data: XOR<PasskeyCredentialUpdateManyMutationInput, PasskeyCredentialUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type PasskeyCredentialScalarWhereInput = {
+    AND?: PasskeyCredentialScalarWhereInput | PasskeyCredentialScalarWhereInput[]
+    OR?: PasskeyCredentialScalarWhereInput[]
+    NOT?: PasskeyCredentialScalarWhereInput | PasskeyCredentialScalarWhereInput[]
+    id?: StringFilter<"PasskeyCredential"> | string
+    userId?: StringFilter<"PasskeyCredential"> | string
+    credentialId?: StringFilter<"PasskeyCredential"> | string
+    publicKey?: BytesFilter<"PasskeyCredential"> | Buffer
+    signCount?: IntFilter<"PasskeyCredential"> | number
+    transports?: StringNullableFilter<"PasskeyCredential"> | string | null
+    deviceName?: StringNullableFilter<"PasskeyCredential"> | string | null
+    createdAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+    updatedAt?: DateTimeFilter<"PasskeyCredential"> | Date | string
+  }
+
+  export type DeviceSessionUpsertWithWhereUniqueWithoutUserInput = {
+    where: DeviceSessionWhereUniqueInput
+    update: XOR<DeviceSessionUpdateWithoutUserInput, DeviceSessionUncheckedUpdateWithoutUserInput>
+    create: XOR<DeviceSessionCreateWithoutUserInput, DeviceSessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type DeviceSessionUpdateWithWhereUniqueWithoutUserInput = {
+    where: DeviceSessionWhereUniqueInput
+    data: XOR<DeviceSessionUpdateWithoutUserInput, DeviceSessionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DeviceSessionUpdateManyWithWhereWithoutUserInput = {
+    where: DeviceSessionScalarWhereInput
+    data: XOR<DeviceSessionUpdateManyMutationInput, DeviceSessionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type DeviceSessionScalarWhereInput = {
+    AND?: DeviceSessionScalarWhereInput | DeviceSessionScalarWhereInput[]
+    OR?: DeviceSessionScalarWhereInput[]
+    NOT?: DeviceSessionScalarWhereInput | DeviceSessionScalarWhereInput[]
+    id?: StringFilter<"DeviceSession"> | string
+    userId?: StringFilter<"DeviceSession"> | string
+    socureDeviceId?: StringFilter<"DeviceSession"> | string
+    ipAddress?: StringNullableFilter<"DeviceSession"> | string | null
+    userAgent?: StringNullableFilter<"DeviceSession"> | string | null
+    appCheckToken?: StringNullableFilter<"DeviceSession"> | string | null
+    integrityVerdict?: StringNullableFilter<"DeviceSession"> | string | null
+    seonFingerprint?: StringNullableFilter<"DeviceSession"> | string | null
+    createdAt?: DateTimeFilter<"DeviceSession"> | Date | string
+    updatedAt?: DateTimeFilter<"DeviceSession"> | Date | string
+  }
+
+  export type AuditLogUpsertWithWhereUniqueWithoutUserInput = {
+    where: AuditLogWhereUniqueInput
+    update: XOR<AuditLogUpdateWithoutUserInput, AuditLogUncheckedUpdateWithoutUserInput>
+    create: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type AuditLogUpdateWithWhereUniqueWithoutUserInput = {
+    where: AuditLogWhereUniqueInput
+    data: XOR<AuditLogUpdateWithoutUserInput, AuditLogUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AuditLogUpdateManyWithWhereWithoutUserInput = {
+    where: AuditLogScalarWhereInput
+    data: XOR<AuditLogUpdateManyMutationInput, AuditLogUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AuditLogScalarWhereInput = {
+    AND?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+    OR?: AuditLogScalarWhereInput[]
+    NOT?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+    id?: StringFilter<"AuditLog"> | string
+    userId?: StringNullableFilter<"AuditLog"> | string | null
+    requestId?: StringFilter<"AuditLog"> | string
+    action?: StringFilter<"AuditLog"> | string
+    providerOutcome?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
+    timestamp?: DateTimeFilter<"AuditLog"> | Date | string
+  }
+
+  export type InsightUpsertWithWhereUniqueWithoutUserInput = {
+    where: InsightWhereUniqueInput
+    update: XOR<InsightUpdateWithoutUserInput, InsightUncheckedUpdateWithoutUserInput>
+    create: XOR<InsightCreateWithoutUserInput, InsightUncheckedCreateWithoutUserInput>
+  }
+
+  export type InsightUpdateWithWhereUniqueWithoutUserInput = {
+    where: InsightWhereUniqueInput
+    data: XOR<InsightUpdateWithoutUserInput, InsightUncheckedUpdateWithoutUserInput>
+  }
+
+  export type InsightUpdateManyWithWhereWithoutUserInput = {
+    where: InsightScalarWhereInput
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type InsightScalarWhereInput = {
+    AND?: InsightScalarWhereInput | InsightScalarWhereInput[]
+    OR?: InsightScalarWhereInput[]
+    NOT?: InsightScalarWhereInput | InsightScalarWhereInput[]
+    id?: StringFilter<"Insight"> | string
+    userId?: StringFilter<"Insight"> | string
+    type?: StringFilter<"Insight"> | string
+    title?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    amount?: FloatNullableFilter<"Insight"> | number | null
+    actionUrl?: StringNullableFilter<"Insight"> | string | null
+    isRead?: BoolFilter<"Insight"> | boolean
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+  }
+
   export type UserCreateWithoutBankAccountsInput = {
     id?: string
     email: string
@@ -18310,6 +24546,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18325,7 +24562,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18336,6 +24576,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBankAccountsInput = {
@@ -18346,6 +24590,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18361,7 +24606,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18372,6 +24620,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBankAccountsInput = {
@@ -18383,10 +24635,12 @@ export namespace Prisma {
     id?: string
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -18402,10 +24656,12 @@ export namespace Prisma {
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -18442,6 +24698,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18457,7 +24714,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18468,6 +24728,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBankAccountsInput = {
@@ -18478,6 +24742,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18493,7 +24758,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18504,6 +24772,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TransactionUpsertWithWhereUniqueWithoutBankAccountInput = {
@@ -18530,6 +24802,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18545,7 +24818,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18556,6 +24832,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -18566,6 +24846,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18581,7 +24862,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18592,6 +24876,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -18636,6 +24924,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     budget: BudgetCreateNestedOneWithoutCategoriesInput
@@ -18648,6 +24937,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18676,6 +24966,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18691,7 +24982,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18702,6 +24996,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -18712,6 +25010,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18727,7 +25026,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18738,6 +25040,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BankAccountUpsertWithoutTransactionsInput = {
@@ -18794,6 +25100,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     budget?: BudgetUpdateOneRequiredWithoutCategoriesNestedInput
@@ -18806,6 +25113,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18818,6 +25126,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18833,7 +25142,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18844,6 +25156,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentMethodsInput = {
@@ -18854,6 +25170,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18869,7 +25186,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18880,6 +25200,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentMethodsInput = {
@@ -18906,6 +25230,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18921,7 +25246,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18932,6 +25260,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentMethodsInput = {
@@ -18942,6 +25274,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18957,7 +25290,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18968,6 +25304,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSubscriptionsInput = {
@@ -18978,6 +25318,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -18993,7 +25334,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19004,6 +25348,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSubscriptionsInput = {
@@ -19014,6 +25362,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19029,7 +25378,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19040,6 +25392,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSubscriptionsInput = {
@@ -19066,6 +25422,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19081,7 +25438,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19092,6 +25452,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSubscriptionsInput = {
@@ -19102,6 +25466,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19117,7 +25482,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19128,6 +25496,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutIncomeSourcesInput = {
@@ -19138,6 +25510,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19153,7 +25526,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19164,6 +25540,10 @@ export namespace Prisma {
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutIncomeSourcesInput = {
@@ -19174,6 +25554,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19189,7 +25570,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19200,6 +25584,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutIncomeSourcesInput = {
@@ -19264,6 +25652,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19279,7 +25668,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19290,6 +25682,10 @@ export namespace Prisma {
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutIncomeSourcesInput = {
@@ -19300,6 +25696,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19315,7 +25712,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19326,6 +25726,10 @@ export namespace Prisma {
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CashAdvanceUpsertWithWhereUniqueWithoutIncomeSourceInput = {
@@ -19352,6 +25756,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19367,7 +25772,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19378,6 +25786,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBudgetsInput = {
@@ -19388,6 +25800,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19403,7 +25816,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19414,6 +25830,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBudgetsInput = {
@@ -19427,6 +25847,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionCreateNestedManyWithoutCategoryInput
@@ -19438,6 +25859,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
@@ -19472,6 +25894,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19487,7 +25910,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19498,6 +25924,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBudgetsInput = {
@@ -19508,6 +25938,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19523,7 +25954,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19534,6 +25968,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CategoryUpsertWithWhereUniqueWithoutBudgetInput = {
@@ -19562,6 +26000,7 @@ export namespace Prisma {
     limit?: FloatFilter<"Category"> | number
     spent?: FloatFilter<"Category"> | number
     icon?: StringNullableFilter<"Category"> | string | null
+    color?: StringNullableFilter<"Category"> | string | null
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
   }
@@ -19597,10 +26036,12 @@ export namespace Prisma {
     id?: string
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -19616,10 +26057,12 @@ export namespace Prisma {
     bankAccountId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -19694,6 +26137,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19709,7 +26153,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19720,6 +26167,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
     budgets?: BudgetCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutChatSessionsInput = {
@@ -19730,6 +26181,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19745,7 +26197,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19756,6 +26211,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutChatSessionsInput = {
@@ -19767,6 +26226,7 @@ export namespace Prisma {
     id?: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -19774,6 +26234,7 @@ export namespace Prisma {
     id?: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -19806,6 +26267,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19821,7 +26283,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19832,6 +26297,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutChatSessionsInput = {
@@ -19842,6 +26311,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19857,7 +26327,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19868,6 +26341,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ChatMessageUpsertWithWhereUniqueWithoutSessionInput = {
@@ -19894,6 +26371,7 @@ export namespace Prisma {
     chatSessionId?: StringFilter<"ChatMessage"> | string
     role?: StringFilter<"ChatMessage"> | string
     content?: StringFilter<"ChatMessage"> | string
+    metadata?: JsonNullableFilter<"ChatMessage">
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
   }
 
@@ -19901,6 +26379,7 @@ export namespace Prisma {
     id?: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutChatSessionsInput
@@ -19911,6 +26390,7 @@ export namespace Prisma {
     userId: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19935,6 +26415,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutChatSessionsNestedInput
@@ -19945,6 +26426,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19957,6 +26439,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -19972,7 +26455,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19983,6 +26469,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
     budgets?: BudgetCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCashAdvancesInput = {
@@ -19993,6 +26483,7 @@ export namespace Prisma {
     lastName?: string | null
     dob?: string | null
     ssn?: string | null
+    ssnLast4?: string | null
     addressStreet?: string | null
     addressCity?: string | null
     addressState?: string | null
@@ -20008,7 +26499,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: string | null
     cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
     socureDeviceId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -20019,6 +26513,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
     budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
     chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCashAdvancesInput = {
@@ -20072,6 +26570,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20087,7 +26586,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20098,6 +26600,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
     budgets?: BudgetUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCashAdvancesInput = {
@@ -20108,6 +26614,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     dob?: NullableStringFieldUpdateOperationsInput | string | null
     ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
     addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
     addressCity?: NullableStringFieldUpdateOperationsInput | string | null
     addressState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20123,7 +26630,10 @@ export namespace Prisma {
     boosts?: NullableJsonNullValueInput | InputJsonValue
     last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
     cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
     socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20134,6 +26644,10 @@ export namespace Prisma {
     incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
     budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
     chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type IncomeSourceUpsertWithoutCashAdvancesInput = {
@@ -20169,6 +26683,774 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateWithoutPasskeysInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountCreateNestedManyWithoutUserInput
+    transactions?: TransactionCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
+    budgets?: BudgetCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutPasskeysInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountUncheckedCreateNestedManyWithoutUserInput
+    transactions?: TransactionUncheckedCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodUncheckedCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
+    budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPasskeysInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPasskeysInput, UserUncheckedCreateWithoutPasskeysInput>
+  }
+
+  export type UserUpsertWithoutPasskeysInput = {
+    update: XOR<UserUpdateWithoutPasskeysInput, UserUncheckedUpdateWithoutPasskeysInput>
+    create: XOR<UserCreateWithoutPasskeysInput, UserUncheckedCreateWithoutPasskeysInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPasskeysInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPasskeysInput, UserUncheckedUpdateWithoutPasskeysInput>
+  }
+
+  export type UserUpdateWithoutPasskeysInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPasskeysInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUncheckedUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUncheckedUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUncheckedUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutDeviceSessionsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountCreateNestedManyWithoutUserInput
+    transactions?: TransactionCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
+    budgets?: BudgetCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDeviceSessionsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountUncheckedCreateNestedManyWithoutUserInput
+    transactions?: TransactionUncheckedCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodUncheckedCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
+    budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDeviceSessionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDeviceSessionsInput, UserUncheckedCreateWithoutDeviceSessionsInput>
+  }
+
+  export type UserUpsertWithoutDeviceSessionsInput = {
+    update: XOR<UserUpdateWithoutDeviceSessionsInput, UserUncheckedUpdateWithoutDeviceSessionsInput>
+    create: XOR<UserCreateWithoutDeviceSessionsInput, UserUncheckedCreateWithoutDeviceSessionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDeviceSessionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDeviceSessionsInput, UserUncheckedUpdateWithoutDeviceSessionsInput>
+  }
+
+  export type UserUpdateWithoutDeviceSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDeviceSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUncheckedUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUncheckedUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUncheckedUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutAuditLogsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountCreateNestedManyWithoutUserInput
+    transactions?: TransactionCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
+    budgets?: BudgetCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    insights?: InsightCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAuditLogsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountUncheckedCreateNestedManyWithoutUserInput
+    transactions?: TransactionUncheckedCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodUncheckedCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
+    budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    insights?: InsightUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAuditLogsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+  }
+
+  export type UserUpsertWithoutAuditLogsInput = {
+    update: XOR<UserUpdateWithoutAuditLogsInput, UserUncheckedUpdateWithoutAuditLogsInput>
+    create: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAuditLogsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAuditLogsInput, UserUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type UserUpdateWithoutAuditLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    insights?: InsightUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAuditLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUncheckedUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUncheckedUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUncheckedUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutInsightsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountCreateNestedManyWithoutUserInput
+    transactions?: TransactionCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceCreateNestedManyWithoutUserInput
+    budgets?: BudgetCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutInsightsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    dob?: string | null
+    ssn?: string | null
+    ssnLast4?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressZip?: string | null
+    stripeCustomerId?: string | null
+    stripeConnectAccountId?: string | null
+    spendingPower?: number
+    subscriptionNextBillingDate?: Date | string | null
+    invitedUserReward?: number
+    totalToRepay?: number
+    walletBalance?: number
+    minDepositAmount?: number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: string | null
+    cleo_card?: boolean
+    phoneNumber?: string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: string | null
+    ewaDisclaimerAccepted?: boolean
+    socureDeviceId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bankAccounts?: BankAccountUncheckedCreateNestedManyWithoutUserInput
+    transactions?: TransactionUncheckedCreateNestedManyWithoutUserInput
+    paymentMethods?: PaymentMethodUncheckedCreateNestedManyWithoutUserInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
+    incomeSources?: IncomeSourceUncheckedCreateNestedManyWithoutUserInput
+    budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
+    chatSessions?: ChatSessionUncheckedCreateNestedManyWithoutUserInput
+    cashAdvances?: CashAdvanceUncheckedCreateNestedManyWithoutUserInput
+    passkeys?: PasskeyCredentialUncheckedCreateNestedManyWithoutUserInput
+    deviceSessions?: DeviceSessionUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutInsightsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutInsightsInput, UserUncheckedCreateWithoutInsightsInput>
+  }
+
+  export type UserUpsertWithoutInsightsInput = {
+    update: XOR<UserUpdateWithoutInsightsInput, UserUncheckedUpdateWithoutInsightsInput>
+    create: XOR<UserCreateWithoutInsightsInput, UserUncheckedCreateWithoutInsightsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutInsightsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutInsightsInput, UserUncheckedUpdateWithoutInsightsInput>
+  }
+
+  export type UserUpdateWithoutInsightsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutInsightsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    dob?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    ssnLast4?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZip?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeConnectAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    spendingPower?: FloatFieldUpdateOperationsInput | number
+    subscriptionNextBillingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedUserReward?: FloatFieldUpdateOperationsInput | number
+    totalToRepay?: FloatFieldUpdateOperationsInput | number
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    minDepositAmount?: FloatFieldUpdateOperationsInput | number
+    boosts?: NullableJsonNullValueInput | InputJsonValue
+    last4_digits?: NullableStringFieldUpdateOperationsInput | string | null
+    cleo_card?: BoolFieldUpdateOperationsInput | boolean
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    kycStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    ewaDisclaimerAccepted?: BoolFieldUpdateOperationsInput | boolean
+    socureDeviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bankAccounts?: BankAccountUncheckedUpdateManyWithoutUserNestedInput
+    transactions?: TransactionUncheckedUpdateManyWithoutUserNestedInput
+    paymentMethods?: PaymentMethodUncheckedUpdateManyWithoutUserNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    incomeSources?: IncomeSourceUncheckedUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
+    chatSessions?: ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+    cashAdvances?: CashAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    passkeys?: PasskeyCredentialUncheckedUpdateManyWithoutUserNestedInput
+    deviceSessions?: DeviceSessionUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type BankAccountCreateManyUserInput = {
     id?: string
     accessToken: string
@@ -20187,10 +27469,12 @@ export namespace Prisma {
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -20239,6 +27523,7 @@ export namespace Prisma {
     id?: string
     subscriptionName?: string | null
     bankName?: string | null
+    mode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20253,6 +27538,50 @@ export namespace Prisma {
     serviceFeeCap?: number | null
     status: string
     repaymentDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasskeyCredentialCreateManyUserInput = {
+    id?: string
+    credentialId: string
+    publicKey: Buffer
+    signCount?: number
+    transports?: string | null
+    deviceName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeviceSessionCreateManyUserInput = {
+    id?: string
+    socureDeviceId: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    appCheckToken?: string | null
+    integrityVerdict?: string | null
+    seonFingerprint?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AuditLogCreateManyUserInput = {
+    id?: string
+    requestId: string
+    action: string
+    providerOutcome?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: Date | string
+  }
+
+  export type InsightCreateManyUserInput = {
+    id?: string
+    type: string
+    title: string
+    description?: string | null
+    amount?: number | null
+    actionUrl?: string | null
+    isRead?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20299,10 +27628,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20318,10 +27649,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20335,10 +27668,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20465,6 +27800,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUpdateManyWithoutSessionNestedInput
@@ -20474,6 +27810,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: ChatMessageUncheckedUpdateManyWithoutSessionNestedInput
@@ -20483,6 +27820,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     subscriptionName?: NullableStringFieldUpdateOperationsInput | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    mode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20529,16 +27867,150 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PasskeyCredentialUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasskeyCredentialUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasskeyCredentialUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: StringFieldUpdateOperationsInput | string
+    publicKey?: BytesFieldUpdateOperationsInput | Buffer
+    signCount?: IntFieldUpdateOperationsInput | number
+    transports?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeviceSessionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    socureDeviceId?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    appCheckToken?: NullableStringFieldUpdateOperationsInput | string | null
+    integrityVerdict?: NullableStringFieldUpdateOperationsInput | string | null
+    seonFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuditLogUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    providerOutcome?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TransactionCreateManyBankAccountInput = {
     id?: string
     userId: string
     categoryId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -20550,10 +28022,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20569,10 +28043,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20586,10 +28062,12 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20659,6 +28137,7 @@ export namespace Prisma {
     limit: number
     spent?: number
     icon?: string | null
+    color?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20669,6 +28148,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUpdateManyWithoutCategoryNestedInput
@@ -20680,6 +28160,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
@@ -20691,6 +28172,7 @@ export namespace Prisma {
     limit?: FloatFieldUpdateOperationsInput | number
     spent?: FloatFieldUpdateOperationsInput | number
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20701,10 +28183,12 @@ export namespace Prisma {
     bankAccountId?: string | null
     stripePaymentIntentId?: string | null
     type?: string
+    direction?: string | null
     amount: number
     selectedAmount?: number | null
     currency?: string
     status?: string
+    logoUrl?: string | null
     lastFormatted?: string | null
     merchantName?: string | null
     description?: string | null
@@ -20716,10 +28200,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20735,10 +28221,12 @@ export namespace Prisma {
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20752,10 +28240,12 @@ export namespace Prisma {
     bankAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentIntentId?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
+    direction?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     selectedAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     lastFormatted?: NullableStringFieldUpdateOperationsInput | string | null
     merchantName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20767,6 +28257,7 @@ export namespace Prisma {
     id?: string
     role: string
     content: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -20774,6 +28265,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -20781,6 +28273,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -20788,6 +28281,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -20864,6 +28358,22 @@ export namespace Prisma {
      * @deprecated Use CashAdvanceDefaultArgs instead
      */
     export type CashAdvanceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CashAdvanceDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PasskeyCredentialDefaultArgs instead
+     */
+    export type PasskeyCredentialArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PasskeyCredentialDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use DeviceSessionDefaultArgs instead
+     */
+    export type DeviceSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DeviceSessionDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AuditLogDefaultArgs instead
+     */
+    export type AuditLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AuditLogDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use InsightDefaultArgs instead
+     */
+    export type InsightArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = InsightDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

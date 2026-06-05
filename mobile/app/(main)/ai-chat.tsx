@@ -1,3 +1,4 @@
+import HapticsManager from '../../utils/HapticsManager';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,6 +10,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { coreTrpc } from '../../utils/trpc';
 import { useTrackScreen, trackEvent } from '../../hooks/useTelemetry';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
+import firestore from '@react-native-firebase/firestore';
+import { useUser } from '@clerk/clerk-expo';
 
 interface Message {
   id: string;
@@ -26,21 +31,23 @@ type ChatFormValues = z.infer<typeof chatSchema>;
 const MessageBubble = React.memo(({ msg }: { msg: Message }) => {
   const isUser = msg.role === 'user';
   return (
-    <View 
-      className={`max-w-[80%] p-4 rounded-3xl mb-4 shadow-sm ${
-        isUser 
-          ? 'self-end bg-gray-900 rounded-br-sm' 
-          : 'self-start bg-white rounded-bl-sm border border-gray-100'
-      }`}
+    <Animated.View 
+      entering={FadeInDown.springify().stiffness(400).damping(10)}
+      style={[{
+        maxWidth: '80%', padding: 16, borderRadius: 24, marginBottom: 16, 
+        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2,
+        backgroundColor: isUser ? '#3B82F6' : '#FFFFFF', alignSelf: isUser ? 'flex-end' : 'flex-start'
+      }, isUser ? { borderBottomRightRadius: 4 } : { borderBottomLeftRadius: 4 }]}
     >
-      <Text className={`text-base font-montreal leading-relaxed ${isUser ? 'text-white' : 'text-gray-900'}`}>
+      <Text style={{ fontSize: 16, fontFamily: 'Montreal-Medium', lineHeight: 24, color: isUser ? '#FFFFFF' : '#111827' }}>
         {msg.content}
       </Text>
-    </View>
+    </Animated.View>
   );
 });
 
 export default function AIChatScreen() {
+  const { colorRoles, typography, spacing } = useGlobalTheme();
   const { persona } = useLocalSearchParams();
   const router = useRouter();
   useTrackScreen('Main_AIChat', { persona });
@@ -53,6 +60,51 @@ export default function AIChatScreen() {
   const [messages, setMessages] = useState<Message[]>([{ id: '1', role: 'ai', content: initialMsg }]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const listRef = useRef<FlashList<Message>>(null);
+  const { user } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Initialize session ID on mount
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionId(Date.now().toString()); // Use timestamp as basic session ID
+    }
+  }, []);
+
+  // Listen to Firestore for real-time AI responses
+  useEffect(() => {
+    if (!user?.id || !sessionId) return;
+    
+    const unsubscribe = firestore()
+      .collection('users')
+      .doc(user.id)
+      .collection('chat_sessions')
+      .doc(sessionId)
+      .collection('messages')
+      .orderBy('createdAt', 'asc')
+      .onSnapshot(snapshot => {
+        if (!snapshot || snapshot.empty) return;
+        
+        const fetchedMessages = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            role: data.role as 'user' | 'ai',
+            content: data.content
+          };
+        });
+        
+        // Add initial msg + fetched messages
+        setMessages([{ id: '1', role: 'ai', content: initialMsg }, ...fetchedMessages]);
+        
+        // Check if AI is done responding (we can use a flag on the latest message or collection)
+        setIsLoading(false);
+        setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+      }, error => {
+        console.error("Firestore listener error:", error);
+      });
+
+    return () => unsubscribe();
+  }, [user?.id, sessionId]);
 
   const { control, handleSubmit, reset, formState: { isValid } } = useForm<ChatFormValues>({
     resolver: zodResolver(chatSchema),
@@ -60,59 +112,59 @@ export default function AIChatScreen() {
     defaultValues: { message: '' }
   });
 
-  const { mutate: sendMessage, isLoading } = coreTrpc.chat.sendMessage.useMutation({
-    onSuccess: (data) => {
-      if (data && data.sessionId && !sessionId) {
-        setSessionId(data.sessionId);
-      }
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: data?.response || "Done." }]);
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
-    },
-    onError: () => {
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: "I'm having a technical breakdown. Try again later." }]);
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
-    }
-  });
-
-  const onSubmit = useCallback((data: ChatFormValues) => {
+  const onSubmit = useCallback(async (data: ChatFormValues) => {
+    if (!user?.id || !sessionId) return;
+    
     trackEvent('Chat_Message_Sent');
     const userMsg = data.message;
     reset({ message: '' });
     
-    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content: userMsg }]);
-    
-    // Scroll to bottom optimistically
+    // Optimistic UI update handled via Firestore snapshot anyway, 
+    // but we can set loading state here
+    setIsLoading(true);
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
 
-    sendMessage({
-      message: userMsg,
-      persona: (persona as string) || 'roast',
-      sessionId: sessionId || undefined
-    });
-  }, [reset, sendMessage, sessionId, persona]);
+    try {
+      await firestore()
+        .collection('users')
+        .doc(user.id)
+        .collection('chat_sessions')
+        .doc(sessionId)
+        .collection('messages')
+        .add({
+          role: 'user',
+          content: userMsg,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+          persona: persona || 'roast'
+        });
+    } catch (error) {
+      console.error("Error writing to Firestore:", error);
+      setIsLoading(false);
+    }
+  }, [reset, sessionId, persona, user?.id]);
 
   const ListFooter = useCallback(() => (
     isLoading ? (
-      <View className="self-start bg-white p-4 rounded-3xl rounded-bl-sm mb-4 border border-gray-100 shadow-sm w-16 items-center">
+      <View style={{alignItems: 'center', marginBottom: 16, padding: 16}}>
         <ActivityIndicator color={isHype ? '#2DD4BF' : '#EC4899'} size="small" />
       </View>
     ) : null
   ), [isLoading, isHype]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'left', 'right']}>
-      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <SafeAreaView  edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView  behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Header */}
-        <View className={`flex-row items-center p-4 bg-white border-b-2 shadow-sm z-10 ${isHype ? 'border-teal-400' : 'border-pink-500'}`}>
-          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 items-center justify-center rounded-full bg-gray-50 mr-4">
-            <Ionicons name="arrow-back" size={24} color="#374151" />
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#FFFFFF', borderBottomWidth: 2, borderBottomColor: isHype ? '#2DD4BF' : '#EC4899', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, zIndex: 10 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ width: 40, height: 40, justifyContent: 'center' }}>
+            <Ionicons name="arrow-back" size={28} color="#111827" />
           </TouchableOpacity>
-          <Text className={`flex-1 text-center text-lg font-montrealBold uppercase tracking-widest ${isHype ? 'text-teal-500' : 'text-pink-500'} mr-10`}>
+          <Text style={{ flex: 1, textAlign: 'center', fontSize: 20, fontFamily: 'Montreal-Bold', textTransform: 'uppercase', letterSpacing: 1.5, marginRight: 40, color: isHype ? '#14B8A6' : '#EC4899' }}>
             {isHype ? 'Hype Mode' : 'Roast Mode'}
           </Text>
         </View>
 
-        <View className="flex-1 px-4">
+        <View >
           <FlashList
             ref={listRef}
             data={messages}
@@ -126,13 +178,13 @@ export default function AIChatScreen() {
         </View>
 
         {/* Input Footer */}
-        <View className="flex-row items-end p-4 bg-white border-t border-gray-100 pb-8">
+        <View style={{flexDirection: 'row', alignItems: 'flex-end', padding: 16}}>
           <Controller
             control={control}
             name="message"
             render={({ field: { onChange, value } }) => (
               <TextInput
-                className="flex-1 bg-gray-100 font-montreal rounded-3xl px-5 py-4 text-base text-gray-900 max-h-32 min-h-[56px]"
+                
                 value={value}
                 onChangeText={onChange}
                 placeholder="Say something..."
@@ -144,7 +196,7 @@ export default function AIChatScreen() {
           />
           <TouchableOpacity 
             style={{ backgroundColor: isValid ? (isHype ? '#2DD4BF' : '#EC4899') : '#E5E7EB' }}
-            className="w-14 h-14 rounded-full justify-center items-center ml-3 shadow-sm"
+            style={{alignItems: 'center', justifyContent: 'center'}}
             onPress={handleSubmit(onSubmit)}
             disabled={!isValid || isLoading}
           >
