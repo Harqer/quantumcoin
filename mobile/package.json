@@ -21,7 +21,7 @@
     "@react-native-firebase/firestore": "^24.0.0",
     "@react-native-firebase/messaging": "^24.0.0",
     "@reduxjs/toolkit": "^2.12.0",
-    "@sentry/react-native": "^8.13.0",
+    "@sentry/react-native": "~6.10.0",
     "@shopify/flash-list": "1.7.3",
     "@stripe/react-stripe-js": "^6.6.0",
     "@stripe/stripe-js": "^9.7.0",
@@ -78,7 +78,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@expo/config-plugins": "~9.0.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/react": "~18.3.12",
     "typescript": "^5.3.3"
