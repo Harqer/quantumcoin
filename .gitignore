@@ -95,10 +95,6 @@ venv_new/
 .*
 # Essential exceptions to keep tracked
 !.gitignore
-!.github/
-!.npmrc
-!.prettierrc
-!.eslintrc*
 
 ffuf
 dependabot
@@ -111,7 +107,7 @@ mobile_backup/
 .projects/state.local.test.json
 .env
 .env.*
-!.env.example
+# .env.example excluded to follow strict dotfile rule
 qbitcoin-base-contracts/
 
 /gateway/target
