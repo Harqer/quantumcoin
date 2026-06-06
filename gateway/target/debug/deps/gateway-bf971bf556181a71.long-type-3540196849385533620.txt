@@ -1,2 +1,0 @@
-fn(Extension<Claims>) -> impl Future<Output = axum::Json<serde_json::Value>> {generate_qnrg}
-fn(Extension<Claims>) -> impl Future<Output = axum::Json<serde_json::Value>> {generate_qnrg}: Handler<_, _>

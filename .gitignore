@@ -113,3 +113,9 @@ mobile_backup/
 .env.*
 !.env.example
 qbitcoin-base-contracts/
+
+/gateway/target
+/rust_gateway/target
+/hbctool-venv
+/contracts/.certora_internal
+
