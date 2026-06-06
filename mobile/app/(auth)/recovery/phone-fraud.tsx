@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
-import HermesFailureScreen from '../../components/HermesFailureScreen';
+import HermesFailureScreen from '../../../components/HermesFailureScreen';
 
 export default function PhoneNumberClaimFraudBlockedFailureScreen() {
   const router = useRouter();
