@@ -3,6 +3,7 @@ import { Inter, Source_Code_Pro } from "next/font/google";
 import { RootProvider } from "./rootProvider";
 import * as Sentry from "@sentry/nextjs";
 import { ClerkProvider } from '@clerk/nextjs'
+import { AlchemyProviderWrapper } from "./AlchemyProviderWrapper";
 import "./globals.css";
 
 const inter = Inter({
@@ -56,5 +57,11 @@ export default function RootLayout({
     return content;
   }
 
-  return <ClerkProvider>{content}</ClerkProvider>;
+  return (
+    <ClerkProvider>
+      <AlchemyProviderWrapper>
+        {content}
+      </AlchemyProviderWrapper>
+    </ClerkProvider>
+  );
 }

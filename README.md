@@ -1,305 +1,75 @@
-![ffuf mascot](_img/ffuf_run_logo_600.png)
-# ffuf - Fuzz Faster U Fool
+# QbitCoin (QBTC) & The Agentic Neobank
 
-A fast web fuzzer written in Go.
+Welcome to the future of personal finance. 
 
-- [Installation](https://github.com/ffuf/ffuf#installation)
-- [Example usage](https://github.com/ffuf/ffuf#example-usage)
-    - [Content discovery](https://github.com/ffuf/ffuf#typical-directory-discovery)
-    - [Vhost discovery](https://github.com/ffuf/ffuf#virtual-host-discovery-without-dns-records)
-    - [Parameter fuzzing](https://github.com/ffuf/ffuf#get-parameter-fuzzing)
-    - [POST data fuzzing](https://github.com/ffuf/ffuf#post-data-fuzzing)
-    - [Using external mutator](https://github.com/ffuf/ffuf#using-external-mutator-to-produce-test-cases)
-    - [Configuration files](https://github.com/ffuf/ffuf#configuration-files)
-- [Help](https://github.com/ffuf/ffuf#usage)
-    - [Interactive mode](https://github.com/ffuf/ffuf#interactive-mode)
+We are building an **Agentic Neobank** powered by autonomous AI and secured by next-generation quantum cryptography. 
 
+At the heart of the ecosystem is **QbitCoin (QBTC)**—a hyper-secure, USD-pegged stablecoin built natively on Ethereum L2 (Base). It offers lightning-fast, gas-efficient transactions with the ultimate peace of mind: the money itself is fortified by Quantum Key Distribution (QKD) and Quantum Random Number Generation (QNRG) to protect against the computing threats of tomorrow.
 
-## Installation
+## The Anatomy of a Stablecoin (And Why It Supersedes Fiat)
 
-- [Download](https://github.com/ffuf/ffuf/releases/latest) a prebuilt binary from [releases page](https://github.com/ffuf/ffuf/releases/latest), unpack and run!
+Before diving into QbitCoin's architecture, it is critical to understand the technical paradigm shift that stablecoins represent. A **stablecoin** is an ERC-20 (or equivalent) smart contract token cryptographically pegged 1:1 to a real-world asset (USD). Rather than relying on centralized banking ledgers, the token supply is algorithmically minted and burned on-chain corresponding to verifiable collateral reserves, often secured by decentralized oracle networks (like Chainlink) for price feeds.
 
-  _or_
-- If you are on macOS with [homebrew](https://brew.sh), ffuf can be installed with: `brew install ffuf`
-  
-  _or_
-- If you have recent go compiler installed: `go install github.com/ffuf/ffuf/v2@latest` (the same command works for updating)
-  
-  _or_
-- `git clone https://github.com/ffuf/ffuf ; cd ffuf ; go get ; go build`
+**The Technical Superiority Over Fiat (USD)**
+Traditional fiat currency operates on legacy infrastructure like the SWIFT network or ACH, which suffer from T+2 settlement times, centralized single-points-of-failure, and walled-garden APIs. Stablecoins solve this through blockchain primitives:
+*   **Atomic Settlements & Composability:** Stablecoins settle globally in milliseconds with deterministic finality. Furthermore, they are "composable" money. A smart contract can execute complex, multi-step financial logic—such as flash loans, automated market maker (AMM) routing, and yield farming—in a single atomic transaction.
+*   **Programmable Primitives:** Fiat systems require human identity verification (KYC/AML) to open bank accounts. Stablecoins function strictly via public-private key cryptography. This enables the "Machine Economy": autonomous AI agents can natively hold private keys, interact with Web3 protocols, and execute programmatic value transfers without requiring human intervention or corporate banking rails.
 
-Ffuf depends on Go 1.16 or greater.
+## Why QbitCoin is the Ultimate Stablecoin Architecture
 
-## Example usage
+While legacy stablecoins like USDC and USDT paved the way, their underlying architectures are increasingly antiquated for modern Web3 demands. QbitCoin is engineered as a generational leap forward:
 
-The usage examples below show just the simplest tasks you can accomplish using `ffuf`. 
+*   **L2 Native Execution (Zero-Gas Overhead):** Legacy stablecoins dominate Ethereum L1, subjecting users to network congestion and high gas fees (often $5-$50 per transfer). QbitCoin is built natively on Base, an Optimistic Rollup (L2). By executing transactions off-chain and posting compressed transaction data back to L1, QbitCoin achieves near-instant finality and fractional-cent gas costs while inheriting Mainnet's decentralized security.
+*   **Quantum-Proof Cryptography:** Almost all current stablecoins rely on the `secp256k1` elliptic curve for digital signatures (ECC). This standard will be fundamentally broken by future quantum computers running Shor's algorithm. QbitCoin replaces vulnerable ECC with a hybrid cryptographic model: **Device-Independent Quantum Key Distribution (DI-QKD)** secures institutional L2 backhaul, while **Post-Quantum Cryptography (PQC)** (such as lattice-based signatures) secures consumer wallets. 
+*   **Agent-Optimized Smart Contracts:** QbitCoin is designed specifically for autonomous execution. The smart contracts are heavily optimized to allow AI agents to parse yields, execute cross-chain arbitrage, and programmatically pay for APIs using the x402 protocol with minimal execution overhead.
 
-More elaborate documentation that goes through many features with a lot of examples is
-available in the ffuf wiki at [https://github.com/ffuf/ffuf/wiki](https://github.com/ffuf/ffuf/wiki)
+## Competitor Matrix: The QbitCoin Advantage
 
-For more extensive documentation, with real life usage examples and tips, be sure to check out the awesome guide:
-"[Everything you need to know about FFUF](https://codingo.io/tools/ffuf/bounty/2020/09/17/everything-you-need-to-know-about-ffuf.html)" by 
-Michael Skelton ([@codingo](https://github.com/codingo)).
+If you search for "quantum cryptocurrencies" on major retail platforms like Coinbase, Robinhood, or Base as of June 2026, you will notice a massive market gap: **There are zero direct competitors to QbitCoin.** 
 
-You can also practise your ffuf scans against a live host with different lessons and use cases either locally by using the docker container https://github.com/adamtlangley/ffufme or against the live hosted version at http://ffuf.me created by Adam Langley [@adamtlangley](https://twitter.com/adamtlangley).  
+Most native quantum projects (like QRL, Cellframe, or Abelian) are highly volatile Layer 1s that have failed to achieve mainstream retail listings. Conversely, major stablecoins (like USDC) are treating Post-Quantum Cryptography (PQC) as a multi-year, phased migration, leaving them currently vulnerable to "Harvest Now, Decrypt Later" attacks.
 
-### Typical directory discovery
+Here is how QbitCoin dominates the landscape:
 
-[![asciicast](https://asciinema.org/a/211350.png)](https://asciinema.org/a/211350)
+| Project / Asset | Listed On Retail Platforms? | Asset Type | Quantum Security Protocol |
+| :--- | :--- | :--- | :--- |
+| **QbitCoin (Ours)** | **Yes (Base L2)** | **Stablecoin (Non-Volatile)** | **DI-QKD & PQC:** Proactive defense-in-depth architecture. Natively built for agentic automated trading. |
+| **USDC / USDT** | Yes (Coinbase, Robinhood) | Stablecoin (Non-Volatile) | **Vulnerable (ECC):** Relying on phased, multi-year PQC roadmaps. Currently exposed to harvest attacks. |
+| **Algorand (ALGO)** | Yes (Coinbase, Robinhood) | Speculative (Volatile) | **PQC (Falcon):** Uses lattice-based signatures for State Proofs, but remains a highly volatile asset. |
+| **QRL / Cellframe / Abelian**| No | Speculative (Volatile) | **PQC / Lattice:** Legitimate quantum security, but isolated on obscure L1s without stablecoin utility or agentic trading support. |
 
-By using the FUZZ keyword at the end of URL (`-u`):
+**The QbitCoin USP (Unique Selling Proposition):**
+We are the *only* non-volatile asset offering proactive DI-QKD/PQC security directly on Base. By combining the absolute price stability of a fiat peg, the zero-gas execution speeds of an L2 rollup, and a smart contract architecture natively optimized for autonomous AI trading agents, QbitCoin stands entirely unrivaled in the modern market.
 
-```
-ffuf -w /path/to/wordlist -u https://target/FUZZ
-```
+## The App: Your Autonomous Financial Advisor
 
-### Virtual host discovery (without DNS records)
+Imagine a bank account that actually works *for* you while you sleep. Our mobile application pairs the security of QbitCoin with a state-of-the-art AI financial agent.
 
-[![asciicast](https://asciinema.org/a/211360.png)](https://asciinema.org/a/211360)
+*   **Real-Time Voice AI:** Stop tapping through complex menus. Just talk to your wallet. Our bidirectional voice pipeline lets you converse naturally with your AI advisor to check balances, send funds, or get market insights instantly.
+*   **Frictionless Neobank Experience:** The app looks and feels like a premium banking application—because it is. No confusing seed phrases, no clunky web browsers. Just pure, intelligent finance serving as your personal advisor.
 
-Assuming that the default virtualhost response size is 4242 bytes, we can filter out all the responses of that size (`-fs 4242`)while fuzzing the Host - header:
+## The Ecosystem Features
 
-```
-ffuf -w /path/to/vhost/wordlist -u https://target -H "Host: FUZZ" -fs 4242
-```
+*   **Autonomous DeFi:** Build agents that monitor yields across protocols, execute trades on Base and manage liquidity positions 24/7. Your agent detects a better yield opportunity at 3am? It rebalances automatically, no approval needed because you’ve already set permissions and controls.
+*   **The Machine Economy:** Power agents that pay for their own resources using the x402 protocol. Agents acquire API keys, purchase compute, access premium data streams, and pay for storage – all autonomously, creating truly self-sustaining machine economies.
+*   **Agentic Commerce:** Enable agents to participate in creator economies, send payments to other agents or users, and even monetize their own generated content. 
+*   **Multi-Chain Agent Operations:** Deploy agents that operate on Base, managing positions and executing strategies wherever the opportunities exist.
 
-### GET parameter fuzzing
+## The Unified Vision: Ethereum L2 & Quantum Security
 
-GET parameter name fuzzing is very similar to directory discovery, and works by defining the `FUZZ` keyword as a part of the URL. This also assumes a response size of 4242 bytes for invalid GET parameter name.
+QbitCoin doesn't just use two buzzwords; it relies on the perfect technological synergy between Layer 2 scaling and Post-Quantum Cryptography (PQC). Here is why this architecture is the undisputed future of blockchain:
 
-```
-ffuf -w /path/to/paramnames.txt -u https://target/script.php?FUZZ=test_value -fs 4242
-```
+**1. The "Bank Vault" vs. "High-Speed Teller" Analogy**
+Think of Ethereum Mainnet (L1) as a massive, hyper-secure **Bank Vault**. It is incredibly safe, but walking into a giant vault, filling out paperwork, and having a manager sign off on a $3 cup of coffee is slow and ridiculously expensive. Base (L2) acts as the **High-Speed Teller**, and with an L2 quantum inclusion, it instantly processes thousands of everyday transactions and bundles them into a single receipt dropped off at the main vault at the end of the day. By splitting the "vault fee" across thousands of users, transactions cost pennies instead of dollars, and clear instantly. You get the speed of Venmo with the untouchable security of Ethereum. This is exactly why the entire financial industry is abandoning L1 for consumer apps.
 
-If the parameter name is known, the values can be fuzzed the same way. This example assumes a wrong parameter value returning HTTP response code 401.
+**2. A Greener, Eco-Friendly Network**
+This process, known as "Transaction Batching," makes L2 exponentially better for the environment. Instead of the network burning energy to process 10,000 individual operations, L2 compresses them into one single lightweight proof, and with quantum integrated in it, drastically shrinking the carbon footprint of your digital finances.
 
-```
-ffuf -w /path/to/values.txt -u https://target/script.php?valid_name=FUZZ -fc 401
-```
+**3. The Quantum Threat: "Harvest Now, Decrypt Later"**
+Blockchain security today relies on Elliptic Curve Cryptography (ECC). In the near future, quantum computers running "Shor's Algorithm" will be able to easily solve the math behind ECC, allowing attackers to derive your private key directly from your public key and drain your wallet. Worse, hackers are hoarding encrypted data *today* so they can retroactively attack it when quantum computers mature. The threat is a ticking time bomb.
 
-### POST data fuzzing
-
-This is a very straightforward operation, again by using the `FUZZ` keyword. This example is fuzzing only part of the POST request. We're again filtering out the 401 responses.
-
-```
-ffuf -w /path/to/postdata.txt -X POST -d "username=admin\&password=FUZZ" -u https://target/login.php -fc 401
-```
-
-### Maximum execution time
-
-If you don't want ffuf to run indefinitely, you can use the `-maxtime`. This stops __the entire__ process after a given time (in seconds).
-
-```
-ffuf -w /path/to/wordlist -u https://target/FUZZ -maxtime 60
-```
-
-When working with recursion, you can control the maxtime __per job__ using `-maxtime-job`. This will stop the current job after a given time (in seconds) and continue with the next one. New jobs are created when the recursion functionality detects a subdirectory.
-
-```
-ffuf -w /path/to/wordlist -u https://target/FUZZ -maxtime-job 60 -recursion -recursion-depth 2
-```
-
-It is also possible to combine both flags limiting the per job maximum execution time as well as the overall execution time. If you do not use recursion then both flags behave equally.
-
-### Using external mutator to produce test cases
-
-For this example, we'll fuzz JSON data that's sent over POST. [Radamsa](https://gitlab.com/akihe/radamsa) is used as the mutator.
-
-When `--input-cmd` is used, ffuf will display matches as their position. This same position value will be available for the callee as an environment variable `$FFUF_NUM`. We'll use this position value as the seed for the mutator. Files example1.txt and example2.txt contain valid JSON payloads. We are matching all the responses, but filtering out response code `400 - Bad request`:
-
-```
-ffuf --input-cmd 'radamsa --seed $FFUF_NUM example1.txt example2.txt' -H "Content-Type: application/json" -X POST -u https://ffuf.io.fi/FUZZ -mc all -fc 400
-```
-
-It of course isn't very efficient to call the mutator for each payload, so we can also pre-generate the payloads, still using [Radamsa](https://gitlab.com/akihe/radamsa) as an example:
-
-```
-# Generate 1000 example payloads
-radamsa -n 1000 -o %n.txt example1.txt example2.txt
-
-# This results into files 1.txt ... 1000.txt
-# Now we can just read the payload data in a loop from file for ffuf
-
-ffuf --input-cmd 'cat $FFUF_NUM.txt' -H "Content-Type: application/json" -X POST -u https://ffuf.io.fi/ -mc all -fc 400
-```
-
-### Configuration files
-
-When running ffuf, it first checks if a default configuration file exists. Default path for a `ffufrc` file is
-`$XDG_CONFIG_HOME/ffuf/ffufrc`.  You can configure one or multiple options in this file, and they will be applied on 
-every subsequent ffuf job. An example of ffufrc file can be found 
-[here](https://github.com/ffuf/ffuf/blob/master/ffufrc.example). 
-
-A more detailed description about configuration file locations can be found in the wiki: 
-[https://github.com/ffuf/ffuf/wiki/Configuration](https://github.com/ffuf/ffuf/wiki/Configuration)
-
-The configuration options provided on the command line override the ones loaded from the default `ffufrc` file.
-Note: this does not apply for CLI flags that can be provided more than once. One of such examples is `-H` (header) flag.
-In this case, the `-H` values provided on the command line will be _appended_ to the ones from the config file instead.
-
-Additionally, in case you wish to use bunch of configuration files for different use cases, you can do this by defining
-the configuration file path using `-config` command line flag that takes the file path to the configuration file as its
-parameter. 
-
-<p align="center">
-  <img width="250" src="_img/ffuf_juggling_250.png">
-</p>
-
-## Usage
-
-To define the test case for ffuf, use the keyword `FUZZ` anywhere in the URL (`-u`), headers (`-H`), or POST data (`-d`).
-
-```
-Fuzz Faster U Fool - v2.1.0
-
-HTTP OPTIONS:
-  -H                  Header `"Name: Value"`, separated by colon. Multiple -H flags are accepted.
-  -X                  HTTP method to use
-  -b                  Cookie data `"NAME1=VALUE1; NAME2=VALUE2"` for copy as curl functionality.
-  -cc                 Client cert for authentication. Client key needs to be defined as well for this to work
-  -ck                 Client key for authentication. Client certificate needs to be defined as well for this to work
-  -d                  POST data
-  -http2              Use HTTP2 protocol (default: false)
-  -ignore-body        Do not fetch the response content. (default: false)
-  -r                  Follow redirects (default: false)
-  -raw                Do not encode URI (default: false)
-  -recursion          Scan recursively. Only FUZZ keyword is supported, and URL (-u) has to end in it. (default: false)
-  -recursion-depth    Maximum recursion depth. (default: 0)
-  -recursion-strategy Recursion strategy: "default" for a redirect based, and "greedy" to recurse on all matches (default: default)
-  -replay-proxy       Replay matched requests using this proxy.
-  -sni                Target TLS SNI, does not support FUZZ keyword
-  -timeout            HTTP request timeout in seconds. (default: 10)
-  -u                  Target URL
-  -x                  Proxy URL (SOCKS5 or HTTP). For example: http://127.0.0.1:8080 or socks5://127.0.0.1:8080
-
-GENERAL OPTIONS:
-  -V                  Show version information. (default: false)
-  -ac                 Automatically calibrate filtering options (default: false)
-  -acc                Custom auto-calibration string. Can be used multiple times. Implies -ac
-  -ach                Per host autocalibration (default: false)
-  -ack                Autocalibration keyword (default: FUZZ)
-  -acs                Custom auto-calibration strategies. Can be used multiple times. Implies -ac
-  -c                  Colorize output. (default: false)
-  -config             Load configuration from a file
-  -json               JSON output, printing newline-delimited JSON records (default: false)
-  -maxtime            Maximum running time in seconds for entire process. (default: 0)
-  -maxtime-job        Maximum running time in seconds per job. (default: 0)
-  -noninteractive     Disable the interactive console functionality (default: false)
-  -p                  Seconds of `delay` between requests, or a range of random delay. For example "0.1" or "0.1-2.0"
-  -rate               Rate of requests per second (default: 0)
-  -s                  Do not print additional information (silent mode) (default: false)
-  -sa                 Stop on all error cases. Implies -sf and -se. (default: false)
-  -scraperfile        Custom scraper file path
-  -scrapers           Active scraper groups (default: all)
-  -se                 Stop on spurious errors (default: false)
-  -search             Search for a FFUFHASH payload from ffuf history
-  -sf                 Stop when > 95% of responses return 403 Forbidden (default: false)
-  -t                  Number of concurrent threads. (default: 40)
-  -v                  Verbose output, printing full URL and redirect location (if any) with the results. (default: false)
-
-MATCHER OPTIONS:
-  -mc                 Match HTTP status codes, or "all" for everything. (default: 200-299,301,302,307,401,403,405,500)
-  -ml                 Match amount of lines in response
-  -mmode              Matcher set operator. Either of: and, or (default: or)
-  -mr                 Match regexp
-  -ms                 Match HTTP response size
-  -mt                 Match how many milliseconds to the first response byte, either greater or less than. EG: >100 or <100
-  -mw                 Match amount of words in response
-
-FILTER OPTIONS:
-  -fc                 Filter HTTP status codes from response. Comma separated list of codes and ranges
-  -fl                 Filter by amount of lines in response. Comma separated list of line counts and ranges
-  -fmode              Filter set operator. Either of: and, or (default: or)
-  -fr                 Filter regexp
-  -fs                 Filter HTTP response size. Comma separated list of sizes and ranges
-  -ft                 Filter by number of milliseconds to the first response byte, either greater or less than. EG: >100 or <100
-  -fw                 Filter by amount of words in response. Comma separated list of word counts and ranges
-
-INPUT OPTIONS:
-  -D                  DirSearch wordlist compatibility mode. Used in conjunction with -e flag. (default: false)
-  -e                  Comma separated list of extensions. Extends FUZZ keyword.
-  -enc                Encoders for keywords, eg. 'FUZZ:urlencode b64encode'
-  -ic                 Ignore wordlist comments (default: false)
-  -input-cmd          Command producing the input. --input-num is required when using this input method. Overrides -w.
-  -input-num          Number of inputs to test. Used in conjunction with --input-cmd. (default: 100)
-  -input-shell        Shell to be used for running command
-  -mode               Multi-wordlist operation mode. Available modes: clusterbomb, pitchfork, sniper (default: clusterbomb)
-  -request            File containing the raw http request
-  -request-proto      Protocol to use along with raw request (default: https)
-  -w                  Wordlist file path and (optional) keyword separated by colon. eg. '/path/to/wordlist:KEYWORD'
-
-OUTPUT OPTIONS:
-  -debug-log          Write all of the internal logging to the specified file.
-  -o                  Write output to file
-  -od                 Directory path to store matched results to.
-  -of                 Output file format. Available formats: json, ejson, html, md, csv, ecsv (or, 'all' for all formats) (default: json)
-  -or                 Don't create the output file if we don't have results (default: false)
-
-EXAMPLE USAGE:
-  Fuzz file paths from wordlist.txt, match all responses but filter out those with content-size 42.
-  Colored, verbose output.
-    ffuf -w wordlist.txt -u https://example.org/FUZZ -mc all -fs 42 -c -v
-
-  Fuzz Host-header, match HTTP 200 responses.
-    ffuf -w hosts.txt -u https://example.org/ -H "Host: FUZZ" -mc 200
-
-  Fuzz POST JSON data. Match all responses not containing text "error".
-    ffuf -w entries.txt -u https://example.org/ -X POST -H "Content-Type: application/json" \
-      -d '{"name": "FUZZ", "anotherkey": "anothervalue"}' -fr "error"
-
-  Fuzz multiple locations. Match only responses reflecting the value of "VAL" keyword. Colored.
-    ffuf -w params.txt:PARAM -w values.txt:VAL -u https://example.org/?PARAM=VAL -mr "VAL" -c
-
-  More information and examples: https://github.com/ffuf/ffuf
-```
-
-### Interactive mode
-
-By pressing `ENTER` during ffuf execution, the process is paused and user is dropped to a shell-like interactive mode:
-```
-entering interactive mode
-type "help" for a list of commands, or ENTER to resume.
-> help
-
-available commands:
- afc  [value]             - append to status code filter 
- fc   [value]             - (re)configure status code filter 
- afl  [value]             - append to line count filter 
- fl   [value]             - (re)configure line count filter 
- afw  [value]             - append to word count filter 
- fw   [value]             - (re)configure word count filter 
- afs  [value]             - append to size filter 
- fs   [value]             - (re)configure size filter 
- aft  [value]             - append to time filter 
- ft   [value]             - (re)configure time filter 
- rate [value]             - adjust rate of requests per second (active: 0)
- queueshow                - show job queue
- queuedel [number]        - delete a job in the queue
- queueskip                - advance to the next queued job
- restart                  - restart and resume the current ffuf job
- resume                   - resume current ffuf job (or: ENTER) 
- show                     - show results for the current job
- savejson [filename]      - save current matches to a file
- help                     - you are looking at it
-> 
-```
-
-in this mode, filters can be reconfigured, queue managed and the current state saved to disk.
-
-When (re)configuring the filters, they get applied posthumously and all the false positive matches from memory that
-would have been filtered out by the newly added filters get deleted.
-
-The new state of matches can be printed out with a command `show` that will print out all the matches as like they 
-would have been found by `ffuf`.
-
-As "negative" matches are not stored to memory, relaxing the filters cannot unfortunately bring back the lost matches.
-For this kind of scenario, the user is able to use the command `restart`, which resets the state and starts the current
-job from the beginning.
-
-<p align="center">
-  <img width="250" src="_img/ffuf_waving_250.png">
-</p>
-
-## License
-
-ffuf is released under MIT license. See [LICENSE](https://github.com/ffuf/ffuf/blob/master/LICENSE).
+**4. The Defense-in-Depth Strategy: DI-QKD and L2 Rollups**
+While standard Post-Quantum Cryptography (PQC) prevents hackers from forging signatures, it relies on complex mathematical formulas. For our highest-value assets (like institutional liquidity or the stablecoin peg), we employ **Device-Independent Quantum Key Distribution (DI-QKD)**—the "gold standard" of cryptography.
+*   **Why DI-QKD is the Ultimate Security:** Standard encryption requires you to trust the hardware manufacturer. If a device has a hidden flaw or "side-channel," it can be hacked. DI-QKD treats hardware as untrusted "black boxes" and uses **Bell inequality violations**—a fundamental law of physics—as a statistical self-test. If the test passes, the connection is physically guaranteed to be secret. It is mathematically impossible to hack, even by an advanced quantum computer or if the hardware was built by a malicious actor.
+*   **Bridging DI-QKD with L2:** Traditional blockchains cannot handle the massive data requirements of quantum security. Base L2 changes this. We use DI-QKD to establish an Information-Theoretically Secure (ITS) physical backhaul between our core L2 sequencers and the Ethereum L1 vault. This physically secures the most critical batch updates from "harvest now, decrypt later" attacks. 
+*   **The Dual-Key Approach:** We use DI-QKD to secure the physical infrastructure of high-value asset flows, while using PQC for everyday consumer transaction signatures. Because L2 is built for massive data aggregation, it can easily process these heavy quantum validations off-chain for pennies before submitting them to the Mainnet. By unifying L2 scalability with these quantum algorithms, **QbitCoin delivers the absolute best, futuristic financial security without ever sacrificing speed or cost.**

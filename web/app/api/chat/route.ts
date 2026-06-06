@@ -5,6 +5,7 @@ import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
+import { auth } from "@clerk/nextjs/server";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -13,6 +14,12 @@ const WALLET_DATA_FILE = path.join(process.cwd(), "agent_wallet_data.txt");
 
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { messages } = await req.json();
 
     if (!process.env.CDP_API_KEY_NAME || !process.env.CDP_API_KEY_PRIVATE_KEY) {

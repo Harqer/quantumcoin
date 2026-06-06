@@ -100,6 +100,11 @@ venv_new/
 !.prettierrc
 !.eslintrc*
 
+ffuf
+dependabot
+hermes-decomp/
+mobile_backup/
+
 .projects/cache
 .projects/vault
 .projects/state.test.json
@@ -107,7 +112,4 @@ venv_new/
 .env
 .env.*
 !.env.example
-ffuf
-dependabot
-hermes-decomp/
-mobile_backup/
+qbitcoin-base-contracts/

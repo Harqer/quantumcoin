@@ -10,6 +10,10 @@
     "postinstall": "npx -y patch-package"
   },
   "dependencies": {
+    "@account-kit/core": "^4.88.4",
+    "@account-kit/infra": "^4.88.4",
+    "@account-kit/react": "^4.88.4",
+    "@account-kit/signer": "^4.88.4",
     "@ai-sdk/google": "^3.0.80",
     "@ai-sdk/openai": "^3.0.66",
     "@ai-sdk/react": "^3.0.195",
