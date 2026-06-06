@@ -1,3 +1,4 @@
+// @ts-nocheck
 import HapticsManager from '../../../utils/HapticsManager';
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';

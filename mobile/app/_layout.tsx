@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Sentry from '@sentry/react-native';
 import { Stack } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';

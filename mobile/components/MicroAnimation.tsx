@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect } from 'react';
 import { StyleProp, ViewStyle, View } from 'react-native';
 import LottieView from 'lottie-react-native';

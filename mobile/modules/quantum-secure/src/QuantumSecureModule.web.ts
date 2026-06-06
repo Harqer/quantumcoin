@@ -4,4 +4,4 @@ class QuantumSecureModule extends NativeModule<{}> {
   async setValueAsync(value: string): Promise<void> {}
 }
 
-export default registerWebModule(QuantumSecureModule, 'QuantumSecureModule');
+export default registerWebModule(QuantumSecureModule);

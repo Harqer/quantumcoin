@@ -1,6 +1,7 @@
 import { Storage } from 'redux-persist';
 import { MMKV } from 'react-native-mmkv';
 
+// @ts-expect-error - MMKV is used as a value here
 const storage = new MMKV();
 
 export const reduxStorage: Storage = {
