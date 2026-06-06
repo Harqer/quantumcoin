@@ -16,6 +16,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@intercom/intercom-react-native": "^10.2.0",
     "@pinwheel/react-native-pinwheel": "^4.0.0",
+    "@react-native-community/slider": "^5.2.0",
     "@react-native-firebase/app": "^24.0.0",
     "@react-native-firebase/app-check": "^24.0.0",
     "@react-native-firebase/firestore": "^24.0.0",
