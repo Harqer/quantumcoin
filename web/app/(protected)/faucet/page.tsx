@@ -10,7 +10,7 @@ export default function FaucetDashboard() {
   const [amount, setAmount] = useState('100');
   const [operationType, setOperationType] = useState('qnrg');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ message: string; transaction_id: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,8 +41,8 @@ export default function FaucetDashboard() {
       }
 
       setResult(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

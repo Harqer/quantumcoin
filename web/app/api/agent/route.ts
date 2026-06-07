@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response, { status: 202 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     Sentry.captureException(error, {
       extra: {
         eventCategory: 'AGENT_TERMINAL_ERROR',

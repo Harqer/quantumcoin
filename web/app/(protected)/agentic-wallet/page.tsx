@@ -35,7 +35,7 @@ function BlockchainActivityTerminal() {
 
     try {
       let endpoint = '/api/agent';
-      let payload: any = {
+      let payload: Record<string, unknown> = {
         agentId: 'agent_1',
         action: actionType,
         parameters: { targetAddress: walletAddress },
@@ -81,8 +81,9 @@ function BlockchainActivityTerminal() {
       if (!res.ok) throw new Error(data.error || 'Request failed');
 
       setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Success: ${JSON.stringify(data).substring(0, 50)}...`, status: 'success' } : l));
-    } catch (err: any) {
-      setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Error: ${err.message}`, status: 'failed' } : l));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
+      setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Error: ${errMsg}`, status: 'failed' } : l));
     } finally {
       setIsLoading(false);
     }

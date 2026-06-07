@@ -5,10 +5,18 @@ import StakeModal from '@/components/earn/StakeModal';
 import { ConnectWallet, Wallet, WalletDropdown } from '@coinbase/onchainkit/wallet';
 import { Identity, Avatar, Name } from '@coinbase/onchainkit/identity';
 
+interface StakePool {
+  poolId: string;
+  asset: string;
+  apy: string;
+  totalStaked: string;
+  lockup: number;
+}
+
 export default function EarnDashboard() {
   const [isMounted, setIsMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPool, setSelectedPool] = useState<any>(null);
+  const [selectedPool, setSelectedPool] = useState<StakePool | null>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -19,7 +27,7 @@ export default function EarnDashboard() {
     { poolId: 'pool_usdc_1', asset: 'USDC', apy: '0.05', totalStaked: '5,000,000', lockup: 14 }
   ];
 
-  const handleOpenModal = (pool: any) => {
+  const handleOpenModal = (pool: StakePool) => {
     setSelectedPool(pool);
     setIsModalOpen(true);
   };

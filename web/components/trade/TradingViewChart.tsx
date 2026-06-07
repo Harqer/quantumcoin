@@ -1,12 +1,24 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
+
+interface CandleData {
+  start: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+}
+
+interface CandleEvent {
+  candles?: CandleData[];
+}
 
 export default function TradingViewChart({ productId }: { productId: string }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<any>(null);
-  const candlestickSeriesRef = useRef<any>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const candlestickSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -63,14 +75,13 @@ export default function TradingViewChart({ productId }: { productId: string }) {
       }));
     };
 
-    const buffer: any[] = [];
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.channel === 'candles' && data.events && data.events.length > 0) {
-          data.events.forEach((ev: any) => {
+          data.events.forEach((ev: CandleEvent) => {
             if (ev.candles && ev.candles.length > 0) {
-              ev.candles.forEach((c: any) => {
+              ev.candles.forEach((c) => {
                 const candle = {
                   time: parseInt(c.start),
                   open: parseFloat(c.open),

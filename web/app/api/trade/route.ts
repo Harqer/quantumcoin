@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     failureCount = 0;
     
     return NextResponse.json(mockResponse, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Record failure for circuit breaker
     failureCount++;
     lastFailureTime = Date.now();

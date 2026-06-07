@@ -46,11 +46,11 @@ export const apiGetTransactionSummary = () => fetchWithAuth('/api/v3/brokerage/t
 // 6. Agent Bazaar
 export const apiGetBazaarServices = () => fetchWithAuth('/api/bazaar/services');
 export const apiSearchBazaarServices = (query: string) => fetchWithAuth(`/api/bazaar/search?q=${encodeURIComponent(query)}`);
-export const apiRegisterBazaarService = (payload: any) => 
+export const apiRegisterBazaarService = (payload: Record<string, unknown>) => 
   fetchWithAuth('/api/bazaar/register', { method: 'POST', body: JSON.stringify(payload) });
 
 // 7. Quantum ML Jobs (Rust Gateway)
-export const apiSubmitJob = (model_type: string, parameters: any) => 
+export const apiSubmitJob = (model_type: string, parameters: Record<string, unknown>) => 
   fetchWithAuth('/api/v4/quantum/jobs', { method: 'POST', body: JSON.stringify({ model_type, parameters }) });
 export const apiGetJobStatus = (job_id: string) => 
   fetchWithAuth(`/api/v4/quantum/jobs/${job_id}`);

@@ -83,7 +83,7 @@ export interface AgentTerminalCommand {
 export interface AgentCommandResponse {
   commandId: string;
   status: 'pending' | 'success' | 'failed';
-  resultData?: any;
+  resultData?: unknown;
   error?: string;
 }
 

@@ -91,8 +91,9 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify(payload),
       });
-    } catch (fetchError: any) {
-      console.warn("Backend fetch failed, mocking success for local dev:", fetchError.message);
+    } catch (fetchError: unknown) {
+      const fetchErrMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
+      console.warn("Backend fetch failed, mocking success for local dev:", fetchErrMsg);
       // Fallback for local development if api.quantumcoin.io doesn't exist
       response = {
         ok: true,
@@ -100,11 +101,11 @@ export async function POST(request: Request) {
           ? { random_bytes: "mock_base64_random_bytes==", provider: "MockProvider" }
           : { status: "Key distribution initiated", keyId: "mock_key_id" }
         )
-      } as any;
+      } as unknown as Response;
     }
 
     if (!response.ok) {
-      let errorBody: any = {};
+      let errorBody: { code?: string; message?: string } = {};
       try {
         errorBody = await response.json();
       } catch (e) {}
@@ -140,7 +141,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in /api/mint route:', error);
     return NextResponse.json(
       {

@@ -42,7 +42,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching product book:', error);
     return NextResponse.json({ error: 'Failed to fetch product book' }, { status: 500 });
   }

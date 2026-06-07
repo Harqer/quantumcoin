@@ -47,8 +47,8 @@ export default function StakeModal({ isOpen, onClose, poolId, asset, apy }: Stak
       if (!res.ok) throw new Error(data.error || 'Stake failed');
       
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

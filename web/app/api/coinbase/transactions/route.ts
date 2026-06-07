@@ -33,10 +33,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: transactions });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error fetching transactions for account:`, error);
     
-    if (error.message && error.message.includes('401')) {
+    if (error instanceof Error && error.message.includes('401')) {
       return NextResponse.json({ error: 'Session expired. Please log in again.' }, { status: 401 });
     }
     

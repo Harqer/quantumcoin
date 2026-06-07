@@ -41,7 +41,7 @@ const earnRequestSchema = z.discriminatedUnion('action', [
 // Mock PostgreSQL Interface for Strict ACID properties
 const db = {
   positions: new Map<string, UserStakingPosition>(),
-  auditLogs: [] as any[],
+  auditLogs: [] as { action: string; payload: unknown; context: Record<string, unknown>; timestamp: number }[],
   async beginTransaction() { return true; },
   async commit() { return true; },
   async rollback() { return true; }
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: result }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     await db.rollback();
     
     Sentry.captureException(error, {
@@ -134,6 +134,7 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

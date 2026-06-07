@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     });
 
     return result.toDataStreamResponse();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Secure error log - agentic wallet chat route:", error);
     // Do not leak sensitive backend errors to the client
     return NextResponse.json(

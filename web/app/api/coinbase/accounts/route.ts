@@ -25,11 +25,11 @@ export async function GET() {
 
     return NextResponse.json({ data: accounts });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching Coinbase accounts:', error);
     
     // If it's a 401, we might want to tell the frontend to trigger a refresh/re-auth
-    if (error.message && error.message.includes('401')) {
+    if (error instanceof Error && error.message.includes('401')) {
       return NextResponse.json({ error: 'Session expired. Please log in again.' }, { status: 401 });
     }
     

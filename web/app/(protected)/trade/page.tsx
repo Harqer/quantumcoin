@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import OrderForm from '@/components/trade/OrderForm';
 import { ConnectWallet, Wallet, WalletDropdown } from '@coinbase/onchainkit/wallet';
 import { Identity, Avatar, Name } from '@coinbase/onchainkit/identity';
-import { createChart, ColorType, ISeriesApi, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, ISeriesApi, IChartApi, UTCTimestamp } from 'lightweight-charts';
 
 // Real WebSocket hook for Coinbase Public API
 function useCoinbaseMarketData(productId: string) {
@@ -47,7 +47,7 @@ function useCoinbaseMarketData(productId: string) {
                 let newBids = [...prev.bids];
                 let newAsks = [...prev.asks];
                 
-                updates.forEach((u: any) => {
+                updates.forEach((u: { side: string; price_level: string; new_quantity: string }) => {
                   if (u.side === 'bid') newBids.push([u.price_level, u.new_quantity]);
                   if (u.side === 'offer') newAsks.push([u.price_level, u.new_quantity]);
                 });
@@ -62,7 +62,7 @@ function useCoinbaseMarketData(productId: string) {
         if (data.channel === 'market_trades' && data.events) {
            const tradesList = data.events[0].trades;
            if (tradesList) {
-             const newTrades = tradesList.map((t: any) => ({
+             const newTrades = tradesList.map((t: { time: string; price: string }) => ({
                 time: Math.floor(new Date(t.time).getTime() / 1000),
                 price: parseFloat(t.price)
              }));
@@ -136,7 +136,7 @@ function TradingChart({ trades }: { trades: {time: number, price: number}[] }) {
       const uniqueTrades = Array.from(new Map(trades.map(t => [t.time, t])).values());
       uniqueTrades.sort((a, b) => a.time - b.time);
       if (uniqueTrades.length > 0) {
-        seriesRef.current.setData(uniqueTrades.map(t => ({ time: t.time as any, value: t.price })));
+        seriesRef.current.setData(uniqueTrades.map(t => ({ time: t.time as UTCTimestamp, value: t.price })));
       }
     }
   }, [trades]);

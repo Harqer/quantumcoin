@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
     // Determine the FastAPI endpoint based on the requested service
     let backendEndpoint = "";
-    let payload: any = {};
+    let payload: Record<string, string | number> = {};
 
     switch (service) {
       case "wallet-seed":
