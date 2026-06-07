@@ -3,12 +3,38 @@ import { useState, useEffect } from "react";
 import { apiGetAccounts, apiGetHistoricalOrdersBatch, apiGetHistoricalFills, apiGetTransactionSummary } from "@/lib/api";
 import styles from "./page.module.css";
 
+interface Account {
+  account_id: string;
+  currency: string;
+  balance: string;
+}
+
+interface Order {
+  order_id: string;
+  side: string;
+  size: string;
+  price: string;
+  status: string;
+}
+
+interface Fill {
+  fill_id: string;
+  order_id: string;
+  size: string;
+  price: string;
+}
+
+interface TransactionSummary {
+  trailing_30_day_volume?: string;
+  fee_tier?: string;
+}
+
 export default function HistoryComponent() {
   const [activeTab, setActiveTab] = useState<"accounts" | "orders" | "fills">("accounts");
-  const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
-  const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
-  const [fills, setFills] = useState<Record<string, unknown>[]>([]);
-  const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [fills, setFills] = useState<Fill[]>([]);
+  const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -3,11 +3,18 @@ import { useState } from "react";
 import { apiGetConvertQuote, apiExecuteTrade } from "@/lib/api";
 import styles from "./page.module.css";
 
+interface ConvertQuote {
+  quote_id: string;
+  exchange_rate: string;
+  amount: string;
+  fee: string;
+}
+
 export default function ConvertComponent() {
   const [fromAsset, setFromAsset] = useState("USD");
   const [toAsset, setToAsset] = useState("BTC");
   const [amount, setAmount] = useState("");
-  const [quote, setQuote] = useState<Record<string, unknown> | null>(null);
+  const [quote, setQuote] = useState<ConvertQuote | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

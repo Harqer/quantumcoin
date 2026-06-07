@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { apiRegisterBazaarService } from "../@/lib/api";
+import { apiRegisterBazaarService } from "@/lib/api";
 import styles from "../page.module.css";
 
 export default function CreatorDashboardComponent() {

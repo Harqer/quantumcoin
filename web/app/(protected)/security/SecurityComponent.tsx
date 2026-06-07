@@ -3,11 +3,22 @@ import { useState, useEffect } from "react";
 import { apiListKeys, apiCreateKey, apiRotateKey } from "@/lib/api";
 import styles from "./page.module.css";
 
+interface ApiKey {
+  key_id: string;
+  permissions?: string[];
+}
+
+interface KeyDetails {
+  key_id?: string;
+  secret_key?: string;
+  new_secret_key?: string;
+}
+
 export default function SecurityComponent() {
-  const [keys, setKeys] = useState<Record<string, unknown>[]>([]);
+  const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [newKeyDetails, setNewKeyDetails] = useState<Record<string, unknown> | null>(null);
+  const [newKeyDetails, setNewKeyDetails] = useState<KeyDetails | null>(null);
 
   useEffect(() => {
     fetchKeys();
@@ -95,7 +106,7 @@ export default function SecurityComponent() {
                 <div className={styles.keyInfo}>
                   <div className={styles.keyId}>{key.key_id}</div>
                   <div className={styles.permissions}>
-                    {key.permissions?.map((p: string) => (
+                    {key.permissions?.map((p) => (
                       <span key={p} className={styles.badge}>{p}</span>
                     ))}
                   </div>

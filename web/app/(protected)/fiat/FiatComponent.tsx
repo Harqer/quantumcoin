@@ -8,7 +8,7 @@ export default function FiatComponent() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [options, setOptions] = useState<string[]>([]);
-  const [quote, setQuote] = useState<Record<string, unknown> | null>(null);
+  const [quote, setQuote] = useState<{ amount: string; fee: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [offrampUrl, setOfframpUrl] = useState("");
 
