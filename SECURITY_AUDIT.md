@@ -51,3 +51,9 @@ This report details the findings of a comprehensive security audit performed on 
 - **Issue**: `const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');`
 - **Risk**: Medium. If the environment variable is missing, a new key is generated on every restart, making previously encrypted data unreadable.
 - **Recommendation**: Enforce the presence of `ENCRYPTION_KEY` in production and fail-fast if missing.
+
+### 8. Exposed API Keys and Secrets
+- **Location**: `api/inject_secrets.ts`
+- **Issue**: Hardcoded test and live secrets for Clerk, Stripe, Alchehmy, and CDP were committed to source control.
+- **Risk**: Critical. Exposed secrets allow unauthorized parties to access third-party services, potentially incurring costs or stealing user data.
+- **Recommendation**: Rotate all exposed keys immediately and use environment variables or a secure vault (like Doppler/Infisical) to inject secrets at runtime.
