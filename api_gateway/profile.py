@@ -19,9 +19,15 @@ def get_profile(payload: dict = Depends(verify_token), db: Session = Depends(get
         db.commit()
         db.refresh(user)
         
-    return {
-        "user_id": user.id,
-        "clerk_id": clerk_id,
-        "wallet_balance": 0.00, # Initial balance
-        "role": user.role
-    }
+    try:
+        return {
+            "user_id": user.id,
+            "clerk_id": clerk_id,
+            "wallet_balance": 0.00, # Initial balance
+            "role": user.role
+        }
+    except Exception as e:
+        import logging
+        logging.error(f"Error fetching profile: {e}")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Internal server error occurred")

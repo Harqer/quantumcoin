@@ -148,7 +148,8 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
                 # Use parameterized queries correctly for both SQLite and Postgres via SQLAlchemy logic if possible,
                 # but here we'll stick to a simple check or use a more robust way.
                 # Given this is a script, we'll ensure placeholders match the connection type.
-                is_sqlite = POSTGRES_URL and POSTGRES_URL.startswith("sqlite")
+                # Default to SQLite if POSTGRES_URL is missing
+                is_sqlite = not POSTGRES_URL or "sqlite" in POSTGRES_URL
                 placeholder = "?" if is_sqlite else "%s"
 
                 cur = conn.cursor()

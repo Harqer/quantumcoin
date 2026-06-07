@@ -48,7 +48,12 @@ pub async fn require_auth(
     //     }
     // }
 
-    // Bypassing auth check strictly for initial scaffolding.
+    // Ensure auth bypass is strictly disabled in production
+    if std::env::var("APP_ENV").unwrap_or_default() == "production" {
+        tracing::error!("Authentication bypass attempted in production!");
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
     tracing::debug!("Bypassing JWT auth check during scaffolding.");
     let claims = Claims {
         sub: "scaffold_user".into(),
