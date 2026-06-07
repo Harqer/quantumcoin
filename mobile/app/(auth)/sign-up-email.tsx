@@ -150,7 +150,7 @@ export default function SignUpEmailScreen() {
                     borderWidth: 1,
                     borderColor: email ? colorRoles.border.selectedInverse : 'transparent'
                   }}
-                  placeholder="john@example.com"
+                  placeholder="Enter your email"
                   placeholderTextColor={colorRoles.content.secondary}
                   value={email}
                   onChangeText={setEmail}

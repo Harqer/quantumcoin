@@ -67,7 +67,7 @@ export default function SignUpNameScreen() {
                   borderWidth: 1,
                   borderColor: firstName ? colorRoles.border.selectedInverse : 'transparent'
                 }}
-                placeholder="John"
+                placeholder="First Name"
                 placeholderTextColor={colorRoles.content.secondary}
                 value={firstName}
                 onChangeText={setFirstName}
@@ -92,7 +92,7 @@ export default function SignUpNameScreen() {
                   borderWidth: 1,
                   borderColor: lastName ? colorRoles.border.selectedInverse : 'transparent'
                 }}
-                placeholder="Doe"
+                placeholder="Last Name"
                 placeholderTextColor={colorRoles.content.secondary}
                 value={lastName}
                 onChangeText={setLastName}

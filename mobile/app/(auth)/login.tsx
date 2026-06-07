@@ -8,6 +8,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import { useSignIn } from '@clerk/clerk-expo';
 import { useDeviceRisk } from '../../hooks/useDeviceRisk';
+import LottieView from 'lottie-react-native';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
@@ -105,7 +106,7 @@ export default function LoginScreen() {
             }}
           >
             {isLoading ? (
-              <ActivityIndicator color={colorRoles.content.onPrimary} />
+              <LottieView source={require('../../assets/loading_animation.json')} autoPlay loop style={{ width: 24, height: 24 }} />
             ) : (
               <>
                 <Ionicons name="scan" size={20} color={isRiskEngineReady ? colorRoles.content.onPrimary : colorRoles.content.secondary} style={{ marginRight: spacing.s }} />

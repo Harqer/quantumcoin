@@ -39,8 +39,8 @@ export default function EmailFallbackScreen() {
           emailAddressId: emailFactor.emailAddressId,
         });
         AudioHapticsManager.success();
-        // Route to OTP screen (which would be implemented in a full flow)
-        setErrorMsg('OTP sent! (OTP flow not implemented in this demo)');
+        // Route to OTP screen
+        router.push('/(auth)/recovery/masked-email');
       } else {
         setErrorMsg('Email authentication not supported for this account.');
       }

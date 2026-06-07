@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { coreTrpc } from '@/utils/coreTrpc';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function MqRevealPin() {
   const { data: tokenData } = coreTrpc.card.getMarqetaToken.useQuery();

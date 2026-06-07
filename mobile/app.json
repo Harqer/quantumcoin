@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "platforms": [
       "ios",
-      "android"
+      "android",
+      "web"
     ],
     "scheme": [
       "quantumcoin",
@@ -26,13 +27,16 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera for ID Verification."
-      }
+      },
+      "bundleIdentifier": "com.harqer.quantumcoin"
     },
     "android": {
       "package": "com.harqer.quantumcoin",
       "googleServicesFile": "./google-services.json",
       "permissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE"
       ],
       "intentFilters": [
         {

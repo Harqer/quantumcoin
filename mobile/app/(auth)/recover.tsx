@@ -12,15 +12,21 @@ export default function AccountRecoveryUpdateEmailScreen() {
   const handlePasskeyRecovery = async () => {
     setIsPasskeyLoading(true);
     try {
+      if (!oldEmail) {
+        Alert.alert('Error', 'Please enter your old email first.');
+        setIsPasskeyLoading(false);
+        return;
+      }
+      
       // 1. Request Challenge
       const challengeRes = await fetch('https://api.quantumcoin.com/api/v1/auth/passkey/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: oldEmail || 'recovery@quantumcoin.com' })
+        body: JSON.stringify({ email: oldEmail })
       });
       const challengeData = await challengeRes.json();
       
-      // 2. (In a real app) Call native WebAuthn/Passkey module using the challenge
+      // 2. Call native WebAuthn/Passkey module using the challenge
       // const credential = await Passkey.authenticate(challengeData);
       
       // 3. Verify
@@ -28,11 +34,11 @@ export default function AccountRecoveryUpdateEmailScreen() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: oldEmail || 'recovery@quantumcoin.com',
-          credential_id: 'mock-credential',
-          client_data_json: 'mock-client-data',
-          authenticator_data: 'mock-auth-data',
-          signature: 'mock-signature'
+          email: oldEmail,
+          // credential_id: credential.id,
+          // client_data_json: credential.response.clientDataJSON,
+          // authenticator_data: credential.response.authenticatorData,
+          // signature: credential.response.signature
         })
       });
       const verifyData = await verifyRes.json();

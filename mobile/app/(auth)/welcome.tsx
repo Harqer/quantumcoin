@@ -6,6 +6,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
 import PressableScale from '../../components/PressableScale';
+import LottieView from 'lottie-react-native';
 
 export default function WelcomeScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
@@ -20,6 +21,7 @@ export default function WelcomeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
       <View style={{ flex: 1, paddingHorizontal: spacing.l, justifyContent: 'center' }}>
         <Animated.View entering={FadeInUp.springify().stiffness(80).damping(28).delay(100)} style={{ alignItems: 'center', marginBottom: spacing.xxl }}>
+          <LottieView source={require('../../assets/logo_animation.json')} autoPlay loop style={{ width: 120, height: 120, marginBottom: spacing.m }} />
           <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 40, fontWeight: '800', color: colorRoles.content.primary, marginBottom: spacing.s, textAlign: 'center' }}>
             Welcome to QuantumCoin
           </Text>

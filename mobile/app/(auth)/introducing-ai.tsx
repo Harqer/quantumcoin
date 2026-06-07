@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useTrackScreen } from '../../hooks/useTelemetry';
 import Animated, { FadeInDown, FadeInUp, withRepeat, withTiming, useSharedValue, useAnimatedStyle, withSequence } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
+import LottieView from 'lottie-react-native';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
@@ -68,7 +69,7 @@ export default function IntroducingAiScreen() {
             animatedOrbStyle
           ]}>
             {/* The AI "Eye" */}
-            <View style={{ width: width * 0.15, height: width * 0.15, backgroundColor: '#FFFFFF', borderRadius: width * 0.075 }} />
+            <LottieView source={require('../../assets/shimmering_overlay.json')} autoPlay loop style={{ width: width * 0.5, height: width * 0.5 }} />
           </Animated.View>
 
           {step === 0 ? (
