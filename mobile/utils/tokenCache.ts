@@ -17,7 +17,10 @@ const createTokenCache = (): TokenCache => {
         return await SecureStore.getItemAsync(key);
       } catch {
         // A corrupted/undecryptable entry would otherwise wedge auth; drop it.
-        await SecureStore.deleteItemAsync(key);
+        // deleteItemAsync can itself throw, so guard it to always return null.
+        try {
+          await SecureStore.deleteItemAsync(key);
+        } catch {}
         return null;
       }
     },
@@ -25,7 +28,7 @@ const createTokenCache = (): TokenCache => {
       return SecureStore.setItemAsync(key, token);
     },
     clearToken: (key: string) => {
-      void SecureStore.deleteItemAsync(key);
+      void SecureStore.deleteItemAsync(key).catch(() => {});
     },
   };
 };
