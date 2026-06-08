@@ -2,7 +2,6 @@ import os
 import time
 import stripe
 import psycopg2
-from psycopg2.extras import RealDictCursor
 from fastapi import APIRouter, Depends, Request, HTTPException, Header
 from pydantic import BaseModel
 from auth import verify_token
@@ -83,21 +82,30 @@ async def create_payment_intent(data: CreatePaymentIntentRequest, payload: dict 
         if not conn:
             raise HTTPException(status_code=500, detail="Database connection error")
 
+        is_sqlite = not POSTGRES_URL or "sqlite" in POSTGRES_URL
+        placeholder = "?" if is_sqlite else "%s"
+
         stripe_customer_id = None
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute('SELECT "stripeCustomerId" FROM "User" WHERE email = %s OR "id" = %s LIMIT 1', (data.email or payload.get("email"), clerk_id))
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                f'SELECT "stripeCustomerId" FROM "User" WHERE email = {placeholder} OR "id" = {placeholder} LIMIT 1',
+                (data.email or payload.get("email"), clerk_id)
+            )
             user = cur.fetchone()
-            
-            if user and user.get("stripeCustomerId"):
-                stripe_customer_id = user["stripeCustomerId"]
+
+            if user and user[0]:
+                stripe_customer_id = user[0]
             else:
                 customer = execute_stripe_customer_create(metadata={"clerk_id": clerk_id})
                 stripe_customer_id = customer.id
                 cur.execute(
-                    'UPDATE "User" SET "stripeCustomerId" = %s WHERE "id" = %s OR email = %s', 
+                    f'UPDATE "User" SET "stripeCustomerId" = {placeholder} WHERE "id" = {placeholder} OR email = {placeholder}',
                     (stripe_customer_id, clerk_id, data.email or payload.get("email", ""))
                 )
                 conn.commit()
+        finally:
+            cur.close()
         conn.close()
         
         ephemeralKey = execute_stripe_ephemeral_key_create(stripe_customer_id)
@@ -154,12 +162,11 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
 
                 cur = conn.cursor()
                 # 1. Find User
-                cur.execute(f'SELECT "id", "walletBalance" FROM "User" WHERE "id" = {placeholder}', (clerk_id,))
+                cur.execute(f'SELECT "id" FROM "User" WHERE "id" = {placeholder}', (clerk_id,))
                 user = cur.fetchone()
                 
                 if user:
                     user_internal_id = user[0]
-                    current_balance = user[1] or 0.0
 
                     # 2. Check for duplicate webhook via Transaction table
                     cur.execute(f'SELECT "id" FROM "Transaction" WHERE "stripePaymentIntentId" = {placeholder}', (pi_id,))
@@ -175,14 +182,13 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
                             (user_internal_id, pi_id, 'credit', amount_dollars, 'usd', 'succeeded', 'Stripe Deposit')
                         )
                         
-                        # 4. Increment balance securely
-                        new_balance = current_balance + amount_dollars
+                        # 4. Increment balance atomically to avoid lost updates under concurrent webhooks
                         cur.execute(
-                            f'UPDATE "User" SET "walletBalance" = {placeholder}, "updatedAt" = {"datetime(\'now\')" if is_sqlite else "NOW()"} WHERE "id" = {placeholder}',
-                            (new_balance, user_internal_id)
+                            f'UPDATE "User" SET "walletBalance" = "walletBalance" + {placeholder}, "updatedAt" = {"datetime(\'now\')" if is_sqlite else "NOW()"} WHERE "id" = {placeholder}',
+                            (amount_dollars, user_internal_id)
                         )
                         conn.commit()
-                        print(f"✅ Wallet credited! New balance for {clerk_id}: ${new_balance}")
+                        print(f"✅ Wallet credited! Added ${amount_dollars} for {clerk_id}")
                     else:
                         print(f"⚠️ Webhook duplicated: Payment {pi_id} already processed.")
             except Exception as e:

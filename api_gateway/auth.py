@@ -5,6 +5,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 CLERK_JWKS_URL = os.environ.get("CLERK_JWKS_URL", "https://ultimate-dingo-48.clerk.accounts.dev/.well-known/jwks.json")
 
+CLERK_AUDIENCE = os.environ.get("CLERK_AUDIENCE")
+if not CLERK_AUDIENCE:
+    raise ValueError("CLERK_AUDIENCE is required to verify the JWT audience claim.")
+
 # In production, cache the JWKS or rely on PyJWKClient's built-in caching
 try:
     jwks_client = jwt.PyJWKClient(CLERK_JWKS_URL)
@@ -25,7 +29,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             signing_key.key,
             algorithms=["RS256"],
             options={"verify_aud": True},
-            audience=os.environ.get("CLERK_AUDIENCE")
+            audience=CLERK_AUDIENCE
         )
         return payload
     except jwt.ExpiredSignatureError:
