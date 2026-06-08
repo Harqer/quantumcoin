@@ -26,10 +26,11 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera for ID Verification.",
-        "NSFaceIDUsageDescription": "$(PRODUCT_NAME) uses Face ID to securely unlock your account and authorize sensitive actions."
+        "NSFaceIDUsageDescription": "$(PRODUCT_NAME) uses Face ID to securely unlock your account and authorize sensitive actions.",
+        "NSUserTrackingUsageDescription": "$(PRODUCT_NAME) uses your data to measure advertising effectiveness and improve your experience."
       },
       "privacyManifests": {
-        "NSPrivacyTracking": false,
+        "NSPrivacyTracking": true,
         "NSPrivacyTrackingDomains": [],
         "NSPrivacyCollectedDataTypes": [],
         "NSPrivacyAccessedAPITypes": [
