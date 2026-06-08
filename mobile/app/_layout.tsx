@@ -11,6 +11,7 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { useFonts } from 'expo-font';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { queryClient, queryClientPersister, coreTrpc, coreTrpcClient, cryptoTrpc, cryptoTrpcClient } from '../utils/trpc';
+import { tokenCache } from '../utils/tokenCache';
 import { useTrackScreen } from '../hooks/useTelemetry';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
@@ -273,7 +274,7 @@ function RootLayout() {
         </View>
       )}
       <BottomSheetModalProvider>
-        <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+        <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
           <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
             <coreTrpc.Provider client={coreTrpcClient} queryClient={queryClient}>
               <cryptoTrpc.Provider client={cryptoTrpcClient} queryClient={queryClient}>
