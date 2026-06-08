@@ -17,17 +17,17 @@ jobs:
           node-version: 20
           
       - name: Start Local Backend API
+        working-directory: web
         env:
           DATABASE_URL: "postgresql://mock"
           CLERK_SECRET_KEY: "mock_secret"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "mock_key"
         run: |
-          npm ci
-          # Start the backend server (Vercel API or Express depending on the project structure)
-          # Assuming `npm run dev` starts the API routes on port 3000
+          npm install --legacy-peer-deps
+          # Start the backend server (Next.js API routes on port 3000)
           npm run dev &
           # Wait for server to boot
-          sleep 15
+          sleep 20
           
       - name: Install ffuf
         run: |

@@ -1,4 +1,4 @@
-name: Jules AI Security Audit
+name: Jules AI Code Review
 on:
   pull_request:
     branches: [main]
@@ -11,14 +11,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Run Jules Audit
-        env:
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+      - name: Jules Review Notice
         run: |
-          npm install -g jules-cli
-          jules audit . --ci
+          echo "ℹ️  Jules AI review is handled via the Jules GitHub App."
+          echo "   Jules does not have an npm CLI package."
+          echo "   Install the Jules GitHub App at https://jules.google.com"
+          echo "   to enable automated AI code reviews on pull requests."
+          echo ""
+          echo "✅ This step is informational only — not a blocking check."
