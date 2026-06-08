@@ -20,6 +20,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import messaging from '@react-native-firebase/messaging';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Network from 'expo-network';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import { AppState, AppStateStatus } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 // Publishable keys are loaded from EAS Vault Secrets in production, and .env locally.
@@ -116,6 +117,17 @@ function RootLayout() {
       } catch (e) {}
     }
     checkSecurity();
+  }, []);
+
+  useEffect(() => {
+    // App Tracking Transparency: must be requested before any tracking/IDFA use
+    // (required because NSPrivacyTracking is true). No-op/granted on Android.
+    async function requestTracking() {
+      try {
+        await requestTrackingPermissionsAsync();
+      } catch (e) {}
+    }
+    requestTracking();
   }, []);
 
   useTrackScreen('App_Launch', { version: '1.0.0' });
