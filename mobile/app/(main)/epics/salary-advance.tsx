@@ -4,25 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { coreTrpc } from '../../../utils/trpc';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 
 export default function SalaryAdvanceScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const router = useRouter();
 
-  const { data: advanceData, isLoading } = useQuery({
-    queryKey: ['salaryAdvance'],
-    queryFn: async () => {
-      return { eligibleAmount: 250, fee: 3.99, currentAdvance: null };
-    },
-  });
+  const { data: advanceData, isLoading } = coreTrpc.epics.getSalaryAdvance.useQuery();
 
-  const advanceMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      return { success: true, amount };
-    },
-    onSuccess: (data) => {
+  const advanceMutation = coreTrpc.epics.requestSalaryAdvance.useMutation({
+    onSuccess: (data: any) => {
       AudioHapticsManager.success();
       Alert.alert('Success', `You have advanced $${data.amount} to your wallet.`);
       router.back();

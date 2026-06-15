@@ -17,12 +17,7 @@ import Skeleton from '../../components/Skeleton';
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 const { width } = Dimensions.get('window');
 
-// Fallback Mock Data for Autopilot Movements
-const FALLBACK_MOVEMENTS = [
-  { id: '1', type: 'salary_advance', amount: 250, status: 'completed', date: 'Oct 15, 2026', direction: 'in', description: 'Salary Advance' },
-  { id: '2', type: 'auto_save', amount: 25, status: 'completed', date: 'Oct 16, 2026', direction: 'out', description: 'Auto-Save to Vault' },
-  { id: '3', type: 'repayment', amount: 250, status: 'upcoming', date: 'Oct 30, 2026', direction: 'out', description: 'Advance Repayment' },
-];
+
 
 const MovementItem = React.memo(({ item, index, colorRoles, typography, spacing }: any) => {
   const isOut = item.direction === 'out';
@@ -83,10 +78,8 @@ export default function MoneyMovementScreen() {
   useTrackScreen('MoneyMovementScreen_1_1');
 
   // TRPC Query mapping to simulated Ledger
-  // @ts-ignore - 'wallet' router name collides with TRPC built-in methods
   const { data: movements, isLoading } = coreTrpc.wallet.movements.useQuery(undefined, {
-    staleTime: 1000 * 60 * 5,
-    initialData: FALLBACK_MOVEMENTS
+    staleTime: 1000 * 60 * 5
   });
 
   const filteredMovements = useMemo(() => {

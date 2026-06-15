@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuthenticateWithJWT, useCurrentUser, useEvmAddress } from "@coinbase/cdp-hooks";
+import { useAuthenticateWithJWT, useCurrentUser, useEvmAddress, useCreateEvmEip7702Delegation } from "@coinbase/cdp-hooks";
 import styles from "./page.module.css";
 
 export default function DelegationGrants() {
@@ -12,6 +12,9 @@ export default function DelegationGrants() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isGranting, setIsGranting] = useState(false);
   const [grantSuccess, setGrantSuccess] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { createEvmEip7702Delegation } = useCreateEvmEip7702Delegation() as any;
 
   const handleAuth = async () => {
     try {
@@ -29,10 +32,11 @@ export default function DelegationGrants() {
     try {
       setIsGranting(true);
       
-      // Simulating the short-lived Delegation Grant API
-      // In a real integration, the Temporary Wallet Secret (TWS) and OAuth Token
-      // are securely transmitted to the developer server via HTTPS.
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await createEvmEip7702Delegation({
+        address: evmAddress as `0x${string}`,
+        network: "base-sepolia",
+        enableSpendPermissions: true,
+      });
       
       setGrantSuccess(true);
     } catch (error) {

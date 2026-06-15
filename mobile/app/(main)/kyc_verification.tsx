@@ -1,22 +1,41 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { coreTrpc } from '../../utils/trpc';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function KYCVerificationScreen() {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
-
-  const startVerification = () => {
-    setIsVerifying(true);
-    // Simulate a Socure/Persona KYC flow
-    setTimeout(() => {
+  const { user } = useUser();
+  
+  const verifyIdentity = coreTrpc.kyc.verifyIdentity.useMutation({
+    onSuccess: () => {
       setIsVerifying(false);
       Alert.alert(
         'Identity Verified',
         'Your identity has been successfully verified. Welcome to QuantumCoin!',
         [{ text: 'Continue', onPress: () => router.replace('/(main)/dashboard') }]
       );
-    }, 2500);
+    },
+    onError: () => {
+      setIsVerifying(false);
+      Alert.alert('Verification Failed', 'Could not verify your identity. Please try again.');
+    }
+  });
+
+  const startVerification = () => {
+    setIsVerifying(true);
+    verifyIdentity.mutate({
+      userId: user?.id || 'unknown',
+      deviceSessionId: crypto.randomUUID(),
+      firstName: user?.firstName || 'John',
+      lastName: user?.lastName || 'Doe',
+      dob: '1990-01-01',
+      email: user?.primaryEmailAddress?.emailAddress || 'john@example.com',
+      phoneNumber: user?.primaryPhoneNumber?.phoneNumber || '+1234567890',
+      address: { street: '123 Main St', city: 'Anytown', state: 'NY', zip: '12345' }
+    });
   };
 
   return (

@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyCd4cmQOVdsfy7XNuZaHacgad2qkrwoDCI</string>
+	<string>AIzaSyAE8HKL0pse9wS_JeCU2xCRwUsoVY3cUqs</string>
 	<key>GCM_SENDER_ID</key>
-	<string>733416228618</string>
+	<string>741697675913</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.harqer.quantumcoin</string>
 	<key>PROJECT_ID</key>
-	<string>qubits-1b76c</string>
+	<string>getqubits-prod</string>
 	<key>STORAGE_BUCKET</key>
-	<string>qubits-1b76c.firebasestorage.app</string>
+	<string>getqubits-prod.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:733416228618:ios:2b8d9ab74bbeaad0b21cf3</string>
+	<string>1:741697675913:ios:aff3f14b3803d3b9911c58</string>
 </dict>
 </plist>

@@ -7,21 +7,22 @@ import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 import Animated, { FadeInDown, SlideInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function SubscriptionCancellationFomoBSideScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const updateIntent = coreTrpc.user.updateIntent.useMutation();
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     AudioHapticsManager.lightInteraction();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      AudioHapticsManager.success();
-    }, 2000);
+    await updateIntent.mutateAsync({ intent: 'cancel_subscription' });
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    AudioHapticsManager.success();
   };
 
   if (isSuccess) {

@@ -126,7 +126,7 @@ export default function SecurityScreen() {
                 Passkeys are active and protecting your account.
               </Text>
             </View>
-            <Ionicons name="checkmark-circle" size={24} color={colorRoles.content.positiveMid} />
+            <Ionicons name="checkmark-circle" size={24} color={colorRoles.content.positiveDark} />
           </View>
         </View>
       </ScrollView>

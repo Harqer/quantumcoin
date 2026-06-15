@@ -6,41 +6,41 @@ import { useRouter } from 'expo-router';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
+import { coreTrpc } from '../../../utils/trpc';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function WithdrawFundsScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const router = useRouter();
   const [amount, setAmount] = useState('');
 
-  // Example of using react-query as found in decompiled code
-  const { data: balanceData, isLoading } = useQuery({
-    queryKey: ['walletBalance'],
-    queryFn: async () => {
-      // Stub fetch
-      return { balance: 150.0 };
-    },
-  });
+  const { user } = useUser();
+  const { data: budgetData, isLoading } = coreTrpc.budget.getBudgetSettings.useQuery();
 
-  const withdrawMutation = useMutation({
-    mutationFn: async () => {
-      // Stub API call
-      return { success: true };
-    },
+  const withdrawMutation = coreTrpc.wallet.transfer.useMutation({
     onSuccess: () => {
       AudioHapticsManager.success();
       Alert.alert('Success', 'Funds have been withdrawn to your linked bank account.');
       router.back();
     },
+    onError: (err) => {
+      Alert.alert('Error', err.message);
+    }
   });
 
   const handleWithdraw = () => {
     const val = parseFloat(amount);
     if (isNaN(val) || val <= 0) return;
-    if (val > (balanceData?.balance || 0)) {
+    if (val > (budgetData?.limit || 0)) {
       Alert.alert('Error', 'Insufficient funds');
       return;
     }
-    withdrawMutation.mutate(val);
+    withdrawMutation.mutate({
+      userId: user?.id || 'unknown',
+      destinationAddress: 'bank_account_withdrawal',
+      amount: val,
+      currency: 'USD'
+    });
   };
 
   return (
@@ -84,7 +84,7 @@ export default function WithdrawFundsScreen() {
             marginBottom: spacing.m,
           }}
         >
-          Available Balance: ${isLoading ? '...' : balanceData?.balance.toFixed(2)}
+          Available Balance: ${isLoading ? '...' : budgetData?.limit?.toFixed(2) || '0.00'}
         </Text>
         <TextInput
           style={{

@@ -3,17 +3,24 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function WalletSetupKYCScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
 
+  const { data: kycData } = coreTrpc.kyc.getStatus.useQuery(
+    { userId: 'current-user-id' },
+    { refetchInterval: 3000 }
+  );
+
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (kycData?.kycStatus === 'verified') {
       router.replace('/(main)/wallet/setup-link-bank');
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, [router]);
+    } else if (kycData?.kycStatus === 'rejected') {
+      router.replace('/(main)/wallet/setup-link-bank');
+    }
+  }, [kycData?.kycStatus, router]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['bottom', 'top']}>

@@ -5,8 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { coreTrpc } from "../utils/trpc";
 
-const CORE_API_URL =
-  process.env.NEXT_PUBLIC_CORE_API_URL || "https://api-rosy-one-81.vercel.app";
+const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL || "http://localhost:4000";
 
 export function TrpcProvider({
   children,

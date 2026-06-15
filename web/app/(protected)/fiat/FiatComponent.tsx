@@ -14,7 +14,7 @@ export default function FiatComponent() {
 
   useEffect(() => {
     if (tab === "buy") {
-      apiGetBuyOptions().then(res => setOptions(res.options || []));
+      apiGetBuyOptions().then(res => setOptions(res?.options || []));
     }
   }, [tab]);
 

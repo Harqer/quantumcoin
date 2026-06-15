@@ -6,29 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { coreTrpc } from '@/utils/coreTrpc';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Mock hook for parity
-function useCreditScore() {
-  const [score, setScore] = useState<number | null>(null);
-  useEffect(() => {
-    setTimeout(() => setScore(724), 1000);
-  }, []);
-  return score;
-}
+// Hook replaced with TRPC backend call
 
 export default function CreditBuilderIndex() {
   const router = useRouter();
-  const { data: cardDetails, isLoading } = coreTrpc.card.getCardDetails.useQuery();
-  const creditScore = useCreditScore();
-  
-  // Lifecycle states to match Hermes: 'welcome', 'on_the_way', 'active'
-  const [lifecycleState, setLifecycleState] = useState<'welcome' | 'on_the_way' | 'active'>('welcome');
-
-  useEffect(() => {
-    // Simulate progression through states
-    const timer1 = setTimeout(() => setLifecycleState('on_the_way'), 3000);
-    const timer2 = setTimeout(() => setLifecycleState('active'), 6000);
-    return () => { clearTimeout(timer1); clearTimeout(timer2); };
-  }, []);
+  const { data: cardDetails, isLoading } = coreTrpc.cards.getDetails.useQuery();
+  const creditScore = cardDetails?.creditScore;
+  const lifecycleState = cardDetails?.lifecycleState || 'welcome';
 
   if (isLoading) {
     return (

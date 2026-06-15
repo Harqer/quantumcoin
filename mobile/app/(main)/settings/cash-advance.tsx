@@ -21,7 +21,7 @@ export default function CashAdvanceSettingsScreen() {
   const [autoAdvance, setAutoAdvance] = useState(false);
 
   const toggleSwitch = () => {
-    AudioHapticsManager.selection();
+    AudioHapticsManager.lightInteraction();
     setAutoAdvance(!autoAdvance);
   };
 

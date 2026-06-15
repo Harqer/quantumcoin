@@ -36,12 +36,15 @@ export default function BanksListScreen() {
   
   useTrackScreen('BanksListScreen_1_1');
 
+  const createLinkToken = coreTrpc.plaid.createLinkToken.useMutation();
+  const exchangeToken = coreTrpc.plaid.exchangePublicToken.useMutation();
+
   useEffect(() => {
     const fetchLinkToken = async () => {
       try {
         const token = await getToken();
-        // Mock token for dev/parity testing since we stripped instant success
-        setLinkToken("link-sandbox-mock");
+        const res = await createLinkToken.mutateAsync();
+        setLinkToken(res.link_token);
       } catch (err: any) {
         console.error("Token error", err);
       } finally {
@@ -71,8 +74,15 @@ export default function BanksListScreen() {
 
   const onSuccess = async (public_token: string, metadata: any) => {
     AudioHapticsManager.mediumInteraction();
-    // Instead of instant success, we enter the background polling state
-    setIsPolling(true);
+    try {
+      await exchangeToken.mutateAsync({
+        publicToken: public_token,
+        accountId: metadata.account_id || metadata.accounts?.[0]?.id || "unknown"
+      });
+      setIsPolling(true);
+    } catch (e) {
+      console.error("Exchange error", e);
+    }
   };
 
   const onExit = (err: any, metadata: any) => {
@@ -82,19 +92,11 @@ export default function BanksListScreen() {
     }
   };
 
-  const plaidConfig = linkToken ? { token: linkToken, onSuccess, onExit } : { token: '', onSuccess: () => {}, onExit: () => {} };
-  let open = () => {};
-  let ready = false;
-  
-  try {
-    const plaidHook = usePlaidLink(plaidConfig);
-    open = plaidHook.open;
-    ready = plaidHook.ready;
-  } catch (e) {
-    // Plaid web hook fallback
-    ready = true;
-    open = () => onSuccess("mock_token", {});
-  }
+  const { open, ready } = usePlaidLink({
+    token: linkToken || '',
+    onSuccess,
+    onExit
+  });
 
   if (isLoadingToken) {
     return (

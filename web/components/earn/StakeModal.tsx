@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth, useSession } from "@clerk/nextjs";
 import { StakeRequest, SecureRequestContext } from '@/types/feature_expansion_contracts';
 
 interface StakeModalProps {
@@ -12,23 +13,40 @@ interface StakeModalProps {
 }
 
 export default function StakeModal({ isOpen, onClose, poolId, asset, apy }: StakeModalProps) {
+  const { userId, sessionId } = useAuth();
+  const { session } = useSession();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fingerprint, setFingerprint] = useState('unknown');
+
+  useEffect(() => {
+    // Generate a simple device fingerprint locally
+    if (typeof window !== 'undefined') {
+      const fp = btoa(`${navigator.userAgent}-${window.screen.width}x${window.screen.height}`);
+      setFingerprint(fp);
+    }
+  }, []);
 
   if (!isOpen) return null;
 
   const handleStake = async () => {
     setIsLoading(true);
     setError(null);
+    if (!userId || !sessionId) {
+      setError("You must be logged in to anchor assets.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const context: SecureRequestContext = {
-        userId: 'user_123', // Mock user ID
-        sessionId: 'session_abc',
-        ipAddress: '127.0.0.1',
-        deviceFingerprint: 'dev_123',
-        mfaVerified: true, // Bypass MFA check for UI testing
-        clearanceLevel: 'standard'
+        userId: userId,
+        sessionId: sessionId,
+        ipAddress: 'client_ip_deferred', // Server will extract this
+        deviceFingerprint: fingerprint,
+        mfaVerified: session?.user?.twoFactorEnabled || false, 
+        clearanceLevel: (session?.user?.publicMetadata?.tier as string) || 'standard'
       };
 
       const payload: StakeRequest = {

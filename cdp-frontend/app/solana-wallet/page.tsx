@@ -10,6 +10,7 @@ export default function SolanaWallet() {
   const { wallets } = useSolanaStandardWallets();
   const [signature, setSignature] = useState<string | null>(null);
   const [txSignature, setTxSignature] = useState<string | null>(null);
+  const [recipient, setRecipient] = useState<string>('');
 
   const handleSignMessage = async () => {
     if (!wallet?.accounts.length) return;
@@ -30,7 +31,7 @@ export default function SolanaWallet() {
   };
 
   const handleSendTransaction = async () => {
-    if (!wallet?.accounts.length) return;
+    if (!wallet?.accounts.length || !recipient) return;
 
     const account = wallet.accounts[0];
     const fromPubkey = new PublicKey(account.address);
@@ -40,7 +41,7 @@ export default function SolanaWallet() {
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey,
-          toPubkey: new PublicKey('4C7sHifMjsgNZTLHABr7vUqYXLFiGnZhSru712MKAxJf'), // Some hardcoded address for test
+          toPubkey: new PublicKey(recipient),
           lamports: 1000 // 0.000001 SOL
         })
       );
@@ -114,9 +115,16 @@ export default function SolanaWallet() {
 
             <div style={{ flex: 1, padding: '20px', border: '1px solid #d0d5dd', borderRadius: '12px' }}>
               <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>Send Devnet Transaction</h3>
+              <input 
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="Recipient PubKey"
+                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+              />
               <button 
                 onClick={handleSendTransaction}
-                style={{ padding: '10px 20px', background: '#111', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                disabled={!recipient}
+                style={{ padding: '10px 20px', background: recipient ? '#111' : '#ccc', color: 'white', border: 'none', borderRadius: '8px', cursor: recipient ? 'pointer' : 'not-allowed' }}
               >
                 Send 0.000001 SOL
               </button>

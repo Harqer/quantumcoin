@@ -1,7 +1,10 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('jwt_token') || 'mock_token';
+  const token = localStorage.getItem('jwt_token');
+  if (!token) {
+    throw new Error('Authentication required: No JWT token found. Please log in.');
+  }
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
@@ -54,3 +57,6 @@ export const apiSubmitJob = (model_type: string, parameters: Record<string, unkn
   fetchWithAuth('/api/v4/quantum/jobs', { method: 'POST', body: JSON.stringify({ model_type, parameters }) });
 export const apiGetJobStatus = (job_id: string) => 
   fetchWithAuth(`/api/v4/quantum/jobs/${job_id}`);
+
+// 8. Earn / Staking
+export const apiGetStakePools = () => fetchWithAuth('/api/v3/earn/pools');

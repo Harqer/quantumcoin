@@ -17,7 +17,7 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           # Target URL will be updated dynamically based on staging environment
-          target: 'https://getqubits.com'
+          target: 'https://www.getqubits.com'
           # Prevent the pipeline from failing abruptly, ensuring reports are always generated
           fail_action: false
           # Generate an HTML report for the team

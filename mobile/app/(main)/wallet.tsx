@@ -42,25 +42,21 @@ export default function WalletScreen() {
 
   const { data: fiatData, isLoading: isLoadingFiat, refetch: refetchFiat } = coreTrpc.wallet.fiatBalances.useQuery();
   const { data: cryptoData, isLoading: isLoadingCrypto, refetch: refetchCrypto } = cryptoTrpc.wallet.cryptoBalances.useQuery();
+  const { data: transactionsData, isLoading: isLoadingTransactions, refetch: refetchTransactions } = coreTrpc.wallet.getTransactions.useQuery();
 
   useEffect(() => {
-    if (transactionIds.length === 0) {
-      dispatch(setTransactions([
-        { id: '1', amount: -15.99, merchantName: 'Uber', date: 'Today', category: 'Transport', status: 'completed' },
-        { id: '2', amount: 2500.00, merchantName: 'Salary', date: 'Yesterday', category: 'Income', status: 'completed' },
-        { id: '3', amount: -4.50, merchantName: 'Starbucks', date: 'Yesterday', category: 'Food', status: 'pending' },
-        { id: '4', amount: -120.00, merchantName: 'Amazon', date: 'Mon', category: 'Shopping', status: 'failed' },
-      ]));
+    if (transactionsData && Array.isArray(transactionsData)) {
+      dispatch(setTransactions(transactionsData));
     }
-  }, [dispatch, transactionIds.length]);
+  }, [dispatch, transactionsData]);
 
   const onRefresh = useCallback(async () => {
     AudioHapticsManager.lightInteraction();
     setIsRefreshing(true);
-    await Promise.all([refetchFiat(), refetchCrypto()]);
+    await Promise.all([refetchFiat(), refetchCrypto(), refetchTransactions()]);
     setIsRefreshing(false);
     AudioHapticsManager.success();
-  }, [refetchFiat, refetchCrypto]);
+  }, [refetchFiat, refetchCrypto, refetchTransactions]);
 
   const renderRightActions = (id: string) => {
     return (

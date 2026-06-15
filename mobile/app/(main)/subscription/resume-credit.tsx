@@ -9,11 +9,7 @@ export default function ResumeSubscriptionCreditScoreScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // randomly succeed or fail for demo
-      router.replace('/(main)/subscription/resume-success');
-    }, 2000);
-    return () => clearTimeout(timer);
+    router.replace('/(main)/subscription/resume-success');
   }, [router]);
 
   return (

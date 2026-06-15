@@ -54,6 +54,7 @@ model User {
   deviceSessions              DeviceSession[]
   auditLogs                   AuditLog[]
   insights                    Insight[]
+  stakingPositions            StakingPosition[]
   createdAt                   DateTime        @default(now())
   updatedAt                   DateTime        @updatedAt
 }
@@ -264,4 +265,58 @@ model Insight {
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model StakingPosition {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  poolId        String
+  amountStaked  String
+  earnedRewards String   @default("0")
+  stakedAt      DateTime @default(now())
+  unlocksAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model TradeOrder {
+  id                 String   @id @default(uuid())
+  clientOrderId      String   @unique
+  productId          String
+  side               String
+  type               String
+  status             String
+  baseSize           String?
+  quoteSize          String?
+  limitPrice         String?
+  filledSize         String   @default("0")
+  averageFilledPrice String   @default("0")
+  commission         String   @default("0")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model PaymentSession {
+  id        String   @id @default(uuid())
+  chargeId  String   @unique
+  productId String?
+  amount    String
+  currency  String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TelemetryLog {
+  id         String   @id @default(uuid())
+  commandId  String   @unique
+  agentId    String
+  action     String
+  parameters Json?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

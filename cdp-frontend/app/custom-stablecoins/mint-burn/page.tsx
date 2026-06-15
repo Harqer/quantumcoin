@@ -2,7 +2,13 @@
 
 import React, { useState } from "react";
 import { useAuthenticateWithJWT, useCurrentUser, useEvmAddress, useSendEvmTransaction } from "@coinbase/cdp-hooks";
+import { encodeFunctionData, parseAbi } from "viem";
 import styles from "./page.module.css";
+
+const TOKEN_ABI = parseAbi([
+  "function mint(address to, uint256 amount) external",
+  "function burn(uint256 amount) external"
+]);
 
 export default function MintAndBurn() {
   const { authenticateWithJWT } = useAuthenticateWithJWT();
@@ -37,12 +43,17 @@ export default function MintAndBurn() {
       setIsSending(true);
       // Stub for CDP Stablecoin Mint Contract execution
       // Requires the appropriate Contract ABI and Address for the Custom Stablecoin
+      const parsedAmount = BigInt(Math.floor(Number(amount) * 1e6));
       const result = await sendEvmTransaction({
         network: "base-sepolia",
         evmAccount: evmAddress,
         transaction: {
-          to: "0x0000000000000000000000000000000000000000", // TODO: Mint Contract Address
-          data: "0x", // TODO: encodeFunctionData for mint(uint256)
+          to: process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS as `0x${string}`,
+          data: encodeFunctionData({
+            abi: TOKEN_ABI,
+            functionName: "mint",
+            args: [evmAddress, parsedAmount]
+          }),
           value: BigInt(0),
           chainId: 84532, // Base Sepolia
         }
@@ -60,12 +71,17 @@ export default function MintAndBurn() {
     try {
       setIsSending(true);
       // Stub for CDP Stablecoin Burn Contract execution
+      const parsedAmount = BigInt(Math.floor(Number(amount) * 1e6));
       const result = await sendEvmTransaction({
         network: "base-sepolia",
         evmAccount: evmAddress,
         transaction: {
-          to: "0x0000000000000000000000000000000000000000", // TODO: Burn Contract Address
-          data: "0x", // TODO: encodeFunctionData for burn(uint256)
+          to: process.env.NEXT_PUBLIC_BURN_CONTRACT_ADDRESS as `0x${string}`,
+          data: encodeFunctionData({
+            abi: TOKEN_ABI,
+            functionName: "burn",
+            args: [parsedAmount]
+          }),
           value: BigInt(0),
           chainId: 84532, // Base Sepolia
         }

@@ -28,10 +28,7 @@ export default function PlansScreen() {
 
   const [selectedTier, setSelectedTier] = useState<'plus' | 'premium'>('plus');
 
-  const plans = [
-    { id: 'plus', title: 'Quantum Plus', price: '$5.99/mo', desc: 'Larger cash advances and custom budgeting.' },
-    { id: 'premium', title: 'Quantum Premium', price: '$9.99/mo', desc: 'Credit building, priority support, and max advances.' }
-  ];
+  const { data: plans = [], isLoading: isLoadingPlans } = coreTrpc.subscription.getPlans.useQuery();
 
   const handleContinue = () => {
     HapticsManager.medium();
@@ -42,7 +39,7 @@ export default function PlansScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingPlans) {
     return (
       <View style={{ flex: 1, backgroundColor: colorRoles.background.primary, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={colorRoles.content.accentMid} />

@@ -1,39 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
 import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 import Animated, { FadeInDown, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
-
-const TRIVIA_QUESTIONS = [
-  { q: "What does APR stand for?", a: ["Annual Percentage Rate", "Actual Payment Return", "Average Payment Ratio", "Annual Price Range"], correct: 0 },
-  { q: "Which of these is generally considered a 'good' credit score?", a: ["450", "550", "750", "1000"], correct: 2 },
-  { q: "What is a 401(k)?", a: ["A distance race", "A retirement savings plan", "A type of mortgage", "A crypto token"], correct: 1 }
-];
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function TriviaGameScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const { data: questions, isLoading } = coreTrpc.trivia.getQuestions.useQuery();
+  const submitAnswerMutation = coreTrpc.trivia.submitAnswer.useMutation();
 
-  useEffect(() => {
-    if (selectedAnswer !== null) return;
-    if (timeLeft === 0) {
-      handleAnswer(-1); // Timeout
-      return;
-    }
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, selectedAnswer]);
-
-  const handleAnswer = (index: number) => {
+  const handleAnswer = async (index: number) => {
     setSelectedAnswer(index);
-    const isCorrect = index === TRIVIA_QUESTIONS[currentQ].correct;
+    if (!questions) return;
+
+    const isCorrect = index === questions[currentQ].correct;
     if (isCorrect) {
       AudioHapticsManager.success();
       setScore(s => s + 1);
@@ -41,18 +29,29 @@ export default function TriviaGameScreen() {
       AudioHapticsManager.error();
     }
 
-    setTimeout(() => {
-      if (currentQ < TRIVIA_QUESTIONS.length - 1) {
-        setCurrentQ(q => q + 1);
-        setSelectedAnswer(null);
-        setTimeLeft(10);
-      } else {
-        router.replace({ pathname: '/(main)/trivia/score', params: { score: score + (isCorrect ? 1 : 0), total: TRIVIA_QUESTIONS.length } });
-      }
-    }, 1500);
+    try {
+      await submitAnswerMutation.mutateAsync({ questionIndex: currentQ, answerIndex: index });
+    } catch (err) {
+      console.error('Failed to submit answer', err);
+    }
+
+    if (currentQ < questions.length - 1) {
+      setCurrentQ(q => q + 1);
+      setSelectedAnswer(null);
+    } else {
+      router.replace({ pathname: '/(main)/trivia/score', params: { score: score + (isCorrect ? 1 : 0), total: questions.length } });
+    }
   };
 
-  const question = TRIVIA_QUESTIONS[currentQ];
+  if (isLoading || !questions) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary, justifyContent: 'center', alignItems: 'center' }} edges={['top', 'bottom']}>
+        <ActivityIndicator size="large" color={colorRoles.content.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  const question = questions[currentQ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
@@ -61,12 +60,7 @@ export default function TriviaGameScreen() {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl }}>
           <View style={{ backgroundColor: colorRoles.background.baseLight, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999 }}>
             <Text style={{ fontFamily: typography.labelSmall.fontFamily, color: colorRoles.content.primary, fontWeight: '700' }}>
-              Q {currentQ + 1}/{TRIVIA_QUESTIONS.length}
-            </Text>
-          </View>
-          <View style={{ backgroundColor: timeLeft <= 3 ? '#FEE2E2' : '#DBEAFE', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999 }}>
-            <Text style={{ fontFamily: typography.labelSmall.fontFamily, color: timeLeft <= 3 ? '#EF4444' : '#2563EB', fontWeight: '800' }}>
-              0:{timeLeft.toString().padStart(2, '0')}
+              Q {currentQ + 1}/{questions.length}
             </Text>
           </View>
         </View>

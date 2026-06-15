@@ -3,10 +3,10 @@ import { router, protectedProcedure } from "../trpc";
 import { prisma } from "../db";
 import crypto from "crypto";
 
-if (!process.env.ENCRYPTION_KEY && process.env.NODE_ENV === 'production') {
-  throw new Error("ENCRYPTION_KEY must be set in production");
+if (!process.env.ENCRYPTION_KEY) {
+  throw new Error("ENCRYPTION_KEY must be set");
 }
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 function encrypt(text: string) {
   const iv = crypto.randomBytes(16);

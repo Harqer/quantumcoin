@@ -6,10 +6,12 @@ import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
 import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 import { Ionicons } from '@expo/vector-icons';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function DowngradeToQuarterlyPlusOfferScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
+  const updateIntent = coreTrpc.user.updateIntent.useMutation();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['bottom', 'top']}>
@@ -28,8 +30,9 @@ export default function DowngradeToQuarterlyPlusOfferScreen() {
 
         <PressableScale
           haptics="heavy"
-          onPress={() => {
+          onPress={async () => {
             AudioHapticsManager.success();
+            await updateIntent.mutateAsync({ intent: 'downgrade_quarterly' });
             router.replace('/(main)/dashboard');
           }}
           style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}

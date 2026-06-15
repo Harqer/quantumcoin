@@ -48,7 +48,7 @@ export default function PersonalDetailsScreen() {
         <View style={{ marginBottom: spacing.l }}>
           <Text
             style={{
-              fontFamily: typography.labelLarge.fontFamily,
+              fontFamily: typography.bodyLarge.fontFamily,
               color: colorRoles.content.secondary,
               marginBottom: 8,
             }}
@@ -70,7 +70,7 @@ export default function PersonalDetailsScreen() {
         <View style={{ marginBottom: spacing.l }}>
           <Text
             style={{
-              fontFamily: typography.labelLarge.fontFamily,
+              fontFamily: typography.bodyLarge.fontFamily,
               color: colorRoles.content.secondary,
               marginBottom: 8,
             }}
@@ -92,7 +92,7 @@ export default function PersonalDetailsScreen() {
         <View style={{ marginBottom: spacing.l }}>
           <Text
             style={{
-              fontFamily: typography.labelLarge.fontFamily,
+              fontFamily: typography.bodyLarge.fontFamily,
               color: colorRoles.content.secondary,
               marginBottom: 8,
             }}

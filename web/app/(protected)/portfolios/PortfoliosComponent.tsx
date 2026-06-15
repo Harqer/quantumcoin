@@ -27,8 +27,8 @@ export default function PortfoliosComponent() {
   useEffect(() => {
     apiGetPortfolios()
       .then((data) => {
-        setPortfolios(data.portfolios || []);
-        if (data.portfolios && data.portfolios.length > 0) {
+        setPortfolios(data?.portfolios || []);
+        if (data?.portfolios && data.portfolios.length > 0) {
           fetchBreakdown(data.portfolios[0].portfolio_uuid);
         } else {
           setLoading(false);

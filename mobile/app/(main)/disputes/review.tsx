@@ -17,11 +17,9 @@ export default function TransactionDisputeReviewScreen() {
   const handleSubmit = () => {
     AudioHapticsManager.lightInteraction();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      AudioHapticsManager.success();
-    }, 2000);
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    AudioHapticsManager.success();
   };
 
   if (isSuccess) {

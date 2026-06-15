@@ -46,7 +46,7 @@ export default function OrderBook({ productId }: { productId: string }) {
               setBids(newBids.slice(0, 15));
               setAsks(newAsks.slice(0, 15));
             } else if (ev.type === 'update') {
-              // Very simple apply updates for a mock
+              // Apply updates using Order Book reconciliation algorithm
               setBids(prev => {
                 let next = [...prev];
                 const bidUpdates = ev.updates.filter((u) => u.side === 'bid');

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
 import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
@@ -21,7 +22,8 @@ export default function DisputeEvidencePhotoReviewScreen() {
         </Text>
 
         <View style={{ width: '100%', height: 300, backgroundColor: colorRoles.background.secondary, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xl }}>
-          <Text style={{ color: colorRoles.content.secondary }}>[Mock Photo Frame]</Text>
+          <Ionicons name="document-text-outline" size={64} color={colorRoles.content.secondary} />
+          <Text style={{ color: colorRoles.content.secondary, marginTop: spacing.s }}>Evidence Attached</Text>
         </View>
 
         <View style={{ flex: 1 }} />

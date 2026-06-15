@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 export default function MqActivateCard() {
   const { data: tokenData } = coreTrpc.card.getMarqetaToken.useQuery();
   const logInteraction = coreTrpc.card.logToolkitInteraction.useMutation();
+  const activateCard = coreTrpc.card.activateCard.useMutation();
   const [last4, setLast4] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -20,12 +21,11 @@ export default function MqActivateCard() {
 
   const handleActivate = async () => {
     setIsSubmitting(true);
+    await activateCard.mutateAsync({ last4 });
     await logInteraction.mutateAsync({ component_name: 'mq-activate-card', action: 'activate', success: true });
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setTimeout(() => router.back(), 2000);
-    }, 1500);
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    router.back();
   };
 
   return (

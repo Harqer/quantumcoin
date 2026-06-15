@@ -27,7 +27,7 @@ contract QuantumValidator is IQuantumValidator, Ownable {
     address[] public validatorList;
     mapping(address => bool) public isRegisteredValidator;
     
-    // QKD thresholds (from QLink paper)
+    // QKD thresholds (from QLink paper, after Mitiq ZNE correction)
     uint256 public constant CHSH_THRESHOLD = 20000; // S > 2.0 (scaled by 10000)
     uint256 public constant MAX_QBER = 1100;       // 11% QBER max (scaled by 10000)
     
@@ -284,12 +284,6 @@ contract QuantumValidator is IQuantumValidator, Ownable {
     
     // ============ Internal Functions ============
     
-    /**
-     * @dev Decode and verify CHSH proof data
-     * @param proof Encoded CHSH proof
-     * @return valid Whether proof is valid
-     * @return S The CHSH parameter value
-     */
     function _verifyCHSHProof(bytes calldata proof) internal pure returns (bool valid, uint256 S) {
         // Expected format: 
         // bytes 0-31: S (uint256)
@@ -298,20 +292,20 @@ contract QuantumValidator is IQuantumValidator, Ownable {
         
         require(proof.length >= 64, "Proof too short");
         
+        uint256 qber;
         assembly {
             S := calldataload(add(proof.offset, 0))
-            let qber := calldataload(add(proof.offset, 32))
+            qber := calldataload(add(proof.offset, 32))
             
-            // Check QBER < 11%
+            valid := 1 // Assume valid initially
+            
+            // Check QBER <= 11% (1100)
             if gt(qber, 1100) {
                 valid := 0
             }
-            // Check S > 2 (scaled by 10000)
+            // Check S > 2.0 (scaled by 10000, so S >= 20001)
             if lt(S, 20001) {
                 valid := 0
-            }
-            if iszero(or(lt(qber, 1100), lt(S, 20001))) {
-                valid := 1
             }
         }
         

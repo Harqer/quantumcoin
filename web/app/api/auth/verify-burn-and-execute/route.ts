@@ -62,10 +62,11 @@ export async function POST(request: Request) {
         }
       }
 
-      // If no standard transfer to zero address was found, we still proceed if the tx is valid, 
-      // but in production we'd enforce isBurn === true and verify log.address === QBC_CONTRACT_ADDRESS.
       if (!isBurn) {
-        console.warn(`Transaction ${tx_hash} did not contain a standard ERC20 burn event to the zero address. Ensure this is a valid burn method.`);
+        return NextResponse.json(
+          { error: "Transaction did not contain a valid ERC20 burn event to the zero address." },
+          { status: 400 }
+        );
       }
 
     } catch (error) {
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
     }
 
     // Proxy request to FastAPI backend (Quantum Server)
-    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com'}${backendEndpoint}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://www.getqubits.com'}${backendEndpoint}`;
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

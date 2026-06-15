@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
+import { PrismaClient } from '@prisma/client';
 import { TradeOrderRequest, TradeOrderResponse } from '@/types/quantum_coin_contracts';
+
+const prisma = new PrismaClient();
 
 const tradeSchema = z.object({
   clientOrderId: z.string().uuid().optional(), // Idempotency key
@@ -21,8 +24,6 @@ const tradeSchema = z.object({
   path: ["limitPrice"]
 });
 
-// Idempotency cache (In-memory mock for demo purposes; use Redis in production)
-const processedOrders = new Map<string, TradeOrderResponse>();
 
 // Circuit Breaker pattern state
 let failureCount = 0;
@@ -64,9 +65,13 @@ export async function POST(request: Request) {
     const validData = validationResult.data as TradeOrderRequest;
     const clientOrderId = validData.clientOrderId || crypto.randomUUID();
     
-    // 2. Idempotency checks
-    if (processedOrders.has(clientOrderId)) {
-      return NextResponse.json(processedOrders.get(clientOrderId), { status: 200 });
+    // 2. Idempotency checks using Prisma Database
+    const existingOrder = await prisma.tradeOrder.findUnique({
+      where: { clientOrderId }
+    });
+
+    if (existingOrder) {
+      return NextResponse.json(existingOrder, { status: 200 });
     }
     
     // 3. Mapping to Wormhole/Alchemy architecture (logging intention as defined in contracts)
@@ -79,26 +84,64 @@ export async function POST(request: Request) {
       }
     });
     
-    // 4. Mock Coinbase Advanced Trade execution
-    // (Here we'd typically call the CDP SDK or Advanced Trade REST API)
-    const mockResponse: TradeOrderResponse = {
-      orderId: crypto.randomUUID(),
-      clientOrderId: clientOrderId,
-      productId: validData.productId,
-      side: validData.side,
-      status: 'FILLED',
-      filledSize: validData.baseSize || "0",
-      averageFilledPrice: validData.limitPrice || "100.00",
-      commission: "0.01",
-      createdAt: new Date().toISOString(),
-    };
+    // 4. Coinbase Advanced Trade execution
+    // Actual implementation of Coinbase API calling
+    if (!process.env.COINBASE_API_KEY_NAME || !process.env.COINBASE_API_KEY_PRIVATE_KEY) {
+      throw new Error("Coinbase credentials not configured");
+    }
     
-    processedOrders.set(clientOrderId, mockResponse);
+    const coinbaseResponse = await fetch('https://api.coinbase.com/api/v3/brokerage/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.COINBASE_API_KEY_PRIVATE_KEY}`
+      },
+      body: JSON.stringify({
+        client_order_id: clientOrderId,
+        product_id: validData.productId,
+        side: validData.side,
+        order_configuration: validData.type === 'MARKET' ? {
+          market_market_ioc: {
+            quote_size: validData.quoteSize || validData.baseSize || "1"
+          }
+        } : {
+          limit_limit_gtc: {
+            base_size: validData.baseSize || "1",
+            limit_price: validData.limitPrice!
+          }
+        }
+      })
+    });
+
+    if (!coinbaseResponse.ok) {
+      const err = await coinbaseResponse.text();
+      console.error("Coinbase Trade API Error:", err);
+      throw new Error("Failed to execute trade on Coinbase.");
+    }
+
+    const createdOrder = await coinbaseResponse.json();
+    const orderData = createdOrder.success_response || {};
+
+    const executedOrder = await prisma.tradeOrder.create({
+      data: {
+        clientOrderId: clientOrderId,
+        productId: validData.productId,
+        side: validData.side,
+        type: validData.type,
+        status: orderData.status || 'PENDING',
+        baseSize: validData.baseSize || "0",
+        quoteSize: validData.quoteSize || "0",
+        limitPrice: validData.limitPrice || "0",
+        filledSize: orderData.filled_size || "0",
+        averageFilledPrice: orderData.average_filled_price || "0",
+        commission: orderData.total_fees || "0",
+      }
+    });
     
     // Reset circuit breaker on success
     failureCount = 0;
     
-    return NextResponse.json(mockResponse, { status: 200 });
+    return NextResponse.json(executedOrder, { status: 200 });
   } catch (error: unknown) {
     // Record failure for circuit breaker
     failureCount++;

@@ -50,9 +50,9 @@ export default function HistoryComponent() {
         apiGetHistoricalFills(),
         apiGetTransactionSummary()
       ]);
-      setAccounts(accRes.accounts || []);
-      setOrders(ordRes.orders || []);
-      setFills(fillRes.fills || []);
+      setAccounts(accRes?.accounts || []);
+      setOrders(ordRes?.orders || []);
+      setFills(fillRes?.fills || []);
       setSummary(sumRes);
     } catch (err) {
       console.error(err);

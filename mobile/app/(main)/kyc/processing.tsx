@@ -36,26 +36,18 @@ export default function ProcessingScreen() {
 
   useEffect(() => {
     HapticsManager.medium();
-    // Sequence the fake chat bubbles
-    const timers = CHAT_BUBBLES.map((_, i) => 
-      setTimeout(() => setStep(i), i * 2000)
-    );
-
-    // Call actual backend
-    setTimeout(() => {
-      verifyIdentity.mutate({
-        userId: user?.id || 'unknown',
-        deviceSessionId: 'dwolla_session_123',
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        dob: '1990-01-01',
-        email: user?.primaryEmailAddress?.emailAddress || '',
-        phoneNumber: user?.primaryPhoneNumber?.phoneNumber || '',
-        address: { street: '', city: '', state: '', zip: '' }
-      });
-    }, 6000);
-
-    return () => timers.forEach(clearTimeout);
+    
+    // Call actual backend immediately
+    verifyIdentity.mutate({
+      userId: user?.id || 'unknown',
+      deviceSessionId: 'dwolla_session_123',
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      dob: '1990-01-01',
+      email: user?.primaryEmailAddress?.emailAddress || '',
+      phoneNumber: user?.primaryPhoneNumber?.phoneNumber || '',
+      address: { street: '', city: '', state: '', zip: '' }
+    });
   }, []);
 
   return (

@@ -19,6 +19,13 @@ export default function SecurityComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [newKeyDetails, setNewKeyDetails] = useState<KeyDetails | null>(null);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(["read"]);
+
+  const togglePermission = (perm: string) => {
+    setSelectedPermissions(prev => 
+      prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm]
+    );
+  };
 
   useEffect(() => {
     fetchKeys();
@@ -28,7 +35,7 @@ export default function SecurityComponent() {
     setLoading(true);
     try {
       const data = await apiListKeys();
-      setKeys(data.api_keys || []);
+      setKeys(data?.api_keys || []);
     } catch {
       setError("Failed to fetch API keys");
     } finally {
@@ -37,11 +44,15 @@ export default function SecurityComponent() {
   };
 
   const handleCreateKey = async () => {
+    if (selectedPermissions.length === 0) {
+      setError("Please select at least one permission");
+      return;
+    }
     setLoading(true);
     setError("");
     setNewKeyDetails(null);
     try {
-      const data = await apiCreateKey(["read", "trade"]);
+      const data = await apiCreateKey(selectedPermissions);
       setNewKeyDetails(data);
       fetchKeys();
     } catch {
@@ -69,9 +80,23 @@ export default function SecurityComponent() {
     <div className={styles.securityContainer}>
       <div className={styles.headerRow}>
         <h2>Your API Keys</h2>
-        <button className={styles.primaryButton} onClick={handleCreateKey} disabled={loading}>
-          + Create New Key
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {["read", "trade", "transfer"].map(perm => (
+              <label key={perm} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem' }}>
+                <input 
+                  type="checkbox" 
+                  checked={selectedPermissions.includes(perm)} 
+                  onChange={() => togglePermission(perm)} 
+                  disabled={loading}
+                /> {perm}
+              </label>
+            ))}
+          </div>
+          <button className={styles.primaryButton} onClick={handleCreateKey} disabled={loading || selectedPermissions.length === 0}>
+            + Create New Key
+          </button>
+        </div>
       </div>
 
       {error && <div className={styles.error}>{error}</div>}

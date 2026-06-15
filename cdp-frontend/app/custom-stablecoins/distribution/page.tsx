@@ -2,7 +2,13 @@
 
 import React, { useState } from "react";
 import { useAuthenticateWithJWT, useCurrentUser, useEvmAddress, useSendEvmTransaction } from "@coinbase/cdp-hooks";
+import { encodeFunctionData, parseAbi } from "viem";
 import styles from "./page.module.css";
+
+const STABLESWAPPER_ADDRESS = "0x8E09DCCBc9fDeC6B24BB10E45eCAba67280f2d90"; // Example stable swapper contract
+const SWAPPER_ABI = parseAbi([
+  "function swap(uint256 amount) external"
+]);
 
 export default function AssetDistribution() {
   const { authenticateWithJWT } = useAuthenticateWithJWT();
@@ -30,13 +36,20 @@ export default function AssetDistribution() {
     if (!evmAddress || !amount) return;
     try {
       setIsSending(true);
-      // Stub for Stableswapper permissionless onchain swap (1:1 with USDC)
+      // Real viem encoding for Stableswapper permissionless onchain swap (1:1 with USDC)
+      const parsedAmount = BigInt(Math.floor(Number(amount) * 1e6)); // USDC 6 decimals
+      const data = encodeFunctionData({
+        abi: SWAPPER_ABI,
+        functionName: "swap",
+        args: [parsedAmount],
+      });
+
       const result = await sendEvmTransaction({
         network: "base-sepolia",
         evmAccount: evmAddress,
         transaction: {
-          to: "0x0000000000000000000000000000000000000000", // TODO: Stableswapper Contract Address
-          data: "0x", // TODO: encodeFunctionData for swap()
+          to: STABLESWAPPER_ADDRESS,
+          data: data,
           value: BigInt(0),
           chainId: 84532,
         }
@@ -73,7 +86,7 @@ export default function AssetDistribution() {
           <div className={styles.dashboardCard}>
             <div className={styles.walletInfo}>
               <p><strong>EVM Wallet:</strong> {evmAddress || "Provisioning..."}</p>
-              <p><strong>Stableswapper Contract:</strong> 0x000... (Base Sepolia)</p>
+              <p><strong>Stableswapper Contract:</strong> {STABLESWAPPER_ADDRESS}</p>
             </div>
 
             <div className={styles.actionSection}>

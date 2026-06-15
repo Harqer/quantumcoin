@@ -58,20 +58,59 @@ export default function ChatInput({ onTypingChange }: Props) {
         onTypingChange?.(false);
       }
     } else {
-      // Stub response if trpc is not fully integrated
-      setTimeout(() => {
+      // Connect to the real /api/chat endpoint instead of stubbing
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: input }] })
+        });
+        
+        if (!response.ok) throw new Error("Failed to fetch chat");
+        
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullReply = "";
+        
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('0:')) {
+                try {
+                  fullReply += JSON.parse(line.substring(2));
+                } catch(e) {}
+              }
+            }
+          }
+        }
+        
         dispatch(
           addMessage({
             id: crypto.randomUUID(),
             role: "ai",
             type: "text",
-            content:
-              "I am a stubbed AI response since the tRPC mutation is not wired up yet.",
+            content: fullReply || "Agent executed your command but returned no explicit text.",
             shouldStream: true,
           }),
         );
+      } catch (err) {
+        console.error("Fetch error:", err);
+        dispatch(
+          addMessage({
+            id: crypto.randomUUID(),
+            role: "ai",
+            type: "text",
+            content: "There was an error communicating with the agent.",
+            shouldStream: false,
+          }),
+        );
+      } finally {
         onTypingChange?.(false);
-      }, 1500);
+      }
     }
   };
 

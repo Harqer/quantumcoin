@@ -6,24 +6,26 @@ import { useAuth } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function IntercomHelpCenterScreen() {
   const { userId, isLoaded } = useAuth();
   const router = useRouter();
   const [isInitializing, setIsInitializing] = useState(true);
 
+  const { data: intercomData, isLoading } = coreTrpc.user.getIntercomHash.useQuery(
+    { userId: userId || '' }, 
+    { enabled: !!userId && isLoaded }
+  );
+
   useEffect(() => {
     async function initializeIntercom() {
-      if (!isLoaded || !userId) return;
+      if (!isLoaded || !userId || !intercomData?.hash) return;
       
       try {
-        // In a real scenario, this HMAC hash is fetched securely from the QuantumCoin API 
-        // to prevent Intercom identity spoofing as outlined by our Orchestration Strategy.
-        const mockBackendUserHash = "b4c9a289323b21a01c... (mocked hmac-sha256)";
-        
         await Intercom.loginUserWithUserAttributes({
           userId: userId,
-          userHash: mockBackendUserHash,
+          userHash: intercomData.hash,
         });
 
         setIsInitializing(false);
@@ -33,8 +35,10 @@ export default function IntercomHelpCenterScreen() {
       }
     }
 
-    initializeIntercom();
-  }, [userId, isLoaded]);
+    if (!isLoading) {
+      initializeIntercom();
+    }
+  }, [userId, isLoaded, intercomData, isLoading]);
 
   const openIntercomMessenger = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

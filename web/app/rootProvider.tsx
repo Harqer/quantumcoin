@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { base, baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { QueryClient } from "@tanstack/react-query";
 import { WagmiProvider, createConfig, http } from "wagmi";
@@ -12,11 +12,10 @@ import { ReduxProvider } from "../components/ReduxProvider";
 const queryClient = new QueryClient();
 
 const wagmiConfig = createConfig({
-  chains: [base, baseSepolia],
+  chains: [base],
   connectors: [coinbaseWallet({ appName: "QuantumCoin" })],
   transports: {
     [base.id]: http(),
-    [baseSepolia.id]: http(),
   },
 });
 

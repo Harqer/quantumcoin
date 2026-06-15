@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import StakeModal from '@/components/earn/StakeModal';
 import { ConnectWallet, Wallet, WalletDropdown } from '@coinbase/onchainkit/wallet';
 import { Identity, Avatar, Name } from '@coinbase/onchainkit/identity';
+import { apiGetStakePools } from '@/lib/api';
 
 interface StakePool {
   poolId: string;
@@ -18,14 +19,24 @@ export default function EarnDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPool, setSelectedPool] = useState<StakePool | null>(null);
 
+  const [pools, setPools] = useState<StakePool[]>([]);
+  const [loading, setLoading] = useState(true);
+
   React.useEffect(() => {
     setIsMounted(true);
+    fetchPools();
   }, []);
 
-  const pools = [
-    { poolId: 'pool_qtc_1', asset: 'QTC', apy: '0.12', totalStaked: '1,250,000', lockup: 30 },
-    { poolId: 'pool_usdc_1', asset: 'USDC', apy: '0.05', totalStaked: '5,000,000', lockup: 14 }
-  ];
+  const fetchPools = async () => {
+    try {
+      const data = await apiGetStakePools();
+      setPools(data?.pools || []);
+    } catch (error) {
+      console.error("Failed to fetch pools", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenModal = (pool: StakePool) => {
     setSelectedPool(pool);
@@ -58,7 +69,9 @@ export default function EarnDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {pools.map(pool => (
+          {loading ? (
+            <div className="text-white">Loading pools...</div>
+          ) : pools.map(pool => (
             <div key={pool.poolId} className="bg-[#111214] border border-[#2B2F36] rounded-xl p-6 hover:border-[#3B4048] transition-colors">
               <div className="flex justify-between items-start mb-6">
                 <div>

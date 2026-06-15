@@ -25,7 +25,7 @@ export default function ServiceDetailComponent({ id }: { id: string }) {
     try {
       const statusRes = await apiGetJobStatus(jobId);
       if (statusRes.status === "completed") {
-        setResult(`Payment of $${service?.price} routed via x402.\nExecution result: SUCCESS\nPayload processed.\nResult data: ${JSON.stringify(statusRes.result)}`);
+        setResult(`Execution result: SUCCESS\nPayload processed.\nResult data: ${JSON.stringify(statusRes.result)}`);
         setExecuting(false);
       } else if (statusRes.status === "failed") {
         setResult("Execution failed.");
@@ -44,16 +44,35 @@ export default function ServiceDetailComponent({ id }: { id: string }) {
     setExecuting(true);
     setResult(null);
     try {
+      if (!service?.name) {
+        throw new Error("Service name is undefined");
+      }
+      
       let params = {};
       try { params = JSON.parse(playgroundInput); } catch (e) { /* ignore parse error for raw strings */ }
       
-      const res = await apiSubmitJob(String(service?.name || "UnknownService"), params);
+      // Process actual charge first
+      const chargeRes = await fetch('/api/pay/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          productId: String(service.id), 
+          amount: String(service.price), 
+          currency: 'USD' 
+        })
+      });
+      
+      if (!chargeRes.ok) {
+        throw new Error("Payment processing failed");
+      }
+
+      const res = await apiSubmitJob(String(service.name), params);
       
       if (res.job_id) {
-        setResult(`Job submitted (ID: ${res.job_id}). Polling for completion...`);
+        setResult(`Payment successful. Job submitted (ID: ${res.job_id}). Polling for completion...`);
         pollJobStatus(res.job_id);
       } else {
-        throw new Error("No job ID returned");
+        throw new Error("No job ID returned from service");
       }
     } catch (err) {
       setResult("Execution request failed.");
@@ -95,7 +114,7 @@ paths:
 
         <div className={styles.playground}>
           <h3>"Pay & Execute" x402 Playground</h3>
-          <p style={{marginBottom: '1rem', color: '#666'}}>Test this service by passing a JSON payload. A simulated x402 payment will be attached to your request.</p>
+          <p style={{marginBottom: '1rem', color: '#666'}}>Test this service by passing a JSON payload. A real x402 charge will be processed before execution.</p>
           <textarea 
             className={styles.textarea}
             value={playgroundInput}

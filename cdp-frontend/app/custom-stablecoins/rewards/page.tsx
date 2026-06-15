@@ -1,12 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 export default function IssuerRewards() {
   const circulatingSupply = 104523000;
-  // Stubbing 3.35% APY distributed weekly
-  const weeklyRewardEstimate = (circulatingSupply * 0.0335) / 52; 
+  const [apy, setApy] = useState(3.35);
+
+  useEffect(() => {
+    fetch('https://yields.llama.fi/pools')
+      .then(res => res.json())
+      .then(data => {
+        const usdcPool = data.data.find((p: any) => p.symbol === 'USDC');
+        if (usdcPool && usdcPool.apy) {
+          setApy(usdcPool.apy);
+        }
+      }).catch(console.error);
+  }, []);
+
+  const weeklyRewardEstimate = (circulatingSupply * (apy / 100)) / 52; 
 
   return (
     <div className={styles.container}>
@@ -19,7 +31,7 @@ export default function IssuerRewards() {
         <div className={styles.dashboardCard}>
           <div className={styles.walletInfo}>
             <p><strong>Asset:</strong> QubitCoin (QBC)</p>
-            <p><strong>Current APY:</strong> 3.35%</p>
+            <p><strong>Current APY:</strong> {apy.toFixed(2)}%</p>
             <p><strong>Payout Frequency:</strong> Weekly</p>
           </div>
 

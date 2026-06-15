@@ -41,8 +41,12 @@ export default function AgenticWalletPage() {
   const handleGrantPermission = async () => {
     if (!treasuryAddress) await fetchTreasuryAddress();
     
-    // We fallback to a hardcoded address if the API fetch fails for any reason
-    const spender = treasuryAddress || "0x1399BE2B2E4186C209617053822C67173E8DFe5c";
+    if (!treasuryAddress) {
+      alert("Treasury address is required.");
+      return;
+    }
+    
+    const spender = treasuryAddress;
 
     await createSpendPermission({
       network: "base-sepolia",

@@ -22,10 +22,10 @@ export const ALCHEMY_ENDPOINT_URL = "https://eth-mainnet.g.alchemy.com/v2/8VAudA
 export const CORE_API_URL = "https://api-rosy-one-81.vercel.app";
 
 // 1. Core API Client (General app data, budgets, chat, salary advance)
-export const coreTrpc = createTRPCReact<any>();
+export const coreTrpc = createTRPCReact<any>() as any;
 
 // 2. Crypto/Web3 API Client (Isolated endpoint for blockchain integrations)
-export const cryptoTrpc = createTRPCReact<any>();
+export const cryptoTrpc = createTRPCReact<any>() as any;
 
 // Shared QueryClient to ensure cross-tab state syncing works seamlessly regardless of which API updates it
 export const queryClient = new QueryClient({

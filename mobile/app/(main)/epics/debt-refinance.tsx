@@ -4,19 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
-import { useQuery } from '@tanstack/react-query';
+import { coreTrpc } from '../../../utils/trpc';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 
 export default function DebtRefinanceScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const router = useRouter();
 
-  const { data: refinanceData, isLoading } = useQuery({
-    queryKey: ['debtRefinance'],
-    queryFn: async () => {
-      return { offerAmount: 10000, apr: '5.99%' };
-    },
-  });
+  const { data: refinanceData, isLoading } = coreTrpc.debt.getRefinanceOffers.useQuery({ userId: 'current-user-id' });
 
   return (
     <SafeAreaView

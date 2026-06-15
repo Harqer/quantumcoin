@@ -10,10 +10,8 @@ export default function MqCard() {
 
   useEffect(() => {
     if (tokenData) {
-      setTimeout(() => {
-        setLoaded(true);
-        logInteraction.mutate({ component_name: 'mq-card', action: 'load', success: true });
-      }, 1000);
+      setLoaded(true);
+      logInteraction.mutate({ component_name: 'mq-card', action: 'load', success: true });
     }
   }, [tokenData]);
 

@@ -16,7 +16,7 @@ export default function TreasuryDashboard() {
   const fetchTreasuryAccounts = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com'}/api/treasury/accounts`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://www.getqubits.com'}/api/treasury/accounts`);
       if (!res.ok) throw new Error('Failed to fetch treasury accounts');
       const data = await res.json();
       // Depending on the backend shape, we assume data is an array or has an array field
@@ -34,7 +34,7 @@ export default function TreasuryDashboard() {
       const name = prompt("Enter a name for the new Custodial Account (e.g., 'Settlement Pool 1'):");
       if (!name) return;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com'}/api/treasury/accounts`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://www.getqubits.com'}/api/treasury/accounts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })

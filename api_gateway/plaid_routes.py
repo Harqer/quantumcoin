@@ -94,6 +94,9 @@ async def create_link_token(request: Request, payload: dict = Depends(verify_pay
         
         TelemetryStream.track_event("plaid_link_token_created", {"status": "success"}, user_id=clerk_id)
         return {"link_token": response['link_token']}
+    except plaid.ApiException as e:
+        logger.warning("plaid_api_error", error=str(e))
+        raise HTTPException(status_code=400, detail="Plaid API returned an error")
     except Exception as e:
         logger.exception("create_link_token_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error occurred")
@@ -133,6 +136,9 @@ async def exchange_public_token(data: PublicTokenExchangeRequest, payload: dict 
         TelemetryStream.track_event("bank_account_linked", {"item_id": item_id}, user_id=user.id)
         
         return {"status": "success"}
+    except plaid.ApiException as e:
+        logger.warning("plaid_api_error", error=str(e))
+        raise HTTPException(status_code=400, detail="Plaid API returned an error")
     except Exception as e:
         logger.exception("exchange_public_token_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error occurred")

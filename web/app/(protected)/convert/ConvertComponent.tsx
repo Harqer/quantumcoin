@@ -63,7 +63,13 @@ export default function ConvertComponent() {
             onChange={(e) => setAmount(e.target.value)} 
             placeholder="0.00" 
           />
-          <select value={fromAsset} onChange={(e) => setFromAsset(e.target.value)}>
+          <select value={fromAsset} onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue === toAsset) {
+              setToAsset(fromAsset);
+            }
+            setFromAsset(newValue);
+          }}>
             <option value="USD">USD</option>
             <option value="USDC">USDC</option>
             <option value="BTC">BTC</option>
@@ -83,7 +89,13 @@ export default function ConvertComponent() {
             readOnly 
             placeholder="0.00" 
           />
-          <select value={toAsset} onChange={(e) => setToAsset(e.target.value)}>
+          <select value={toAsset} onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue === fromAsset) {
+              setFromAsset(toAsset);
+            }
+            setToAsset(newValue);
+          }}>
             <option value="BTC">BTC</option>
             <option value="ETH">ETH</option>
             <option value="USDC">USDC</option>

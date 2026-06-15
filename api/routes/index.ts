@@ -8,6 +8,9 @@ import { budgetRouter } from "./budget";
 import { cashAdvanceRouter } from "./cashAdvance";
 import { userRouter } from "./user";
 import { cardRouter } from "./card";
+import { walletRouter } from "./wallet";
+import { debtRouter } from "./debt";
+import { campaignRouter } from "./campaign";
 
 export const appRouter = router({
   user: userRouter,
@@ -19,6 +22,9 @@ export const appRouter = router({
   budget: budgetRouter,
   cashAdvance: cashAdvanceRouter,
   card: cardRouter,
+  wallet: walletRouter,
+  debt: debtRouter,
+  campaign: campaignRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -12,12 +12,7 @@ import { coreTrpc } from '../../utils/trpc';
 import { useUser } from '@clerk/clerk-expo';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 
-// Mock Kafka Telemetry Hook
-const usePaymentCardKafkaEvent = () => {
-  return (event: string) => {
-    console.log(`[KAFKA_TELEMETRY] ${event}`);
-  };
-};
+// Telemetry hook removed in favor of core TRPC telemetry (if added) or just console logs
 export default function AddSubscriptionCardScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const router = useRouter();
@@ -29,14 +24,12 @@ export default function AddSubscriptionCardScreen() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   
   useTrackScreen('PlusAddSubscriptionCardScreen_1_1');
-  const sendPaymentCardLog = usePaymentCardKafkaEvent();
 
   // Backend TRPC Mutation to generate Stripe SetupIntent
   const createSubscriptionIntent = coreTrpc.subscription.createIntent.useMutation();
 
   const handleSubscribe = async () => {
     HapticsManager.medium();
-    sendPaymentCardLog('CARD_SUBMIT_ATTEMPT');
     
     try {
       // 1. Get Client Secret from TRPC
@@ -51,25 +44,21 @@ export default function AddSubscriptionCardScreen() {
       });
 
       if (error) {
-        sendPaymentCardLog('CARD_SUBMIT_FAILURE');
         Alert.alert("Subscription Failed", error.message);
         HapticsManager.error();
       } else if (setupIntent) {
-        sendPaymentCardLog('CARD_SUBMIT_SUCCESS');
         HapticsManager.success();
         router.replace('/(main)/wallet'); // redirect on success
       }
     } catch (e: any) {
-      sendPaymentCardLog('CARD_SUBMIT_ERROR');
-      Alert.alert("Error", e.message || "Failed to initialize subscription");
-      HapticsManager.error();
+        Alert.alert("Error", e.message || "Failed to initialize subscription");
+        HapticsManager.error();
     }
   };
 
   const handleInfoPress = () => {
     HapticsManager.light();
     setShowWarningModal(true);
-    sendPaymentCardLog('VIEWED_WARNING_MODAL');
   };
 
   return (
@@ -125,9 +114,9 @@ export default function AddSubscriptionCardScreen() {
         </Animated.View>
       </View>
 
-      {/* CardAccountLinkWarningModal Mock */}
-      {showWarningModal && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24, zIndex: 100 }}>
+      {/* CardAccountLinkWarningModal */}
+      <Modal visible={showWarningModal} transparent={true} animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
           <View style={{ backgroundColor: colorRoles.background.primary, padding: 24, borderRadius: 16, width: '100%' }}>
             <Text style={{ fontFamily: 'Montreal-Bold', fontSize: 20, color: colorRoles.content.primary, marginBottom: 12 }}>Account Linking Warning</Text>
             <Text style={{ fontFamily: 'Montreal-Medium', fontSize: 14, color: colorRoles.content.secondary, marginBottom: 24, lineHeight: 20 }}>
@@ -138,7 +127,7 @@ export default function AddSubscriptionCardScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      )}
+      </Modal>
 
       <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 16, borderTopWidth: 1, borderTopColor: colorRoles.border.default, paddingTop: 24 }}>
         <TouchableOpacity 

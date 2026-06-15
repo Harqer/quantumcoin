@@ -92,4 +92,14 @@ export const kycRouter = router({
         docvTransactionToken, 
       };
     }),
+
+  getStatus: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { kycStatus: true }
+      });
+      return { kycStatus: user?.kycStatus || "unverified" };
+    }),
 });

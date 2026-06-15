@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { addMessage, addMessages, setMode } from '../../store/slices/chatSlice';
 import { coreTrpc } from '../../utils/trpc';
+import firestore from '@react-native-firebase/firestore';
 
 // Premium UX & Monetization Components
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
@@ -44,6 +45,12 @@ type ChatFormValues = z.infer<typeof chatSchema>;
 // --- INLINE WIDGETS ---
 const BudgetWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
   const router = useRouter();
+  const { data, isLoading } = coreTrpc.budget.getBudgetSettings.useQuery();
+
+  if (isLoading || !data) return null;
+
+  const remaining = Math.max(0, data.limit - data.money);
+
   return (
     <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
@@ -51,7 +58,7 @@ const BudgetWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
         <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: colorRoles.content.primary }}>Budget Summary</Text>
       </View>
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
-        You've spent <Text style={{ color: colorRoles.content.negativeDark, fontWeight: '700' }}>$450</Text> on Food & Drink this month. You're tracking $50 over your limit.
+        You've spent <Text style={{ color: colorRoles.content.negativeDark, fontWeight: '700' }}>${data.money.toFixed(2)}</Text> this cycle. You have <Text style={{ color: colorRoles.content.positiveDark, fontWeight: '700' }}>${remaining.toFixed(2)}</Text> remaining.
       </Text>
       <PressableScale haptics="medium" onPress={() => router.push('/(main)/budget')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>View Breakdown</Text>
@@ -62,6 +69,10 @@ const BudgetWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
 
 const CashAdvanceWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
   const router = useRouter();
+  const { data: eligibility, isLoading } = coreTrpc.cashAdvance.checkEligibility.useQuery();
+
+  if (isLoading || !eligibility?.eligible) return null;
+
   return (
     <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: '#DBEAFE', borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
@@ -69,10 +80,10 @@ const CashAdvanceWidget = React.memo(({ colorRoles, typography, spacing }: any) 
         <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: '#1E3A8A' }}>Need a Spot?</Text>
       </View>
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: '#1E3A8A', marginBottom: spacing.l }}>
-        I can spot you up to $250 interest-free right now.
+        I can spot you up to ${eligibility.limit.toFixed(2)} interest-free right now.
       </Text>
       <PressableScale haptics="heavy" onPress={() => router.push('/(main)/advance')} style={{ backgroundColor: '#2563EB', paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
-        <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Check Eligibility</Text>
+        <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Claim Now</Text>
       </PressableScale>
     </Animated.View>
   );
@@ -97,15 +108,20 @@ const PlaidWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
 });
 
 const SponsoredAdWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
+  const { data: campaigns } = coreTrpc.campaign.getActiveCampaigns.useQuery();
+  const campaign = campaigns?.[0];
+
+  if (!campaign) return null;
+
   return (
     <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28)} style={{ backgroundColor: '#FFFBEB', borderRadius: 20, padding: spacing.l, width: '85%', marginBottom: spacing.m, alignSelf: 'flex-start', borderWidth: 1, borderColor: '#FDE68A' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.xs }}>
-        <Text style={{ fontFamily: typography.labelSmall.fontFamily, fontSize: 10, fontWeight: '700', color: '#D97706', textTransform: 'uppercase' }}>Sponsored</Text>
+        <Text style={{ fontFamily: typography.labelSmall.fontFamily, fontSize: 10, fontWeight: '700', color: '#D97706', textTransform: 'uppercase' }}>{campaign.badge}</Text>
         <Ionicons name="star" size={12} color="#D97706" />
       </View>
-      <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, fontWeight: '700', color: '#92400E', marginBottom: spacing.xs }}>Get the Quantum Credit Card</Text>
+      <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, fontWeight: '700', color: '#92400E', marginBottom: spacing.xs }}>{campaign.title}</Text>
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: 14, color: '#B45309', marginBottom: spacing.m }}>
-        Stop paying interest. Build credit instantly. Apply today.
+        {campaign.description}
       </Text>
       <PressableScale haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ backgroundColor: '#D97706', paddingVertical: 10, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Learn More</Text>
@@ -178,7 +194,8 @@ export default function DashboardScreen() {
   useTrackScreen('Main_Dashboard_Chat');
 
   // Monetization State
-  const [isProTier, setIsProTier] = useState(false); // Defaulting to False to simulate Free Tier
+  const { data: userPreferences } = coreTrpc.user.getPreferences.useQuery();
+  const isProTier = userPreferences?.tier === 'pro' || userPreferences?.tier === 'builder';
   const [showGatingModal, setShowGatingModal] = useState(false);
 
   const dispatch = useDispatch();
@@ -193,44 +210,48 @@ export default function DashboardScreen() {
     defaultValues: { message: '' }
   });
 
-  // --- FIREBASE DATA CONNECT (SQL CONNECT) REAL-TIME SUBSCRIPTION SIMULATION ---
-  // In production, this uses generated SDK: const { data } = useListChatMessages({ userId: user.id }, { subscribe: true });
-  const triggerDatabaseSync = (newMessages: Message[]) => {
-    dispatch(addMessages(newMessages));
-    setIsTyping(false);
-    AudioHapticsManager.lightInteraction();
-    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
-  };
-
-  // --- FIREBASE CLOUD MESSAGING (FCM) BACKGROUND SYNC HOOK ---
+  // --- REAL BIDIRECTIONAL FIREBASE WEBSOCKETS (FIRESTORE) ---
   useEffect(() => {
-    // Simulated FCM onMessage handler for Background Sync
-    // If the LLM takes 15s to process a deep financial query while app is backgrounded,
-    // the server writes to SQL Connect and sends a silent data push notification here.
-    const fcmListener = () => {
-      console.log('FCM Payload received: Re-fetching SQL Connect Data automatically.');
-      // The SQL Connect `useListChatMessages` would automatically update here due to the @refresh directive.
-    };
-    return () => {}; // Cleanup listener
-  }, []);
+    if (!user?.id) return;
+    
+    // Subscribe to real-time chat updates
+    const unsubscribe = firestore()
+      .collection('chats')
+      .doc(user.id)
+      .collection('messages')
+      .orderBy('createdAt', 'asc')
+      .onSnapshot((snapshot) => {
+        if (!snapshot || snapshot.empty) return;
+        
+        const newMessages = snapshot.docChanges()
+          .filter(change => change.type === 'added' && !change.doc.metadata.hasPendingWrites)
+          .map(change => {
+            const data = change.doc.data();
+            return {
+              id: change.doc.id,
+              role: data.role,
+              type: data.type || 'text',
+              content: data.content,
+              isError: data.isError,
+              shouldStream: data.role === 'ai',
+              widgetType: data.widgetType
+            } as Message;
+          });
+          
+        if (newMessages.length > 0) {
+          dispatch(addMessages(newMessages));
+          setIsTyping(false);
+          AudioHapticsManager.lightInteraction();
+          setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+        }
+      }, (error) => {
+        console.error("Firestore WebSocket Error:", error);
+      });
 
-  // Real AI Logic executing server-side via tRPC
-  const chatMutation = coreTrpc.ai.chat.useMutation({
-    onSuccess: (data: any) => {
-      // Backend returns { responses: Message[] }
-      triggerDatabaseSync(data.responses || []);
-    },
-    onError: (err: any) => {
-      triggerDatabaseSync([{ id: Date.now().toString(), role: 'ai', type: 'text', content: "My quantum link to the mainframe is down. Try again.", isError: true, shouldStream: false }]);
-    }
-  });
+    return () => unsubscribe();
+  }, [user?.id, dispatch]);
 
-  const handleSimulatedAIResponseFallback = (userText: string) => {
-    setIsTyping(true);
-    chatMutation.mutate({ message: userText, mode });
-  };
-
-  const onSubmit = useCallback((data: ChatFormValues) => {
+  const onSubmit = useCallback(async (data: ChatFormValues) => {
     trackEvent('Chat_Message_Sent');
     const lowerMsg = data.message.toLowerCase();
 
@@ -241,7 +262,7 @@ export default function DashboardScreen() {
       return;
     }
 
-    // 1. Write Optimistic Message to local state / Data Connect Cache
+    // 1. Optimistic UI update
     const tempId = Date.now().toString();
     const optimisticMsg: Message = { id: tempId, role: 'user', type: 'text', content: data.message };
     dispatch(addMessage(optimisticMsg));
@@ -249,8 +270,21 @@ export default function DashboardScreen() {
     reset({ message: '' });
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
 
-    // 2. Trigger Server Execution (simulated)
-    handleSimulatedAIResponseFallback(data.message);
+    // 2. Write to Firestore to trigger backend AI via WebSockets
+    if (user?.id) {
+       try {
+         await firestore().collection('chats').doc(user.id).collection('messages').add({
+            role: 'user',
+            type: 'text',
+            content: data.message,
+            mode: mode,
+            createdAt: firestore.FieldValue.serverTimestamp()
+         });
+       } catch (error) {
+         setIsTyping(false);
+         dispatch(addMessage({ id: Date.now().toString(), role: 'ai', type: 'text', content: "Network error writing to Firebase. Please try again.", isError: true, shouldStream: false }));
+       }
+    }
 
   }, [mode, user, isProTier]);
 
@@ -336,10 +370,8 @@ export default function DashboardScreen() {
         onClose={() => setShowGatingModal(false)}
         onUpgrade={() => {
           setShowGatingModal(false);
-          setIsProTier(true);
           AudioHapticsManager.success();
-          // In a real app, this would trigger Stripe checkout or RevenueCat
-          dispatch(addMessage({ id: Date.now().toString(), role: 'ai', type: 'text', content: "Payment confirmed. Quantum Pro unlocked. You now have access to the GPT-4 financial engine.", shouldStream: true }));
+          dispatch(addMessage({ id: Date.now().toString(), role: 'ai', type: 'text', content: "Please upgrade on the web app to unlock PRO.", shouldStream: true }));
         }}
       />
     </SafeAreaView>

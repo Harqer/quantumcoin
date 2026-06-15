@@ -18,12 +18,7 @@ import Skeleton from '../../components/Skeleton';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
-// Fallback data if TRPC backend is unreachable
-const FALLBACK_CATEGORIES = [
-  { id: '1', name: 'Food & Drink', spent: 450, limit: 500, icon: 'restaurant-outline', color: '#F59E0B' },
-  { id: '2', name: 'Transport', spent: 120, limit: 150, icon: 'car-outline', color: '#3B82F6' },
-  { id: '3', name: 'Shopping', spent: 300, limit: 200, icon: 'bag-handle-outline', color: '#EC4899' },
-];
+// Backend data replaces this.
 
 // ADVANCED OPTIMIZATION: Memoized BudgetCard to prevent 120Hz frame drops on long lists
 const BudgetCardComponent = ({ item, index, colorRoles, typography, spacing }: any) => {
@@ -94,13 +89,7 @@ export default function BudgetScreen() {
   const router = useRouter();
   useTrackScreen('CategoryScreen_1_1');
 
-  // ADVANCED OPTIMIZATION: 
-  // 1. Stale time set to 60 minutes. Triggers cache hits from local MMKV instantly.
-  // 2. Fallback initial data provided to prevent loading screens if completely offline/new.
-  const { data: categories, isLoading } = coreTrpc.budget.categories.useQuery(undefined, {
-    staleTime: 1000 * 60 * 60,
-    initialData: FALLBACK_CATEGORIES,
-  });
+  const { data: categories = [], isLoading } = coreTrpc.finance.getBudget.useQuery();
 
   const totalSpent = useMemo(() => {
     return categories.reduce((sum: number, cat: any) => sum + cat.spent, 0);

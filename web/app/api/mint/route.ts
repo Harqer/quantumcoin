@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from "@clerk/nextjs/server";
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number, timestamp: number }>();
@@ -19,6 +20,17 @@ export async function POST(request: Request) {
         },
         { status: 403 }
       );
+    }
+
+    const { userId, getToken } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // Obtain the real authentication token from Clerk instead of mocking
+    const token = await getToken();
+    if (!token) {
+      return NextResponse.json({ error: "Missing Authentication Token" }, { status: 401 });
     }
 
     const client_ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -61,14 +73,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Routing to New API Contracts
+    // Routing to New API Contracts
     // According to docs/qbc_api_contracts_and_security.md
     const API_BASE_URL = process.env.API_BASE_URL || 'https://api.quantumcoin.io/v1';
     
-    // Mock JWT token generation to satisfy the security standard (bearerAuth, RS256).
-    // In production, this should use a real private key from environment variables.
-    const token = "mock.jwt.token";
-
     let targetEndpoint = '';
     let payload = {};
 
@@ -93,15 +101,15 @@ export async function POST(request: Request) {
       });
     } catch (fetchError: unknown) {
       const fetchErrMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
-      console.warn("Backend fetch failed, mocking success for local dev:", fetchErrMsg);
-      // Fallback for local development if api.quantumcoin.io doesn't exist
-      response = {
-        ok: true,
-        json: async () => (operation_type === 'qnrg' 
-          ? { random_bytes: "mock_base64_random_bytes==", provider: "MockProvider" }
-          : { status: "Key distribution initiated", keyId: "mock_key_id" }
-        )
-      } as unknown as Response;
+      console.warn("Backend fetch failed, returning 502:", fetchErrMsg);
+      return NextResponse.json(
+        {
+          status: 'error',
+          code: 'BAD_GATEWAY',
+          message: 'Failed to communicate with the quantum provider.',
+        },
+        { status: 502 }
+      );
     }
 
     if (!response.ok) {
@@ -134,7 +142,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: 'success',
-        transaction_id: `tx_${Date.now()}_mock`,
+        transaction_id: crypto.randomUUID(),
         quantum_proof: backendData,
         message: `Mint initiated successfully via ${operation_type.toUpperCase()}.`,
       },
