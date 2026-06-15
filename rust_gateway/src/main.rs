@@ -94,12 +94,7 @@ async fn extract_tenant_id(headers: &HeaderMap) -> Option<String> {
     }
     let token = &auth_header[7..];
     
-    // In production, use the actual ES256 public key.
-    // For this implementation, we will mock the extraction for demonstration,
-    // or use a dummy validation if the token is "mock_token".
-    if token == "mock_token" {
-        return Some("00000000-0000-0000-0000-000000000000".to_string());
-    }
+    // Removed mock_token bypass for security.
 
     // In production, load the public key from a secure source.
     let decoding_key = if let Ok(key) = std::env::var("JWT_PUBLIC_KEY") {

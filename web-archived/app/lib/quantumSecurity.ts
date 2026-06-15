@@ -24,7 +24,7 @@ const QUANTUM_WALLET_ENTROPY = 'wallet_entropy';
 const QUANTUM_SESSION_KEY = 'qbc_quantum_session_v1';
 const QUANTUM_TX_LOG = 'qbc_encrypted_transactions_v1';
 
-const QUANTUM_API_BASE = process.env.NEXT_PUBLIC_QUANTUM_BACKEND_URL || 'https://getqubits.com';
+const QUANTUM_API_BASE = process.env.NEXT_PUBLIC_QUANTUM_BACKEND_URL || 'https://www.getqubits.com';
 
 const toBase64 = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...Array.from(bytes)));

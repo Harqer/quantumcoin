@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import OrderForm from '@/components/trade/OrderForm';
 import { ConnectWallet, Wallet, WalletDropdown } from '@coinbase/onchainkit/wallet';
 import { Identity, Avatar, Name } from '@coinbase/onchainkit/identity';
-import { createChart, ColorType, ISeriesApi, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, ISeriesApi, IChartApi, UTCTimestamp } from 'lightweight-charts';
 
 // Real WebSocket hook for Coinbase Public API
 function useCoinbaseMarketData(productId: string) {
@@ -37,17 +37,17 @@ function useCoinbaseMarketData(productId: string) {
     ws.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.channel === 'ticker' && data.events && data.events[0].tickers) {
+        if (data.channel === 'ticker' && data.events && data.events[0]?.tickers) {
           setTicker(data.events[0].tickers[0]);
         }
         if (data.channel === 'l2_data' && data.events) {
-          const updates = data.events[0].updates;
-          if (updates) {
+          const updates = data.events[0]?.updates;
+          if (Array.isArray(updates)) {
              setOrderBook(prev => {
                 let newBids = [...prev.bids];
                 let newAsks = [...prev.asks];
                 
-                updates.forEach((u: any) => {
+                updates.forEach((u: { side: string; price_level: string; new_quantity: string }) => {
                   if (u.side === 'bid') newBids.push([u.price_level, u.new_quantity]);
                   if (u.side === 'offer') newAsks.push([u.price_level, u.new_quantity]);
                 });
@@ -60,9 +60,9 @@ function useCoinbaseMarketData(productId: string) {
           }
         }
         if (data.channel === 'market_trades' && data.events) {
-           const tradesList = data.events[0].trades;
-           if (tradesList) {
-             const newTrades = tradesList.map((t: any) => ({
+           const tradesList = data.events[0]?.trades;
+           if (Array.isArray(tradesList)) {
+             const newTrades = tradesList.map((t: { time: string; price: string }) => ({
                 time: Math.floor(new Date(t.time).getTime() / 1000),
                 price: parseFloat(t.price)
              }));
@@ -136,7 +136,7 @@ function TradingChart({ trades }: { trades: {time: number, price: number}[] }) {
       const uniqueTrades = Array.from(new Map(trades.map(t => [t.time, t])).values());
       uniqueTrades.sort((a, b) => a.time - b.time);
       if (uniqueTrades.length > 0) {
-        seriesRef.current.setData(uniqueTrades.map(t => ({ time: t.time as any, value: t.price })));
+        seriesRef.current.setData(uniqueTrades.map(t => ({ time: t.time as UTCTimestamp, value: t.price })));
       }
     }
   }, [trades]);
@@ -146,7 +146,8 @@ function TradingChart({ trades }: { trades: {time: number, price: number}[] }) {
 
 
 export default function TradeDashboard() {
-  const { ticker, orderBook, trades } = useCoinbaseMarketData('BTC-USD'); // Using BTC-USD for real data
+  const [productId, setProductId] = useState('BTC-USD');
+  const { ticker, orderBook, trades } = useCoinbaseMarketData(productId);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -176,7 +177,15 @@ export default function TradeDashboard() {
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-[#111214] p-4 rounded-lg border border-[#2B2F36] flex justify-between items-center">
             <div className="flex items-center gap-8">
-              <h1 className="text-3xl font-bold">BTC-USD</h1>
+              <select 
+                value={productId}
+                onChange={(e) => setProductId(e.target.value)}
+                className="bg-transparent text-3xl font-bold focus:outline-none focus:ring-0 cursor-pointer appearance-none"
+              >
+                <option value="BTC-USD" className="bg-[#111214] text-base">BTC-USD</option>
+                <option value="ETH-USD" className="bg-[#111214] text-base">ETH-USD</option>
+                <option value="SOL-USD" className="bg-[#111214] text-base">SOL-USD</option>
+              </select>
               <div>
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Last Price</p>
                 <p className="text-2xl font-medium text-[#12B981]">${ticker?.price || '...'}</p>

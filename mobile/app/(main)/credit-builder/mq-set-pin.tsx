@@ -20,10 +20,8 @@ export default function MqSetPin() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     await logInteraction.mutateAsync({ component_name: 'mq-set-pin', action: 'submit', success: true });
-    setTimeout(() => {
-      setIsSubmitting(false);
-      router.back();
-    }, 1000);
+    setIsSubmitting(false);
+    router.back();
   };
 
   return (

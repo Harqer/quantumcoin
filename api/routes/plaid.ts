@@ -1,12 +1,12 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../trpc";
-import { prisma } from "../db";
-import crypto from "crypto";
+import { z } from 'zod';
+import { router, protectedProcedure } from '../trpc';
+import { prisma } from '../db';
+import crypto from 'crypto';
 
-if (!process.env.ENCRYPTION_KEY && process.env.NODE_ENV === 'production') {
-  throw new Error("ENCRYPTION_KEY must be set in production");
+if (!process.env.ENCRYPTION_KEY) {
+  throw new Error('ENCRYPTION_KEY must be set');
 }
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 function encrypt(text: string) {
   const iv = crypto.randomBytes(16);
@@ -17,7 +17,7 @@ function encrypt(text: string) {
   return {
     iv: iv.toString('hex'),
     content: encrypted.toString('hex'),
-    tag: tag.toString('hex') // In a real system, you'd store the tag too, or append it to the content. For simplicity, we append it to the content here:
+    tag: tag.toString('hex'), // In a real system, you'd store the tag too, or append it to the content. For simplicity, we append it to the content here:
   };
 }
 
@@ -30,44 +30,45 @@ function encryptToken(token: string) {
   const tag = cipher.getAuthTag();
   return {
     accessToken: encrypted.toString('hex') + ':' + tag.toString('hex'),
-    iv: iv.toString('hex')
+    iv: iv.toString('hex'),
   };
 }
 
 export const plaidRouter = router({
-  createLinkToken: protectedProcedure
-    .mutation(async ({ ctx, input }) => {
-      if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) throw new Error("Missing Plaid keys");
+  createLinkToken: protectedProcedure.mutation(async ({ ctx, input }) => {
+    if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET)
+      throw new Error('Missing Plaid keys');
 
-      const response = await fetch("https://sandbox.plaid.com/link/token/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client_id: process.env.PLAID_CLIENT_ID,
-          secret: process.env.PLAID_SECRET,
-          client_name: "QuantumCoin",
-          user: { client_user_id: ctx.user.id },
-          products: ["auth", "transactions"],
-          country_codes: ["US"],
-          language: "en",
-        }),
-      });
+    const response = await fetch('https://sandbox.plaid.com/link/token/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: process.env.PLAID_CLIENT_ID,
+        secret: process.env.PLAID_SECRET,
+        client_name: 'QuantumCoin',
+        user: { client_user_id: ctx.user.id },
+        products: ['auth', 'transactions'],
+        country_codes: ['US'],
+        language: 'en',
+      }),
+    });
 
-      if (!response.ok) throw new Error("Plaid createLinkToken failed");
-      const data = await response.json();
-      return { link_token: data.link_token };
-    }),
+    if (!response.ok) throw new Error('Plaid createLinkToken failed');
+    const data = await response.json();
+    return { link_token: data.link_token };
+  }),
 
   exchangePublicToken: protectedProcedure
     .input(z.object({ publicToken: z.string(), accountId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) throw new Error("Missing Plaid keys");
-      if (!process.env.STRIPE_SECRET_KEY) throw new Error("Missing Stripe keys");
+      if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET)
+        throw new Error('Missing Plaid keys');
+      if (!process.env.STRIPE_SECRET_KEY) throw new Error('Missing Stripe keys');
 
       // 1. Exchange Public Token
-      const response = await fetch("https://sandbox.plaid.com/item/public_token/exchange", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('https://sandbox.plaid.com/item/public_token/exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: process.env.PLAID_CLIENT_ID,
           secret: process.env.PLAID_SECRET,
@@ -75,87 +76,90 @@ export const plaidRouter = router({
         }),
       });
 
-      if (!response.ok) throw new Error("Plaid exchangePublicToken failed");
+      if (!response.ok) throw new Error('Plaid exchangePublicToken failed');
       const data = await response.json();
       const rawAccessToken = data.access_token;
-      
+
       // 2. Get Stripe Processor Token from Plaid
-      const processorResponse = await fetch("https://sandbox.plaid.com/processor/token/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const processorResponse = await fetch('https://sandbox.plaid.com/processor/token/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: process.env.PLAID_CLIENT_ID,
           secret: process.env.PLAID_SECRET,
           access_token: rawAccessToken,
           account_id: input.accountId,
-          processor: "stripe"
+          processor: 'stripe',
         }),
       });
-      
-      if (!processorResponse.ok) throw new Error("Failed to create Stripe processor token");
+
+      if (!processorResponse.ok) throw new Error('Failed to create Stripe processor token');
       const processorData = await processorResponse.json();
       const stripeToken = processorData.processor_token;
 
       // 3. Ensure User has Stripe Customer AND Stripe Connect Account
       let user = await prisma.user.findUnique({ where: { id: ctx.user.id } });
-      if (!user) throw new Error("User not found");
-      
+      if (!user) throw new Error('User not found');
+
       let stripeCustomerId = user.stripeCustomerId;
       if (!stripeCustomerId) {
-        const customerRes = await fetch("https://api.stripe.com/v1/customers", {
-          method: "POST",
+        const customerRes = await fetch('https://api.stripe.com/v1/customers', {
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-            "Content-Type": "application/x-www-form-urlencoded"
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: new URLSearchParams({ email: user.email }).toString()
+          body: new URLSearchParams({ email: user.email }).toString(),
         });
         const customerData = await customerRes.json();
         stripeCustomerId = customerData.id;
-        
+
         await prisma.user.update({
           where: { id: user.id },
-          data: { stripeCustomerId }
+          data: { stripeCustomerId },
         });
       }
 
       let stripeConnectAccountId = user.stripeConnectAccountId;
       if (!stripeConnectAccountId) {
-        const accountRes = await fetch("https://api.stripe.com/v1/accounts", {
-          method: "POST",
+        const accountRes = await fetch('https://api.stripe.com/v1/accounts', {
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-            "Content-Type": "application/x-www-form-urlencoded"
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: new URLSearchParams({ 
-            type: 'custom', 
-            country: 'US', 
+          body: new URLSearchParams({
+            type: 'custom',
+            country: 'US',
             email: user.email,
             'capabilities[transfers][requested]': 'true',
             business_type: 'individual',
             'tos_acceptance[date]': Math.floor(Date.now() / 1000).toString(),
-            'tos_acceptance[ip]': ctx.ip || '0.0.0.0'
-          }).toString()
+            'tos_acceptance[ip]': ctx.ip || '0.0.0.0',
+          }).toString(),
         });
         const accountData = await accountRes.json();
         stripeConnectAccountId = accountData.id;
-        
+
         await prisma.user.update({
           where: { id: user.id },
-          data: { stripeConnectAccountId }
+          data: { stripeConnectAccountId },
         });
       }
 
       // 4. Attach Bank Account to Stripe Connect Account as External Account
-      const sourceRes = await fetch(`https://api.stripe.com/v1/accounts/${stripeConnectAccountId}/external_accounts`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-          "Content-Type": "application/x-www-form-urlencoded"
+      const sourceRes = await fetch(
+        `https://api.stripe.com/v1/accounts/${stripeConnectAccountId}/external_accounts`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({ external_account: stripeToken }).toString(),
         },
-        body: new URLSearchParams({ external_account: stripeToken }).toString()
-      });
-      
+      );
+
       if (!sourceRes.ok) {
         const err = await sourceRes.json();
         throw new Error(`Failed to attach Stripe External Account: ${err.error?.message}`);
@@ -164,15 +168,15 @@ export const plaidRouter = router({
 
       // 5. Encrypt and save Plaid Access Token securely
       const encrypted = encryptToken(rawAccessToken);
-      
+
       await prisma.bankAccount.create({
         data: {
           userId: ctx.user.id,
           accessToken: encrypted.accessToken,
           iv: encrypted.iv,
           itemId: data.item_id,
-          stripeBankId: sourceData.id
-        }
+          stripeBankId: sourceData.id,
+        },
       });
 
       // DO NOT return raw access token

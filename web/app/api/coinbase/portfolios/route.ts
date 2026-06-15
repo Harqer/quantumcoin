@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating portfolio:', error);
     return NextResponse.json({ error: 'Failed to create portfolio' }, { status: 500 });
   }
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching portfolios:', error);
     return NextResponse.json({ error: 'Failed to fetch portfolios' }, { status: 500 });
   }

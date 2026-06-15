@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTrackScreen } from '../../hooks/useTelemetry';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
+import { coreTrpc } from '../../utils/trpc';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
@@ -23,34 +24,22 @@ export default function PersonalisationCheckpointScreen() {
   
   useTrackScreen('Auth_PersonalisationCheckpointScreen');
 
+  const intentQuery = coreTrpc.user.getIntent.useQuery();
+
   useEffect(() => {
     AudioHapticsManager.init();
 
-    // Sequence the fake chat bubbles
-    const timers = CHAT_BUBBLES.map((_, i) => 
-      setTimeout(() => {
-        setStep(i);
-        AudioHapticsManager.lightInteraction();
-      }, i * 2000)
-    );
-
-    // Final navigation to the main app dashboard (which we already refactored into a Chat interface)
-    const navTimer = setTimeout(() => {
+    if (!intentQuery.isLoading) {
       AudioHapticsManager.success();
       router.replace('/(main)/dashboard');
-    }, CHAT_BUBBLES.length * 2000);
-
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(navTimer);
-    };
-  }, []);
+    }
+  }, [intentQuery.isLoading]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing.l }}>
       <Animated.View key={step} entering={FadeInDown.duration(400).springify()} exiting={FadeOutUp.duration(300)}>
         <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 24, fontWeight: '700', color: colorRoles.content.accentMid, textAlign: 'center' }}>
-          {CHAT_BUBBLES[step]}
+          Preparing your financial dashboard...
         </Text>
       </Animated.View>
     </SafeAreaView>

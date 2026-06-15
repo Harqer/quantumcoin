@@ -1,8 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuthenticateWithJWT, useCurrentUser, useEvmAddress, useSendEvmTransaction } from "@coinbase/cdp-hooks";
+import {
+  useAuthenticateWithJWT,
+  useCurrentUser,
+  useEvmAddress,
+  useSendEvmTransaction,
+} from "@coinbase/cdp-hooks";
+import { encodeFunctionData, parseAbi } from "viem";
 import styles from "./page.module.css";
+
+const TOKEN_ABI = parseAbi([
+  "function mint(address to, uint256 amount) external",
+  "function burn(uint256 amount) external",
+]);
 
 export default function MintAndBurn() {
   const { authenticateWithJWT } = useAuthenticateWithJWT();
@@ -25,7 +36,11 @@ export default function MintAndBurn() {
       await authenticateWithJWT();
     } catch (err) {
       console.error("Auth failed", err);
-      setAuthError(err instanceof Error ? err.message : "Failed to authenticate with custom JWT.");
+      setAuthError(
+        err instanceof Error
+          ? err.message
+          : "Failed to authenticate with custom JWT.",
+      );
     } finally {
       setIsAuthenticating(false);
     }
@@ -37,15 +52,20 @@ export default function MintAndBurn() {
       setIsSending(true);
       // Stub for CDP Stablecoin Mint Contract execution
       // Requires the appropriate Contract ABI and Address for the Custom Stablecoin
+      const parsedAmount = BigInt(Math.floor(Number(amount) * 1e6));
       const result = await sendEvmTransaction({
         network: "base-sepolia",
         evmAccount: evmAddress,
         transaction: {
-          to: "0x0000000000000000000000000000000000000000", // TODO: Mint Contract Address
-          data: "0x", // TODO: encodeFunctionData for mint(uint256)
+          to: process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS as `0x${string}`,
+          data: encodeFunctionData({
+            abi: TOKEN_ABI,
+            functionName: "mint",
+            args: [evmAddress, parsedAmount],
+          }),
           value: BigInt(0),
           chainId: 84532, // Base Sepolia
-        }
+        },
       });
       setTxHash(result.transactionHash);
     } catch (error) {
@@ -60,15 +80,20 @@ export default function MintAndBurn() {
     try {
       setIsSending(true);
       // Stub for CDP Stablecoin Burn Contract execution
+      const parsedAmount = BigInt(Math.floor(Number(amount) * 1e6));
       const result = await sendEvmTransaction({
         network: "base-sepolia",
         evmAccount: evmAddress,
         transaction: {
-          to: "0x0000000000000000000000000000000000000000", // TODO: Burn Contract Address
-          data: "0x", // TODO: encodeFunctionData for burn(uint256)
+          to: process.env.NEXT_PUBLIC_BURN_CONTRACT_ADDRESS as `0x${string}`,
+          data: encodeFunctionData({
+            abi: TOKEN_ABI,
+            functionName: "burn",
+            args: [parsedAmount],
+          }),
           value: BigInt(0),
           chainId: 84532, // Base Sepolia
-        }
+        },
       });
       setTxHash(result.transactionHash);
     } catch (error) {
@@ -82,52 +107,64 @@ export default function MintAndBurn() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Mint & Burn Controls</h1>
-        <p className={styles.subtitle}>Execute verified supply operations on the custom stablecoin.</p>
+        <p className={styles.subtitle}>
+          Execute verified supply operations on the custom stablecoin.
+        </p>
       </header>
 
       <main className={styles.main}>
         {!currentUser ? (
           <div className={styles.authCard}>
             <h2>Authorization Required</h2>
-            <p>You must authenticate via Clerk JWT to interact with the CDP Embedded Wallet.</p>
+            <p>
+              You must authenticate via Clerk JWT to interact with the CDP
+              Embedded Wallet.
+            </p>
             {authError && <p className={styles.error}>{authError}</p>}
-            <button 
-              onClick={handleAuth} 
+            <button
+              onClick={handleAuth}
               disabled={isAuthenticating}
               className={styles.primaryButton}
             >
-              {isAuthenticating ? "Authenticating..." : "Authorize Wallet & Session"}
+              {isAuthenticating
+                ? "Authenticating..."
+                : "Authorize Wallet & Session"}
             </button>
             <p className={styles.note}>
-              Ensure you have configured the Clerk JWKS URL in the CDP Portal under Embedded Wallets &gt; Custom Auth.
+              Ensure you have configured the Clerk JWKS URL in the CDP Portal
+              under Embedded Wallets &gt; Custom Auth.
             </p>
           </div>
         ) : (
           <div className={styles.dashboardCard}>
             <div className={styles.walletInfo}>
-              <p><strong>User ID:</strong> {currentUser.userId}</p>
-              <p><strong>EVM Wallet:</strong> {evmAddress || "Provisioning..."}</p>
+              <p>
+                <strong>User ID:</strong> {currentUser.userId}
+              </p>
+              <p>
+                <strong>EVM Wallet:</strong> {evmAddress || "Provisioning..."}
+              </p>
             </div>
 
             <div className={styles.actionSection}>
               <label>Amount (USDC equivalent)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount..."
                 className={styles.input}
               />
-              
+
               <div className={styles.buttonGroup}>
-                <button 
+                <button
                   onClick={handleMint}
                   disabled={!evmAddress || !amount || isSending}
                   className={styles.mintButton}
                 >
                   {isSending ? "Processing..." : "Mint Tokens"}
                 </button>
-                <button 
+                <button
                   onClick={handleBurn}
                   disabled={!evmAddress || !amount || isSending}
                   className={styles.burnButton}

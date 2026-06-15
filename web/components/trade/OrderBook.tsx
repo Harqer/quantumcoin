@@ -8,6 +8,17 @@ type OrderBookLevel = {
   flash?: boolean;
 };
 
+interface OrderBookUpdate {
+  side: string;
+  price_level: string;
+  new_quantity: string;
+}
+
+interface OrderBookEvent {
+  type: string;
+  updates: OrderBookUpdate[];
+}
+
 export default function OrderBook({ productId }: { productId: string }) {
   const [bids, setBids] = useState<OrderBookLevel[]>([]);
   const [asks, setAsks] = useState<OrderBookLevel[]>([]);
@@ -27,19 +38,19 @@ export default function OrderBook({ productId }: { productId: string }) {
       try {
         const data = JSON.parse(event.data);
         if (data.channel === 'level2' && data.events) {
-          data.events.forEach((ev: any) => {
+          data.events.forEach((ev: OrderBookEvent) => {
             if (ev.type === 'snapshot') {
-              const newBids = ev.updates.filter((u: any) => u.side === 'bid').map((u: any) => ({ price: u.price_level, size: u.new_quantity }));
-              const newAsks = ev.updates.filter((u: any) => u.side === 'offer').map((u: any) => ({ price: u.price_level, size: u.new_quantity }));
+              const newBids = ev.updates.filter((u) => u.side === 'bid').map((u) => ({ price: u.price_level, size: u.new_quantity }));
+              const newAsks = ev.updates.filter((u) => u.side === 'offer').map((u) => ({ price: u.price_level, size: u.new_quantity }));
               
               setBids(newBids.slice(0, 15));
               setAsks(newAsks.slice(0, 15));
             } else if (ev.type === 'update') {
-              // Very simple apply updates for a mock
+              // Apply updates using Order Book reconciliation algorithm
               setBids(prev => {
                 let next = [...prev];
-                const bidUpdates = ev.updates.filter((u: any) => u.side === 'bid');
-                bidUpdates.forEach((u: any) => {
+                const bidUpdates = ev.updates.filter((u) => u.side === 'bid');
+                bidUpdates.forEach((u) => {
                   const idx = next.findIndex(b => b.price === u.price_level);
                   if (idx >= 0) {
                     if (parseFloat(u.new_quantity) === 0) next.splice(idx, 1);
@@ -56,8 +67,8 @@ export default function OrderBook({ productId }: { productId: string }) {
 
               setAsks(prev => {
                 let next = [...prev];
-                const askUpdates = ev.updates.filter((u: any) => u.side === 'offer');
-                askUpdates.forEach((u: any) => {
+                const askUpdates = ev.updates.filter((u) => u.side === 'offer');
+                askUpdates.forEach((u) => {
                   const idx = next.findIndex(a => a.price === u.price_level);
                   if (idx >= 0) {
                     if (parseFloat(u.new_quantity) === 0) next.splice(idx, 1);

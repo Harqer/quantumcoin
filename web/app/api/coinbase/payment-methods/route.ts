@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching payment methods:', error);
     return NextResponse.json({ error: 'Failed to fetch payment methods' }, { status: 500 });
   }

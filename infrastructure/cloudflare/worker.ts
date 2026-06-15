@@ -10,7 +10,7 @@ export interface Env {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const clientIp = request.headers.get("CF-Connecting-IP") || "127.0.0.1";
+    const clientIp = request.headers.get("CF-Connecting-IP") || "";
     
     // ==========================================
     // 1. LAYER 1 WAF & RATE LIMITING

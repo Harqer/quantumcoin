@@ -1,1 +1,49 @@
-{"abi":[],"bytecode":{"object":"0x","linkReferences":{}},"deployedBytecode":{"object":"0x","linkReferences":{}},"ast":{"absolutePath":"lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol","id":5882,"exportedSymbols":{"IERC20":[6873]},"nodeType":"SourceUnit","src":"105:77:26","nodes":[{"id":5879,"nodeType":"PragmaDirective","src":"105:25:26","nodes":[],"literals":["solidity",">=","0.4",".16"]},{"id":5881,"nodeType":"ImportDirective","src":"132:49:26","nodes":[],"absolutePath":"lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol","file":"../token/ERC20/IERC20.sol","nameLocation":"-1:-1:-1","scope":5882,"sourceUnit":6874,"symbolAliases":[{"foreign":{"id":5880,"name":"IERC20","nodeType":"Identifier","overloadedDeclarations":[],"referencedDeclaration":6873,"src":"140:6:26","typeDescriptions":{}},"nameLocation":"-1:-1:-1"}],"unitAlias":""}],"license":"MIT"},"id":26}
+{
+  "abi": [],
+  "bytecode": { "object": "0x", "linkReferences": {} },
+  "deployedBytecode": { "object": "0x", "linkReferences": {} },
+  "ast": {
+    "absolutePath": "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol",
+    "id": 1323,
+    "exportedSymbols": { "IERC20": [1404] },
+    "nodeType": "SourceUnit",
+    "src": "105:77:6",
+    "nodes": [
+      {
+        "id": 1320,
+        "nodeType": "PragmaDirective",
+        "src": "105:25:6",
+        "nodes": [],
+        "literals": ["solidity", ">=", "0.4", ".16"]
+      },
+      {
+        "id": 1322,
+        "nodeType": "ImportDirective",
+        "src": "132:49:6",
+        "nodes": [],
+        "absolutePath": "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "file": "../token/ERC20/IERC20.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 1323,
+        "sourceUnit": 1405,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 1321,
+              "name": "IERC20",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 1404,
+              "src": "140:6:6",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 6
+}

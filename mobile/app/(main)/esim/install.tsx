@@ -3,40 +3,33 @@ import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-// Mocking the TapToInstall functionality
-const TapToInstall = {
-  checkESimSupport: async () => {
-    // Simulate 1s compatibility check
-    return new Promise<{value: boolean}>(resolve => setTimeout(() => resolve({value: true}), 1000));
-  },
-  setupESim: async () => {
-    // Simulate 2s installation
-    return new Promise<{value: boolean}>(resolve => setTimeout(() => resolve({value: true}), 2000));
-  }
-};
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function EsimInstall() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isInstalling, setIsInstalling] = useState(false);
   const [isCheckingESimSupport, setIsCheckingESimSupport] = useState(false);
+  
+  const checkSupportMutation = coreTrpc.esim.checkSupport.useMutation();
+  const setupESimMutation = coreTrpc.esim.setup.useMutation();
 
   const handleNext = async () => {
     if (step === 4) {
       setIsCheckingESimSupport(true);
-      const support = await TapToInstall.checkESimSupport();
+      const support = await checkSupportMutation.mutateAsync();
       setIsCheckingESimSupport(false);
       
-      if (!support.value) {
+      if (!support?.value) {
         router.push('/(main)/esim/error?type=support');
         return;
       }
       
       setIsInstalling(true);
-      const setup = await TapToInstall.setupESim();
+      const setup = await setupESimMutation.mutateAsync();
       setIsInstalling(false);
       
-      if (!setup.value) {
+      if (!setup?.value) {
         router.push('/(main)/esim/error?type=install');
       } else {
         router.push('/(main)/esim/success');

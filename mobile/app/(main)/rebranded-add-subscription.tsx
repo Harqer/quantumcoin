@@ -13,10 +13,8 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      router.replace('/(main)/success');
-    }, 1500);
+    setIsSubmitting(false);
+    router.replace('/(main)/success');
   };
 
   return (

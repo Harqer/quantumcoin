@@ -95,12 +95,12 @@ export default function SignUpEmailScreen() {
         try {
           await signUp.createPasskey();
           AudioHapticsManager.success();
+          // 4. Continue the Hermes Psychological Onboarding
+          router.replace('/(auth)/introducing-ai');
         } catch (passkeyErr: any) {
-          console.log("Passkey creation skipped or failed:", passkeyErr);
+          AudioHapticsManager.error();
+          setErrorMsg(passkeyErr.errors?.[0]?.longMessage || passkeyErr.message || "Device attestation failed. A hardware passkey is required.");
         }
-
-        // 4. Continue the Hermes Psychological Onboarding
-        router.replace('/(auth)/introducing-ai');
       } else {
         AudioHapticsManager.error();
         setErrorMsg('Verification failed. Please try again.');

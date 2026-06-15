@@ -1,0 +1,21 @@
+name: Jules AI Code Review
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    name: Jules Codebase Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Jules Review Notice
+        run: |
+          echo "ℹ️  Jules AI review is handled via the Jules GitHub App."
+          echo "   Jules does not have an npm CLI package."
+          echo "   Install the Jules GitHub App at https://jules.google.com"
+          echo "   to enable automated AI code reviews on pull requests."
+          echo ""
+          echo "✅ This step is informational only — not a blocking check."

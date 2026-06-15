@@ -8,7 +8,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import { useSignIn } from '@clerk/clerk-expo';
 import { useDeviceRisk } from '../../hooks/useDeviceRisk';
-import LottieView from 'lottie-react-native';
+import { coreTrpc } from '../../utils/trpc';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
@@ -22,6 +22,8 @@ export default function LoginScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const registerDeviceMutation = coreTrpc.auth.registerDevice.useMutation();
   
   // Rate Limiting / Debounce State
   const lastActionTime = useRef<number>(0);
@@ -47,9 +49,13 @@ export default function LoginScreen() {
       // 2. If successful, set session active and route to dashboard
       if (signInAttempt.status === 'complete') {
         
-        // Fraud Prevention: At this point, we would theoretically send the `deviceSessionId` and `deviceToken` 
+        // Fraud Prevention: Send the `deviceSessionId` and `deviceToken`
         // to our TRPC backend to register this exact device as a trusted session and update push notification tokens.
         console.log(`Device Token Binding: ${deviceToken}, Fingerprint: ${deviceSessionId}`);
+        await registerDeviceMutation.mutateAsync({
+          deviceToken: deviceToken,
+          deviceSessionId: deviceSessionId
+        });
 
         await setActive({ session: signInAttempt.createdSessionId });
         AudioHapticsManager.success();
@@ -106,7 +112,7 @@ export default function LoginScreen() {
             }}
           >
             {isLoading ? (
-              <LottieView source={require('../../assets/loading_animation.json')} autoPlay loop style={{ width: 24, height: 24 }} />
+              <ActivityIndicator color={colorRoles.content.onPrimary} />
             ) : (
               <>
                 <Ionicons name="scan" size={20} color={isRiskEngineReady ? colorRoles.content.onPrimary : colorRoles.content.secondary} style={{ marginRight: spacing.s }} />

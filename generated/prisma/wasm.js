@@ -323,6 +323,57 @@ exports.Prisma.InsightScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.StakingPositionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  poolId: 'poolId',
+  amountStaked: 'amountStaked',
+  earnedRewards: 'earnedRewards',
+  stakedAt: 'stakedAt',
+  unlocksAt: 'unlocksAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TradeOrderScalarFieldEnum = {
+  id: 'id',
+  clientOrderId: 'clientOrderId',
+  productId: 'productId',
+  side: 'side',
+  type: 'type',
+  status: 'status',
+  baseSize: 'baseSize',
+  quoteSize: 'quoteSize',
+  limitPrice: 'limitPrice',
+  filledSize: 'filledSize',
+  averageFilledPrice: 'averageFilledPrice',
+  commission: 'commission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentSessionScalarFieldEnum = {
+  id: 'id',
+  chargeId: 'chargeId',
+  productId: 'productId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TelemetryLogScalarFieldEnum = {
+  id: 'id',
+  commandId: 'commandId',
+  agentId: 'agentId',
+  action: 'action',
+  parameters: 'parameters',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -370,7 +421,11 @@ exports.Prisma.ModelName = {
   PasskeyCredential: 'PasskeyCredential',
   DeviceSession: 'DeviceSession',
   AuditLog: 'AuditLog',
-  Insight: 'Insight'
+  Insight: 'Insight',
+  StakingPosition: 'StakingPosition',
+  TradeOrder: 'TradeOrder',
+  PaymentSession: 'PaymentSession',
+  TelemetryLog: 'TelemetryLog'
 };
 
 /**

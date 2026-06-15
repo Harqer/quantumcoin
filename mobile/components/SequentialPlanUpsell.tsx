@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
+import { coreTrpc } from '../../utils/trpc';
 
 export default function SequentialPlanUpsell() {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
-  const handleNext = () => {
+  const updateIntent = coreTrpc.user.updateIntent.useMutation();
+
+  const handleNext = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      // Simulate subscribing
+      await updateIntent.mutateAsync({ intent: 'subscribed_plus' });
       router.back();
     }
   };
@@ -81,9 +84,10 @@ export default function SequentialPlanUpsell() {
         <TouchableOpacity 
           className="w-full bg-blue-600 p-4 rounded-xl items-center"
           onPress={handleNext}
+          disabled={updateIntent.isPending}
         >
           <Text className="text-white font-bold text-lg">
-            {step === 3 ? "Start Free Trial" : "Continue"}
+            {updateIntent.isPending ? "Upgrading..." : (step === 3 ? "Start Free Trial" : "Continue")}
           </Text>
         </TouchableOpacity>
       </View>

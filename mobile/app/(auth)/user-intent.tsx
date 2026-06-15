@@ -22,6 +22,7 @@ export default function UserIntentReinforcementScreen() {
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   
+  const updateIntentMutation = coreTrpc.user.updateIntent.useMutation();
   useTrackScreen('Auth_UserIntentReinforcementScreen');
 
   const intents = [
@@ -37,10 +38,10 @@ export default function UserIntentReinforcementScreen() {
     setIsUpdating(true);
 
     try {
-      // In a real app, you would call your backend to update Clerk publicMetadata
-      // coreTrpc.user.updateIntent.useMutation(...)
-      // We will simulate the network request
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await updateIntentMutation.mutateAsync({
+        intent: selectedIntent,
+        email: user?.primaryEmailAddress?.emailAddress || ""
+      });
       
       router.push('/(auth)/personalisation');
     } catch (err) {

@@ -20,19 +20,17 @@ export default function OfflineScreen() {
     setIsChecking(true);
     const networkState = await Network.getNetworkStateAsync();
     
-    setTimeout(() => {
-      setIsChecking(false);
-      if (networkState.isConnected) {
-        AudioHapticsManager.success();
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/(main)/dashboard');
-        }
+    setIsChecking(false);
+    if (networkState.isConnected) {
+      AudioHapticsManager.success();
+      if (router.canGoBack()) {
+        router.back();
       } else {
-        AudioHapticsManager.error();
+        router.replace('/(main)/dashboard');
       }
-    }, 1500);
+    } else {
+      AudioHapticsManager.error();
+    }
   };
 
   return (

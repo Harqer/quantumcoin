@@ -57,7 +57,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error listing public products:', error);
     return NextResponse.json({ error: 'Failed to list public products' }, { status: 500 });
   }

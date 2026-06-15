@@ -1,7 +1,10 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://getqubits.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('jwt_token') || 'mock_token';
+  const token = localStorage.getItem('jwt_token');
+  if (!token) {
+    throw new Error('Authentication required: No JWT token found. Please log in.');
+  }
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
@@ -46,11 +49,14 @@ export const apiGetTransactionSummary = () => fetchWithAuth('/api/v3/brokerage/t
 // 6. Agent Bazaar
 export const apiGetBazaarServices = () => fetchWithAuth('/api/bazaar/services');
 export const apiSearchBazaarServices = (query: string) => fetchWithAuth(`/api/bazaar/search?q=${encodeURIComponent(query)}`);
-export const apiRegisterBazaarService = (payload: any) => 
+export const apiRegisterBazaarService = (payload: Record<string, unknown>) => 
   fetchWithAuth('/api/bazaar/register', { method: 'POST', body: JSON.stringify(payload) });
 
 // 7. Quantum ML Jobs (Rust Gateway)
-export const apiSubmitJob = (model_type: string, parameters: any) => 
+export const apiSubmitJob = (model_type: string, parameters: Record<string, unknown>) => 
   fetchWithAuth('/api/v4/quantum/jobs', { method: 'POST', body: JSON.stringify({ model_type, parameters }) });
 export const apiGetJobStatus = (job_id: string) => 
   fetchWithAuth(`/api/v4/quantum/jobs/${job_id}`);
+
+// 8. Earn / Staking
+export const apiGetStakePools = () => fetchWithAuth('/api/v3/earn/pools');

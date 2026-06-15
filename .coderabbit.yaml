@@ -1,0 +1,28 @@
+# CodeRabbit Configuration
+# This file configures the CodeRabbit AI PR reviewer behavior.
+
+version: 2
+language: "en-US"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+  ignore:
+    - "package-lock.json"
+    - "yarn.lock"
+    - "bundle_analysis*.txt"
+    - "**/*.tflite"
+    - "cleo_ai_bin/**"
+    - "generated/**"
+    - "node_modules/**"
+chat:
+  auto_reply: true

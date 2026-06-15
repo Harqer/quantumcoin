@@ -19,7 +19,10 @@ export default function SignUpNameScreen() {
   const [lastName, setLastName] = useState('');
   useTrackScreen('Auth_SignUpNameScreen');
 
-  const isValid = firstName.trim().length > 1 && lastName.trim().length > 1;
+  const nameRegex = /^[a-zA-Z\s\-']{2,50}$/;
+  const isFirstNameValid = nameRegex.test(firstName.trim());
+  const isLastNameValid = nameRegex.test(lastName.trim());
+  const isValid = isFirstNameValid && isLastNameValid;
 
   const handleNext = () => {
     if (isValid) {

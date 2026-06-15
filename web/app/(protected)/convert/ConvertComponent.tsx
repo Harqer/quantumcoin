@@ -3,11 +3,18 @@ import { useState } from "react";
 import { apiGetConvertQuote, apiExecuteTrade } from "@/lib/api";
 import styles from "./page.module.css";
 
+interface ConvertQuote {
+  quote_id: string;
+  exchange_rate: string;
+  amount: string;
+  fee: string;
+}
+
 export default function ConvertComponent() {
   const [fromAsset, setFromAsset] = useState("USD");
   const [toAsset, setToAsset] = useState("BTC");
   const [amount, setAmount] = useState("");
-  const [quote, setQuote] = useState<Record<string, unknown> | null>(null);
+  const [quote, setQuote] = useState<ConvertQuote | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -56,7 +63,13 @@ export default function ConvertComponent() {
             onChange={(e) => setAmount(e.target.value)} 
             placeholder="0.00" 
           />
-          <select value={fromAsset} onChange={(e) => setFromAsset(e.target.value)}>
+          <select value={fromAsset} onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue === toAsset) {
+              setToAsset(fromAsset);
+            }
+            setFromAsset(newValue);
+          }}>
             <option value="USD">USD</option>
             <option value="USDC">USDC</option>
             <option value="BTC">BTC</option>
@@ -76,7 +89,13 @@ export default function ConvertComponent() {
             readOnly 
             placeholder="0.00" 
           />
-          <select value={toAsset} onChange={(e) => setToAsset(e.target.value)}>
+          <select value={toAsset} onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue === fromAsset) {
+              setFromAsset(toAsset);
+            }
+            setToAsset(newValue);
+          }}>
             <option value="BTC">BTC</option>
             <option value="ETH">ETH</option>
             <option value="USDC">USDC</option>

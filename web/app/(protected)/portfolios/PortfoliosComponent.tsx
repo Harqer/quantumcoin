@@ -3,16 +3,32 @@ import { useEffect, useState } from "react";
 import { apiGetPortfolios, apiGetPortfolioBreakdown } from "@/lib/api";
 import styles from "./page.module.css";
 
+interface Portfolio {
+  portfolio_uuid: string;
+  name: string;
+  is_default?: boolean;
+}
+
+interface PortfolioBreakdown {
+  portfolio_uuid: string;
+  portfolio_balances?: {
+    crypto?: string;
+    fiat?: string;
+    futures?: string;
+    perp?: string;
+  };
+}
+
 export default function PortfoliosComponent() {
-  const [portfolios, setPortfolios] = useState<Record<string, any>[]>([]);
-  const [selectedPortfolio, setSelectedPortfolio] = useState<Record<string, any> | null>(null);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<PortfolioBreakdown | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     apiGetPortfolios()
       .then((data) => {
-        setPortfolios(data.portfolios || []);
-        if (data.portfolios && data.portfolios.length > 0) {
+        setPortfolios(data?.portfolios || []);
+        if (data?.portfolios && data.portfolios.length > 0) {
           fetchBreakdown(data.portfolios[0].portfolio_uuid);
         } else {
           setLoading(false);

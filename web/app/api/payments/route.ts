@@ -1,37 +1,51 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { productId, amount, currency } = body;
 
-    // In a real implementation, we would authenticate with CDP API here
-    // using the CDP SDK or standard REST requests.
-    // Example: Create a Payment Session via CDP Payment Acceptance API
-    
-    /*
-    const response = await fetch('https://api.coinbase.com/api/v3/brokerage/payment_sessions', {
+    const response = await fetch('https://api.commerce.coinbase.com/charges', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.CDP_API_KEY}`
+        'X-CC-Api-Key': process.env.CDP_API_KEY || "",
+        'X-CC-Version': '2018-03-22'
       },
       body: JSON.stringify({
-        amount: amount,
-        currency: currency,
-        // other required fields
+        name: 'QuantumCoin Service',
+        description: 'Payment for ' + productId,
+        pricing_type: 'fixed_price',
+        local_price: {
+          amount: amount.toString(),
+          currency: currency
+        }
       })
     });
-    const data = await response.json();
-    */
+    
+    if (!response.ok) {
+      throw new Error(`CDP API Error: ${await response.text()}`);
+    }
 
-    // Mocking the successful creation of a payment session (charge)
-    // The client OnchainKit Checkout component expects a valid charge ID.
-    const mockChargeId = "CHRG_" + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const data = await response.json();
+    const chargeId = data.data.code;
+
+    await prisma.paymentSession.create({
+      data: {
+        chargeId: chargeId,
+        productId: productId || "UNKNOWN",
+        amount: String(amount),
+        currency: currency,
+        status: "pending"
+      }
+    });
 
     return NextResponse.json({
       success: true,
-      chargeId: mockChargeId,
+      chargeId: chargeId,
       message: "Payment session created successfully via CDP"
     });
 

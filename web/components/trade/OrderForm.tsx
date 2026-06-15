@@ -58,9 +58,9 @@ export default function OrderForm() {
       setError(null);
       alert('Order placed successfully!');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       Sentry.captureException(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     }
   });
 

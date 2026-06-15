@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
+const stripePromise = loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
 interface StripeCheckoutComponentProps {
   fetchPaymentSheetParams: () => Promise<{

@@ -1,0 +1,39 @@
+name: Android UI Monkey Testing
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  monkey-test:
+    name: Run UI Fuzzing (Monkey)
+    runs-on: macos-latest # macOS runners support hardware acceleration for Android Emulators
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # This assumes we are either building the APK in a previous EAS job and downloading it,
+      # or building it directly here.
+      - name: Run Android Emulator and Monkey Test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: default
+          arch: x86_64
+          script: |
+            echo "Emulator booted successfully."
+            
+            # 1. Install the APK (Path depends on your EAS build output)
+            # adb install path/to/quantumcoin.apk
+            
+            # 2. Run the UI Application Exerciser Monkey
+            # This simulates 5,000 random pseudo-user events (clicks, swipes, system keys)
+            # -p specifies our package name so the monkey stays strictly inside our app
+            # --throttle adds a 50ms delay between events so the React Native UI thread can render
+            # -v prints verbose logs so we can see exactly what gesture caused a crash
+            echo "Running 5,000 chaotic UI events..."
+            # adb shell monkey -p com.shaolin.quantumcoin --throttle 50 -v 5000

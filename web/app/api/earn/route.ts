@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
 import { StakeRequest, UnstakeRequest, SecureRequestContext, UserStakingPosition } from '@/types/feature_expansion_contracts';
@@ -38,14 +41,7 @@ const earnRequestSchema = z.discriminatedUnion('action', [
   unstakeSchema
 ]);
 
-// Mock PostgreSQL Interface for Strict ACID properties
-const db = {
-  positions: new Map<string, UserStakingPosition>(),
-  auditLogs: [] as any[],
-  async beginTransaction() { return true; },
-  async commit() { return true; },
-  async rollback() { return true; }
-};
+
 
 export async function POST(request: Request) {
   try {
@@ -75,58 +71,65 @@ export async function POST(request: Request) {
     const vaultedUserId = `vault_${crypto.randomUUID()}`;
 
     // Database Optimization: ACID Transaction Boundary
-    await db.beginTransaction();
-    
     let result;
-    if (action === 'stake') {
-      const p = payload as StakeRequest;
-      
-      // Yield computation offloading: Send event to Kafka for YieldEngine worker
-      Sentry.captureMessage(`Publishing Staking event to Kafka for pool ${p.poolId}`, {
-        level: "info",
-        extra: { 
-          eventCategory: 'STAKING_ACID_TX', 
-          poolId: p.poolId, 
-          amount: p.amount,
-          vaultedUserId 
+    await prisma.$transaction(async (tx) => {
+      if (action === 'stake') {
+        const p = payload as StakeRequest;
+        
+        // Yield computation offloading: Send event to Kafka for YieldEngine worker
+        Sentry.captureMessage(`Publishing Staking event to Kafka for pool ${p.poolId}`, {
+          level: "info",
+          extra: { 
+            eventCategory: 'STAKING_ACID_TX', 
+            poolId: p.poolId, 
+            amount: p.amount,
+            vaultedUserId 
+          }
+        });
+
+        const unlocksAt = new Date(Date.now() + 86400 * 30 * 1000); // 30 days lockup
+
+        result = await tx.stakingPosition.create({
+          data: {
+            userId: p.userId,
+            poolId: p.poolId,
+            amountStaked: p.amount,
+            earnedRewards: "0",
+            unlocksAt: unlocksAt
+          }
+        });
+        
+      } else {
+        const p = payload as UnstakeRequest;
+        const position = await tx.stakingPosition.findUnique({
+          where: { id: p.positionId }
+        });
+        
+        if (!position) {
+          throw new Error("Staking position not found");
+        }
+
+        const newAmount = parseFloat(position.amountStaked) - parseFloat(p.amount);
+        result = await tx.stakingPosition.update({
+          where: { id: p.positionId },
+          data: { amountStaked: newAmount.toString() }
+        });
+      }
+
+      // Immutable Audit Log entry for SOC2
+      await tx.auditLog.create({
+        data: {
+          requestId: crypto.randomUUID(),
+          action,
+          metadata: { payload, context: { ...context, piiVaulted: true } },
+          userId: context.userId
         }
       });
-
-      result = {
-        positionId: crypto.randomUUID(),
-        userId: p.userId,
-        poolId: p.poolId,
-        amountStaked: p.amount,
-        earnedRewards: "0",
-        stakedAt: Date.now(),
-        unlocksAt: Date.now() + 86400 * 30 * 1000 // Mock: 30 days lockup
-      } as UserStakingPosition;
-      
-      db.positions.set(result.positionId, result);
-    } else {
-      const p = payload as UnstakeRequest;
-      if (!db.positions.has(p.positionId)) {
-        throw new Error("Staking position not found");
-      }
-      const position = db.positions.get(p.positionId)!;
-      result = { ...position, amountStaked: (parseFloat(position.amountStaked) - parseFloat(p.amount)).toString() };
-      db.positions.set(p.positionId, result);
-    }
-
-    // Immutable Audit Log entry for SOC2
-    db.auditLogs.push({ 
-      action, 
-      payload, 
-      context: { ...context, piiVaulted: true }, 
-      timestamp: Date.now() 
     });
-
-    await db.commit();
 
     return NextResponse.json({ success: true, data: result }, { status: 200 });
 
-  } catch (error: any) {
-    await db.rollback();
+  } catch (error: unknown) {
     
     Sentry.captureException(error, {
       extra: {
@@ -134,6 +137,7 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

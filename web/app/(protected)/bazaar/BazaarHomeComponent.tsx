@@ -17,7 +17,7 @@ export default function BazaarHomeComponent() {
     setLoading(true);
     try {
       const data = await apiGetBazaarServices();
-      setServices(data.services || []);
+      setServices(data?.services || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -34,7 +34,7 @@ export default function BazaarHomeComponent() {
     setLoading(true);
     try {
       const data = await apiSearchBazaarServices(searchQuery);
-      setServices(data.services || []);
+      setServices(data?.services || []);
     } catch (err) {
       console.error(err);
     } finally {

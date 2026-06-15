@@ -12,6 +12,8 @@ export default function WaitlistEmailScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const [email, setEmail] = useState('');
 
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const handleNext = () => {
     AudioHapticsManager.success();
     router.push('/(auth)/waitlist/confirmation');
@@ -50,17 +52,17 @@ export default function WaitlistEmailScreen() {
 
           <PressableScale 
             haptics="heavy" 
-            disabled={!email.includes('@')}
+            disabled={!isValidEmail}
             onPress={handleNext} 
             style={{ 
-              backgroundColor: email.includes('@') ? colorRoles.content.accentMid : colorRoles.background.baseLight, 
+              backgroundColor: isValidEmail ? colorRoles.content.accentMid : colorRoles.background.baseLight, 
               paddingVertical: spacing.l, 
               borderRadius: 999, 
               alignItems: 'center' 
             }}
           >
             <Text style={{ 
-              color: email.includes('@') ? colorRoles.content.onPrimary : colorRoles.content.secondary, 
+              color: isValidEmail ? colorRoles.content.onPrimary : colorRoles.content.secondary, 
               fontFamily: typography.bodyLarge.fontFamily, 
               fontSize: 18, 
               fontWeight: '800' 

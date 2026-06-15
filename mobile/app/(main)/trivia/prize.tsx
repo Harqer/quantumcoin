@@ -15,13 +15,9 @@ export default function TriviaPrizeRevealScreen() {
   const [prizeAmount, setPrizeAmount] = useState(0);
 
   useEffect(() => {
-    // Simulate prize draw lobby loading (TriviaPrizeDrawLobbyScreen logic)
-    const timer = setTimeout(() => {
-      setPrizeAmount(Math.floor(Math.random() * 10) + 1); // Random prize between $1 and $10
-      setIsRevealed(true);
-      AudioHapticsManager.success();
-    }, 2500);
-    return () => clearTimeout(timer);
+    setPrizeAmount(Math.floor(Math.random() * 10) + 1); // Random prize between $1 and $10
+    setIsRevealed(true);
+    AudioHapticsManager.success();
   }, []);
 
   const handleClaim = () => {

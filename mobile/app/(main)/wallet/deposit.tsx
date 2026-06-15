@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput } from 'react-native';
+import { View, Text, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
 import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function WalletDepositScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
   const [amount, setAmount] = useState('0');
+  
+  const depositMutation = coreTrpc.wallet.deposit.useMutation();
+
+  const handleDeposit = async () => {
+    const amountStr = amount === '0' ? '' : amount;
+    const currencyRegex = /^\\d+(\\.\\d{1,2})?$/;
+    if (!amountStr || !currencyRegex.test(amountStr) || Number(amountStr) <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid currency amount (e.g. 10.50).');
+      return;
+    }
+
+    try {
+      await depositMutation.mutateAsync({ amount: Number(amountStr) });
+      AudioHapticsManager.success();
+      router.back();
+    } catch (e) {
+      Alert.alert('Error', 'Failed to initiate deposit. Please try again.');
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['bottom', 'top']}>
@@ -28,11 +48,11 @@ export default function WalletDepositScreen() {
           </Text>
         </View>
 
-        {/* Mock Keypad or just direct input */}
+        {/* Direct numerical input */}
         <View style={{ backgroundColor: colorRoles.background.secondary, borderRadius: 16, padding: spacing.l, marginBottom: spacing.xl }}>
            <TextInput
              style={{ fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary, textAlign: 'center' }}
-             keyboardType="numeric"
+             keyboardType="decimal-pad"
              placeholder="Enter amount"
              placeholderTextColor={colorRoles.content.secondary}
              value={amount === '0' ? '' : amount}
@@ -45,20 +65,21 @@ export default function WalletDepositScreen() {
         <Animated.View entering={FadeInDown.delay(100).springify()}>
           <PressableScale
             haptics="medium"
-            onPress={() => {
-              AudioHapticsManager.success();
-              router.back();
-            }}
+            onPress={handleDeposit}
+            disabled={depositMutation.isPending}
             style={{
-              backgroundColor: colorRoles.content.accentMid,
+              backgroundColor: depositMutation.isPending ? colorRoles.background.disabled : colorRoles.content.accentMid,
               paddingVertical: spacing.l,
               borderRadius: 999,
               alignItems: 'center',
-              marginBottom: spacing.m
+              marginBottom: spacing.m,
+              flexDirection: 'row',
+              justifyContent: 'center'
             }}
           >
+            {depositMutation.isPending && <ActivityIndicator color={colorRoles.content.onPrimary} style={{ marginRight: spacing.s }} />}
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
-              Initiate Transfer
+              {depositMutation.isPending ? 'Initiating...' : 'Initiate Transfer'}
             </Text>
           </PressableScale>
         </Animated.View>

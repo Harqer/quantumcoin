@@ -8,6 +8,18 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IQuantumValidator.sol";
 import "./interfaces/IPQCSignature.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+
+interface INttManager {
+    function transfer(
+        uint256 amount,
+        uint16 recipientChain,
+        bytes32 recipient,
+        uint256 fee,
+        bytes memory extraData
+    ) external returns (uint64 sequence);
+}
 
 /**
  * @title QLinkBridge
@@ -77,6 +89,9 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
     // QKD session key => expiry timestamp
     mapping(bytes32 => uint256) public qkdSessionExpiry;
     
+    // Wormhole NTT Manager
+    INttManager public nttManager;
+    
     // PQC Signature verifier contract
     IPQCSignature public pqcVerifier;
     
@@ -86,7 +101,11 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
     uint256 public constant MIN_VALIDATORS = 3;
     uint256 public constant PROOF_THRESHOLD = 2; // Multi-sig threshold
     uint256 public constant QKD_SESSION_DURATION = 1 hours;
+    uint256 public constant MIN_CHSH_SCORE = 200; // CHSH > 2.0 (precision 2 decimals)
     uint256 public validatorCount;
+    
+    // Rust backend signer for CHSH verification
+    address public backendSigner;
     
     // ============ Events ============
     
@@ -130,6 +149,9 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
     error TransferAlreadyExecuted(bytes32 transferId);
     error ValidatorNotAuthorized(address validator);
     error ProofAlreadySubmitted(bytes32 transferId, uint256 validatorId);
+    error InvalidCHSHProof();
+    error CHSHScoreTooLow();
+    error InvalidSigner();
     
     // ============ Modifiers ============
     
@@ -156,9 +178,10 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
 
     // ============ Constructor ============
     
-    constructor(address _pqcVerifier, address _quantumValidator) Ownable(msg.sender) ReentrancyGuard() {
+    constructor(address _pqcVerifier, address _quantumValidator, address _nttManager) Ownable(msg.sender) ReentrancyGuard() {
         pqcVerifier = IPQCSignature(_pqcVerifier);
         quantumValidator = IQuantumValidator(_quantumValidator);
+        nttManager = INttManager(_nttManager);
     }
 
     // ============ External Functions ============
@@ -192,10 +215,7 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
             block.prevrandao // Use PoS randomness
         ));
         
-        // Lock tokens
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        
-        // Record transfer
+        // Record transfer FIRST (Checks-Effects-Interactions)
         transfers[transferId] = TransferRequest({
             transferId: transferId,
             sourceToken: token,
@@ -208,6 +228,9 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
             timestamp: block.timestamp,
             executed: false
         });
+
+        // Lock tokens LAST
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
         
         emit TransferInitiated(
             transferId,
@@ -273,10 +296,18 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
     }
     
     /**
-     * @notice Execute transfer after sufficient proofs
+     * @notice Execute transfer after sufficient proofs and CHSH certification
      * @param transferId Transfer to execute
+     * @param destToken Token to release to recipient on this chain
+     * @param chshScore The CHSH score scaled by 100 (e.g., 201 = 2.01, after Mitiq ZNE mitigation)
+     * @param backendSignature ECDSA signature from the Rust backend proving CHSH > 2.0
      */
-    function executeTransfer(bytes32 transferId) external nonReentrant {
+    function executeTransfer(
+        bytes32 transferId,
+        address destToken,
+        uint256 chshScore,
+        bytes calldata backendSignature
+    ) external nonReentrant validToken(destToken) {
         TransferRequest storage transfer = transfers[transferId];
         
         if (transfer.executed) {
@@ -286,11 +317,34 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
         if (proofCount[transferId] < PROOF_THRESHOLD) {
             revert InsufficientProofs(transferId);
         }
+
+        if (chshScore <= MIN_CHSH_SCORE) {
+            revert CHSHScoreTooLow();
+        }
+        
+        // Verify backend signature (CHSH certification)
+        bytes32 messageHash = keccak256(abi.encodePacked(transferId, destToken, chshScore));
+        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(messageHash);
+        
+        address recoveredSigner = ECDSA.recover(ethSignedMessageHash, backendSignature);
+        if (recoveredSigner != backendSigner || backendSigner == address(0)) {
+            revert InvalidCHSHProof();
+        }
         
         transfer.executed = true;
+        transfer.destToken = destToken;
         
-        // In production: mint wrapped tokens or release from liquidity pool
-        // For now: emit event for off-chain handler
+        // Classical Deployment: Execute via Wormhole NTT
+        // Transfer payload is natively wrapped to the destination chain
+        IERC20(destToken).approve(address(nttManager), transfer.amount);
+        nttManager.transfer(
+            transfer.amount,
+            uint16(transfer.destChainId), // Wormhole chain ID
+            bytes32(uint256(uint160(transfer.recipient))), // recipient
+            0, // fee
+            "" // extraData
+        );
+        
         emit TransferExecuted(
             transferId,
             transfer.recipient,
@@ -359,6 +413,15 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
         quantumValidator = IQuantumValidator(_quantumValidator);
     }
 
+    function setNttManager(address _nttManager) external onlyOwner {
+        nttManager = INttManager(_nttManager);
+    }
+
+    function setBackendSigner(address _signer) external onlyOwner {
+        if (_signer == address(0)) revert InvalidSigner();
+        backendSigner = _signer;
+    }
+
     // ============ View Functions ============
     
     function getValidatorId(address validator) public view returns (uint256) {
@@ -373,7 +436,7 @@ contract QLinkBridge is ReentrancyGuard, Ownable {
     function getTransferStatus(bytes32 transferId) external view returns (
         bool exists,
         bool executed,
-        uint256 proofs,
+        uint256 _proofCount,
         uint256 required
     ) {
         TransferRequest storage t = transfers[transferId];

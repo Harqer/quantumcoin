@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import PinwheelLogin from '@pinwheel/react-native-pinwheel';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
+import { coreTrpc } from '../../utils/trpc';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function PinwheelScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
@@ -12,20 +14,21 @@ export default function PinwheelScreen() {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const { user } = useUser();
+  const createTokenMutation = coreTrpc.payroll.createLinkToken.useMutation();
+
   useEffect(() => {
-    // In production, this fetches a real token from the backend `GET /api/v1/pinwheel/link`
     const fetchLinkToken = async () => {
+      if (!user?.id) return;
       try {
-        // Simulated fetch
-        setTimeout(() => {
-          setLinkToken("pat_sandbox_VIfK63x8aW35hB5r52J1aC255c2h1mB");
-        }, 1000);
+        const res = await createTokenMutation.mutateAsync({ userId: user.id });
+        setLinkToken(res.token);
       } catch (err) {
         setErrorMsg('Failed to load Pinwheel. Please try again later.');
       }
     };
     fetchLinkToken();
-  }, []);
+  }, [user?.id]);
 
   const onSuccess = (result: any) => {
     console.log("Pinwheel Success:", result);

@@ -10,7 +10,7 @@ import "./interfaces/IQuantumValidator.sol";
 
 /**
  * @title WrappedQuantumCoin (wqQBC)
- * @notice A completely compliant ERC20Wrapper that securely wraps QubitCoin.
+ * @notice A completely compliant ERC20Wrapper that securely wraps QBitcoin.
  * @dev Enforces strict hardware-backed Device-Independent QKD (DI-QKD) for all transfers.
  * Integrates with Coinbase Smart Accounts and Paymasters via ERC2771Context.
  */
@@ -31,7 +31,7 @@ contract WrappedQuantumCoin is
     /**
      * @notice Initializes the wrapper contract
      * @param initialOwner Owner address
-     * @param underlyingToken The base QubitCoin (QBC) token address
+     * @param underlyingToken The base QBitcoin (QBC) token address
      * @param _quantumValidator The QuantumValidator contract address
      */
     function initialize(
@@ -100,15 +100,16 @@ contract WrappedQuantumCoin is
         internal
         override(ERC20Upgradeable)
     {
-        // Enforce strict DI-QKD check on transfers (exclude mints/deposits and burns/withdrawals)
-        if (from != address(0) && to != address(0)) {
-            // Check that the physical caller (msg.sender - i.e., the relayer/validator executing the meta-tx)
-            // has an active hardware-backed DI-QKD session or a fallback PQC session.
-            (bool hasActive, , IQuantumValidator.SessionType sessionType) = quantumValidator.hasActiveQKD(msg.sender);
-            require(hasActive, "Strict Quantum Enforcement: Relayer lacks active quantum session");
+        // Enforce strict QKD/PQC check ONLY on cross-chain bridge actions (minting or burning)
+        // Peer-to-peer (P2P) transfers rely on standard consensus/PQC wallets and DO NOT require QKD.
+        if (from == address(0) || to == address(0)) {
+            // The caller (Bridge Validator) must have an active QKD or PQC session
+            (bool hasActive, , IQuantumValidator.SessionType sessionType) = quantumValidator.hasActiveQKD(_msgSender());
+            require(hasActive, "Strict Quantum Enforcement: Bridge Validator lacks active quantum session");
             require(
-                sessionType == IQuantumValidator.SessionType.DI_QKD || sessionType == IQuantumValidator.SessionType.PQC, 
-                "Strict Quantum Enforcement: Invalid session type"
+                sessionType == IQuantumValidator.SessionType.DI_QKD || 
+                sessionType == IQuantumValidator.SessionType.PQC, 
+                "Strict Quantum Enforcement: Invalid Bridge session type"
             );
         }
         

@@ -1,30 +1,70 @@
 // @ts-nocheck
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { z } from 'zod';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import { useTrackScreen } from '../../hooks/useTelemetry';
 import { KYCDrawer } from '../../components/KYCDrawers';
+import { coreTrpc } from '../../utils/trpc';
+import { useUser } from '@clerk/clerk-expo';
+
+const kycSchema = z.object({
+  firstName: z.string().min(2, 'First name is required'),
+  lastName: z.string().min(2, 'Last name is required'),
+  dob: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Invalid DOB format (MM/DD/YYYY)'),
+  address: z.string().min(5, 'Address is required')
+});
 
 export default function EarlyKYCDetailsScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
   useTrackScreen('EarlyKYCDetailsScreen');
   const router = useRouter();
+  const { user } = useUser();
+  const verifyIdentity = coreTrpc.kyc.verifyIdentity.useMutation();
 
   const [drawerType, setDrawerType] = useState<'firstName' | 'lastName' | 'dob' | 'address' | null>(null);
   
-  const [firstName, setFirstName] = useState('Missing');
-  const [lastName, setLastName] = useState('Missing');
-  const [dob, setDob] = useState('Missing');
-  const [address, setAddress] = useState('Missing');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    dob: '',
+    address: ''
+  });
 
-  const handleSubmit = () => {
-    router.replace('/(main)/dashboard');
+  const updateField = (field: keyof typeof formData) => (value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const isComplete = firstName !== 'Missing' && lastName !== 'Missing' && dob !== 'Missing' && address !== 'Missing';
+  const handleSubmit = async () => {
+    const result = kycSchema.safeParse(formData);
+    if (!result.success) {
+      Alert.alert('Validation Error', result.error.errors[0].message);
+      return;
+    }
+    try {
+      await verifyIdentity.mutateAsync({
+        userId: user?.id || "",
+        deviceSessionId: crypto.randomUUID(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dob: formData.dob,
+        email: user?.primaryEmailAddress?.emailAddress || "",
+        phoneNumber: user?.primaryPhoneNumber?.phoneNumber || "",
+        address: { street: formData.address, city: "", state: "", zip: "" }
+      });
+      router.replace('/(main)/dashboard');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to verify identity');
+    }
+  };
+
+  const isComplete = formData.firstName.trim() !== '' && 
+                     formData.lastName.trim() !== '' && 
+                     formData.dob.trim() !== '' && 
+                     formData.address.trim() !== '';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
@@ -36,9 +76,16 @@ export default function EarlyKYCDetailsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Mock Steps Progress Bar */}
+      {/* Dynamic Progress Bar */}
       <View style={{ height: 4, flexDirection: 'row', backgroundColor: colorRoles.background.surface }}>
-        <View style={{ flex: 0.5, backgroundColor: colorRoles.brand.primary }} />
+        <View style={{ 
+          flex: isComplete ? 1 : 
+            ((formData.firstName ? 0.25 : 0) + 
+             (formData.lastName ? 0.25 : 0) + 
+             (formData.dob ? 0.25 : 0) + 
+             (formData.address ? 0.25 : 0)) || 0.1, 
+          backgroundColor: colorRoles.brand.primary 
+        }} />
       </View>
 
       {/* Padlock Banner */}
@@ -55,7 +102,7 @@ export default function EarlyKYCDetailsScreen() {
         <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('firstName')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>First Name</Text>
-            <Text style={[typography.bodyLarge, { color: firstName === 'Missing' ? colorRoles.status.error : colorRoles.content.primary }]}>{firstName}</Text>
+            <Text style={[typography.bodyLarge, { color: !formData.firstName ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.firstName || 'Missing'}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
@@ -63,7 +110,7 @@ export default function EarlyKYCDetailsScreen() {
         <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('lastName')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Last Name</Text>
-            <Text style={[typography.bodyLarge, { color: lastName === 'Missing' ? colorRoles.status.error : colorRoles.content.primary }]}>{lastName}</Text>
+            <Text style={[typography.bodyLarge, { color: !formData.lastName ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.lastName || 'Missing'}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
@@ -71,7 +118,7 @@ export default function EarlyKYCDetailsScreen() {
         <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('dob')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Date of Birth</Text>
-            <Text style={[typography.bodyLarge, { color: dob === 'Missing' ? colorRoles.status.error : colorRoles.content.primary }]}>{dob}</Text>
+            <Text style={[typography.bodyLarge, { color: !formData.dob ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.dob || 'Missing'}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
@@ -79,7 +126,7 @@ export default function EarlyKYCDetailsScreen() {
         <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('address')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Home Address</Text>
-            <Text style={[typography.bodyLarge, { color: address === 'Missing' ? colorRoles.status.error : colorRoles.content.primary }]}>{address}</Text>
+            <Text style={[typography.bodyLarge, { color: !formData.address ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.address || 'Missing'}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
@@ -98,21 +145,21 @@ export default function EarlyKYCDetailsScreen() {
       <KYCDrawer
         visible={drawerType === 'firstName'}
         onClose={() => setDrawerType(null)}
-        onSave={setFirstName}
+        onSave={updateField('firstName')}
         title="First Name"
         placeholder="Legal First Name"
       />
       <KYCDrawer
         visible={drawerType === 'lastName'}
         onClose={() => setDrawerType(null)}
-        onSave={setLastName}
+        onSave={updateField('lastName')}
         title="Last Name"
         placeholder="Legal Last Name"
       />
       <KYCDrawer
         visible={drawerType === 'dob'}
         onClose={() => setDrawerType(null)}
-        onSave={setDob}
+        onSave={updateField('dob')}
         title="Date of Birth"
         placeholder="MM/DD/YYYY"
         keyboardType="numeric"
@@ -120,7 +167,7 @@ export default function EarlyKYCDetailsScreen() {
       <KYCDrawer
         visible={drawerType === 'address'}
         onClose={() => setDrawerType(null)}
-        onSave={setAddress}
+        onSave={updateField('address')}
         title="Edit Address"
         placeholder="123 Main St"
       />

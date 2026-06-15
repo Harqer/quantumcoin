@@ -2,15 +2,14 @@ import { NextResponse } from 'next/server';
 import { AgentKit, CdpWalletProvider, wethActionProvider, walletActionProvider, erc20ActionProvider, cdpApiActionProvider, cdpWalletActionProvider, pythActionProvider } from "@coinbase/agentkit";
 import { getOnchainTools } from "@coinbase/agentkit-vercel-ai-sdk";
 import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import fs from "fs";
-import path from "path";
+import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
-
-const WALLET_DATA_FILE = path.join(process.cwd(), "agent_wallet_data.txt");
 
 export async function POST(req: Request) {
   try {
@@ -29,28 +28,38 @@ export async function POST(req: Request) {
       );
     }
 
-    // Read existing wallet data if available to maintain state
+    // Read existing wallet data if available to maintain state from Prisma
     let cdpWalletData: string | undefined = undefined;
-    if (fs.existsSync(WALLET_DATA_FILE)) {
-      try {
-        cdpWalletData = fs.readFileSync(WALLET_DATA_FILE, "utf8");
-      } catch (e) {
-        console.error("Failed to read wallet data:", e);
-      }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
+    if (user?.preferences && typeof user.preferences === 'object') {
+      cdpWalletData = (user.preferences as any).cdpWalletData;
     }
 
     // Initialize AgentKit with CDP Wallet Provider
     const walletProvider = await CdpWalletProvider.configureWithWallet({
       apiKeyName: process.env.CDP_API_KEY_NAME,
       apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(/\\n/g, "\n"),
-      networkId: process.env.NETWORK_ID || "base-sepolia",
+      networkId: process.env.NETWORK_ID || "base-mainnet",
       cdpWalletData,
     });
 
-    // Securely persist wallet data for future requests (Mocking DB persistence)
+    // Securely persist wallet data for future requests using Prisma
     try {
       const exportedWallet = await walletProvider.exportWallet();
-      fs.writeFileSync(WALLET_DATA_FILE, typeof exportedWallet === 'string' ? exportedWallet : JSON.stringify(exportedWallet));
+      const walletString = typeof exportedWallet === 'string' ? exportedWallet : JSON.stringify(exportedWallet);
+      
+      const currentPreferences = typeof user?.preferences === 'object' && user?.preferences !== null ? user.preferences : {};
+      
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          preferences: {
+            ...currentPreferences,
+            cdpWalletData: walletString
+          }
+        }
+      });
     } catch (e) {
       console.error("Failed to persist wallet data:", e);
     }
@@ -79,7 +88,7 @@ export async function POST(req: Request) {
 
     // Optimize streaming and add multi-step execution to allow the agent to use tools and then respond
     const result = streamText({
-      model: openai("gpt-4o-mini"),
+      model: google("gemini-2.5-pro"),
       system: "You are a helpful Quantum Intelligence Wallet assistant for Quantum Coin (QTC). You help users manage funds, perform trades, and interact with the quantum anchor. Use the provided tools to interact with the Coinbase Developer Platform (CDP). Note that Quantum Coin architecture uses Coinbase Advanced Trade for execution and Wormhole/Alchemy for cross-chain liquidity routing. Treat 'QTC' as the native token. Always prioritize secure, efficient, and well-logged execution.",
       messages,
       tools,
@@ -87,7 +96,7 @@ export async function POST(req: Request) {
     });
 
     return result.toDataStreamResponse();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Secure error log - agentic wallet chat route:", error);
     // Do not leak sensitive backend errors to the client
     return NextResponse.json(

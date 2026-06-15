@@ -7,10 +7,12 @@ import PressableScale from '../../../components/PressableScale';
 import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { coreTrpc } from '../../../utils/trpc';
 
 export default function SubscriptionCancellationDiscountScreen() {
   const router = useRouter();
   const { colorRoles, typography, spacing } = useGlobalTheme();
+  const updateIntent = coreTrpc.user.updateIntent.useMutation();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['bottom']}>
@@ -47,7 +49,7 @@ export default function SubscriptionCancellationDiscountScreen() {
         <Animated.View entering={FadeInDown.delay(200).springify()}>
           <PressableScale 
             haptics="heavy" 
-            onPress={() => { AudioHapticsManager.success(); router.push('/(main)/wallet'); }} 
+            onPress={async () => { AudioHapticsManager.success(); await updateIntent.mutateAsync({ intent: 'claim_50_discount' }); router.push('/(main)/wallet'); }} 
             style={{ 
               backgroundColor: '#10B981', 
               paddingVertical: spacing.l, 

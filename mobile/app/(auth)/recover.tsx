@@ -1,100 +1,102 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { coreTrpc } from '../../utils/trpc';
+import { useGlobalTheme } from '../../hooks/useGlobalTheme';
+import { get as passkeyGet } from 'react-native-passkeys';
 
 export default function AccountRecoveryUpdateEmailScreen() {
   const router = useRouter();
+  const { colorRoles, typography, spacing } = useGlobalTheme();
   const [oldEmail, setOldEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [ssn, setSsn] = useState('');
-  const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
+
+  const recoverMutation = coreTrpc.auth.recover.useMutation();
+  const challengeQuery = coreTrpc.auth.getPasskeyChallenge.useQuery(undefined, { enabled: false });
 
   const handlePasskeyRecovery = async () => {
-    setIsPasskeyLoading(true);
+    if (!oldEmail) {
+      Alert.alert('Error', 'Please enter your old email first.');
+      return;
+    }
     try {
-      if (!oldEmail) {
-        Alert.alert('Error', 'Please enter your old email first.');
-        setIsPasskeyLoading(false);
+      const { data } = await challengeQuery.refetch();
+      const challenge = data?.challenge;
+      if (!challenge) {
+        Alert.alert('Error', 'Failed to fetch device passkey challenge.');
         return;
       }
-      
-      // 1. Request Challenge
-      const challengeRes = await fetch('https://api.quantumcoin.com/api/v1/auth/passkey/challenge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: oldEmail })
+
+      const assertion = await passkeyGet({
+        challenge,
+        rpId: 'quantumcoin.com',
       });
-      const challengeData = await challengeRes.json();
-      
-      // 2. Call native WebAuthn/Passkey module using the challenge
-      // const credential = await Passkey.authenticate(challengeData);
-      
-      // 3. Verify
-      const verifyRes = await fetch('https://api.quantumcoin.com/api/v1/auth/passkey/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: oldEmail,
-          // credential_id: credential.id,
-          // client_data_json: credential.response.clientDataJSON,
-          // authenticator_data: credential.response.authenticatorData,
-          // signature: credential.response.signature
-        })
+
+      await recoverMutation.mutateAsync({
+        email: oldEmail,
+        credential_id: assertion.id,
+        client_data_json: assertion.response.clientDataJSON,
+        authenticator_data: assertion.response.authenticatorData,
+        signature: assertion.response.signature
       });
-      const verifyData = await verifyRes.json();
       
-      if (verifyData.verified) {
-        Alert.alert('Passkey Verified', 'Device attestation successful. You can now update your email.', [
-          { text: 'Continue' }
-        ]);
-      } else {
-        Alert.alert('Error', 'Passkey verification failed.');
-      }
+      Alert.alert('Passkey Verified', 'Device attestation successful. You can now update your email.', [
+        { text: 'Continue' }
+      ]);
     } catch (error) {
       Alert.alert('Error', 'Failed to connect to the authentication server.');
-    } finally {
-      setIsPasskeyLoading(false);
     }
   };
 
-  const handleRecover = () => {
+  const handleRecover = async () => {
     if (!oldEmail || !newEmail || !ssn) {
       Alert.alert('Error', 'Please fill out all fields to recover your account.');
       return;
     }
-    // Implement API call to backend recovery endpoint
-    Alert.alert('Success', 'Recovery request submitted. Please check your new email.');
-    router.replace('/(auth)/login');
+    
+    try {
+      await recoverMutation.mutateAsync({
+        oldEmail,
+        newEmail,
+        ssn
+      });
+      Alert.alert('Success', 'Recovery request submitted. Please check your new email.');
+      router.replace('/(auth)/login');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit recovery request.');
+    }
   };
 
   return (
-    <View className="flex-1 bg-white p-6 justify-center">
-      <Text className="text-3xl font-bold text-gray-900 mb-6">Recover Account</Text>
+    <View style={{ flex: 1, backgroundColor: colorRoles.background.primary, padding: spacing.xl, justifyContent: 'center' }}>
+      <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, fontWeight: '700', color: colorRoles.content.primary, marginBottom: spacing.l }}>Recover Account</Text>
       
-      <Text className="text-gray-600 mb-6">
+      <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
         If you lost access to your old email, you can verify your identity using your device's secure Passkey or your SSN.
       </Text>
 
       <TouchableOpacity 
-        className="w-full bg-black p-4 rounded-xl items-center flex-row justify-center mb-8"
+        style={{ width: '100%', backgroundColor: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.xxl }}
         onPress={handlePasskeyRecovery}
-        disabled={isPasskeyLoading}
+        disabled={recoverMutation.isPending}
       >
-        {isPasskeyLoading && <ActivityIndicator color="white" className="mr-2" />}
-        <Text className="text-white font-bold text-lg">Use Device Passkey (Face ID / Touch ID)</Text>
+        {recoverMutation.isPending && <ActivityIndicator color={colorRoles.content.onPrimary} style={{ marginRight: spacing.s }} />}
+        <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>Use Device Passkey (Face ID / Touch ID)</Text>
       </TouchableOpacity>
 
-      <View className="flex-row items-center mb-8">
-        <View className="flex-1 h-px bg-gray-200" />
-        <Text className="px-4 text-gray-500 font-medium">OR USE MANUAL RECOVERY</Text>
-        <View className="flex-1 h-px bg-gray-200" />
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xxl }}>
+        <View style={{ flex: 1, height: 1, backgroundColor: colorRoles.border.default }} />
+        <Text style={{ paddingHorizontal: spacing.m, color: colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500' }}>OR USE MANUAL RECOVERY</Text>
+        <View style={{ flex: 1, height: 1, backgroundColor: colorRoles.border.default }} />
       </View>
 
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-gray-700 mb-1">Old Email</Text>
+      <View style={{ marginBottom: spacing.m }}>
+        <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>Old Email</Text>
         <TextInput
-          className="w-full bg-gray-100 p-4 rounded-xl border border-gray-200"
+          style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="Enter old email"
+          placeholderTextColor={colorRoles.content.secondary}
           value={oldEmail}
           onChangeText={setOldEmail}
           keyboardType="email-address"
@@ -102,11 +104,12 @@ export default function AccountRecoveryUpdateEmailScreen() {
         />
       </View>
 
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-gray-700 mb-1">New Email</Text>
+      <View style={{ marginBottom: spacing.m }}>
+        <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>New Email</Text>
         <TextInput
-          className="w-full bg-gray-100 p-4 rounded-xl border border-gray-200"
+          style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="Enter new email"
+          placeholderTextColor={colorRoles.content.secondary}
           value={newEmail}
           onChangeText={setNewEmail}
           keyboardType="email-address"
@@ -114,11 +117,12 @@ export default function AccountRecoveryUpdateEmailScreen() {
         />
       </View>
 
-      <View className="mb-8">
-        <Text className="text-sm font-medium text-gray-700 mb-1">Social Security Number (SSN)</Text>
+      <View style={{ marginBottom: spacing.xxl }}>
+        <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>Social Security Number (SSN)</Text>
         <TextInput
-          className="w-full bg-gray-100 p-4 rounded-xl border border-gray-200"
+          style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="XXX-XX-XXXX"
+          placeholderTextColor={colorRoles.content.secondary}
           value={ssn}
           onChangeText={setSsn}
           secureTextEntry
@@ -127,17 +131,17 @@ export default function AccountRecoveryUpdateEmailScreen() {
       </View>
 
       <TouchableOpacity 
-        className="w-full bg-blue-600 p-4 rounded-xl items-center"
+        style={{ width: '100%', backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 16, alignItems: 'center' }}
         onPress={handleRecover}
       >
-        <Text className="text-white font-bold text-lg">Submit Recovery Request</Text>
+        <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>Submit Recovery Request</Text>
       </TouchableOpacity>
       
       <TouchableOpacity 
-        className="w-full p-4 mt-2 items-center"
+        style={{ width: '100%', padding: spacing.l, marginTop: spacing.s, alignItems: 'center' }}
         onPress={() => router.back()}
       >
-        <Text className="text-blue-600 font-medium">Cancel</Text>
+        <Text style={{ color: colorRoles.content.accentMid, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '500' }}>Cancel</Text>
       </TouchableOpacity>
     </View>
   );

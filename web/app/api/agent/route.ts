@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
+import { PrismaClient } from '@prisma/client';
 import { AgentTerminalCommand, AgentCommandResponse, SecureRequestContext } from '@/types/feature_expansion_contracts';
+
+const prisma = new PrismaClient();
 
 // Security and validation schemas
 const secureContextSchema = z.object({
@@ -55,14 +58,24 @@ export async function POST(request: Request) {
       timestamp: Date.now()
     };
 
-    // Simulate saving high-throughput telemetry to ClickHouse / TimescaleDB
-    Sentry.captureMessage(`Saving agent command telemetry to AnalyticsDB (ClickHouse)`, {
+    // Store high-throughput telemetry to Database
+    Sentry.captureMessage(`Saving agent command telemetry to AnalyticsDB`, {
       level: "info",
       extra: { 
         eventCategory: 'AGENT_ANALYTICS_INGEST',
         commandId,
         action,
         agentId
+      }
+    });
+
+    await prisma.telemetryLog.create({
+      data: {
+        commandId,
+        agentId,
+        action,
+        parameters: parameters || {},
+        status: 'pending'
       }
     });
 
@@ -75,7 +88,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response, { status: 202 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     Sentry.captureException(error, {
       extra: {
         eventCategory: 'AGENT_TERMINAL_ERROR',

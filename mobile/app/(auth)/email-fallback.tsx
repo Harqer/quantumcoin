@@ -15,6 +15,8 @@ export default function EmailFallbackScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
 
   const [emailAddress, setEmailAddress] = useState('');
+  const [code, setCode] = useState('');
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -39,14 +41,41 @@ export default function EmailFallbackScreen() {
           emailAddressId: emailFactor.emailAddressId,
         });
         AudioHapticsManager.success();
-        // Route to OTP screen
-        router.push('/(auth)/recovery/masked-email');
+        setIsCodeSent(true);
+        setErrorMsg('');
       } else {
         setErrorMsg('Email authentication not supported for this account.');
       }
     } catch (err: any) {
       AudioHapticsManager.error();
       setErrorMsg(err.errors?.[0]?.message || 'Sign in failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!isLoaded || !code) return;
+    AudioHapticsManager.mediumInteraction();
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const signInAttempt = await signIn.attemptFirstFactor({
+        strategy: 'email_code',
+        code,
+      });
+
+      if (signInAttempt.status === 'complete') {
+        await setActive({ session: signInAttempt.createdSessionId });
+        AudioHapticsManager.success();
+        router.replace('/(main)/dashboard');
+      } else {
+        setErrorMsg('Verification incomplete.');
+      }
+    } catch (err: any) {
+      AudioHapticsManager.error();
+      setErrorMsg(err.errors?.[0]?.message || 'Verification failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -63,54 +92,102 @@ export default function EmailFallbackScreen() {
       <View style={{ flex: 1, paddingHorizontal: spacing.l, paddingTop: spacing.xl }}>
         <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)} style={{ marginBottom: spacing.xl }}>
           <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, fontWeight: '700', color: colorRoles.content.primary, marginBottom: spacing.s }}>
-            Sign in with Email
+            {isCodeSent ? 'Enter Code' : 'Sign in with Email'}
           </Text>
           <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, lineHeight: 24 }}>
-            Enter your email to receive a one-time passcode.
+            {isCodeSent ? `Enter the one-time passcode sent to ${emailAddress}` : 'Enter your email to receive a one-time passcode.'}
           </Text>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)}>
-          <View style={{ marginBottom: spacing.xl }}>
-            <TextInput
-              autoCapitalize="none"
-              value={emailAddress}
-              placeholder="name@example.com"
-              placeholderTextColor={colorRoles.content.secondary}
-              onChangeText={(email) => setEmailAddress(email)}
-              keyboardType="email-address"
-              style={{
-                fontFamily: typography.bodyLarge.fontFamily,
-                fontSize: 18,
-                color: colorRoles.content.primary,
-                borderBottomWidth: 2,
-                borderBottomColor: colorRoles.content.accentMid,
-                paddingVertical: spacing.m,
-              }}
-            />
-          </View>
+          {!isCodeSent ? (
+            <>
+              <View style={{ marginBottom: spacing.xl }}>
+                <TextInput
+                  autoCapitalize="none"
+                  value={emailAddress}
+                  placeholder="name@example.com"
+                  placeholderTextColor={colorRoles.content.secondary}
+                  onChangeText={(email) => setEmailAddress(email)}
+                  keyboardType="email-address"
+                  style={{
+                    fontFamily: typography.bodyLarge.fontFamily,
+                    fontSize: 18,
+                    color: colorRoles.content.primary,
+                    borderBottomWidth: 2,
+                    borderBottomColor: colorRoles.content.accentMid,
+                    paddingVertical: spacing.m,
+                  }}
+                />
+              </View>
 
-          <PressableScale
-            haptics="heavy"
-            onPress={handleSignIn}
-            disabled={isLoading || !emailAddress}
-            style={{ 
-              backgroundColor: emailAddress ? colorRoles.content.primary : colorRoles.background.disabled, 
-              paddingVertical: 18, 
-              borderRadius: 9999, 
-              alignItems: 'center', 
-              flexDirection: 'row',
-              justifyContent: 'center'
-            }}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={colorRoles.content.onPrimary} />
-            ) : (
-              <Text style={{ color: emailAddress ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>
-                Continue
-              </Text>
-            )}
-          </PressableScale>
+              <PressableScale
+                haptics="heavy"
+                onPress={handleSignIn}
+                disabled={isLoading || !emailAddress}
+                style={{ 
+                  backgroundColor: emailAddress ? colorRoles.content.primary : colorRoles.background.disabled, 
+                  paddingVertical: 18, 
+                  borderRadius: 9999, 
+                  alignItems: 'center', 
+                  flexDirection: 'row',
+                  justifyContent: 'center'
+                }}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colorRoles.content.onPrimary} />
+                ) : (
+                  <Text style={{ color: emailAddress ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>
+                    Continue
+                  </Text>
+                )}
+              </PressableScale>
+            </>
+          ) : (
+            <>
+              <View style={{ marginBottom: spacing.xl }}>
+                <TextInput
+                  value={code}
+                  placeholder="123456"
+                  placeholderTextColor={colorRoles.content.secondary}
+                  onChangeText={(c) => setCode(c)}
+                  keyboardType="number-pad"
+                  style={{
+                    fontFamily: typography.bodyLarge.fontFamily,
+                    fontSize: 24,
+                    color: colorRoles.content.primary,
+                    borderBottomWidth: 2,
+                    borderBottomColor: colorRoles.content.accentMid,
+                    paddingVertical: spacing.m,
+                    textAlign: 'center',
+                    letterSpacing: 8
+                  }}
+                />
+              </View>
+
+              <PressableScale
+                haptics="heavy"
+                onPress={handleVerifyCode}
+                disabled={isLoading || !code}
+                style={{
+                  backgroundColor: code ? colorRoles.content.primary : colorRoles.background.disabled,
+                  paddingVertical: 18,
+                  borderRadius: 9999,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center'
+                }}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colorRoles.content.onPrimary} />
+                ) : (
+                  <Text style={{ color: code ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>
+                    Verify Code
+                  </Text>
+                )}
+              </PressableScale>
+            </>
+          )}
 
           {errorMsg ? (
             <Text style={{ fontFamily: typography.bodyMedium.fontFamily, color: colorRoles.content.negativeDark, marginTop: spacing.l, textAlign: 'center' }}>

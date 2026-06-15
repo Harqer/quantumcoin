@@ -4,24 +4,40 @@ import { useChat } from "@ai-sdk/react";
 import Header from "@/components/Header";
 import { useEffect, useRef, useState } from "react";
 import { SecureRequestContext } from '@/types/feature_expansion_contracts';
+import { useAuth, useSession } from '@clerk/nextjs';
 
 function BlockchainActivityTerminal() {
   const [logs, setLogs] = useState<{ id: string; time: string; msg: string; status: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState('analyze_wallet');
   const [walletAddress, setWalletAddress] = useState('');
+  const [amount, setAmount] = useState('10.00');
+  const [fromAsset, setFromAsset] = useState('ETH');
+  const [toAsset, setToAsset] = useState('USDC');
+  const [destinationChain, setDestinationChain] = useState('base');
+  const [fingerprint, setFingerprint] = useState('unknown');
+  
+  const { getToken, sessionId, userId } = useAuth();
+  const { session } = useSession();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const fp = btoa(`${navigator.userAgent}-${window.screen.width}x${window.screen.height}`);
+      setFingerprint(fp);
+    }
+  }, []);
 
   const handleAction = async () => {
     if (!walletAddress) return;
     setIsLoading(true);
     
     const context: SecureRequestContext = {
-      userId: 'admin_123',
-      sessionId: 'sess_abc',
-      ipAddress: '127.0.0.1',
-      deviceFingerprint: 'dev_123',
-      mfaVerified: true,
-      clearanceLevel: 'admin'
+      userId: userId || 'unknown_user',
+      sessionId: sessionId || 'unknown_session',
+      ipAddress: 'client_ip_deferred', // Will be replaced by backend
+      deviceFingerprint: fingerprint,
+      mfaVerified: session?.user?.twoFactorEnabled || false,
+      clearanceLevel: (session?.user?.publicMetadata?.tier as string) || 'standard'
     };
 
     const newLog = {
@@ -35,7 +51,7 @@ function BlockchainActivityTerminal() {
 
     try {
       let endpoint = '/api/agent';
-      let payload: any = {
+      let payload: Record<string, unknown> = {
         agentId: 'agent_1',
         action: actionType,
         parameters: { targetAddress: walletAddress },
@@ -53,26 +69,28 @@ function BlockchainActivityTerminal() {
         payload = { agentId: 'agent_1' };
       } else if (actionType === 'pay_charge') {
         endpoint = '/api/pay/charge';
-        payload = { productId: 'agent_service', amount: '10.00', currency: 'USD' };
+        payload = { productId: 'agent_service', amount, currency: 'USD' };
       } else if (actionType === 'oracle_price') {
         endpoint = '/api/oracle/price';
-        payload = { assetPair: 'BTC-USD' };
+        payload = { assetPair: `${fromAsset}-${toAsset}` };
       } else if (actionType === 'bridge_asset') {
         endpoint = '/api/bridge';
-        payload = { destinationChain: 'base', amount: '100' };
+        payload = { destinationChain, amount };
       } else if (actionType === 'swap_asset') {
         endpoint = '/api/swap';
-        payload = { fromAsset: 'ETH', toAsset: 'USDC', amount: '1' };
+        payload = { fromAsset, toAsset, amount };
       } else if (actionType === 'builder_code') {
         endpoint = '/api/builder_code';
         payload = { requestType: 'base_builder' };
       }
 
+      const token = await getToken();
+
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': 'X402 mock_macaroon_preimage'
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
@@ -81,8 +99,9 @@ function BlockchainActivityTerminal() {
       if (!res.ok) throw new Error(data.error || 'Request failed');
 
       setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Success: ${JSON.stringify(data).substring(0, 50)}...`, status: 'success' } : l));
-    } catch (err: any) {
-      setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Error: ${err.message}`, status: 'failed' } : l));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
+      setLogs(prev => prev.map(l => l.id === newLog.id ? { ...l, msg: `${l.msg} Error: ${errMsg}`, status: 'failed' } : l));
     } finally {
       setIsLoading(false);
     }
@@ -135,6 +154,49 @@ function BlockchainActivityTerminal() {
               className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-lg pl-10 pr-4 py-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono placeholder-white/30"
             />
           </div>
+
+          {['pay_charge', 'bridge_asset', 'swap_asset'].includes(actionType) && (
+            <div className="relative group">
+              <input 
+                type="text" 
+                placeholder="Amount (e.g. 10.00)" 
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-lg px-4 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono placeholder-white/30"
+              />
+            </div>
+          )}
+
+          {['swap_asset', 'oracle_price'].includes(actionType) && (
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="From Asset (e.g. ETH)" 
+                value={fromAsset}
+                onChange={(e) => setFromAsset(e.target.value)}
+                className="flex-1 bg-black/40 border border-white/10 text-white text-sm rounded-lg px-4 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono placeholder-white/30"
+              />
+              <input 
+                type="text" 
+                placeholder="To Asset (e.g. USDC)" 
+                value={toAsset}
+                onChange={(e) => setToAsset(e.target.value)}
+                className="flex-1 bg-black/40 border border-white/10 text-white text-sm rounded-lg px-4 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono placeholder-white/30"
+              />
+            </div>
+          )}
+
+          {actionType === 'bridge_asset' && (
+            <div className="relative group">
+              <input 
+                type="text" 
+                placeholder="Destination Chain (e.g. base)" 
+                value={destinationChain}
+                onChange={(e) => setDestinationChain(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-lg px-4 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono placeholder-white/30"
+              />
+            </div>
+          )}
         </div>
         <button 
           onClick={handleAction}

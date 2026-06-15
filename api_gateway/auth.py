@@ -37,7 +37,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": bool(audience)},
+            options={"verify_aud": True},
             audience=audience
         )
         return payload

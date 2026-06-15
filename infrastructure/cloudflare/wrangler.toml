@@ -1,0 +1,20 @@
+name = "quantumcoin-edge-proxy"
+main = "worker.ts"
+compatibility_date = "2024-03-20"
+
+# Map the worker to your domain
+routes = [
+  { pattern = "getqubits.com", custom_domain = true },
+  { pattern = "www.getqubits.com", custom_domain = true }
+]
+# workers_dev = true
+
+[vars]
+# The Vercel URL the worker should proxy traffic to
+VERCEL_ORIGIN = "https://qubit-coin.vercel.app"
+# Note: CF_SECURE_TOKEN will be provided as a secret
+
+[[kv_namespaces]]
+binding = "QUANTUM_CACHE"
+# Replace this ID with the one generated from: npx wrangler kv namespace create "QUANTUM_CACHE"
+id = "80a878dfc06c4eeba4b4206babcaed0b"

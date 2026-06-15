@@ -3,20 +3,31 @@ import { withX402 } from "@x402/next";
 import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://x402.org/facilitator" });
+const facilitatorClient = new HTTPFacilitatorClient({
+  url: "https://x402.org/facilitator",
+});
 const server = new x402ResourceServer(facilitatorClient);
 registerExactEvmScheme(server);
 
 // The actual payload we sell
 const handler = async (_: NextRequest) => {
-  return NextResponse.json({ 
+  let btcPrice = "0.00";
+  try {
+    const res = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot");
+    const data = await res.json();
+    btcPrice = data.data.amount;
+  } catch (e) {
+    console.error("Failed to fetch price", e);
+  }
+
+  return NextResponse.json({
     service: "Quantum Pricing Oracle",
     priceFeed: {
-      "BTC-USD": "95,000.00",
-      "QBC-USD": "100.00",
-      timestamp: Date.now()
+      "BTC-USD": btcPrice,
+      "QBC-USD": "1.00",
+      timestamp: Date.now(),
     },
-    message: "Data powered by Quantum Number Generators (QNRG)."
+    message: "Data powered by Quantum Number Generators (QNRG).",
   });
 };
 
@@ -28,11 +39,11 @@ export const GET = withX402(
         scheme: "exact",
         price: "$0.001",
         network: "eip155:84532", // Base Sepolia
-        payTo: "0x0000000000000000000000000000000000000000", // Will be replaced by Treasury Wallet
-      }
+        payTo: process.env.TREASURY_WALLET_ADDRESS as `0x${string}`,
+      },
     ],
     description: "Access to Quantum Pricing Oracle",
-    mimeType: "application/json"
+    mimeType: "application/json",
   },
-  server
+  server,
 );

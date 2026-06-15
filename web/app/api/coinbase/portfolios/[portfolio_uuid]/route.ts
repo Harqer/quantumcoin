@@ -27,7 +27,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ portf
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting portfolio:', error);
     return NextResponse.json({ error: 'Failed to delete portfolio' }, { status: 500 });
   }
@@ -62,7 +62,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ portfoli
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error editing portfolio:', error);
     return NextResponse.json({ error: 'Failed to edit portfolio' }, { status: 500 });
   }
@@ -101,7 +101,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ portfoli
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching portfolio breakdown:', error);
     return NextResponse.json({ error: 'Failed to fetch portfolio breakdown' }, { status: 500 });
   }

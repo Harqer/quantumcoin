@@ -108,6 +108,7 @@ export default function AIChatScreen() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const listRef = useRef<FlashList<Message>>(null);
   const { user } = useUser();
+  const executePaymentMutation = coreTrpc.ai.executePayment.useMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
@@ -141,8 +142,7 @@ export default function AIChatScreen() {
         const uri = recording.getURI();
         console.log('Recording stopped and stored at', uri);
         
-        // In a true real-time WebRTC flow, this audio is streamed via WebSockets.
-        // For this implementation, we simulate sending the recorded voice chunk to the AI.
+        // Send the recorded voice chunk to the AI via Firestore messaging layer
         if (user?.id && sessionId && uri) {
           setIsLoading(true);
           await firestore()
@@ -182,19 +182,21 @@ export default function AIChatScreen() {
         
         if (result.success) {
           setIsLoading(true);
-          await firestore()
-            .collection('users')
-            .doc(user.id)
-            .collection('chat_sessions')
-            .doc(sessionId)
-            .collection('messages')
-            .add({
-              role: 'user',
-              content: '[PAYMENT_APPROVED]',
-              createdAt: firestore.FieldValue.serverTimestamp(),
-              persona: persona || 'roast',
-              isProcessed: false
-            });
+          let proposalData: any = {};
+          try {
+            const match = originalMsg.match(/\{.*\}/s);
+            if (match) {
+              proposalData = JSON.parse(match[0]);
+            }
+          } catch (e) {}
+
+          await executePaymentMutation.mutateAsync({
+            sessionId,
+            amount: proposalData.amount,
+            token: proposalData.token,
+            to: proposalData.to
+          });
+          setIsLoading(false);
         }
       }
     } catch (e) {

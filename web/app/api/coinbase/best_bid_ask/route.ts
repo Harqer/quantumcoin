@@ -38,7 +38,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching best bid ask:', error);
     return NextResponse.json({ error: 'Failed to fetch best bid ask' }, { status: 500 });
   }
