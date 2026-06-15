@@ -5,9 +5,11 @@ This document consolidates the exact 1:1 Python code implementations for integra
 ---
 
 ## 1. IBM Quantum (Superconducting)
+
 There are two primary methods for applying Fire Opal to IBM hardware: native IBM catalog and direct Fire Opal SDK.
 
 ### Method A: IBM Qiskit Functions Catalog (Native)
+
 ```python
 from qiskit import QuantumCircuit
 from qiskit_ibm_catalog import QiskitFunctionsCatalog
@@ -26,8 +28,8 @@ perf_mgmt = catalog.load("q-ctrl/performance-management")
 
 # 4. Use the function to run your workload on an IBM backend
 job = perf_mgmt.run(
-    circuits=qc, 
-    backend="ibm_brisbane", 
+    circuits=qc,
+    backend="ibm_brisbane",
     shots=2048
 )
 
@@ -37,6 +39,7 @@ print(result)
 ```
 
 ### Method B: Direct Fire Opal SDK
+
 ```python
 import fireopal as fo
 from qiskit import QuantumCircuit
@@ -51,8 +54,8 @@ circuit_qasm = qc.qasm()
 # fo.credentials.make_credentials_for_ibm_cloud(token="YOUR_IBM_TOKEN")
 
 job = fo.execute(
-    circuits=[circuit_qasm], 
-    backend_name="ibm_brisbane", 
+    circuits=[circuit_qasm],
+    backend_name="ibm_brisbane",
     shot_count=2048
 )
 
@@ -63,6 +66,7 @@ print(result)
 ---
 
 ## 2. IonQ (Trapped-Ion)
+
 Integrating Fire Opal with IonQ's Forte hardware via Amazon Braket.
 
 ```python
@@ -100,6 +104,7 @@ print(fire_opal_result["results"])
 ---
 
 ## 3. OQC (Superconducting)
+
 Applying Fire Opal error suppression to OQC hardware via Amazon Braket.
 
 ```python
@@ -129,6 +134,7 @@ print("Error Suppressed Measurement Results:", results.results())
 ---
 
 ## 4. QuantWare (Superconducting)
+
 Generating noise-robust control pulses using Boulder Opal for QuantWare QPUs driven by Qblox electronics (Quantum Utility Block).
 
 ```python
@@ -136,7 +142,7 @@ import qctrlopencontrols as oc
 import numpy as np
 
 # QuantWare superconducting qubit parameters
-maximum_rabi_rate = 20e6 * 2 * np.pi 
+maximum_rabi_rate = 20e6 * 2 * np.pi
 target_rotation = np.pi # Target: 180-degree (X) gate
 
 # Generate an error-robust control pulse (e.g., CORPSE protocol)
@@ -159,6 +165,7 @@ for segment in pulse_segments:
 ---
 
 ## 5. QuEra (Neutral Atom)
+
 Using Boulder Opal to design and optimize computational graphs for analog Rydberg blockades (e.g., Z2 state generation on the Aquila QPU).
 
 ```python
@@ -170,10 +177,10 @@ n_atoms = 7
 a = 6.0e-6  # Lattice spacing
 c6 = 5.42e-24  # C6 coefficient for Rubidium-87 Rydberg state in m^6/s
 duration = 4.0e-6
-segment_count = 40 
+segment_count = 40
 
 omega_max = 2.5 * 2 * np.pi * 1e6
-delta_max = 10.0 * 2 * np.pi * 1e6 
+delta_max = 10.0 * 2 * np.pi * 1e6
 
 positions = np.array([i * a for i in range(n_atoms)])
 V = np.zeros((n_atoms, n_atoms))
@@ -205,7 +212,7 @@ def tensor_op(op, index, size):
 
 sigma_x = np.array([[0, 1], [1, 0]])
 sigma_z = np.array([[1, 0], [0, -1]])
-n_op = 0.5 * (np.eye(2) + sigma_z) # Projector |r><r| 
+n_op = 0.5 * (np.eye(2) + sigma_z) # Projector |r><r|
 
 global_x = sum(tensor_op(sigma_x, i, n_atoms) for i in range(n_atoms))
 global_n = sum(tensor_op(n_op, i, n_atoms) for i in range(n_atoms))
@@ -228,7 +235,7 @@ unitary = graph.time_evolution_operators_pwc(
 
 # Target Z2 Antiferromagnetic State |0101010>
 initial_state_vec = np.zeros(2**n_atoms)
-initial_state_vec[0] = 1.0 
+initial_state_vec[0] = 1.0
 initial_state = graph.constant_state_vector(initial_state_vec)
 
 target_state_vec = np.zeros(2**n_atoms)

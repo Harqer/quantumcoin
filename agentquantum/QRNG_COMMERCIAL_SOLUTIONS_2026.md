@@ -44,24 +44,24 @@ Quandela Photonic QRNG Architecture:
 
 ### Certification Levels
 
-| Level | Method | Security | Use Case |
-|-------|--------|----------|----------|
-| **Standard** | Quantum measurement only | High | General crypto |
-| **Self-Testing** | Device partially verified | Very High | Financial |
-| **Device-Independent** | CHSH Bell test (S > 2) | **Maximum** | Military/Gov |
+| Level                  | Method                    | Security    | Use Case       |
+| ---------------------- | ------------------------- | ----------- | -------------- |
+| **Standard**           | Quantum measurement only  | High        | General crypto |
+| **Self-Testing**       | Device partially verified | Very High   | Financial      |
+| **Device-Independent** | CHSH Bell test (S > 2)    | **Maximum** | Military/Gov   |
 
 **Quandela's achievement**: Demonstrated device-independent QRNG on a 2-qubit photonic chip using quantum dot sources (2023) - **patent pending**!
 
 ### Performance Specs
 
-| Metric | Value |
-|--------|-------|
-| **Generation rate** | ~1-10 kbps (hardware) |
-| **Photon purity** | 99% |
-| **Source efficiency** | 72% |
-| **Certification score** | >0.99 for DI-QRNG |
-| **Max photons** | 6 (Ascella) |
-| **Cloud access** | ✅ Available now |
+| Metric                  | Value                 |
+| ----------------------- | --------------------- |
+| **Generation rate**     | ~1-10 kbps (hardware) |
+| **Photon purity**       | 99%                   |
+| **Source efficiency**   | 72%                   |
+| **Certification score** | >0.99 for DI-QRNG     |
+| **Max photons**         | 6 (Ascella)           |
+| **Cloud access**        | ✅ Available now      |
 
 ---
 
@@ -69,28 +69,28 @@ Quandela Photonic QRNG Architecture:
 
 ### Tier 1: Hardware QRNG with Cloud Access
 
-| Provider | Technology | Rate | Certification | Cost | Status |
-|----------|-----------|------|---------------|------|--------|
-| **Quandela** | Photonic (quantum dot) | 1-10 kbps | Device-independent | $$ | ✅ **WE HAVE ACCESS** |
-| **ID Quantique** | Optical (phase noise) | 100+ Mbps | NIST SP800-90B | $$ | Commercial |
-| **Quantinuum** | Trapped ion | ~kbps | High | $$$ | H2 integration |
-| **Quside** | Phase diffusion | 100+ Mbps | NIST cert | $$ | Commercial |
+| Provider         | Technology             | Rate      | Certification      | Cost | Status                |
+| ---------------- | ---------------------- | --------- | ------------------ | ---- | --------------------- |
+| **Quandela**     | Photonic (quantum dot) | 1-10 kbps | Device-independent | $$   | ✅ **WE HAVE ACCESS** |
+| **ID Quantique** | Optical (phase noise)  | 100+ Mbps | NIST SP800-90B     | $$   | Commercial            |
+| **Quantinuum**   | Trapped ion            | ~kbps     | High               | $$$  | H2 integration        |
+| **Quside**       | Phase diffusion        | 100+ Mbps | NIST cert          | $$   | Commercial            |
 
 ### Tier 2: Research/Demonstration
 
-| Provider | Technology | Status |
-|----------|-----------|--------|
-| **Xanadu** | CV squeezed states | Cloud (Borealis) |
-| **IBM** | Superconducting | Research only |
-| **IonQ** | Trapped ion multi-level | Not exposed |
+| Provider   | Technology              | Status           |
+| ---------- | ----------------------- | ---------------- |
+| **Xanadu** | CV squeezed states      | Cloud (Borealis) |
+| **IBM**    | Superconducting         | Research only    |
+| **IonQ**   | Trapped ion multi-level | Not exposed      |
 
 ### Tier 3: QRNG Chips (OEM)
 
-| Provider | Form Factor | Application |
-|----------|-------------|-------------|
+| Provider        | Form Factor | Application      |
+| --------------- | ----------- | ---------------- |
 | **Elmos + IDQ** | Single chip | IoT/Edge devices |
-| **Qrypt** | API/service | Cloud entropy |
-| **QuantumCTek** | PCIe cards | Data centers |
+| **Qrypt**       | API/service | Cloud entropy    |
+| **QuantumCTek** | PCIe cards  | Data centers     |
 
 ---
 
@@ -98,12 +98,12 @@ Quandela Photonic QRNG Architecture:
 
 ### Best for QNRG (Quantum Randomness)
 
-| Provider | Entropy Quality | Speed | Cloud API | Integration |
-|----------|----------------|-------|-----------|-------------|
-| **Quandela** | ⭐⭐⭐⭐⭐ DI-cert | Medium | ✅ Yes | ✅ **Implemented** |
-| ID Quantique | ⭐⭐⭐⭐ High | Very Fast | ✅ Yes | Needs adapter |
-| Quside | ⭐⭐⭐⭐ NIST cert | Very Fast | ✅ Yes | Needs adapter |
-| Xanadu | ⭐⭐⭐⭐ CV infinite | Medium | ✅ Yes | ✅ Implemented |
+| Provider     | Entropy Quality      | Speed     | Cloud API | Integration        |
+| ------------ | -------------------- | --------- | --------- | ------------------ |
+| **Quandela** | ⭐⭐⭐⭐⭐ DI-cert   | Medium    | ✅ Yes    | ✅ **Implemented** |
+| ID Quantique | ⭐⭐⭐⭐ High        | Very Fast | ✅ Yes    | Needs adapter      |
+| Quside       | ⭐⭐⭐⭐ NIST cert   | Very Fast | ✅ Yes    | Needs adapter      |
+| Xanadu       | ⭐⭐⭐⭐ CV infinite | Medium    | ✅ Yes    | ✅ Implemented     |
 
 ### Why Quandela Wins for QuantumCoin
 
@@ -118,6 +118,7 @@ Quandela Photonic QRNG Architecture:
 ## 🔬 QRNG Technical Approaches
 
 ### 1. Photonic (Quandela, IDQ)
+
 ```
 Single photon → Beam splitter → Detectors
 Pros: Simple, certifiable, fast
@@ -125,6 +126,7 @@ Cons: Photon loss reduces rate
 ```
 
 ### 2. Continuous Variable (Xanadu)
+
 ```
 Squeezed vacuum → Quadrature measurement
 Pros: Infinite dimensions, high rate
@@ -132,6 +134,7 @@ Cons: Requires homodyne detection
 ```
 
 ### 3. Phase Noise (IDQ, Quside)
+
 ```
 Laser → Phase fluctuations → Digitize
 Pros: Very high rate, robust
@@ -139,6 +142,7 @@ Cons: Semi-classical (not pure quantum)
 ```
 
 ### 4. Trapped Ion (Quantinuum)
+
 ```
 Hyperfine states → Projective measurement
 Pros: Ultimate quantum fidelity
@@ -152,6 +156,7 @@ Cons: Very slow (~kbps)
 ### Market Size: $7.2 Billion (IQT Research)
 
 **Growth drivers**:
+
 - Post-quantum cryptography transition
 - Blockchain/cryptocurrency entropy needs
 - IoT device security requirements
@@ -159,22 +164,24 @@ Cons: Very slow (~kbps)
 
 ### Key Partnerships (2026)
 
-| Company | QRNG Partner | Application |
-|---------|--------------|-------------|
+| Company                | QRNG Partner                      | Application            |
+| ---------------------- | --------------------------------- | ---------------------- |
 | **Palo Alto Networks** | Quside, IDQ, Quandela, Quantinuum | QRNG Open API standard |
-| **JPMorgan Chase** | Quantinuum | Quantum-safe banking |
-| **Amazon** | IonQ, Rigetti, OQC, AQT | Braket QRNG services |
+| **JPMorgan Chase**     | Quantinuum                        | Quantum-safe banking   |
+| **Amazon**             | IonQ, Rigetti, OQC, AQT           | Braket QRNG services   |
 
 ---
 
 ## 🚀 Implementation Roadmap
 
 ### Phase 1: Immediate (✅ Done)
+
 - ✅ Quandela provider implemented
 - ✅ API key configured in `.env`
 - ✅ Config class updated
 
 ### Phase 2: Production Integration
+
 ```python
 # Usage example:
 from quantum_backend.providers.quandela_provider import QuandelaProvider
@@ -190,6 +197,7 @@ result = provider.generate_certified_qrng(
 ```
 
 ### Phase 3: Hybrid QRNG Strategy
+
 ```
 Production entropy sourcing:
 ├── Primary: Quandela DI-QRNG (certified, slower)
@@ -203,15 +211,18 @@ Production entropy sourcing:
 ## 📚 References
 
 ### Papers
+
 1. **"Quantum random number generation using Quandela photonic quantum computer"** (Springer, 2024)
 2. **"Certified Quantum Random Numbers on a Small Optical Chip"** (Quandela Tech Report)
 3. **"Device-independent quantum random-number generation"** (Nature, 2021)
 
 ### Market Reports
+
 - IQT Research: "Quantum Random Number Generators: A Ten-year Market Assessment" (2026)
 - MarketsandMarkets: Quantum Cryptography Report
 
 ### Standards
+
 - NIST SP 800-90B: Entropy Sources for Random Bit Generation
 - BSI AIS 20/31: German certification for QRNG
 
@@ -220,12 +231,14 @@ Production entropy sourcing:
 ## ✅ Summary for QuantumCoin
 
 **What you now have**:
+
 1. **Quandela API access** - Device-independent QRNG on photonic hardware
 2. **Xanadu CV** - Infinite-dimensional entropy
 3. **8 other providers** - IonQ, IBM, Azure, qBraid, BlueQubit, Braket, etc.
 4. **Complete provider framework** - Easy to add more
 
 **Recommended production setup**:
+
 ```bash
 # Primary QRNG
 QUANDELA_API_KEY=your_key_here
@@ -241,6 +254,7 @@ BLUEQUBIT_TOKEN=your_token_here
 ```
 
 **Next steps**:
+
 1. Test Quandela QRNG generation
 2. Integrate with wallet seed generation
 3. Add entropy pool refill from Quandela
@@ -248,5 +262,5 @@ BLUEQUBIT_TOKEN=your_token_here
 
 ---
 
-*Document created: May 18, 2026*
-*Quandela API status: ACTIVE and ready for use*
+_Document created: May 18, 2026_
+_Quandela API status: ACTIVE and ready for use_

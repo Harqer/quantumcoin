@@ -1,0 +1,142 @@
+[
+  {
+    "name": "D-Wave",
+    "logo": "https://entangledfuture.com/images/logos/d-wave.svg"
+  },
+  {
+    "name": "Infleqtion",
+    "logo": "https://entangledfuture.com/images/logos/infleqtion.png"
+  },
+  {
+    "name": "Atom Computing",
+    "logo": "https://entangledfuture.com/images/logos/atom-computing.png"
+  },
+  {
+    "name": "IBM Quantum",
+    "logo": "https://entangledfuture.com/images/logos/ibm-quantum.png"
+  },
+  {
+    "name": "QuEra Computing",
+    "logo": "https://entangledfuture.com/images/logos/quera-computing.jpg"
+  },
+  {
+    "name": "Pasqal",
+    "logo": "https://entangledfuture.com/images/logos/pasqal.png"
+  },
+  {
+    "name": "IonQ",
+    "logo": "https://entangledfuture.com/images/logos/ionq.png"
+  },
+  {
+    "name": "PlanQC",
+    "logo": "https://entangledfuture.com/images/logos/planqc.jpg"
+  },
+  {
+    "name": "Xanadu",
+    "logo": "https://entangledfuture.com/images/logos/xanadu.png"
+  },
+  {
+    "name": "Origin Quantum",
+    "logo": "https://entangledfuture.com/images/logos/origin-quantum.png"
+  },
+  {
+    "name": "IQM",
+    "logo": "https://entangledfuture.com/images/logos/iqm.png"
+  },
+  {
+    "name": "Rigetti Computing",
+    "logo": "https://entangledfuture.com/images/logos/rigetti-computing.png"
+  },
+  {
+    "name": "Google Quantum AI",
+    "logo": "https://entangledfuture.com/images/logos/google-quantum-ai.png"
+  },
+  {
+    "name": "Quantinuum",
+    "logo": "https://entangledfuture.com/images/logos/quantinuum.png"
+  },
+  {
+    "name": "ORCA Computing",
+    "logo": "https://entangledfuture.com/images/logos/orca-computing.jpg"
+  },
+  {
+    "name": "SEEQC",
+    "logo": "https://entangledfuture.com/images/logos/seeqc.jpg"
+  },
+  {
+    "name": "Universal Quantum",
+    "logo": "https://entangledfuture.com/images/logos/universal-quantum.png"
+  },
+  {
+    "name": "Amazon Braket",
+    "logo": "https://entangledfuture.com/images/logos/amazon-braket.png"
+  },
+  {
+    "name": "Oxford Quantum Circuits",
+    "logo": "https://entangledfuture.com/images/logos/oxford-quantum-circuits.jpg"
+  },
+  {
+    "name": "eleQtron",
+    "logo": "https://entangledfuture.com/images/logos/eleqtron.jpg"
+  },
+  {
+    "name": "Bleximo",
+    "logo": "https://entangledfuture.com/images/logos/bleximo.jpg"
+  },
+  {
+    "name": "Alice & Bob",
+    "logo": null
+  },
+  {
+    "name": "Alpine Quantum Technologies",
+    "logo": "https://entangledfuture.com/images/logos/alpine-quantum-technologies.jpg"
+  },
+  {
+    "name": "Quandela",
+    "logo": "https://entangledfuture.com/images/logos/quandela.png"
+  },
+  {
+    "name": "Quantum Circuits Inc",
+    "logo": "https://entangledfuture.com/images/logos/quantum-circuits-inc.jpg"
+  },
+  {
+    "name": "Quantum Brilliance",
+    "logo": "https://entangledfuture.com/images/logos/quantum-brilliance.png"
+  },
+  {
+    "name": "SpinQ",
+    "logo": "https://entangledfuture.com/images/logos/spinq.png"
+  },
+  {
+    "name": "EeroQ",
+    "logo": "https://entangledfuture.com/images/logos/eeroq.jpg"
+  },
+  {
+    "name": "Diraq",
+    "logo": "https://entangledfuture.com/images/logos/diraq.jpg"
+  },
+  {
+    "name": "Nord Quantique",
+    "logo": "https://entangledfuture.com/images/logos/nord-quantique.png"
+  },
+  {
+    "name": "Photonic Inc",
+    "logo": "https://entangledfuture.com/images/logos/photonic-inc.jpg"
+  },
+  {
+    "name": "PsiQuantum",
+    "logo": "https://entangledfuture.com/images/logos/psiquantum.png"
+  },
+  {
+    "name": "Qblox",
+    "logo": "https://entangledfuture.com/images/logos/qblox.png"
+  },
+  {
+    "name": "Quantum Computing Inc",
+    "logo": "https://entangledfuture.com/images/logos/quantum-computing-inc.png"
+  },
+  {
+    "name": "Quantum Machines",
+    "logo": "https://entangledfuture.com/images/logos/quantum-machines.jpg"
+  }
+]

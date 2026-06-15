@@ -24,7 +24,7 @@ with prog.context as q:
         # Generate Squeezed Vacuum State
         # 'r' = 1.0 (squeezing parameter). Increases variance of the measured quadrature.
         Sgate(1.0, 0.0) | q[i]
-        
+
         # Homodyne Quadrature Measurement (measures continuous position 'x')
         MeasureHomodyne(0.0) | q[i]
 
@@ -38,7 +38,7 @@ except Exception:
 results = eng.run(prog, shots=100000)
 
 # Extract continuous floating-point samples
-cv_raw_samples = results.samples 
+cv_raw_samples = results.samples
 
 # 3. Privacy Amplification & Entropy Extraction
 # Flatten floats to 1D and serialize to a byte stream
@@ -67,7 +67,7 @@ from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
 def generate_qnrg_entropy():
     # 1. Initialize Runtime Service
     service = QiskitRuntimeService()
-    
+
     # 2. Target Utility-Scale Processor (e.g., 133-qubit Heron architecture)
     backend = service.backend("ibm_torino")
     num_qubits = backend.num_qubits
@@ -88,11 +88,11 @@ def generate_qnrg_entropy():
     job = sampler.run([isa_circuit], shots=10000)
     result = job.result()
     pub_result = result[0]
-    
+
     # 7. Payload Extraction
     # get_bitstrings() yields raw unbiased binary strings per shot
     raw_entropy_bitstrings = pub_result.data.meas.get_bitstrings()
-    
+
     return raw_entropy_bitstrings
 
 if __name__ == "__main__":

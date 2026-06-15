@@ -11,9 +11,7 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-const tokenAbi = parseAbi([
-  "function totalSupply() view returns (uint256)",
-]);
+const tokenAbi = parseAbi(["function totalSupply() view returns (uint256)"]);
 
 export default function ProofOfReserves() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
@@ -28,7 +26,7 @@ export default function ProofOfReserves() {
           abi: tokenAbi,
           functionName: "totalSupply",
         });
-        
+
         // Assume 6 decimals
         const formattedSupply = Number(supply) / 1e6;
         setCirculatingSupply(formattedSupply);
@@ -50,36 +48,74 @@ export default function ProofOfReserves() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Proof of Reserves</h1>
-        <p className={styles.subtitle}>Cryptographic attestation of 1:1 USDC backing held with Coinbase.</p>
+        <p className={styles.subtitle}>
+          Cryptographic attestation of 1:1 USDC backing held with Coinbase.
+        </p>
       </header>
 
       <main className={styles.main}>
         <div className={styles.dashboardCard}>
           <div className={styles.walletInfo}>
-            <p><strong>Asset:</strong> QubitCoin (QBC)</p>
-            <p><strong>Contract (Base):</strong> {QBC_CONTRACT_ADDRESS || "Not configured"}</p>
-            <p><strong>Last Verified:</strong> {lastUpdated}</p>
+            <p>
+              <strong>Asset:</strong> QubitCoin (QBC)
+            </p>
+            <p>
+              <strong>Contract (Base):</strong>{" "}
+              {QBC_CONTRACT_ADDRESS || "Not configured"}
+            </p>
+            <p>
+              <strong>Last Verified:</strong> {lastUpdated}
+            </p>
           </div>
 
           <div className={styles.actionSection}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-              <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.4)', padding: '2rem', borderRadius: '16px', flex: 1, marginRight: '1rem' }}>
-                <h3 style={{ color: '#8ba1d4', marginBottom: '0.5rem' }}>Circulating Supply</h3>
-                <h2 style={{ fontSize: '2.5rem', margin: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "2rem",
+              }}
+            >
+              <div
+                style={{
+                  textAlign: "center",
+                  background: "rgba(0,0,0,0.4)",
+                  padding: "2rem",
+                  borderRadius: "16px",
+                  flex: 1,
+                  marginRight: "1rem",
+                }}
+              >
+                <h3 style={{ color: "#8ba1d4", marginBottom: "0.5rem" }}>
+                  Circulating Supply
+                </h3>
+                <h2 style={{ fontSize: "2.5rem", margin: 0 }}>
                   {circulatingSupply.toLocaleString()} QBC
                 </h2>
               </div>
-              
-              <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.4)', padding: '2rem', borderRadius: '16px', flex: 1, marginLeft: '1rem' }}>
-                <h3 style={{ color: '#8ba1d4', marginBottom: '0.5rem' }}>USDC Reserves</h3>
-                <h2 style={{ fontSize: '2.5rem', margin: 0, color: '#00e676' }}>
+
+              <div
+                style={{
+                  textAlign: "center",
+                  background: "rgba(0,0,0,0.4)",
+                  padding: "2rem",
+                  borderRadius: "16px",
+                  flex: 1,
+                  marginLeft: "1rem",
+                }}
+              >
+                <h3 style={{ color: "#8ba1d4", marginBottom: "0.5rem" }}>
+                  USDC Reserves
+                </h3>
+                <h2 style={{ fontSize: "2.5rem", margin: 0, color: "#00e676" }}>
                   ${usdcReserves.toLocaleString()}
                 </h2>
               </div>
             </div>
 
-            <p className={styles.note} style={{ textAlign: 'center' }}>
-              All reserves utilize battle-tested Coinbase systems that support major wrapped assets like cbBTC and cbETH.
+            <p className={styles.note} style={{ textAlign: "center" }}>
+              All reserves utilize battle-tested Coinbase systems that support
+              major wrapped assets like cbBTC and cbETH.
             </p>
           </div>
         </div>

@@ -18,14 +18,15 @@ They **physically CAN** (transmon qubits have higher levels), but they **removed
 
 ### Why This Matters for Qudits
 
-| Before (2024) | After (2025+) |
-|---------------|---------------|
-| Qiskit Pulse allowed custom pulses | Only ISA gates allowed |
-| Could address transmon level |2⟩, |3⟩, etc. | Only |0⟩ and |1⟩ accessible |
-| Qutrit gates possible | **Qubits ONLY** |
-| Research on multi-level encoding | **BLOCKED** for cloud users |
+| Before (2024)                      | After (2025+)               |
+| ---------------------------------- | --------------------------- | -------- | ---- | ------ | ------------- |
+| Qiskit Pulse allowed custom pulses | Only ISA gates allowed      |
+| Could address transmon level       | 2⟩,                         | 3⟩, etc. | Only | 0⟩ and | 1⟩ accessible |
+| Qutrit gates possible              | **Qubits ONLY**             |
+| Research on multi-level encoding   | **BLOCKED** for cloud users |
 
 **IBM's official statement**:
+
 > "Pulse-level control will be removed from the service on February 3, 2025. This decision is part of our ongoing efforts to focus more of our attention and resources on higher-level services aimed at supporting utility-scale experiments and the search for quantum advantage."
 
 ---
@@ -65,13 +66,13 @@ E_n ≈ ℏω₀n - (E_C/2)n(n-1) - (E_J/24)(n+1)(n+2)
 
 **Fractional gates** ≠ **Qudit gates**
 
-| Feature | Fractional Gates | Qudit Gates |
-|---------|-----------------|-------------|
-| **Dimensions** | 2 (qubits) | d > 2 (qudits) |
-| **Levels used** | |0⟩, |1⟩ only | |0⟩, |1⟩, |2⟩, ..., |d-1⟩ |
-| **Purpose** | Reduce circuit depth | Increase Hilbert space |
-| **Hardware** | Same transmon | Same transmon |
-| **API Access** | ✅ Yes | ❌ No |
+| Feature         | Fractional Gates     | Qudit Gates            |
+| --------------- | -------------------- | ---------------------- | ------- | --- | --- | --- | -------- | ---- |
+| **Dimensions**  | 2 (qubits)           | d > 2 (qudits)         |
+| **Levels used** |                      | 0⟩,                    | 1⟩ only |     | 0⟩, | 1⟩, | 2⟩, ..., | d-1⟩ |
+| **Purpose**     | Reduce circuit depth | Increase Hilbert space |
+| **Hardware**    | Same transmon        | Same transmon          |
+| **API Access**  | ✅ Yes               | ❌ No                  |
 
 ### What Fractional Gates Actually Do
 
@@ -87,11 +88,13 @@ RX(θ) → 1 gate [RX(θ)]  # Direct execution
 ```
 
 **Benefits**:
+
 - Circuit depth reduction (up to 5×)
 - Lower error rates
 - Faster execution
 
 **Limitation**:
+
 - Still qubits (d=2)
 - No Hilbert space expansion
 
@@ -101,12 +104,12 @@ RX(θ) → 1 gate [RX(θ)]  # Direct execution
 
 ### Current Systems (2026)
 
-| Processor | Qubits | Qudit Support | Access Method |
-|-----------|--------|---------------|---------------|
-| **Heron** (ibm_torino, etc.) | 100+ | ❌ Blocked | Fractional gates only |
-| **Condor** | 1121 | ❌ Blocked | Standard gates |
-| **Flamingo** | 156 | ❌ Blocked | Standard gates |
-| **Eagle** | 127 | ❌ Blocked | Standard gates |
+| Processor                    | Qubits | Qudit Support | Access Method         |
+| ---------------------------- | ------ | ------------- | --------------------- |
+| **Heron** (ibm_torino, etc.) | 100+   | ❌ Blocked    | Fractional gates only |
+| **Condor**                   | 1121   | ❌ Blocked    | Standard gates        |
+| **Flamingo**                 | 156    | ❌ Blocked    | Standard gates        |
+| **Eagle**                    | 127    | ❌ Blocked    | Standard gates        |
 
 ### Roadmap
 
@@ -137,15 +140,15 @@ RX(θ) → 1 gate [RX(θ)]  # Direct execution
 
 ## 📈 Comparison: IBM vs Other Providers
 
-| Provider | Hardware | Qudit API | Status |
-|----------|----------|-----------|--------|
-| **IBM** | Transmon | ❌ **REMOVED (2025)** | Qubits only |
-| **IonQ** | Trapped ion | ❌ Not exposed | Qubits only (has d=4 capability) |
-| **AQT** | Trapped ion | ❌ Not exposed | Qubits only (has d=5 capability) |
-| **Xanadu** | Photonic CV | ✅ **INFINITE** | Cloud available |
-| **Quandela** | Photonic single-photon | ✅ d=2 | Cloud available (DI-QRNG) |
-| **Rigetti** | Transmon | ❌ No | Qubits only |
-| **Google** | Squeezed states | ❌ Lab only | GKP research |
+| Provider     | Hardware               | Qudit API             | Status                           |
+| ------------ | ---------------------- | --------------------- | -------------------------------- |
+| **IBM**      | Transmon               | ❌ **REMOVED (2025)** | Qubits only                      |
+| **IonQ**     | Trapped ion            | ❌ Not exposed        | Qubits only (has d=4 capability) |
+| **AQT**      | Trapped ion            | ❌ Not exposed        | Qubits only (has d=5 capability) |
+| **Xanadu**   | Photonic CV            | ✅ **INFINITE**       | Cloud available                  |
+| **Quandela** | Photonic single-photon | ✅ d=2                | Cloud available (DI-QRNG)        |
+| **Rigetti**  | Transmon               | ❌ No                 | Qubits only                      |
+| **Google**   | Squeezed states        | ❌ Lab only           | GKP research                     |
 
 ---
 
@@ -154,6 +157,7 @@ RX(θ) → 1 gate [RX(θ)]  # Direct execution
 ### Current State (May 2026)
 
 **IBM**: ❌ Cannot use for Hilbert space encoding
+
 - Hardware capable: YES
 - API allows: NO
 - Workaround: NONE
@@ -172,12 +176,12 @@ QNRG/QKD Provider Priority:
 
 ### What We Lose With IBM
 
-| Capability | Before (2024) | After (2025+) |
-|------------|---------------|---------------|
-| Qutrit QNRG | ✅ Possible | ❌ **IMPOSSIBLE** |
-| Multi-level encoding | ✅ Research | ❌ **BLOCKED** |
+| Capability              | Before (2024)    | After (2025+)        |
+| ----------------------- | ---------------- | -------------------- |
+| Qutrit QNRG             | ✅ Possible      | ❌ **IMPOSSIBLE**    |
+| Multi-level encoding    | ✅ Research      | ❌ **BLOCKED**       |
 | Hilbert space expansion | ✅ Pulse control | ❌ **NOT AVAILABLE** |
-| Custom pulse sequences | ✅ Full control | ❌ **No access** |
+| Custom pulse sequences  | ✅ Full control  | ❌ **No access**     |
 
 ---
 
@@ -186,6 +190,7 @@ QNRG/QKD Provider Priority:
 ### Will IBM Add Qudit Support?
 
 **Unlikely in near term**:
+
 - Roadmap focused on fault-tolerance (2029)
 - No mention of multi-level encoding
 - Trend is toward abstraction, not lower-level control
@@ -235,6 +240,7 @@ QNRG/QKD Provider Priority:
 **IBM Strategy**: Focus on qubit-based fault-tolerant computing (FTQC by 2029)
 
 **For QuantumCoin**:
+
 - ❌ **Cannot use IBM for Hilbert space encoding**
 - ✅ **Use Xanadu for infinite-dimensional CV**
 - ✅ **Use Quandela for certified QRNG**
@@ -245,6 +251,6 @@ QNRG/QKD Provider Priority:
 
 ---
 
-*Document created: May 18, 2026*
-*IBM Pulse removal date: February 3, 2025*
-*Status: CONFIRMED - IBM does NOT support Hilbert space encoding via API*
+_Document created: May 18, 2026_
+_IBM Pulse removal date: February 3, 2025_
+_Status: CONFIRMED - IBM does NOT support Hilbert space encoding via API_

@@ -4,9 +4,10 @@ compatibility_date = "2024-03-20"
 
 # Map the worker to your domain
 routes = [
-  { pattern = "geetqubits.com", custom_domain = true },
-  { pattern = "www.geetqubits.com", custom_domain = true }
+  { pattern = "getqubits.com", custom_domain = true },
+  { pattern = "www.getqubits.com", custom_domain = true }
 ]
+# workers_dev = true
 
 [vars]
 # The Vercel URL the worker should proxy traffic to
