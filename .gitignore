@@ -5,8 +5,6 @@
 !.gitignore
 !.github/
 !.github/**
-!.vibe/
-!.vibe/**
 !.coderabbit.yaml
 !.env.example
 !.gitmodules
