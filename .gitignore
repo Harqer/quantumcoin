@@ -1,3 +1,17 @@
+# Ignore all dotfiles and hidden folders by default
+.*
+
+# Explicitly allow essential dotfiles and folders
+!.gitignore
+!.github/
+!.github/**
+!.vibe/
+!.vibe/**
+!.coderabbit.yaml
+!.env.example
+!.gitmodules
+
+# Custom project directories
 quix/
 xanadu2/
 QubitCoin/
@@ -18,34 +32,19 @@ jadx_out/
 Cleo.apk
 qlink.pdf
 
-.venv/
+# Dependencies and caches
 venv/
+venv_new/
 node_modules/
 __pycache__/
-.next/
-.env*
-.vercel/
-.eas/
-.turbo/
 
-.agents/
-.antigravity/
-.claude/
-.cursor/
-.idea/
-.windsurf/
-
-.cursor-rules
-.cursorignore
-.mcp.json
-.q-ctrl-skills.md
-.qbraid-skills.md
-.skills.md
+# Project documentation and artifacts
 AGENTS.md
 ai-workflow-docs.md
 plan.md
 skills-lock.json
 
+# Build outputs, logs, and temp files
 *.jar
 *.tar.gz
 *.log
@@ -57,6 +56,7 @@ qnrg_report*.json
 screens_list.txt
 stripe_plaid_files.txt
 
+# Scripts
 extract.py
 fetch_cdp_docs.py
 fix_*.py
@@ -67,55 +67,29 @@ test_qualtran*.py
 update_*.py
 verify-ai-code.sh
 
-
 # Large reverse engineering artifacts
 cleobin/
 miner.py
-
 
 # Custom user exclusions
 vibe-coding-playbook-main/
 bitcoin_regtest.conf
 btc_cli_guide.md
 mcp.json
-.mcp.json
 railway.json
 turbo.json
-.turbo/
 vercel.json
-.vercel/
 sdk-key-s_*.json
-.vercelignore
-.vscode/
-venv_new/
 
-# Exclude all dotfiles and hidden folders
-.*
-# Essential exceptions to keep tracked
-!.gitignore
-!.github/
-!.github/**
-!.coderabbit.yaml
-!.vibe/
-!.vibe/**
-
+# Tools and specific outputs
 ffuf
 dependabot
 hermes-decomp/
 mobile_backup/
-
-# .env.example excluded to follow strict dotfile rule
 qbitcoin-base-contracts/
 
+# Specific targets and internal folders
 /gateway/target
 /rust_gateway/target
 /hbctool-venv
 /contracts/.certora_internal
-
-.projects/cache
-.projects/vault
-.projects/state.test.json
-.projects/state.local.test.json
-.env
-.env.*
-!.env.example
