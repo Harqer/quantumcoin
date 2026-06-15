@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^5.6.1",
-    "@openzeppelin/hardhat-upgrades": "^1.28.0"
+    "@openzeppelin/hardhat-upgrades": "^4.0.2"
   },
   "overrides": {
     "elliptic": "^6.6.1",
