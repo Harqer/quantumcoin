@@ -157,15 +157,18 @@ export async function* fetchPaginatedCoinbaseData<T>(
   options: RequestInit,
   twoFactorToken?: string
 ): AsyncGenerator<T[], void, unknown> {
+  const COINBASE_API_ORIGIN = 'https://api.coinbase.com';
   let currentUrl: string | null = url;
 
   while (currentUrl) {
-    // Coinbase's next_uri usually returns a relative path (e.g. "/v2/accounts?...")
-    const fullUrl = currentUrl.startsWith('http') 
-      ? currentUrl 
-      : `https://api.coinbase.com${currentUrl}`;
+    // Coinbase's next_uri usually returns a relative path (e.g. "/v2/accounts?...").
+    // Resolve against a fixed allowlisted origin to prevent SSRF.
+    const parsedUrl = new URL(currentUrl, COINBASE_API_ORIGIN);
+    if (parsedUrl.origin !== COINBASE_API_ORIGIN) {
+      throw new Error(`Disallowed pagination URL origin: ${parsedUrl.origin}`);
+    }
 
-    const response = await fetchWith2FA(fullUrl, options, twoFactorToken);
+    const response = await fetchWith2FA(parsedUrl.toString(), options, twoFactorToken);
     
     if (!response.ok) {
       const errText = await response.text();

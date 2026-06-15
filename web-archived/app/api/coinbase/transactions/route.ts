@@ -11,6 +11,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing accountId parameter' }, { status: 400 });
     }
 
+    if (!/^[A-Za-z0-9_-]+$/.test(accountId)) {
+      return NextResponse.json({ error: 'Invalid accountId parameter' }, { status: 400 });
+    }
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('cb_access_token')?.value;
 
@@ -26,7 +30,7 @@ export async function GET(req: NextRequest) {
     };
 
     // Use our pagination helper to fetch transactions for the specific account
-    const endpoint = `/v2/accounts/${accountId}/transactions`;
+    const endpoint = `/v2/accounts/${encodeURIComponent(accountId)}/transactions`;
     for await (const page of fetchPaginatedCoinbaseData<any>(endpoint, options)) {
       transactions.push(...page);
     }
