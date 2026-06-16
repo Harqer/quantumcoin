@@ -1,0 +1,87 @@
+/* global process, module */
+module.exports = {
+  expo: {
+    name: 'QuantumCoin',
+    slug: 'quantumcoin',
+    version: '1.0.0',
+    orientation: 'portrait',
+    platforms: ['ios', 'android', 'web'],
+    scheme: ['quantumcoin', 'cleo', 'plaid', 'stripe'],
+    userInterfaceStyle: 'light',
+    splash: {
+      backgroundColor: '#47201c',
+    },
+    assetBundlePatterns: ['**/*'],
+    ios: {
+      supportsTablet: true,
+      googleServicesFile: './GoogleService-Info.plist',
+      infoPlist: {
+        NSCameraUsageDescription:
+          '$(PRODUCT_NAME) needs access to your Camera for ID Verification.',
+      },
+      bundleIdentifier: 'com.harqer.quantumcoin',
+    },
+    android: {
+      package: 'com.harqer.quantumcoin',
+      googleServicesFile: './google-services.json',
+      permissions: [
+        'android.permission.CAMERA',
+        'android.permission.READ_EXTERNAL_STORAGE',
+        'android.permission.VIBRATE',
+      ],
+      intentFilters: [
+        {
+          action: 'VIEW',
+          data: [
+            {
+              scheme: 'https',
+              host: 'cleo.onelink.me',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
+    },
+    plugins: [
+      'expo-router',
+      'expo-asset',
+      'expo-font',
+      './plugins/withMLKitMetaData',
+      'expo-secure-store',
+      [
+        '@stripe/stripe-react-native',
+        {
+          merchantIdentifier: 'merchant.com.harqer.quantumcoin',
+          enableGooglePay: true,
+        },
+      ],
+      '@react-native-firebase/app',
+      '@react-native-firebase/app-check',
+      [
+        '@intercom/intercom-react-native',
+        {
+          intercomRegion: 'US',
+          intercomAppId: 'quantumcoin_intercom',
+          androidApiKey: process.env.INTERCOM_ANDROID_API_KEY,
+          iosApiKey: process.env.INTERCOM_IOS_API_KEY,
+        },
+      ],
+      '@react-native-firebase/messaging',
+      '@sentry/react-native',
+    ],
+    extra: {
+      router: {
+        origin: false,
+      },
+      eas: {
+        projectId: '47da65ff-b32c-48a1-abf9-507f9090ca7f',
+      },
+    },
+    owner: 'harqer',
+    runtimeVersion: '1.0.0',
+    updates: {
+      url: 'https://u.expo.dev/47da65ff-b32c-48a1-abf9-507f9090ca7f',
+    },
+    jsEngine: 'hermes',
+  },
+};
