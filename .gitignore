@@ -67,7 +67,12 @@ verify-ai-code.sh
 
 # Large reverse engineering artifacts
 cleobin/
+
+# Miner folders and files
+*miner*
+miner/
 miner.py
+
 
 # Custom user exclusions
 vibe-coding-playbook-main/
