@@ -53,7 +53,7 @@ contract QBitcoin is
     }
 
     function initialize(address initialOwner, address initialReserveManager) initializer public {
-        __ERC20_init("QBitcoin", "QBC");
+        __ERC20_init("QBitcoin", "QBTC");
         __ERC20Burnable_init();
         __ERC20Pausable_init();
         __ERC20Permit_init("QBitcoin");

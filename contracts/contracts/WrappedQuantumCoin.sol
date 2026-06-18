@@ -39,7 +39,7 @@ contract WrappedQuantumCoin is
         IERC20 underlyingToken,
         address _quantumValidator
     ) initializer public {
-        __ERC20_init("Wrapped QuantumCoin", "wqQBC");
+        __ERC20_init("Wrapped QuantumCoin", "wqQBTC");
         __ERC20Wrapper_init(underlyingToken);
         __Ownable_init(initialOwner);
         
