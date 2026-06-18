@@ -1,23 +1,17 @@
 {
-  "timestamp": "2026-05-18T23:24:29",
+  "timestamp": "2026-06-17T15:44:08",
   "provider": "Quandela",
-  "device": "sim:slos",
+  "device": "qpu:ascella",
   "certification": "device_independent",
   "dimensions_tested": [
-    2,
-    4,
-    8
+    2
   ],
   "all_nist_passed": true,
   "all_ptg3": true,
   "min_entropies": [
-    0.9988174748355518,
-    1.9953332241684658,
-    2.977678834257429
+    0.9434164716336297
   ],
   "quantum_advantages": [
-    5.0,
-    6.0,
-    7.0
+    5.0
   ]
 }

@@ -96,3 +96,9 @@ qbitcoin-base-contracts/
 /rust_gateway/target
 /hbctool-venv
 /contracts/.certora_internal
+
+# Security Audit Artifacts
+qrng_*.bin
+third_party/
+contracts/out/
+contracts/cache/

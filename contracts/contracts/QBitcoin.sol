@@ -47,8 +47,6 @@ contract QBitcoin is
     error InvalidZeroAddress();
     error AddressBlocklisted(address account);
 
-    uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10**18;
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -62,9 +60,6 @@ contract QBitcoin is
         __Ownable_init(initialOwner);
 
         reserveManager = initialReserveManager;
-        
-        // Initial supply of 1 million tokens (leaves room for Reserve Manager to mint)
-        _mint(initialOwner, 1_000_000 * 10**18);
     }
 
     modifier onlyNttOrReserveManager() {
@@ -123,7 +118,6 @@ contract QBitcoin is
     }
 
     function mint(address account, uint256 amount) external onlyNttOrReserveManager notBlocklisted(account) {
-        require(totalSupply() + amount <= MAX_SUPPLY, "Max supply exceeded");
         _mint(account, amount);
     }
 
@@ -134,6 +128,11 @@ contract QBitcoin is
     /// and the NTT Manager calls burn() on itself.
     function burn(uint256 amount) public override(INttToken, ERC20BurnableUpgradeable) onlyNttOrReserveManager {
         _burn(msg.sender, amount);
+    }
+
+    /// @notice Restrict burnFrom to only approved managers.
+    function burnFrom(address account, uint256 amount) public override onlyNttOrReserveManager {
+        super.burnFrom(account, amount);
     }
 
     // --- Custom Stablecoin Features ---

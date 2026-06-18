@@ -42,6 +42,7 @@ from savings import router as savings_router
 from debt import router as debt_router
 from pinwheel import router as pinwheel_router
 from ecommerce_x402 import router as ecommerce_router
+from quantum_routes import router as quantum_router
 from agentic_commerce import agentic_commerce_manager
 logger = structlog.get_logger()
 global_redis_pool = None
@@ -105,6 +106,7 @@ app.include_router(savings_router, prefix="/api/v1/savings")
 app.include_router(debt_router, prefix="/api/v1/debt")
 app.include_router(pinwheel_router, prefix="/api/v1/pinwheel")
 app.include_router(ecommerce_router, prefix="/api/v1")
+app.include_router(quantum_router, prefix="/api/v1/quantum")
 
 @app.post("/api/v1/agent/deploy-stablecoin")
 async def deploy_stablecoin(request: Request):
