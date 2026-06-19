@@ -7,8 +7,6 @@ import * as Sentry from "@sentry/nextjs";
 import {
   StakeRequest,
   UnstakeRequest,
-  SecureRequestContext,
-  UserStakingPosition,
 } from "@/types/feature_expansion_contracts";
 
 export const dynamic = "force-dynamic";

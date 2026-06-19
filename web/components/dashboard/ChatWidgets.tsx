@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { coreTrpc as trpc } from "@/utils/trpc";
 
@@ -7,7 +7,11 @@ export function BudgetSummaryWidget() {
   const { data, isLoading } = trpc.budget.getBudgets.useQuery({});
 
   if (isLoading || !data) {
-    return <div className="p-4 text-sm text-gray-500 animate-pulse">Loading budget...</div>;
+    return (
+      <div className="p-4 text-sm text-gray-500 animate-pulse">
+        Loading budget...
+      </div>
+    );
   }
 
   const remaining = Math.max(0, data.limit - data.money);
@@ -31,8 +35,6 @@ export function BudgetSummaryWidget() {
   );
 }
 
-
-
 export function SponsoredAdWidget() {
   // @ts-expect-error: uninitialized trpc client typing
   const { data: campaigns } = trpc.campaign.getActiveCampaigns.useQuery();
@@ -46,18 +48,18 @@ export function SponsoredAdWidget() {
         {campaign.badge}
       </span>
       <h3 className="mb-1 font-bold">{campaign.title}</h3>
-      <p className="text-sm">
-        {campaign.description}
-      </p>
+      <p className="text-sm">{campaign.description}</p>
     </div>
   );
 }
 
 export function CashAdvanceWidget() {
   // @ts-expect-error: uninitialized trpc client typing
-  const { data: eligibility, isLoading } = trpc.cashAdvance.getEligibility.useQuery();
+  const { data: eligibility, isLoading } =
+    trpc.cashAdvance.getEligibility.useQuery();
 
-  if (isLoading) return <div className="animate-pulse h-20 bg-green-50 rounded-xl" />;
+  if (isLoading)
+    return <div className="animate-pulse h-20 bg-green-50 rounded-xl" />;
   if (!eligibility?.eligible) return null;
 
   return (
@@ -66,7 +68,8 @@ export function CashAdvanceWidget() {
         Instant Cash Advance
       </h3>
       <p className="mb-4 text-sm">
-        You are eligible for up to ${eligibility.limit.toFixed(2)} advance with 0% interest.
+        You are eligible for up to ${eligibility.limit.toFixed(2)} advance with
+        0% interest.
       </p>
       <button className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700">
         Claim Now

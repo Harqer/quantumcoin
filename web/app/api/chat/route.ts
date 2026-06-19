@@ -45,8 +45,13 @@ export async function POST(req: Request) {
     let cdpWalletData: string | undefined = undefined;
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    if (user?.preferences && typeof user.preferences === "object") {
-      cdpWalletData = (user.preferences as any).cdpWalletData;
+    if (
+      user?.preferences &&
+      typeof user.preferences === "object" &&
+      user.preferences !== null
+    ) {
+      cdpWalletData = (user.preferences as Record<string, unknown>)
+        .cdpWalletData as string | undefined;
     }
 
     // Initialize AgentKit with CDP Wallet Provider

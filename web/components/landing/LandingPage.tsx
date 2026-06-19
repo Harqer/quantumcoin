@@ -1,16 +1,16 @@
 "use client";
 
-import HeroSection from "./HeroSection";
-import CardSection from "./CardSection";
-import CoinSection from "./CoinSection";
-import PaySection from "./PaySection";
-import ExchangeSection from "./ExchangeSection";
-import DexSection from "./DexSection";
-import GlobalWrappers from "./GlobalWrappers";
+import HeroSection from "./sections/HeroSection";
+import CardSection from "./sections/CardSection";
+import CoinSection from "./sections/CoinSection";
+import PaySection from "./sections/PaySection";
+import ExchangeSection from "./sections/ExchangeSection";
+import DexSection from "./sections/DexSection";
+import GlobalWrappers from "./layout/GlobalWrappers";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-black w-full overflow-x-hidden selection:bg-blue-500/30">
+    <main className="min-h-screen bg-m3-surface w-full overflow-x-hidden selection:bg-m3-primary/30">
       <GlobalWrappers>
         <HeroSection />
         <CardSection />
@@ -19,6 +19,6 @@ export default function LandingPage() {
         <ExchangeSection />
         <DexSection />
       </GlobalWrappers>
-    </div>
+    </main>
   );
 }

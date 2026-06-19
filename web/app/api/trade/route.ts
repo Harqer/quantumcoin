@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { PrismaClient } from "@prisma/client";
-import {
-  TradeOrderRequest,
-  TradeOrderResponse,
-} from "@/types/quantum_coin_contracts";
+import { TradeOrderRequest } from "@/types/quantum_coin_contracts";
 
 const prisma = new PrismaClient();
 

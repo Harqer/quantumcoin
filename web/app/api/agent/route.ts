@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { PrismaClient } from "@prisma/client";
-import {
-  AgentTerminalCommand,
-  AgentCommandResponse,
-  SecureRequestContext,
-} from "@/types/feature_expansion_contracts";
+import { AgentCommandResponse } from "@/types/feature_expansion_contracts";
 
 const prisma = new PrismaClient();
 
@@ -65,13 +61,8 @@ export async function POST(request: Request) {
 
     const commandId = crypto.randomUUID();
 
-    const agentCommand: AgentTerminalCommand = {
-      commandId,
-      agentId,
-      action,
-      parameters,
-      timestamp: Date.now(),
-    };
+    // The agentCommand object was originally here but wasn't used directly
+    // Instead we log it and store it in telemetry
 
     // Store high-throughput telemetry to Database
     Sentry.captureMessage(`Saving agent command telemetry to AnalyticsDB`, {

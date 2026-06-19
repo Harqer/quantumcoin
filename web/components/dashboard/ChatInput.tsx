@@ -60,40 +60,44 @@ export default function ChatInput({ onTypingChange }: Props) {
     } else {
       // Connect to the real /api/chat endpoint instead of stubbing
       try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: [{ role: 'user', content: input }] })
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: input }],
+          }),
         });
-        
+
         if (!response.ok) throw new Error("Failed to fetch chat");
-        
+
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullReply = "";
-        
+
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+            const lines = chunk.split("\n");
             for (const line of lines) {
-              if (line.startsWith('0:')) {
+              if (line.startsWith("0:")) {
                 try {
                   fullReply += JSON.parse(line.substring(2));
-                } catch(e) {}
+                } catch {}
               }
             }
           }
         }
-        
+
         dispatch(
           addMessage({
             id: crypto.randomUUID(),
             role: "ai",
             type: "text",
-            content: fullReply || "Agent executed your command but returned no explicit text.",
+            content:
+              fullReply ||
+              "Agent executed your command but returned no explicit text.",
             shouldStream: true,
           }),
         );

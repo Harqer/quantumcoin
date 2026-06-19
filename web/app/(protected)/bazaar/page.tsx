@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import Header from "@/components/Header";
 import BazaarHomeComponent from "./BazaarHomeComponent";
+import Link from "next/link";
 
 export default function BazaarHomePage() {
   return (
@@ -10,9 +11,13 @@ export default function BazaarHomePage() {
         <div className={styles.headerRow}>
           <div>
             <h1 className={styles.title}>Agent Bazaar</h1>
-            <p className={styles.subtitle}>Discover and integrate powerful AI agents</p>
+            <p className={styles.subtitle}>
+              Discover and integrate powerful AI agents
+            </p>
           </div>
-          <a href="/bazaar/creator" className={styles.primaryButton}>Creator Dashboard</a>
+          <Link href="/bazaar/creator" className={styles.primaryButton}>
+            Creator Dashboard
+          </Link>
         </div>
         <BazaarHomeComponent />
       </main>

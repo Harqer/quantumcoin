@@ -54,7 +54,7 @@ export default function OrderBook({ productId }: { productId: string }) {
             } else if (ev.type === "update") {
               // Apply updates using Order Book reconciliation algorithm
               setBids((prev) => {
-                let next = [...prev];
+                const next = [...prev];
                 const bidUpdates = ev.updates.filter((u) => u.side === "bid");
                 bidUpdates.forEach((u) => {
                   const idx = next.findIndex((b) => b.price === u.price_level);
@@ -87,7 +87,7 @@ export default function OrderBook({ productId }: { productId: string }) {
               });
 
               setAsks((prev) => {
-                let next = [...prev];
+                const next = [...prev];
                 const askUpdates = ev.updates.filter((u) => u.side === "offer");
                 askUpdates.forEach((u) => {
                   const idx = next.findIndex((a) => a.price === u.price_level);

@@ -17,7 +17,6 @@ export default function TypewriterText({
 
   useEffect(() => {
     let index = 0;
-    // eslint-disable-next-line
     setDisplayedText(""); // Reset text on new input
 
     const interval = setInterval(() => {

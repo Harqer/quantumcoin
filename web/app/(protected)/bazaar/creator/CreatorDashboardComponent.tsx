@@ -33,7 +33,7 @@ export default function CreatorDashboardComponent() {
         network: "Base",
         creator_address: "",
       });
-    } catch (err) {
+    } catch {
       setMessage(
         "Failed to register service. You may need creator permissions.",
       );

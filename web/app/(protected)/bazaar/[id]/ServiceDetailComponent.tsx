@@ -38,7 +38,7 @@ export default function ServiceDetailComponent({ id }: { id: string }) {
         // Continue polling
         setTimeout(() => pollJobStatus(jobId), 1000);
       }
-    } catch (err) {
+    } catch {
       setResult("Execution failed during status check.");
       setExecuting(false);
     }
@@ -55,7 +55,7 @@ export default function ServiceDetailComponent({ id }: { id: string }) {
       let params = {};
       try {
         params = JSON.parse(playgroundInput);
-      } catch (e) {
+      } catch {
         /* ignore parse error for raw strings */
       }
 
@@ -84,7 +84,7 @@ export default function ServiceDetailComponent({ id }: { id: string }) {
       } else {
         throw new Error("No job ID returned from service");
       }
-    } catch (err) {
+    } catch {
       setResult("Execution request failed.");
       setExecuting(false);
     }
@@ -136,7 +136,7 @@ paths:
         </div>
 
         <div className={styles.playground}>
-          <h3>"Pay & Execute" x402 Playground</h3>
+          <h3>&quot;Pay &amp; Execute&quot; x402 Playground</h3>
           <p style={{ marginBottom: "1rem", color: "var(--muted-foreground)" }}>
             Test this service by passing a JSON payload. A real x402 charge will
             be processed before execution.
