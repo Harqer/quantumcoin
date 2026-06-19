@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import LandingPage from "@/components/landing/LandingPage";
 
 export default async function Home() {
   const session = auth();
@@ -14,17 +15,8 @@ export default async function Home() {
   }
 
   return (
-    <iframe
-      src="/gleec1/page.html"
-      style={{
-        width: "100vw",
-        height: "100vh",
-        border: "none",
-        margin: 0,
-        padding: 0,
-        display: "block",
-      }}
-      title="Landing Page"
-    />
+    <main>
+      <LandingPage />
+    </main>
   );
 }

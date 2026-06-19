@@ -10,6 +10,7 @@
   --color-destructive: var(--destructive);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --font-roobert: 'Roobert', sans-serif;
 }
 
 @layer base {
@@ -85,3 +86,30 @@
     }
   }
 }
+
+
+/* --- PORTED FROM gleec1/styles.css --- */
+
+@font-face { font-family: Roobert; src: url("/fonts/roobert/Roobert-Regular.woff2") format("woff2"), url("/fonts/roobert/Roobert-Regular.woff") format("woff"), url("/fonts/roobert/Roobert-Regular.ttf") format("truetype"); font-style: normal; font-display: swap; font-weight: 400; }
+@font-face { font-family: Roobert; src: url("/fonts/roobert/Roobert-SemiBoldItalic.woff2") format("woff2"), url("/fonts/roobert/Roobert-SemiBoldItalic.woff") format("woff"), url("/fonts/roobert/Roobert-SemiBoldItalic.ttf") format("truetype"); font-style: italic; font-display: swap; font-weight: 500; }
+@font-face { font-family: Roobert; src: url("/fonts/roobert/Roobert-SemiBold.woff2") format("woff2"), url("/fonts/roobert/Roobert-SemiBold.woff") format("woff"), url("/fonts/roobert/Roobert-SemiBold.ttf") format("truetype"); font-style: normal; font-display: swap; font-weight: 500; }
+
+@layer base {
+  @media (min-width: 0) {
+    html::before { display: none; content: "small"; }
+  }
+  @media (min-width: 500px) {
+    html::before { display: none; content: "medium"; }
+  }
+  @media (min-width: 850px) {
+    html::before { display: none; content: "large"; }
+  }
+  @media (min-width: 500px) {
+    html { font-size: 0.55vw; }
+  }
+  @media (min-width: 850px) {
+    html { font-size: 1vw; }
+  }
+}
+
+
