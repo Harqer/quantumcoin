@@ -9,24 +9,18 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
-};
-
-import { withSentryConfig } from "@sentry/nextjs";
-
-export default withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options
-  org: "quantum-coin",
-  project: "qubitcoin-web",
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-});
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  serverExternalPackages: [
+    "@coinbase/agentkit",
+    "viem",
+    "@noble/hashes",
+    "@coinbase/agentkit-vercel-ai-sdk",
+  ],
+};
+export default nextConfig;

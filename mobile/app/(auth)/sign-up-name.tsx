@@ -1,6 +1,13 @@
 // @ts-nocheck
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +17,7 @@ import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
-import PressableScale from '../../components/PressableScale';
+import { Button } from '../../components/Button';
 
 export default function SignUpNameScreen() {
   const { colorRoles, typography, spacing } = useGlobalTheme();
@@ -27,36 +34,84 @@ export default function SignUpNameScreen() {
   const handleNext = () => {
     if (isValid) {
       AudioHapticsManager.mediumInteraction();
-      router.push({ pathname: '/(auth)/sign-up-dob', params: { firstName: firstName.trim(), lastName: lastName.trim() } });
+      router.push({
+        pathname: '/(auth)/sign-up-dob',
+        params: { firstName: firstName.trim(), lastName: lastName.trim() },
+      });
     } else {
       AudioHapticsManager.error();
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colorRoles.background.primary }}
+      edges={['top', 'bottom']}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+      >
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.m, paddingVertical: spacing.s }}>
-          <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: spacing.m,
+            paddingVertical: spacing.s,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              AudioHapticsManager.lightInteraction();
+              router.back();
+            }}
+            style={{ padding: spacing.s, marginLeft: -spacing.s }}
+          >
             <Ionicons name="arrow-back" size={28} color={colorRoles.content.primary} />
           </TouchableOpacity>
         </View>
 
         <View style={{ flex: 1, paddingHorizontal: spacing.l, paddingTop: spacing.xl }}>
           <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)}>
-            <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, fontWeight: '700', color: colorRoles.content.primary, marginBottom: spacing.s }}>
+            <Text
+              style={{
+                fontFamily: typography.titleLarge.fontFamily,
+                fontSize: 32,
+                fontWeight: '700',
+                color: colorRoles.content.primary,
+                marginBottom: spacing.s,
+              }}
+            >
               What's your name?
             </Text>
-            <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, marginBottom: spacing.xxl }}>
+            <Text
+              style={{
+                fontFamily: typography.bodyLarge.fontFamily,
+                fontSize: 16,
+                color: colorRoles.content.secondary,
+                marginBottom: spacing.xxl,
+              }}
+            >
               Let's get formally introduced.
             </Text>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)} style={{ gap: spacing.l }}>
+          <Animated.View
+            entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)}
+            style={{ gap: spacing.l }}
+          >
             <View>
-              <Text style={{ fontFamily: typography.labelLarge.fontFamily, fontSize: 14, fontWeight: '700', color: colorRoles.content.secondary, marginBottom: spacing.xs, marginLeft: spacing.xs }}>
+              <Text
+                style={{
+                  fontFamily: typography.labelLarge.fontFamily,
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: colorRoles.content.secondary,
+                  marginBottom: spacing.xs,
+                  marginLeft: spacing.xs,
+                }}
+              >
                 First Name
               </Text>
               <TextInput
@@ -68,7 +123,7 @@ export default function SignUpNameScreen() {
                   fontSize: 18,
                   color: colorRoles.content.primary,
                   borderWidth: 1,
-                  borderColor: firstName ? colorRoles.border.selectedInverse : 'transparent'
+                  borderColor: firstName ? colorRoles.border.selectedInverse : 'transparent',
                 }}
                 placeholder="First Name"
                 placeholderTextColor={colorRoles.content.secondary}
@@ -81,7 +136,16 @@ export default function SignUpNameScreen() {
             </View>
 
             <View>
-              <Text style={{ fontFamily: typography.labelLarge.fontFamily, fontSize: 14, fontWeight: '700', color: colorRoles.content.secondary, marginBottom: spacing.xs, marginLeft: spacing.xs }}>
+              <Text
+                style={{
+                  fontFamily: typography.labelLarge.fontFamily,
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: colorRoles.content.secondary,
+                  marginBottom: spacing.xs,
+                  marginLeft: spacing.xs,
+                }}
+              >
                 Last Name
               </Text>
               <TextInput
@@ -93,7 +157,7 @@ export default function SignUpNameScreen() {
                   fontSize: 18,
                   color: colorRoles.content.primary,
                   borderWidth: 1,
-                  borderColor: lastName ? colorRoles.border.selectedInverse : 'transparent'
+                  borderColor: lastName ? colorRoles.border.selectedInverse : 'transparent',
                 }}
                 placeholder="Last Name"
                 placeholderTextColor={colorRoles.content.secondary}
@@ -104,28 +168,20 @@ export default function SignUpNameScreen() {
               />
             </View>
           </Animated.View>
-
         </View>
 
-        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)} style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}>
-          <PressableScale
+        <Animated.View
+          entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
+          style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
+        >
+          <Button
             haptics="medium"
             onPress={handleNext}
             disabled={!isValid}
-            style={{ 
-              backgroundColor: isValid ? colorRoles.content.accentMid : colorRoles.background.disabled, 
-              paddingVertical: 18, 
-              borderRadius: 9999, 
-              alignItems: 'center', 
-              width: '100%' 
-            }}
-          >
-            <Text style={{ color: isValid ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700' }}>
-              Next
-            </Text>
-          </PressableScale>
+            variant="primary"
+            title="Next"
+          />
         </Animated.View>
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

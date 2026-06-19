@@ -1,29 +1,66 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
+import { Button } from '../../../components/Button';
 
 export default function MobileEsimInstallSuccessScreen() {
   const router = useRouter();
+  const { colorRoles, typography, spacing } = useGlobalTheme();
 
   return (
-    <View className="flex-1 bg-gray-900 px-6 py-8 justify-between">
-      <View className="flex-1 items-center justify-center">
-        <View className="p-6 rounded-full mb-8 bg-green-500/20">
-          <Ionicons name="checkmark-circle" size={80} color="#10b981" />
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colorRoles.background.primary,
+        paddingHorizontal: spacing.l,
+        paddingVertical: spacing.xl,
+        justifyContent: 'space-between',
+      }}
+    >
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{
+            padding: spacing.l,
+            borderRadius: 999,
+            marginBottom: spacing.xl,
+            backgroundColor: colorRoles.content.successDark + '20',
+          }}
+        >
+          <Ionicons name="checkmark-circle" size={80} color={colorRoles.content.successDark} />
         </View>
-        <Text className="text-white text-3xl font-bold mb-4 text-center">Enjoy your new plan</Text>
-        <Text className="text-gray-400 text-lg text-center leading-relaxed px-4">
+        <Text
+          style={{
+            color: colorRoles.content.primary,
+            fontFamily: typography.titleLarge.fontFamily,
+            fontSize: 32,
+            marginBottom: spacing.m,
+            textAlign: 'center',
+          }}
+        >
+          Enjoy your new plan
+        </Text>
+        <Text
+          style={{
+            color: colorRoles.content.secondary,
+            fontFamily: typography.bodyLarge.fontFamily,
+            fontSize: 18,
+            textAlign: 'center',
+            lineHeight: 28,
+            paddingHorizontal: spacing.m,
+          }}
+        >
           Your eSIM is installed and ready to use. Welcome to Quantum Mobile!
         </Text>
       </View>
 
-      <TouchableOpacity 
-        className="w-full py-4 rounded-xl items-center bg-green-600"
+      <Button
         onPress={() => router.push('/(main)/wallet')}
-      >
-        <Text className="text-white font-bold text-lg">See my plan</Text>
-      </TouchableOpacity>
+        variant="primary"
+        title="See my plan"
+        style={{ backgroundColor: colorRoles.content.successDark }}
+      />
     </View>
   );
 }

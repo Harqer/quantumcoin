@@ -1,10 +1,17 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-import { z } from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { StakeRequest, UnstakeRequest, SecureRequestContext, UserStakingPosition } from '@/types/feature_expansion_contracts';
+import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
+import {
+  StakeRequest,
+  UnstakeRequest,
+  SecureRequestContext,
+  UserStakingPosition,
+} from "@/types/feature_expansion_contracts";
+
+export const dynamic = "force-dynamic";
 
 // SOC2 & AML strict validation schemas
 const secureContextSchema = z.object({
@@ -13,11 +20,11 @@ const secureContextSchema = z.object({
   ipAddress: z.string().ip(),
   deviceFingerprint: z.string(),
   mfaVerified: z.boolean(),
-  clearanceLevel: z.enum(['standard', 'elevated', 'admin']),
+  clearanceLevel: z.enum(["standard", "elevated", "admin"]),
 });
 
 const stakeSchema = z.object({
-  action: z.literal('stake'),
+  action: z.literal("stake"),
   payload: z.object({
     userId: z.string(),
     poolId: z.string(),
@@ -27,7 +34,7 @@ const stakeSchema = z.object({
 });
 
 const unstakeSchema = z.object({
-  action: z.literal('unstake'),
+  action: z.literal("unstake"),
   payload: z.object({
     userId: z.string(),
     positionId: z.string(),
@@ -36,12 +43,10 @@ const unstakeSchema = z.object({
   context: secureContextSchema,
 });
 
-const earnRequestSchema = z.discriminatedUnion('action', [
+const earnRequestSchema = z.discriminatedUnion("action", [
   stakeSchema,
-  unstakeSchema
+  unstakeSchema,
 ]);
-
-
 
 export async function POST(request: Request) {
   try {
@@ -49,7 +54,10 @@ export async function POST(request: Request) {
 
     const validationResult = earnRequestSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json({ error: validationResult.error.format() }, { status: 400 });
+      return NextResponse.json(
+        { error: validationResult.error.format() },
+        { status: 400 },
+      );
     }
 
     const { action, payload, context } = validationResult.data;
@@ -58,13 +66,16 @@ export async function POST(request: Request) {
     if (!context.mfaVerified) {
       Sentry.captureMessage("Unauthorized earn request: MFA not verified", {
         level: "warning",
-        extra: { 
-          eventCategory: 'SOC2_SECURITY_VIOLATION',
+        extra: {
+          eventCategory: "SOC2_SECURITY_VIOLATION",
           ipAddress: context.ipAddress,
-          userId: context.userId
-        }
+          userId: context.userId,
+        },
       });
-      return NextResponse.json({ error: "MFA is required for earn transactions. Operation blocked." }, { status: 403 });
+      return NextResponse.json(
+        { error: "MFA is required for earn transactions. Operation blocked." },
+        { status: 403 },
+      );
     }
 
     // Tokenize PII data: In a real environment, user identities are separated from transactional data
@@ -73,19 +84,22 @@ export async function POST(request: Request) {
     // Database Optimization: ACID Transaction Boundary
     let result;
     await prisma.$transaction(async (tx) => {
-      if (action === 'stake') {
+      if (action === "stake") {
         const p = payload as StakeRequest;
-        
+
         // Yield computation offloading: Send event to Kafka for YieldEngine worker
-        Sentry.captureMessage(`Publishing Staking event to Kafka for pool ${p.poolId}`, {
-          level: "info",
-          extra: { 
-            eventCategory: 'STAKING_ACID_TX', 
-            poolId: p.poolId, 
-            amount: p.amount,
-            vaultedUserId 
-          }
-        });
+        Sentry.captureMessage(
+          `Publishing Staking event to Kafka for pool ${p.poolId}`,
+          {
+            level: "info",
+            extra: {
+              eventCategory: "STAKING_ACID_TX",
+              poolId: p.poolId,
+              amount: p.amount,
+              vaultedUserId,
+            },
+          },
+        );
 
         const unlocksAt = new Date(Date.now() + 86400 * 30 * 1000); // 30 days lockup
 
@@ -95,24 +109,24 @@ export async function POST(request: Request) {
             poolId: p.poolId,
             amountStaked: p.amount,
             earnedRewards: "0",
-            unlocksAt: unlocksAt
-          }
+            unlocksAt: unlocksAt,
+          },
         });
-        
       } else {
         const p = payload as UnstakeRequest;
         const position = await tx.stakingPosition.findUnique({
-          where: { id: p.positionId }
+          where: { id: p.positionId },
         });
-        
+
         if (!position) {
           throw new Error("Staking position not found");
         }
 
-        const newAmount = parseFloat(position.amountStaked) - parseFloat(p.amount);
+        const newAmount =
+          parseFloat(position.amountStaked) - parseFloat(p.amount);
         result = await tx.stakingPosition.update({
           where: { id: p.positionId },
-          data: { amountStaked: newAmount.toString() }
+          data: { amountStaked: newAmount.toString() },
         });
       }
 
@@ -122,22 +136,21 @@ export async function POST(request: Request) {
           requestId: crypto.randomUUID(),
           action,
           metadata: { payload, context: { ...context, piiVaulted: true } },
-          userId: context.userId
-        }
+          userId: context.userId,
+        },
       });
     });
 
     return NextResponse.json({ success: true, data: result }, { status: 200 });
-
   } catch (error: unknown) {
-    
     Sentry.captureException(error, {
       extra: {
-        eventCategory: 'EARN_API_ERROR',
-      }
+        eventCategory: "EARN_API_ERROR",
+      },
     });
 
-    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

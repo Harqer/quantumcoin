@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
 import { RootProvider } from "./rootProvider";
 import * as Sentry from "@sentry/nextjs";
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider } from "@clerk/nextjs";
 import { AlchemyProviderWrapper } from "./AlchemyProviderWrapper";
 import "./globals.css";
+
+export const dynamic = "force-dynamic";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,13 +41,9 @@ export default function RootLayout({
     </html>
   );
 
-
-
   return (
     <ClerkProvider>
-      <AlchemyProviderWrapper>
-        {content}
-      </AlchemyProviderWrapper>
+      <AlchemyProviderWrapper>{content}</AlchemyProviderWrapper>
     </ClerkProvider>
   );
 }

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
-import PressableScale from '../../components/PressableScale';
+import { Button } from '../../components/Button';
 import { useSignIn } from '@clerk/clerk-expo';
 
 export default function EmailFallbackScreen() {
@@ -32,7 +32,7 @@ export default function EmailFallbackScreen() {
       });
 
       const emailFactor = supportedFirstFactors?.find(
-        (factor: any) => factor.strategy === 'email_code'
+        (factor: any) => factor.strategy === 'email_code',
       ) as any;
 
       if (emailFactor) {
@@ -82,20 +82,56 @@ export default function EmailFallbackScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.m, paddingVertical: spacing.s }}>
-        <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colorRoles.background.primary }}
+      edges={['top', 'bottom']}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.m,
+          paddingVertical: spacing.s,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            AudioHapticsManager.lightInteraction();
+            router.back();
+          }}
+          style={{ padding: spacing.s, marginLeft: -spacing.s }}
+        >
           <Ionicons name="arrow-back" size={28} color={colorRoles.content.primary} />
         </TouchableOpacity>
       </View>
 
       <View style={{ flex: 1, paddingHorizontal: spacing.l, paddingTop: spacing.xl }}>
-        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)} style={{ marginBottom: spacing.xl }}>
-          <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 32, fontWeight: '700', color: colorRoles.content.primary, marginBottom: spacing.s }}>
+        <Animated.View
+          entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)}
+          style={{ marginBottom: spacing.xl }}
+        >
+          <Text
+            style={{
+              fontFamily: typography.titleLarge.fontFamily,
+              fontSize: 32,
+              fontWeight: '700',
+              color: colorRoles.content.primary,
+              marginBottom: spacing.s,
+            }}
+          >
             {isCodeSent ? 'Enter Code' : 'Sign in with Email'}
           </Text>
-          <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, lineHeight: 24 }}>
-            {isCodeSent ? `Enter the one-time passcode sent to ${emailAddress}` : 'Enter your email to receive a one-time passcode.'}
+          <Text
+            style={{
+              fontFamily: typography.bodyLarge.fontFamily,
+              fontSize: 16,
+              color: colorRoles.content.secondary,
+              lineHeight: 24,
+            }}
+          >
+            {isCodeSent
+              ? `Enter the one-time passcode sent to ${emailAddress}`
+              : 'Enter your email to receive a one-time passcode.'}
           </Text>
         </Animated.View>
 
@@ -121,27 +157,14 @@ export default function EmailFallbackScreen() {
                 />
               </View>
 
-              <PressableScale
+              <Button
                 haptics="heavy"
                 onPress={handleSignIn}
                 disabled={isLoading || !emailAddress}
-                style={{ 
-                  backgroundColor: emailAddress ? colorRoles.content.primary : colorRoles.background.disabled, 
-                  paddingVertical: 18, 
-                  borderRadius: 9999, 
-                  alignItems: 'center', 
-                  flexDirection: 'row',
-                  justifyContent: 'center'
-                }}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color={colorRoles.content.onPrimary} />
-                ) : (
-                  <Text style={{ color: emailAddress ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>
-                    Continue
-                  </Text>
-                )}
-              </PressableScale>
+                loading={isLoading}
+                variant="primary"
+                title="Continue"
+              />
             </>
           ) : (
             <>
@@ -160,37 +183,31 @@ export default function EmailFallbackScreen() {
                     borderBottomColor: colorRoles.content.accentMid,
                     paddingVertical: spacing.m,
                     textAlign: 'center',
-                    letterSpacing: 8
+                    letterSpacing: 8,
                   }}
                 />
               </View>
 
-              <PressableScale
+              <Button
                 haptics="heavy"
                 onPress={handleVerifyCode}
                 disabled={isLoading || !code}
-                style={{
-                  backgroundColor: code ? colorRoles.content.primary : colorRoles.background.disabled,
-                  paddingVertical: 18,
-                  borderRadius: 9999,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center'
-                }}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color={colorRoles.content.onPrimary} />
-                ) : (
-                  <Text style={{ color: code ? colorRoles.content.onPrimary : colorRoles.content.secondary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>
-                    Verify Code
-                  </Text>
-                )}
-              </PressableScale>
+                loading={isLoading}
+                variant="primary"
+                title="Verify Code"
+              />
             </>
           )}
 
           {errorMsg ? (
-            <Text style={{ fontFamily: typography.bodyMedium.fontFamily, color: colorRoles.content.negativeDark, marginTop: spacing.l, textAlign: 'center' }}>
+            <Text
+              style={{
+                fontFamily: typography.bodyMedium.fontFamily,
+                color: colorRoles.content.negativeDark,
+                marginTop: spacing.l,
+                textAlign: 'center',
+              }}
+            >
               {errorMsg}
             </Text>
           ) : null}

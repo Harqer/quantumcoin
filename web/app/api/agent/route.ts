@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { PrismaClient } from '@prisma/client';
-import { AgentTerminalCommand, AgentCommandResponse, SecureRequestContext } from '@/types/feature_expansion_contracts';
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
+import { PrismaClient } from "@prisma/client";
+import {
+  AgentTerminalCommand,
+  AgentCommandResponse,
+  SecureRequestContext,
+} from "@/types/feature_expansion_contracts";
 
 const prisma = new PrismaClient();
 
@@ -13,15 +17,18 @@ const secureContextSchema = z.object({
   ipAddress: z.string().ip(),
   deviceFingerprint: z.string(),
   mfaVerified: z.boolean(),
-  clearanceLevel: z.enum(['standard', 'elevated', 'admin']),
+  clearanceLevel: z.enum(["standard", "elevated", "admin"]),
 });
 
 const commandSchema = z.object({
   agentId: z.string(),
-  action: z.enum(['analyze_wallet', 'trace_funds', 'monitor_asset']),
+  action: z.enum(["analyze_wallet", "trace_funds", "monitor_asset"]),
   parameters: z.record(z.any()),
   context: secureContextSchema,
 });
+
+export const maxDuration = 30;
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
@@ -29,23 +36,31 @@ export async function POST(request: Request) {
 
     const validationResult = commandSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json({ error: validationResult.error.format() }, { status: 400 });
+      return NextResponse.json(
+        { error: validationResult.error.format() },
+        { status: 400 },
+      );
     }
 
     const { agentId, action, parameters, context } = validationResult.data;
-    
+
     // SOC2 & AML Clearance Level Optimization: Restrict sensitive blockchain tracing to admin clearance
-    if (action === 'trace_funds' && context.clearanceLevel !== 'admin') {
+    if (action === "trace_funds" && context.clearanceLevel !== "admin") {
       Sentry.captureMessage("Unauthorized fund tracing attempt detected", {
         level: "error",
-        extra: { 
-          eventCategory: 'AML_SECURITY_VIOLATION',
+        extra: {
+          eventCategory: "AML_SECURITY_VIOLATION",
           userId: context.userId,
           ipAddress: context.ipAddress,
-          clearanceLevel: context.clearanceLevel
-        }
+          clearanceLevel: context.clearanceLevel,
+        },
       });
-      return NextResponse.json({ error: "Insufficient clearance for AML tracing operations. Blocked." }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: "Insufficient clearance for AML tracing operations. Blocked.",
+        },
+        { status: 403 },
+      );
     }
 
     const commandId = crypto.randomUUID();
@@ -55,18 +70,18 @@ export async function POST(request: Request) {
       agentId,
       action,
       parameters,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Store high-throughput telemetry to Database
     Sentry.captureMessage(`Saving agent command telemetry to AnalyticsDB`, {
       level: "info",
-      extra: { 
-        eventCategory: 'AGENT_ANALYTICS_INGEST',
+      extra: {
+        eventCategory: "AGENT_ANALYTICS_INGEST",
         commandId,
         action,
-        agentId
-      }
+        agentId,
+      },
     });
 
     await prisma.telemetryLog.create({
@@ -75,26 +90,28 @@ export async function POST(request: Request) {
         agentId,
         action,
         parameters: parameters || {},
-        status: 'pending'
-      }
+        status: "pending",
+      },
     });
 
     // Fire-and-forget async execution or publish to Kafka to trace funds asynchronously
     // Return pending state immediately for WebSocket to update later
     const response: AgentCommandResponse = {
       commandId,
-      status: 'pending',
+      status: "pending",
     };
 
     return NextResponse.json(response, { status: 202 });
-
   } catch (error: unknown) {
     Sentry.captureException(error, {
       extra: {
-        eventCategory: 'AGENT_TERMINAL_ERROR',
-      }
+        eventCategory: "AGENT_TERMINAL_ERROR",
+      },
     });
 
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

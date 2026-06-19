@@ -6,7 +6,6 @@
 !.github/
 !.github/**
 !.coderabbit.yaml
-!.env.example
 !.gitmodules
 
 # Custom project directories
@@ -102,3 +101,11 @@ qrng_*.bin
 third_party/
 contracts/out/
 contracts/cache/
+
+.projects/cache
+.projects/vault
+.projects/state.test.json
+.projects/state.local.test.json
+.env
+.env.*
+!.env.example

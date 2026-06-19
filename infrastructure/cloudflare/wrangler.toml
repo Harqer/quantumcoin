@@ -11,7 +11,7 @@ routes = [
 
 [vars]
 # The Vercel URL the worker should proxy traffic to
-VERCEL_ORIGIN = "https://qubit-coin.vercel.app"
+VERCEL_ORIGIN = "https://quantumcoin.vercel.app"
 # Note: CF_SECURE_TOKEN will be provided as a secret
 
 [[kv_namespaces]]

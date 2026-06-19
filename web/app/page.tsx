@@ -11,7 +11,20 @@ export default async function Home() {
 
   if (userId) {
     redirect("/dashboard");
-  } else {
-    redirect("/login");
   }
+
+  return (
+    <iframe
+      src="/gleec1/page.html"
+      style={{
+        width: "100vw",
+        height: "100vh",
+        border: "none",
+        margin: 0,
+        padding: 0,
+        display: "block",
+      }}
+      title="Landing Page"
+    />
+  );
 }

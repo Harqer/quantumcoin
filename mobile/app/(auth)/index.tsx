@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Premium UX
 import AudioHapticsManager from '../../utils/AudioHapticsManager';
-import PressableScale from '../../components/PressableScale';
+import { Button } from '../../components/Button';
 import { CardsCarousel } from '../../components/CardsCarousel';
 
 const CAROUSEL_DATA = [
@@ -18,22 +18,22 @@ const CAROUSEL_DATA = [
     title: 'Meet Quantum.',
     subtitle: 'The AI that roasts your spending, spots you cash, and builds your credit.',
     icon: 'diamond' as const,
-    color: '#6366F1' // Indigo
+    color: '#6366F1', // Indigo
   },
   {
     id: '2',
     title: 'Build your credit.',
     subtitle: 'Every on-time repayment automatically reports to major bureaus.',
     icon: 'trending-up' as const,
-    color: '#10B981' // Emerald
+    color: '#10B981', // Emerald
   },
   {
     id: '3',
     title: 'Automated Savings.',
     subtitle: 'Turn on auto-save to build an emergency fund without thinking.',
     icon: 'wallet' as const,
-    color: '#F59E0B' // Amber
-  }
+    color: '#F59E0B', // Amber
+  },
 ];
 
 export default function IntroductionScreen() {
@@ -45,48 +45,58 @@ export default function IntroductionScreen() {
     AudioHapticsManager.init();
   }, []);
 
-  const renderCarouselItem = (item: typeof CAROUSEL_DATA[0]) => {
+  const renderCarouselItem = (item: (typeof CAROUSEL_DATA)[0]) => {
     return (
       <View style={[styles.carouselCard, { backgroundColor: item.color }]}>
         <Ionicons name={item.icon} size={80} color="#ffffff" style={{ marginBottom: 32 }} />
-        <Text style={[styles.cardTitle, { fontFamily: typography.titleLarge.fontFamily }]}>{item.title}</Text>
-        <Text style={[styles.cardSubtitle, { fontFamily: typography.bodyMedium.fontFamily }]}>{item.subtitle}</Text>
+        <Text style={[styles.cardTitle, { fontFamily: typography.titleLarge.fontFamily }]}>
+          {item.title}
+        </Text>
+        <Text style={[styles.cardSubtitle, { fontFamily: typography.bodyMedium.fontFamily }]}>
+          {item.subtitle}
+        </Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colorRoles.background.primary }}
+      edges={['top', 'bottom']}
+    >
       <View style={{ flex: 1, justifyContent: 'space-between', paddingVertical: spacing.xxl }}>
-        
         {/* Hermes Parity: Onboarding Value Prop Carousel */}
-        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)} style={{ flex: 1 }}>
+        <Animated.View
+          entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)}
+          style={{ flex: 1 }}
+        >
           <CardsCarousel data={CAROUSEL_DATA} renderItem={renderCarouselItem} />
         </Animated.View>
 
-        {/* Action Buttons */}
-        <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)} style={{ width: '100%', gap: spacing.m, paddingHorizontal: spacing.l }}>
-          <PressableScale
+        <Animated.View
+          entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
+          style={{ width: '100%', gap: spacing.m, paddingHorizontal: spacing.l }}
+        >
+          <Button
             haptics="heavy"
-            onPress={() => { AudioHapticsManager.mediumInteraction(); router.push('/(auth)/sign-up-name'); }}
-            style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: 18, borderRadius: 9999, alignItems: 'center', width: '100%' }}
-          >
-            <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700' }}>
-              Sign up
-            </Text>
-          </PressableScale>
+            onPress={() => {
+              AudioHapticsManager.mediumInteraction();
+              router.push('/(auth)/sign-up-name');
+            }}
+            variant="primary"
+            title="Sign up"
+          />
 
-          <PressableScale
+          <Button
             haptics="light"
-            onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(auth)/login'); }}
-            style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 18, borderRadius: 9999, alignItems: 'center', width: '100%' }}
-          >
-            <Text style={{ color: colorRoles.content.primary, fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700' }}>
-              Log in
-            </Text>
-          </PressableScale>
+            onPress={() => {
+              AudioHapticsManager.lightInteraction();
+              router.push('/(auth)/login');
+            }}
+            variant="secondary"
+            title="Log in"
+          />
         </Animated.View>
-
       </View>
     </SafeAreaView>
   );
@@ -114,5 +124,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     opacity: 0.9,
-  }
+  },
 });

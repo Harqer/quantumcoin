@@ -1,20 +1,30 @@
-import { NextResponse } from 'next/server';
-import { AgentKit, CdpWalletProvider, wethActionProvider, walletActionProvider, erc20ActionProvider, cdpApiActionProvider, cdpWalletActionProvider, pythActionProvider } from "@coinbase/agentkit";
+import { NextResponse } from "next/server";
+import {
+  AgentKit,
+  CdpWalletProvider,
+  wethActionProvider,
+  walletActionProvider,
+  erc20ActionProvider,
+  cdpApiActionProvider,
+  cdpWalletActionProvider,
+  pythActionProvider,
+} from "@coinbase/agentkit";
 import { getOnchainTools } from "@coinbase/agentkit-vercel-ai-sdk";
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,23 +33,29 @@ export async function POST(req: Request) {
 
     if (!process.env.CDP_API_KEY_NAME || !process.env.CDP_API_KEY_PRIVATE_KEY) {
       return NextResponse.json(
-        { error: "CDP API credentials are not configured on the server. Please contact the administrator." },
-        { status: 500 }
+        {
+          error:
+            "CDP API credentials are not configured on the server. Please contact the administrator.",
+        },
+        { status: 500 },
       );
     }
 
     // Read existing wallet data if available to maintain state from Prisma
     let cdpWalletData: string | undefined = undefined;
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    
-    if (user?.preferences && typeof user.preferences === 'object') {
+
+    if (user?.preferences && typeof user.preferences === "object") {
       cdpWalletData = (user.preferences as any).cdpWalletData;
     }
 
     // Initialize AgentKit with CDP Wallet Provider
     const walletProvider = await CdpWalletProvider.configureWithWallet({
       apiKeyName: process.env.CDP_API_KEY_NAME,
-      apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(
+        /\\n/g,
+        "\n",
+      ),
       networkId: process.env.NETWORK_ID || "base-mainnet",
       cdpWalletData,
     });
@@ -47,18 +63,24 @@ export async function POST(req: Request) {
     // Securely persist wallet data for future requests using Prisma
     try {
       const exportedWallet = await walletProvider.exportWallet();
-      const walletString = typeof exportedWallet === 'string' ? exportedWallet : JSON.stringify(exportedWallet);
-      
-      const currentPreferences = typeof user?.preferences === 'object' && user?.preferences !== null ? user.preferences : {};
-      
+      const walletString =
+        typeof exportedWallet === "string"
+          ? exportedWallet
+          : JSON.stringify(exportedWallet);
+
+      const currentPreferences =
+        typeof user?.preferences === "object" && user?.preferences !== null
+          ? user.preferences
+          : {};
+
       await prisma.user.update({
         where: { id: userId },
         data: {
           preferences: {
             ...currentPreferences,
-            cdpWalletData: walletString
-          }
-        }
+            cdpWalletData: walletString,
+          },
+        },
       });
     } catch (e) {
       console.error("Failed to persist wallet data:", e);
@@ -74,11 +96,17 @@ export async function POST(req: Request) {
         erc20ActionProvider(),
         cdpApiActionProvider({
           apiKeyName: process.env.CDP_API_KEY_NAME,
-          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(/\\n/g, "\n"),
+          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(
+            /\\n/g,
+            "\n",
+          ),
         }),
         cdpWalletActionProvider({
           apiKeyName: process.env.CDP_API_KEY_NAME,
-          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(/\\n/g, "\n"),
+          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY.replace(
+            /\\n/g,
+            "\n",
+          ),
         }),
       ],
     });
@@ -89,7 +117,8 @@ export async function POST(req: Request) {
     // Optimize streaming and add multi-step execution to allow the agent to use tools and then respond
     const result = streamText({
       model: google("gemini-2.5-pro"),
-      system: "You are a helpful Quantum Intelligence Wallet assistant for Quantum Coin (QTC). You help users manage funds, perform trades, and interact with the quantum anchor. Use the provided tools to interact with the Coinbase Developer Platform (CDP). Note that Quantum Coin architecture uses Coinbase Advanced Trade for execution and Wormhole/Alchemy for cross-chain liquidity routing. Treat 'QTC' as the native token. Always prioritize secure, efficient, and well-logged execution.",
+      system:
+        "You are a helpful Quantum Intelligence Wallet assistant for Quantum Coin (QTC). You help users manage funds, perform trades, and interact with the quantum anchor. Use the provided tools to interact with the Coinbase Developer Platform (CDP). Note that Quantum Coin architecture uses Coinbase Advanced Trade for execution and Wormhole/Alchemy for cross-chain liquidity routing. Treat 'QTC' as the native token. Always prioritize secure, efficient, and well-logged execution.",
       messages,
       tools,
       maxSteps: 5, // Allow the agent to call tools sequentially if needed
@@ -100,8 +129,11 @@ export async function POST(req: Request) {
     console.error("Secure error log - agentic wallet chat route:", error);
     // Do not leak sensitive backend errors to the client
     return NextResponse.json(
-      { error: "An internal server error occurred while processing your request. Please try again later." },
-      { status: 500 }
+      {
+        error:
+          "An internal server error occurred while processing your request. Please try again later.",
+      },
+      { status: 500 },
     );
   }
 }
