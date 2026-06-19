@@ -17,4 +17,4 @@ Quantum Coin is a cutting-edge Layer 2 (L2) Ethereum token engineered specifical
 
 Traditional cryptographic systems rely on the difficulty of mathematical problems (like factoring large primes), which are theoretically vulnerable to Shor's algorithm on a sufficiently powerful quantum computer. Quantum Coin mitigates this threat vector by employing foundational quantum mechanics to secure transactions.
 
-_(Note: All legacy communication methods, including `foundry init`, have been deprecated in favor of our universally based, quantum-secure infrastructure.)_
+
