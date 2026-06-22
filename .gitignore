@@ -109,3 +109,8 @@ contracts/cache/
 .env
 .env.*
 !.env.example
+
+# Sensitive files and keys
+*.pem
+*.key
+inject_secrets.sh
