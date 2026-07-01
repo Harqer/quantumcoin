@@ -17,7 +17,7 @@ lint_and_typecheck:
   stage: test
   image: node:20
   script:
-    - npm ci
+    - npm install --no-audit --no-fund
     - npm run verify
   cache:
     key:
@@ -30,7 +30,7 @@ build:
   stage: build
   image: node:20
   script:
-    - npm ci
+    - npm install --no-audit --no-fund
     # Assuming a build script exists or just checking if the project can be prepared
     - if [ -f "npm run build" ]; then npm run build; fi
   cache:
