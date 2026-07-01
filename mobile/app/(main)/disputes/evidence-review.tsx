@@ -28,7 +28,7 @@ export default function DisputeEvidencePhotoReviewScreen() {
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale testID="btn-auto-f71128"
+        <PressableScale testID="btn-auto-b7b61c" testID="btn-auto-f71128"
           haptics="medium"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
@@ -47,7 +47,7 @@ export default function DisputeEvidencePhotoReviewScreen() {
           </Text>
         </PressableScale>
 
-        <PressableScale testID="btn-auto-90a641"
+        <PressableScale testID="btn-auto-3fc2ac" testID="btn-auto-90a641"
           haptics="light"
           onPress={() => {
             AudioHapticsManager.lightInteraction();

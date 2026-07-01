@@ -33,7 +33,7 @@ export default function WalletSetupSSNLast4Screen() {
           To verify your identity, we need the last 4 digits of your Social Security Number.
         </Text>
 
-        <TextInput testID="input-auto-ef3c1b" 
+        <TextInput testID="input-auto-25d31c" testID="input-auto-ef3c1b" 
           style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 24, letterSpacing: 8, textAlign: 'center', fontWeight: 'bold' }} 
           placeholder="XXXX" 
           placeholderTextColor={colorRoles.content.secondary} 
@@ -45,7 +45,7 @@ export default function WalletSetupSSNLast4Screen() {
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale testID="btn-auto-bf021f" onPress={handleVerify} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-e7ca88" testID="btn-auto-bf021f" onPress={handleVerify} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Verify</Text>
         </PressableScale>
       </ScrollView>

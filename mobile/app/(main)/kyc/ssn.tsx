@@ -34,7 +34,7 @@ export default function SSNScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
-          <TouchableOpacity testID="btn-auto-17702c" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
+          <TouchableOpacity testID="btn-auto-4afc08" testID="btn-auto-17702c" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
             <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
           </TouchableOpacity>
         </View>
@@ -48,7 +48,7 @@ export default function SSNScreen() {
           </Text>
 
           <View style={{ backgroundColor: colorRoles.background.baseLight, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 4, borderWidth: 1, borderColor: ssn.length > 0 ? colorRoles.border.active : colorRoles.border.default }}>
-            <TextInput testID="input-auto-8e5ac3"
+            <TextInput testID="input-auto-06b858" testID="input-auto-8e5ac3"
               style={{ fontFamily: 'Montreal-Bold', fontSize: 24, color: colorRoles.content.primary, paddingVertical: 16, letterSpacing: 2 }}
               placeholder="XXX-XX-XXXX"
               placeholderTextColor={colorRoles.content.secondary}
@@ -65,7 +65,7 @@ export default function SSNScreen() {
         </Animated.View>
 
         <View style={{ padding: 24 }}>
-          <TouchableOpacity testID="btn-auto-eef675" 
+          <TouchableOpacity testID="btn-auto-41c6bf" testID="btn-auto-eef675" 
             onPress={handleContinue}
             disabled={ssn.length < 11}
             style={{ 

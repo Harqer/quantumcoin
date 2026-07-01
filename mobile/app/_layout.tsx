@@ -256,7 +256,7 @@ function RootLayout() {
           {authError || "Use Face ID / Touch ID to unlock"}
         </Text>
         {authError && (
-          <TouchableOpacity onPress={attemptBiometricAuth} style={{ marginTop: 30, backgroundColor: '#333', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 }}>
+          <TouchableOpacity testID="btn-tap-to-retry" onPress={attemptBiometricAuth} style={{ marginTop: 30, backgroundColor: '#333', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 }}>
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>Tap to retry</Text>
           </TouchableOpacity>
         )}

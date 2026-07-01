@@ -81,7 +81,7 @@ export default function UserIntentReinforcementScreen() {
           zIndex: 10,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-26822d"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
             router.back();
@@ -132,7 +132,7 @@ export default function UserIntentReinforcementScreen() {
           {intents.map((intent) => {
             const isSelected = selectedIntent === intent.id;
             return (
-              <TouchableOpacity
+              <TouchableOpacity testID="btn-auto-af7df7"
                 key={intent.id}
                 testID={`intent-${intent.id}`}
                 onPress={() => {
@@ -209,7 +209,7 @@ export default function UserIntentReinforcementScreen() {
           backgroundColor: colorRoles.background.primary,
         }}
       >
-        <Button
+        <Button testID="btn-auto-b13d27"
           testID="btn-continue"
           haptics="medium"
           onPress={handleNext}

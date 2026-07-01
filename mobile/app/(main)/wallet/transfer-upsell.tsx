@@ -43,7 +43,7 @@ export default function TransferWalletBalanceUpsellScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale testID="btn-auto-6714b9" 
+          <PressableScale testID="btn-auto-1d5de2" testID="btn-auto-6714b9" 
             haptics="heavy" 
             onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} 
             style={{ 
@@ -64,7 +64,7 @@ export default function TransferWalletBalanceUpsellScreen() {
             </Text>
           </PressableScale>
           
-          <PressableScale testID="btn-auto-56b3f3" 
+          <PressableScale testID="btn-auto-0b6dec" testID="btn-auto-56b3f3" 
             haptics="light" 
             onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} 
             style={{ 

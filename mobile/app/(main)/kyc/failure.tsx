@@ -41,7 +41,7 @@ export default function FailureScreen() {
       </View>
 
       <View style={{ padding: 24, gap: 16 }}>
-        <TouchableOpacity testID="btn-auto-5e2a5d" 
+        <TouchableOpacity testID="btn-auto-2fd238" testID="btn-auto-5e2a5d" 
           onPress={handleRetry}
           style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >
@@ -50,7 +50,7 @@ export default function FailureScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity testID="btn-contact-support" 
+        <TouchableOpacity testID="btn-auto-40ecc2" testID="btn-contact-support" 
           onPress={handleSupport}
           style={{ paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >

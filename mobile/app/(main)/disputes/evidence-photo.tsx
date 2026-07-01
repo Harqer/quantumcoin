@@ -23,7 +23,7 @@ export default function DisputeEvidencePhotoCaptureScreen() {
         </View>
 
         <Animated.View entering={FadeInDown.springify()} style={{ position: 'absolute', bottom: 40, width: '100%', alignItems: 'center' }}>
-          <TouchableOpacity testID="btn-auto-5289ea"
+          <TouchableOpacity testID="btn-auto-d322dd" testID="btn-auto-5289ea"
             onPress={() => {
               AudioHapticsManager.heavyInteraction();
               router.push('/(main)/disputes/evidence-review');

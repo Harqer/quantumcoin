@@ -34,7 +34,7 @@ export default function MqRevealPin() {
               </Text>
             </View>
             {!revealed && (
-              <TouchableOpacity testID="btn-hold-to-reveal" className="bg-blue-600 py-3 px-8 rounded-full" onPress={handleReveal}>
+              <TouchableOpacity testID="btn-hold-to-reveal" testID="btn-hold-to-reveal" className="bg-blue-600 py-3 px-8 rounded-full" onPress={handleReveal}>
                 <Text className="text-white font-semibold">Hold to Reveal</Text>
               </TouchableOpacity>
             )}

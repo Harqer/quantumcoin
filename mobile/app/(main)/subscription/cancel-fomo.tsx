@@ -43,7 +43,7 @@ export default function SubscriptionCancellationFomoBSideScreen() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-            <PressableScale testID="btn-auto-d58c28" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+            <PressableScale testID="btn-auto-05d0ca" testID="btn-auto-d58c28" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
               <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
                 Done
               </Text>
@@ -88,7 +88,7 @@ export default function SubscriptionCancellationFomoBSideScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale testID="btn-auto-cb1ecd" 
+          <PressableScale testID="btn-auto-a9236d" testID="btn-auto-cb1ecd" 
             haptics="heavy" 
             onPress={() => { AudioHapticsManager.success(); router.back(); }} 
             style={{ 
@@ -109,7 +109,7 @@ export default function SubscriptionCancellationFomoBSideScreen() {
             </Text>
           </PressableScale>
           
-          <PressableScale testID="btn-auto-0d4c17" 
+          <PressableScale testID="btn-auto-f32dd0" testID="btn-auto-0d4c17" 
             haptics="light" 
             disabled={isSubmitting}
             onPress={handleCancel} 

@@ -40,7 +40,7 @@ export default function TransferWalletBalanceSetupScreen() {
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale testID="btn-auto-affd41"
+        <PressableScale testID="btn-auto-b0fbc7" testID="btn-auto-affd41"
           haptics="medium"
           onPress={() => {
             AudioHapticsManager.success();

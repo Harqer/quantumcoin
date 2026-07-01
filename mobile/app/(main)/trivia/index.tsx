@@ -35,7 +35,7 @@ export default function TriviaIndex() {
             </Text>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-            <PressableScale testID="btn-auto-a56b3c" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); setOnboarded(true); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+            <PressableScale testID="btn-auto-aeb5ce" testID="btn-auto-a56b3c" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); setOnboarded(true); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
               <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Let's Play</Text>
             </PressableScale>
           </Animated.View>
@@ -54,7 +54,7 @@ export default function TriviaIndex() {
           <Text style={{ fontFamily: typography.bodyMedium.fontFamily, color: '#BFDBFE', textAlign: 'center', marginBottom: spacing.l }}>
             Play today's trivia. Get a perfect score to win your share of the prize pool!
           </Text>
-          <PressableScale testID="btn-start-game" haptics="heavy" onPress={startGame} style={{ backgroundColor: '#3B82F6', paddingVertical: spacing.m, paddingHorizontal: spacing.xl, borderRadius: 999 }}>
+          <PressableScale testID="btn-auto-ea4a5b" testID="btn-start-game" haptics="heavy" onPress={startGame} style={{ backgroundColor: '#3B82F6', paddingVertical: spacing.m, paddingHorizontal: spacing.xl, borderRadius: 999 }}>
             <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyLarge.fontFamily, fontWeight: '800' }}>Start Game</Text>
           </PressableScale>
         </View>

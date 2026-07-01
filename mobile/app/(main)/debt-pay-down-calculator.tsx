@@ -27,7 +27,7 @@ export default function DebtPayDownCalculatorScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Pressable testID="btn-debt-calculator" onPress={() => router.back()} hitSlop={15}>
+        <Pressable testID="btn-debt-calculator" testID="btn-debt-calculator" onPress={() => router.back()} hitSlop={15}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </Pressable>
         <Text style={styles.headerTitle}>Debt Calculator</Text>
@@ -37,7 +37,7 @@ export default function DebtPayDownCalculatorScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           <Text style={styles.label}>Total Balance ($)</Text>
-          <TextInput testID="input-auto-9a9e76"
+          <TextInput testID="input-auto-9922ed" testID="input-auto-9a9e76"
             style={styles.input}
             keyboardType="decimal-pad"
             value={balance}
@@ -45,7 +45,7 @@ export default function DebtPayDownCalculatorScreen() {
           />
 
           <Text style={styles.label}>Interest Rate (APR %)</Text>
-          <TextInput testID="input-auto-997b2e"
+          <TextInput testID="input-auto-456b03" testID="input-auto-997b2e"
             style={styles.input}
             keyboardType="decimal-pad"
             value={interestRate}
@@ -53,7 +53,7 @@ export default function DebtPayDownCalculatorScreen() {
           />
 
           <Text style={styles.label}>Monthly Payment ($)</Text>
-          <TextInput testID="input-auto-fdb2a9"
+          <TextInput testID="input-auto-6c38dd" testID="input-auto-fdb2a9"
             style={styles.input}
             keyboardType="decimal-pad"
             value={monthlyPayment}

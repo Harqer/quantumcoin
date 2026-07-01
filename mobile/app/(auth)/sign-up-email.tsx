@@ -153,7 +153,7 @@ export default function SignUpEmailScreen() {
             paddingVertical: spacing.s,
           }}
         >
-          <TouchableOpacity
+          <TouchableOpacity testID="btn-auto-d423fa"
             onPress={() => {
               AudioHapticsManager.lightInteraction();
               router.back();
@@ -206,7 +206,7 @@ export default function SignUpEmailScreen() {
                 >
                   Email Address
                 </Text>
-                <TextInput
+                <TextInput testID="input-auto-3d4ada"
                   style={{
                     backgroundColor: colorRoles.background.baseLight,
                     borderRadius: 16,
@@ -274,7 +274,7 @@ export default function SignUpEmailScreen() {
                 >
                   Verification Code
                 </Text>
-                <TextInput
+                <TextInput testID="input-auto-f3e48d"
                   style={{
                     backgroundColor: colorRoles.background.baseLight,
                     borderRadius: 16,
@@ -319,7 +319,7 @@ export default function SignUpEmailScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
-          <Button
+          <Button testID="btn-auto-10a4d3"
             testID="btn-next"
             haptics="medium"
             onPress={!pendingVerification ? handleSendCode : handleVerifyAndCreatePasskey}

@@ -24,7 +24,7 @@ export default function SecurityScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity testID="btn-auto-ec39c3"
+        <TouchableOpacity testID="btn-auto-cbea54" testID="btn-auto-ec39c3"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >

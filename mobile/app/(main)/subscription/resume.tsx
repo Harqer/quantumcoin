@@ -26,7 +26,7 @@ export default function ResumeSubscriptionScreen() {
           </Text>
         </View>
 
-        <PressableScale testID="btn-auto-3b5426"
+        <PressableScale testID="btn-auto-9aafad" testID="btn-auto-3b5426"
           haptics="medium"
           onPress={() => {
             AudioHapticsManager.success();

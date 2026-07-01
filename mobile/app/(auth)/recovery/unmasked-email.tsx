@@ -22,7 +22,7 @@ export default function AccountRecoveryVerifyUnmaskedEmailScreen() {
           </Text>
 
           <View style={{ backgroundColor: colorRoles.background.secondary, borderRadius: 16, padding: spacing.m, marginBottom: spacing.xl }}>
-            <TextInput
+            <TextInput testID="input-auto-3d84fe"
               style={{ fontSize: 18, color: colorRoles.content.primary }}
               placeholder="Full Email Address"
               placeholderTextColor={colorRoles.content.secondary}
@@ -36,7 +36,7 @@ export default function AccountRecoveryVerifyUnmaskedEmailScreen() {
 
           <View style={{ flex: 1 }} />
 
-          <PressableScale
+          <PressableScale testID="btn-auto-2ae3c4"
             onPress={() => router.push('/(auth)/recovery/masked-email')}
             style={{ backgroundColor: email.includes('@') ? colorRoles.content.accentMid : colorRoles.background.secondary, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}
             disabled={!email.includes('@')}

@@ -91,7 +91,7 @@ export default function TriviaGameScreen() {
               }
 
               return (
-                <PressableScale testID="btn-auto-8bdc85" 
+                <PressableScale testID="btn-auto-742219" testID="btn-auto-8bdc85" 
                   key={idx} 
                   haptics="light" 
                   disabled={selectedAnswer !== null}

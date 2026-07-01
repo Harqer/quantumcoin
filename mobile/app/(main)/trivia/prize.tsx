@@ -61,7 +61,7 @@ export default function TriviaPrizeRevealScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-          <PressableScale testID="btn-auto-574cda" haptics="heavy" onPress={handleClaim} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-402425" testID="btn-auto-574cda" haptics="heavy" onPress={handleClaim} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
               View Wallet
             </Text>

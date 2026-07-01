@@ -76,7 +76,7 @@ export default function AccountRecoveryUpdateEmailScreen() {
         If you lost access to your old email, you can verify your identity using your device's secure Passkey or your SSN.
       </Text>
 
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-auto-80f3ef" 
         style={{ width: '100%', backgroundColor: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.xxl }}
         onPress={handlePasskeyRecovery}
         disabled={recoverMutation.isPending}
@@ -93,7 +93,7 @@ export default function AccountRecoveryUpdateEmailScreen() {
 
       <View style={{ marginBottom: spacing.m }}>
         <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>Old Email</Text>
-        <TextInput
+        <TextInput testID="input-auto-ec053b"
           style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="Enter old email"
           placeholderTextColor={colorRoles.content.secondary}
@@ -106,7 +106,7 @@ export default function AccountRecoveryUpdateEmailScreen() {
 
       <View style={{ marginBottom: spacing.m }}>
         <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>New Email</Text>
-        <TextInput
+        <TextInput testID="input-auto-d074dd"
           style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="Enter new email"
           placeholderTextColor={colorRoles.content.secondary}
@@ -119,7 +119,7 @@ export default function AccountRecoveryUpdateEmailScreen() {
 
       <View style={{ marginBottom: spacing.xxl }}>
         <Text style={{ fontSize: 14, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '500', color: colorRoles.content.secondary, marginBottom: spacing.xs }}>Social Security Number (SSN)</Text>
-        <TextInput
+        <TextInput testID="input-auto-9476d2"
           style={{ width: '100%', backgroundColor: colorRoles.background.baseLight, padding: spacing.l, borderRadius: 16, borderWidth: 1, borderColor: colorRoles.border.default, color: colorRoles.content.primary }}
           placeholder="XXX-XX-XXXX"
           placeholderTextColor={colorRoles.content.secondary}
@@ -130,14 +130,14 @@ export default function AccountRecoveryUpdateEmailScreen() {
         />
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-auto-a74ca6" 
         style={{ width: '100%', backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 16, alignItems: 'center' }}
         onPress={handleRecover}
       >
         <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '700' }}>Submit Recovery Request</Text>
       </TouchableOpacity>
       
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-cancel" 
         style={{ width: '100%', padding: spacing.l, marginTop: spacing.s, alignItems: 'center' }}
         onPress={() => router.back()}
       >

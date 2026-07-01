@@ -53,7 +53,7 @@ export default function IntercomHelpCenterScreen() {
   return (
     <LinearGradient colors={['#ffffff', '#f4f4f5']} style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity testID="btn-quantum-support" onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity testID="btn-quantum-support" testID="btn-quantum-support" onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
       </View>
@@ -66,12 +66,12 @@ export default function IntercomHelpCenterScreen() {
           <ActivityIndicator size="large" color="#000" style={{ marginTop: 40 }} />
         ) : (
           <View style={styles.actionContainer}>
-            <TouchableOpacity testID="btn-chat-with-us" style={styles.primaryCard} onPress={openIntercomMessenger}>
+            <TouchableOpacity testID="btn-chat-with-us" testID="btn-chat-with-us" style={styles.primaryCard} onPress={openIntercomMessenger}>
               <Text style={[styles.cardTitle, { color: '#ffffff' }]}>Chat with us</Text>
               <Text style={[styles.cardSubtitle, { color: '#aaaaaa' }]}>Get help from our support team in real-time.</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity testID="btn-help-center" style={styles.secondaryCard} onPress={openIntercomHelpCenter}>
+            <TouchableOpacity testID="btn-help-center" testID="btn-help-center" style={styles.secondaryCard} onPress={openIntercomHelpCenter}>
               <Text style={[styles.cardTitle, { color: '#000000' }]}>Help Center</Text>
               <Text style={[styles.cardSubtitle, { color: '#666666' }]}>Browse FAQs, guides, and troubleshooting.</Text>
             </TouchableOpacity>

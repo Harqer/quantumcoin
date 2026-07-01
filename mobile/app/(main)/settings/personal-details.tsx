@@ -26,7 +26,7 @@ export default function PersonalDetailsScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity testID="btn-auto-cfff53"
+        <TouchableOpacity testID="btn-auto-79e557" testID="btn-auto-cfff53"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -55,7 +55,7 @@ export default function PersonalDetailsScreen() {
           >
             First Name
           </Text>
-          <TextInput testID="input-auto-50439f"
+          <TextInput testID="input-auto-66aec0" testID="input-auto-50439f"
             value={user?.firstName || ''}
             editable={false}
             style={{
@@ -77,7 +77,7 @@ export default function PersonalDetailsScreen() {
           >
             Last Name
           </Text>
-          <TextInput testID="input-auto-8cc313"
+          <TextInput testID="input-auto-e91251" testID="input-auto-8cc313"
             value={user?.lastName || ''}
             editable={false}
             style={{
@@ -99,7 +99,7 @@ export default function PersonalDetailsScreen() {
           >
             Email Address
           </Text>
-          <TextInput testID="input-auto-33754a"
+          <TextInput testID="input-auto-ea824b" testID="input-auto-33754a"
             value={user?.emailAddresses[0]?.emailAddress || ''}
             editable={false}
             style={{

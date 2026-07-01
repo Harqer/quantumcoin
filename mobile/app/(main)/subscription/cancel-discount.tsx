@@ -47,7 +47,7 @@ export default function SubscriptionCancellationDiscountScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale testID="btn-auto-707c0e" 
+          <PressableScale testID="btn-auto-40e99d" testID="btn-auto-707c0e" 
             haptics="heavy" 
             onPress={async () => { AudioHapticsManager.success(); await updateIntent.mutateAsync({ intent: 'claim_50_discount' }); router.push('/(main)/wallet'); }} 
             style={{ 
@@ -68,7 +68,7 @@ export default function SubscriptionCancellationDiscountScreen() {
             </Text>
           </PressableScale>
           
-          <PressableScale testID="btn-auto-a218cc" 
+          <PressableScale testID="btn-auto-9829fb" testID="btn-auto-a218cc" 
             haptics="light" 
             onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/subscription/cancel-fomo'); }} 
             style={{ 

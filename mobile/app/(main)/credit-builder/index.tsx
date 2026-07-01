@@ -208,7 +208,7 @@ export default function CreditBuilderIndex() {
           </View>
         )}
 
-        <TouchableOpacity testID="btn-auto-200abc"
+        <TouchableOpacity testID="btn-auto-c6d521" testID="btn-auto-200abc"
           style={{
             backgroundColor: colorRoles.content.accentMid,
             borderRadius: 16,
@@ -293,7 +293,7 @@ export default function CreditBuilderIndex() {
             gap: spacing.m,
           }}
         >
-          <TouchableOpacity testID="btn-auto-ea9e28"
+          <TouchableOpacity testID="btn-auto-62e479" testID="btn-auto-ea9e28"
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={() => router.push('/(main)/credit-builder/mq-reveal-pin')}
           >
@@ -321,7 +321,7 @@ export default function CreditBuilderIndex() {
             <Ionicons name="chevron-forward" size={20} color={colorRoles.content.secondary} />
           </TouchableOpacity>
 
-          <TouchableOpacity testID="btn-nav-set-pin"
+          <TouchableOpacity testID="btn-auto-86d4f3" testID="btn-nav-set-pin"
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={() => router.push('/(main)/credit-builder/mq-set-pin')}
           >
@@ -349,7 +349,7 @@ export default function CreditBuilderIndex() {
             <Ionicons name="chevron-forward" size={20} color={colorRoles.content.secondary} />
           </TouchableOpacity>
 
-          <TouchableOpacity testID="btn-auto-8ea195"
+          <TouchableOpacity testID="btn-auto-a35432" testID="btn-auto-8ea195"
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={() => router.push('/(main)/credit-builder/mq-activate-card')}
           >

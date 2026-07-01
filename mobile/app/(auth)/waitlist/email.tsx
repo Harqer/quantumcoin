@@ -30,7 +30,7 @@ export default function WaitlistEmailScreen() {
             We'll notify you as soon as a spot opens up.
           </Text>
 
-          <TextInput
+          <TextInput testID="input-auto-bd4138"
             style={{
               backgroundColor: colorRoles.background.baseLight,
               color: colorRoles.content.primary,
@@ -50,7 +50,7 @@ export default function WaitlistEmailScreen() {
             autoFocus
           />
 
-          <PressableScale 
+          <PressableScale testID="btn-auto-5d0a8f" 
             haptics="heavy" 
             disabled={!isValidEmail}
             onPress={handleNext} 

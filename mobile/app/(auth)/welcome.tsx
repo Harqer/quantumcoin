@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}>
-          <PressableScale
+          <PressableScale testID="btn-auto-fa6f51"
             haptics="heavy"
             onPress={handleContinue}
             style={{ 

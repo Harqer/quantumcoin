@@ -22,7 +22,7 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
       <LinearGradient colors={['#1a1a1a', '#0A0A0A']} style={StyleSheet.absoluteFillObject} />
       
       <View style={styles.header}>
-        <Pressable testID="btn-quantum-builder" onPress={() => router.back()} hitSlop={15}>
+        <Pressable testID="btn-auto-0f1fab" testID="btn-quantum-builder" onPress={() => router.back()} hitSlop={15}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </Pressable>
       </View>
@@ -35,7 +35,7 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
         <Text style={styles.subtitle}>Add a debit card to activate your Quantum Builder subscription. You'll be charged $9.99/month.</Text>
 
         <View style={styles.form}>
-          <TextInput testID="input-auto-3f2131"
+          <TextInput testID="input-auto-439bf0" testID="input-auto-3f2131"
             style={styles.input}
             placeholder="Card Number"
             placeholderTextColor="#666"
@@ -44,7 +44,7 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
             onChangeText={setCardNumber}
           />
           <View style={styles.row}>
-            <TextInput testID="input-auto-04b856"
+            <TextInput testID="input-auto-33d8e4" testID="input-auto-04b856"
               style={[styles.input, { flex: 1, marginRight: 10 }]}
               placeholder="MM/YY"
               placeholderTextColor="#666"
@@ -52,7 +52,7 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
               value={expiry}
               onChangeText={setExpiry}
             />
-            <TextInput testID="input-auto-d0716c"
+            <TextInput testID="input-auto-af1677" testID="input-auto-d0716c"
               style={[styles.input, { flex: 1 }]}
               placeholder="CVC"
               placeholderTextColor="#666"
@@ -64,7 +64,7 @@ export default function RebrandedPlusOnboardingAddRecurringSubCardScreen() {
           </View>
         </View>
 
-        <Pressable testID="btn-auto-ba7502" 
+        <Pressable testID="btn-auto-a4e73e" testID="btn-auto-ba7502" 
           style={[styles.button, (!cardNumber || !expiry || !cvc) && styles.buttonDisabled]} 
           onPress={handleSubmit}
           disabled={!cardNumber || !expiry || !cvc || isSubmitting}

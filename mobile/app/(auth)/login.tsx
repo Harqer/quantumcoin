@@ -111,7 +111,7 @@ export default function LoginScreen() {
           paddingVertical: spacing.s,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-79e056"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
             router.back();
@@ -177,7 +177,7 @@ export default function LoginScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)}
           style={{ width: '100%' }}
         >
-          <Button
+          <Button testID="btn-auto-122a4b"
             testID="btn-google-login"
             haptics="heavy"
             onPress={handleGoogleOAuth}
@@ -198,7 +198,7 @@ export default function LoginScreen() {
 
           <View style={{ height: spacing.m }} />
 
-          <Button
+          <Button testID="btn-auto-d4f2be"
             testID="btn-passkey-login"
             haptics="heavy"
             onPress={handlePasskeyLogin}
@@ -231,7 +231,7 @@ export default function LoginScreen() {
           ) : null}
 
           {/* Fallback Option */}
-          <TouchableOpacity
+          <TouchableOpacity testID="btn-auto-30579a"
             testID="link-email-fallback"
             style={{ marginTop: spacing.xl, alignItems: 'center', paddingVertical: spacing.s }}
             onPress={() => {

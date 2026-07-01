@@ -67,7 +67,7 @@ const MessageBubble = React.memo(({ msg, onApprove }: { msg: Message, onApprove:
         <Text style={{ fontSize: 16, fontFamily: 'Montreal-Medium', color: '#111827', marginBottom: 16 }}>
           The AI wants to transfer {proposalData.amount} {proposalData.token} to {proposalData.to || "an address"}.
         </Text>
-        <TouchableOpacity testID="btn-authorize-with-passkey" 
+        <TouchableOpacity testID="btn-auto-c67b32" testID="btn-authorize-with-passkey" 
           onPress={() => onApprove(msg.content)}
           style={{ backgroundColor: '#EC4899', padding: 12, borderRadius: 24, alignItems: 'center' }}
         >
@@ -298,7 +298,7 @@ export default function AIChatScreen() {
       <KeyboardAvoidingView  behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#FFFFFF', borderBottomWidth: 2, borderBottomColor: isHype ? '#2DD4BF' : '#EC4899', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, zIndex: 10 }}>
-          <TouchableOpacity testID="btn-auto-acaef4" onPress={() => router.back()} style={{ width: 40, height: 40, justifyContent: 'center' }}>
+          <TouchableOpacity testID="btn-auto-af9039" testID="btn-auto-acaef4" onPress={() => router.back()} style={{ width: 40, height: 40, justifyContent: 'center' }}>
             <Ionicons name="arrow-back" size={28} color="#111827" />
           </TouchableOpacity>
           <Text style={{ flex: 1, textAlign: 'center', fontSize: 20, fontFamily: 'Montreal-Bold', textTransform: 'uppercase', letterSpacing: 1.5, marginRight: 40, color: isHype ? '#14B8A6' : '#EC4899' }}>
@@ -335,7 +335,7 @@ export default function AIChatScreen() {
               control={control}
               name="message"
               render={({ field: { onChange, value } }) => (
-                <TextInput testID="input-auto-6c7ea7"
+                <TextInput testID="input-auto-e1d411" testID="input-auto-6c7ea7"
                   style={{ backgroundColor: '#F3F4F6', padding: 12, borderRadius: 20, maxHeight: 100 }}
                   value={value}
                   onChangeText={onChange}

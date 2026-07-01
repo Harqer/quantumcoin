@@ -31,7 +31,7 @@ export default function TransactionDisputeEvidenceSelectionScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(100).springify()} style={{ alignItems: 'center', marginBottom: spacing.xxl }}>
-          <PressableScale testID="btn-auto-88bbbf" 
+          <PressableScale testID="btn-auto-98bfa9" testID="btn-auto-88bbbf" 
             haptics="light" 
             onPress={() => setHasEvidence(true)}
             style={{ 
@@ -58,7 +58,7 @@ export default function TransactionDisputeEvidenceSelectionScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale testID="btn-auto-fe078e" 
+          <PressableScale testID="btn-auto-5851d6" testID="btn-auto-fe078e" 
             haptics="heavy" 
             onPress={handleNext} 
             style={{ 

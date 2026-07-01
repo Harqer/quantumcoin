@@ -32,7 +32,7 @@ export default function DisputeCreationSuccessScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-          <PressableScale testID="btn-auto-7752c8"
+          <PressableScale testID="btn-auto-cd6790" testID="btn-auto-7752c8"
             haptics="medium"
             onPress={() => {
               AudioHapticsManager.lightInteraction();

@@ -111,7 +111,7 @@ export default function BanksListScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.m, paddingVertical: spacing.s }}>
-        <TouchableOpacity testID="btn-close" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+        <TouchableOpacity testID="btn-auto-aac4cd" testID="btn-close" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
           <Ionicons name="close" size={28} color={colorRoles.content.primary} />
         </TouchableOpacity>
       </View>
@@ -157,7 +157,7 @@ export default function BanksListScreen() {
           )}
 
           <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(500)}>
-            <PressableScale testID="btn-auto-731734"
+            <PressableScale testID="btn-auto-f6b71b" testID="btn-auto-731734"
               testID="btn-connect-plaid"
               haptics="heavy"
               style={{ 
@@ -190,7 +190,7 @@ export default function BanksListScreen() {
             This bank account is already connected to a Quantum profile. If you believe this is a mistake, please contact support.
           </Text>
         </View>
-        <PressableScale testID="btn-dismiss-error" haptics="light" onPress={() => errorSheetRef.current?.dismiss()} style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}>
+        <PressableScale testID="btn-auto-da1237" testID="btn-dismiss-error" haptics="light" onPress={() => errorSheetRef.current?.dismiss()} style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}>
           <Text style={{ color: colorRoles.content.primary, fontSize: typography.bodyLarge.fontSize, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '700' }}>
             Dismiss
           </Text>
@@ -207,13 +207,13 @@ export default function BanksListScreen() {
             Choose how you'd like to connect your bank.
           </Text>
 
-          <PressableScale testID="btn-connect-instantly" haptics="medium" onPress={() => { addAccountSheetRef.current?.dismiss(); open(); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: spacing.m }}>
+          <PressableScale testID="btn-auto-30372b" testID="btn-connect-instantly" haptics="medium" onPress={() => { addAccountSheetRef.current?.dismiss(); open(); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: spacing.m }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontSize: 16, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '700' }}>
               Connect Instantly (Plaid)
             </Text>
           </PressableScale>
 
-          <PressableScale testID="btn-link-manually" haptics="light" onPress={() => addAccountSheetRef.current?.dismiss()} style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 16, borderRadius: 16, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-adbb34" testID="btn-link-manually" haptics="light" onPress={() => addAccountSheetRef.current?.dismiss()} style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 16, borderRadius: 16, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.primary, fontSize: 16, fontFamily: typography.bodyLarge.fontFamily, fontWeight: '700' }}>
               Link Manually (Micro-deposits)
             </Text>

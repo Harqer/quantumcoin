@@ -61,7 +61,7 @@ export default function SignUpNameScreen() {
             paddingVertical: spacing.s,
           }}
         >
-          <TouchableOpacity
+          <TouchableOpacity testID="btn-auto-8eeda9"
             onPress={() => {
               AudioHapticsManager.lightInteraction();
               router.back();
@@ -114,7 +114,7 @@ export default function SignUpNameScreen() {
               >
                 First Name
               </Text>
-              <TextInput
+              <TextInput testID="input-auto-64f4db"
                 style={{
                   backgroundColor: colorRoles.background.baseLight,
                   borderRadius: 16,
@@ -149,7 +149,7 @@ export default function SignUpNameScreen() {
               >
                 Last Name
               </Text>
-              <TextInput
+              <TextInput testID="input-auto-5fa9e5"
                 style={{
                   backgroundColor: colorRoles.background.baseLight,
                   borderRadius: 16,
@@ -176,7 +176,7 @@ export default function SignUpNameScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
-          <Button
+          <Button testID="btn-auto-ef1d2f"
             testID="btn-next"
             haptics="medium"
             onPress={handleNext}

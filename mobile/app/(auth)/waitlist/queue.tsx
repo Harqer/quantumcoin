@@ -41,14 +41,14 @@ export default function WaitlistQueueScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%', gap: spacing.m }}>
-          <PressableScale haptics="heavy" onPress={() => AudioHapticsManager.lightInteraction()} style={{ backgroundColor: '#2563EB', paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+          <PressableScale testID="btn-auto-40c411" haptics="heavy" onPress={() => AudioHapticsManager.lightInteraction()} style={{ backgroundColor: '#2563EB', paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
             <Ionicons name="share-social" size={20} color="#FFFFFF" style={{ marginRight: spacing.s }} />
             <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
               Invite Friends
             </Text>
           </PressableScale>
 
-          <PressableScale haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); router.replace('/(auth)/welcome'); }} style={{ backgroundColor: 'transparent', paddingVertical: spacing.m, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-2ec997" haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); router.replace('/(auth)/welcome'); }} style={{ backgroundColor: 'transparent', paddingVertical: spacing.m, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.primary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, fontWeight: '700' }}>
               Back to Start
             </Text>

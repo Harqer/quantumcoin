@@ -21,12 +21,12 @@ export default function DynamicSubscriptionPlanSelectionScreen() {
           Upgrade to unlock multiple advances, priority support, and high-yield wallet interest.
         </Text>
 
-        <TouchableOpacity testID="btn-auto-1afea3" onPress={() => setSelectedPlan('monthly')} style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: selectedPlan === 'monthly' ? colorRoles.content.accentMid : colorRoles.background.secondary, marginBottom: spacing.m }}>
+        <TouchableOpacity testID="btn-auto-e90693" testID="btn-auto-1afea3" onPress={() => setSelectedPlan('monthly')} style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: selectedPlan === 'monthly' ? colorRoles.content.accentMid : colorRoles.background.secondary, marginBottom: spacing.m }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary }}>Monthly</Text>
           <Text style={{ fontSize: 18, color: colorRoles.content.secondary }}>$5.99/mo</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity testID="btn-auto-fc2254" onPress={() => setSelectedPlan('annual')} style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: selectedPlan === 'annual' ? colorRoles.content.accentMid : colorRoles.background.secondary, marginBottom: spacing.xl, position: 'relative' }}>
+        <TouchableOpacity testID="btn-auto-c7b89c" testID="btn-auto-fc2254" onPress={() => setSelectedPlan('annual')} style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: selectedPlan === 'annual' ? colorRoles.content.accentMid : colorRoles.background.secondary, marginBottom: spacing.xl, position: 'relative' }}>
           <View style={{ position: 'absolute', top: -12, right: 16, backgroundColor: '#16A34A', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
             <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 12 }}>Save 20%</Text>
           </View>
@@ -36,7 +36,7 @@ export default function DynamicSubscriptionPlanSelectionScreen() {
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale testID="btn-auto-47a60a"
+        <PressableScale testID="btn-auto-24e50a" testID="btn-auto-47a60a"
           haptics="heavy"
           onPress={() => {
             AudioHapticsManager.success();

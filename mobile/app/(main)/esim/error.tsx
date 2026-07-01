@@ -59,7 +59,7 @@ export default function MobileSimInstallErrorScreen() {
         </Text>
       </View>
 
-      <Button testID="btn-auto-f45201" onPress={() => router.back()} variant="destructive" title="Try Again" />
+      <Button testID="btn-auto-0f0db0" testID="btn-auto-f45201" onPress={() => router.back()} variant="destructive" title="Try Again" />
     </View>
   );
 }

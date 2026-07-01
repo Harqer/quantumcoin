@@ -166,7 +166,7 @@ export default function IntroducingAiScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
           style={{ width: '100%' }}
         >
-          <Button
+          <Button testID="btn-auto-8d7c6e"
             testID="btn-next"
             haptics="heavy"
             onPress={handleNext}

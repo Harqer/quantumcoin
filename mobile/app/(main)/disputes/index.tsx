@@ -39,7 +39,7 @@ export default function TransactionDisputeIntroScreen() {
 
         <Animated.View entering={FadeInDown.delay(100).springify()} style={{ gap: spacing.m, marginBottom: spacing.xxl }}>
           {issues.map(issue => (
-            <PressableScale testID="btn-auto-53206d"
+            <PressableScale testID="btn-auto-1b3c3f" testID="btn-auto-53206d"
               key={issue.id}
               haptics="light"
               onPress={() => setSelectedIssue(issue.id)}
@@ -62,7 +62,7 @@ export default function TransactionDisputeIntroScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale testID="btn-auto-a155e0" 
+          <PressableScale testID="btn-auto-b65853" testID="btn-auto-a155e0" 
             haptics="heavy" 
             disabled={!selectedIssue}
             onPress={handleNext} 

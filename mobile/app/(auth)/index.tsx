@@ -77,7 +77,7 @@ export default function IntroductionScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
           style={{ width: '100%', gap: spacing.m, paddingHorizontal: spacing.l }}
         >
-          <Button
+          <Button testID="btn-auto-c48e5a"
             testID="btn-signup"
             haptics="heavy"
             onPress={() => {
@@ -88,7 +88,7 @@ export default function IntroductionScreen() {
             title="Sign up"
           />
 
-          <Button
+          <Button testID="btn-auto-9d5e1e"
             testID="btn-login"
             haptics="light"
             onPress={() => {

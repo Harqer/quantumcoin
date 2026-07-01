@@ -33,7 +33,7 @@ export default function SSNClaimsSuccessScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-          <PressableScale testID="btn-auto-51224b" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-eb4829" testID="btn-auto-51224b" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
               Continue
             </Text>

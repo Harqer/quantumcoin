@@ -52,7 +52,7 @@ export default function PlansScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top']}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 16, paddingVertical: 12, zIndex: 10 }}>
-        <TouchableOpacity testID="btn-auto-2a9a04" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, backgroundColor: colorRoles.background.baseLight, borderRadius: 20 }}>
+        <TouchableOpacity testID="btn-auto-f01941" testID="btn-auto-2a9a04" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, backgroundColor: colorRoles.background.baseLight, borderRadius: 20 }}>
           <Ionicons name="close" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
       </View>
@@ -84,7 +84,7 @@ export default function PlansScreen() {
               {plans.map((plan) => {
                 const isSelected = selectedTier === plan.id;
                 return (
-                  <TouchableOpacity testID="btn-auto-4835ff" 
+                  <TouchableOpacity testID="btn-auto-a90046" testID="btn-auto-4835ff" 
                     key={plan.id}
                     onPress={() => { HapticsManager.selectionAsync(); setSelectedTier(plan.id as any); }}
                     style={{ 
@@ -113,7 +113,7 @@ export default function PlansScreen() {
 
       {/* Fixed Action Button */}
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingBottom: insets.bottom + 16, paddingTop: 24, backgroundColor: colorRoles.background.primary, borderTopWidth: 1, borderTopColor: colorRoles.border.default }}>
-        <TouchableOpacity testID="btn-auto-52bfe6" 
+        <TouchableOpacity testID="btn-auto-981c17" testID="btn-auto-52bfe6" 
           onPress={handleContinue}
           style={{ backgroundColor: isSubscribed ? colorRoles.background.baseLight : colorRoles.content.accentMid, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >

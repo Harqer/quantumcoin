@@ -16,7 +16,7 @@ export default function EarlyKYCMissingDetailsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity testID="btn-missing-details" onPress={() => router.back()}>
+        <TouchableOpacity testID="btn-missing-details" testID="btn-missing-details" onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Missing Details</Text>
@@ -28,7 +28,7 @@ export default function EarlyKYCMissingDetailsScreen() {
           We need a few more details to comply with federal banking regulations before we can open your account.
         </Text>
 
-        <TouchableOpacity testID="btn-phone-number" style={styles.row} onPress={() => setDrawerType('phone')}>
+        <TouchableOpacity testID="btn-phone-number" testID="btn-phone-number" style={styles.row} onPress={() => setDrawerType('phone')}>
           <View>
             <Text style={styles.label}>Phone Number</Text>
             <Text style={[styles.value, phone === 'Missing' && styles.missing]}>{phone}</Text>
@@ -36,7 +36,7 @@ export default function EarlyKYCMissingDetailsScreen() {
           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
         </TouchableOpacity>
 
-        <TouchableOpacity testID="btn-residential-address" style={styles.row} onPress={() => setDrawerType('address')}>
+        <TouchableOpacity testID="btn-residential-address" testID="btn-residential-address" style={styles.row} onPress={() => setDrawerType('address')}>
           <View>
             <Text style={styles.label}>Residential Address</Text>
             <Text style={[styles.value, address === 'Missing' && styles.missing]}>{address}</Text>
@@ -47,7 +47,7 @@ export default function EarlyKYCMissingDetailsScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity testID="btn-continue-to-ssn" 
+        <TouchableOpacity testID="btn-auto-4c3ffb" testID="btn-continue-to-ssn" 
           style={[styles.button, (phone === 'Missing' || address === 'Missing') && styles.disabledButton]}
           disabled={phone === 'Missing' || address === 'Missing'}
           onPress={() => router.push('/kyc/ssn')}

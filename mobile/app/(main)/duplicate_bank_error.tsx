@@ -17,7 +17,7 @@ export default function DuplicateBankErrorScreen() {
         You can only link a single login from the same institution to prevent duplicate transactions and fraud.
       </Text>
       
-      <TouchableOpacity testID="btn-go-back" 
+      <TouchableOpacity testID="btn-go-back" testID="btn-go-back" 
         className="w-full bg-blue-600 p-4 rounded-xl items-center"
         onPress={() => router.back()}
       >

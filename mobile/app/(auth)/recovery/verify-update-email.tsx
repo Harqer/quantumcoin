@@ -19,12 +19,12 @@ export default function AccountRecoveryVerifyUpdateEmailScreen() {
           Since you lost access to your original email, please provide a new one. We will send a verification link to this address.
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="New Email Address" placeholderTextColor={colorRoles.content.secondary} keyboardType="email-address" autoCapitalize="none" />
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Confirm New Email Address" placeholderTextColor={colorRoles.content.secondary} keyboardType="email-address" autoCapitalize="none" />
+        <TextInput testID="input-auto-dfc5e3" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="New Email Address" placeholderTextColor={colorRoles.content.secondary} keyboardType="email-address" autoCapitalize="none" />
+        <TextInput testID="input-auto-b55f2b" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Confirm New Email Address" placeholderTextColor={colorRoles.content.secondary} keyboardType="email-address" autoCapitalize="none" />
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.replace('/(auth)/login')} style={{ backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-c4b26a" onPress={() => router.replace('/(auth)/login')} style={{ backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Update & Verify</Text>
         </PressableScale>
       </ScrollView>

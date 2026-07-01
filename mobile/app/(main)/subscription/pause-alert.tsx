@@ -26,7 +26,7 @@ export default function PauseSubscriptionAlertScreen() {
           </Text>
         </View>
 
-        <PressableScale testID="btn-auto-d9143a"
+        <PressableScale testID="btn-auto-d38a6d" testID="btn-auto-d9143a"
           haptics="medium"
           onPress={() => {
             AudioHapticsManager.success();
@@ -39,7 +39,7 @@ export default function PauseSubscriptionAlertScreen() {
           </Text>
         </PressableScale>
 
-        <PressableScale testID="btn-auto-64a5eb"
+        <PressableScale testID="btn-auto-a6d335" testID="btn-auto-64a5eb"
           haptics="light"
           onPress={() => router.back()}
           style={{ paddingVertical: spacing.l, alignItems: 'center' }}

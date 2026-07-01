@@ -42,7 +42,7 @@ const BudgetCardComponent = ({ item, index, colorRoles, typography, spacing }: a
 
   return (
     <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(200 + index * 50)} style={{ marginBottom: spacing.m }}>
-      <PressableScale testID="btn-auto-2c615f"
+      <PressableScale testID="btn-auto-a106cb" testID="btn-auto-2c615f"
         testID={`budget-card-${index}`}
         haptics="medium"
         onPress={() => AudioHapticsManager.mediumInteraction()}
@@ -129,11 +129,11 @@ export default function BudgetScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top']}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.m, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colorRoles.border.default }}>
-        <TouchableOpacity testID="btn-back" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -8 }}>
+        <TouchableOpacity testID="btn-auto-5cd9c5" testID="btn-back" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -8 }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: colorRoles.content.primary }}>Budgets</Text>
-        <TouchableOpacity testID="btn-add-budget" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ padding: spacing.s, marginRight: -8 }}>
+        <TouchableOpacity testID="btn-auto-a64e02" testID="btn-add-budget" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ padding: spacing.s, marginRight: -8 }}>
           <Ionicons name="add" size={24} color={colorRoles.content.accentMid} />
         </TouchableOpacity>
       </View>

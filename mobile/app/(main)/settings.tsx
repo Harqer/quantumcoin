@@ -25,7 +25,7 @@ export default function SettingsScreen() {
   };
 
   const SettingRow = ({ icon, title, subtitle, onPress, showToggle = false, isLast = false, rightElement }: any) => (
-    <TouchableOpacity testID="btn-auto-a8d826" 
+    <TouchableOpacity testID="btn-auto-706c46" testID="btn-auto-a8d826" 
       disabled={showToggle || !onPress}
       onPress={() => {
         if (onPress) {
@@ -67,7 +67,7 @@ export default function SettingsScreen() {
       
       {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.m, paddingVertical: spacing.s, borderBottomWidth: 1, borderBottomColor: colorRoles.border.default }}>
-        <TouchableOpacity testID="btn-auto-b310e6" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+        <TouchableOpacity testID="btn-auto-c5fa0c" testID="btn-auto-b310e6" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ fontFamily: typography.titleLarge.fontFamily, fontSize: 18, fontWeight: '700', color: colorRoles.content.primary }}>Settings</Text>
@@ -146,7 +146,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Premium Subscription Banner (Quantum Pro) */}
-          <TouchableOpacity testID="btn-auto-57c946" 
+          <TouchableOpacity testID="btn-auto-316143" testID="btn-auto-57c946" 
             onPress={() => { AudioHapticsManager.mediumInteraction(); router.push('/(main)/upgrade'); }}
             style={{ 
               backgroundColor: '#FFFBEB', 
@@ -170,7 +170,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           {/* Sign Out */}
-          <TouchableOpacity testID="btn-auto-2ba951" 
+          <TouchableOpacity testID="btn-auto-a292cf" testID="btn-auto-2ba951" 
             onPress={handleSignOut}
             style={{ backgroundColor: colorRoles.background.negativeLight, borderRadius: 9999, paddingVertical: 16, alignItems: 'center', marginBottom: spacing.xxl }}
           >

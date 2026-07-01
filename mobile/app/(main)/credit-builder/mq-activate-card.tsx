@@ -47,7 +47,7 @@ export default function MqActivateCard() {
             <Text className="text-gray-900 text-lg font-bold mb-2">Activate Physical Card</Text>
             <Text className="text-gray-500 text-center mb-6">Enter the last 4 digits on the back of your new physical card to activate it.</Text>
             
-            <TextInput testID="input-auto-372725"
+            <TextInput testID="input-auto-dfebf8" testID="input-auto-372725"
               className="bg-white border border-gray-300 rounded-xl w-full text-center text-2xl font-mono tracking-widest py-4 mb-6 text-gray-900"
               keyboardType="number-pad"
               maxLength={4}
@@ -56,7 +56,7 @@ export default function MqActivateCard() {
               placeholder="0000"
             />
 
-            <TouchableOpacity testID="btn-auto-edf075" 
+            <TouchableOpacity testID="btn-auto-ef23a3" testID="btn-auto-edf075" 
               className={`w-full py-4 rounded-xl items-center ${last4.length === 4 ? 'bg-blue-600' : 'bg-gray-300'}`}
               disabled={last4.length !== 4 || isSubmitting}
               onPress={handleActivate}

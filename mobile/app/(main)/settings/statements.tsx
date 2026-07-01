@@ -42,7 +42,7 @@ export default function StatementsScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity testID="btn-auto-23cef5"
+        <TouchableOpacity testID="btn-auto-4a30d4" testID="btn-auto-23cef5"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -65,7 +65,7 @@ export default function StatementsScreen() {
           <Text style={{ color: colorRoles.content.secondary }}>Loading...</Text>
         ) : (
           statements?.map((item) => (
-            <TouchableOpacity testID="btn-auto-845a56"
+            <TouchableOpacity testID="btn-auto-86f0dd" testID="btn-auto-845a56"
               key={item.id}
               onPress={handleDownload}
               style={{

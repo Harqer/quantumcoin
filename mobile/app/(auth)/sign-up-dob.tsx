@@ -67,7 +67,7 @@ export default function SignUpDOBScreen() {
             paddingVertical: spacing.s,
           }}
         >
-          <TouchableOpacity
+          <TouchableOpacity testID="btn-auto-a6b063"
             onPress={() => {
               AudioHapticsManager.lightInteraction();
               router.back();
@@ -118,7 +118,7 @@ export default function SignUpDOBScreen() {
             >
               Date of Birth (MM/DD/YYYY)
             </Text>
-            <TextInput
+            <TextInput testID="input-auto-33b6f0"
               style={{
                 backgroundColor: colorRoles.background.baseLight,
                 borderRadius: 16,
@@ -145,7 +145,7 @@ export default function SignUpDOBScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(300)}
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
-          <Button
+          <Button testID="btn-auto-eb6176"
             testID="btn-next"
             haptics="medium"
             onPress={handleNext}

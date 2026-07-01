@@ -22,7 +22,7 @@ export default function AccountRecoveryVerifyUnmaskedPhoneNumberScreen() {
           </Text>
 
           <View style={{ backgroundColor: colorRoles.background.secondary, borderRadius: 16, padding: spacing.m, marginBottom: spacing.xl }}>
-            <TextInput
+            <TextInput testID="input-auto-22a57e"
               style={{ fontSize: 18, color: colorRoles.content.primary }}
               placeholder="(XXX) XXX-XXXX"
               placeholderTextColor={colorRoles.content.secondary}
@@ -35,7 +35,7 @@ export default function AccountRecoveryVerifyUnmaskedPhoneNumberScreen() {
 
           <View style={{ flex: 1 }} />
 
-          <PressableScale
+          <PressableScale testID="btn-auto-ab2de6"
             onPress={() => router.push('/(auth)/recovery/masked-phone')}
             style={{ backgroundColor: phone.length >= 10 ? colorRoles.content.accentMid : colorRoles.background.secondary, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}
             disabled={phone.length < 10}

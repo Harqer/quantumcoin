@@ -40,7 +40,7 @@ export default function CashAdvanceSettingsScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity testID="btn-auto-7c2275"
+        <TouchableOpacity testID="btn-auto-b6a8f0" testID="btn-auto-7c2275"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >

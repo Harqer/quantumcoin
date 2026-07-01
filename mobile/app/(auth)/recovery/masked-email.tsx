@@ -24,7 +24,7 @@ export default function AccountRecoveryVerifyMaskedEmailScreen() {
 
           <View style={{ backgroundColor: colorRoles.background.secondary, borderRadius: 16, padding: spacing.m, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl }}>
             <Ionicons name="mail" size={24} color={colorRoles.content.secondary} style={{ marginRight: spacing.s }} />
-            <TextInput
+            <TextInput testID="input-auto-ca9ab4"
               style={{ flex: 1, fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary, letterSpacing: 8 }}
               placeholder="000000"
               placeholderTextColor={colorRoles.content.secondary}
@@ -38,7 +38,7 @@ export default function AccountRecoveryVerifyMaskedEmailScreen() {
 
           <View style={{ flex: 1 }} />
 
-          <PressableScale
+          <PressableScale testID="btn-auto-50bac7"
             onPress={() => router.push('/(auth)/recovery/unmasked-phone')}
             style={{ backgroundColor: code.length === 6 ? colorRoles.content.accentMid : colorRoles.background.secondary, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}
             disabled={code.length !== 6}

@@ -19,13 +19,13 @@ export default function AccountRecoveryPIIDetailsScreen() {
           To recover your account, please enter the personal details exactly as they appear on your profile.
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="First Name" placeholderTextColor={colorRoles.content.secondary} />
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Last Name" placeholderTextColor={colorRoles.content.secondary} />
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Date of Birth (MM/DD/YYYY)" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-0c4add" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="First Name" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-713f6e" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Last Name" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-d25ff3" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Date of Birth (MM/DD/YYYY)" placeholderTextColor={colorRoles.content.secondary} />
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.push('/(auth)/recovery/verify-update-email')} style={{ backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-92a76d" onPress={() => router.push('/(auth)/recovery/verify-update-email')} style={{ backgroundColor: colorRoles.content.accentMid, padding: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Continue</Text>
         </PressableScale>
       </ScrollView>

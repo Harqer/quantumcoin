@@ -94,7 +94,7 @@ export default function EmailFallbackScreen() {
           paddingVertical: spacing.s,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-cc52bc"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
             router.back();
@@ -139,7 +139,7 @@ export default function EmailFallbackScreen() {
           {!isCodeSent ? (
             <>
               <View style={{ marginBottom: spacing.xl }}>
-                <TextInput
+                <TextInput testID="input-auto-d2213a"
                   autoCapitalize="none"
                   value={emailAddress}
                   testID="input-email"
@@ -158,7 +158,7 @@ export default function EmailFallbackScreen() {
                 />
               </View>
 
-              <Button
+              <Button testID="btn-auto-b83f46"
                 testID="btn-continue"
                 haptics="heavy"
                 onPress={handleSignIn}
@@ -171,7 +171,7 @@ export default function EmailFallbackScreen() {
           ) : (
             <>
               <View style={{ marginBottom: spacing.xl }}>
-                <TextInput
+                <TextInput testID="input-auto-fce62a"
                   value={code}
                   testID="input-code"
                   placeholder="123456"
@@ -191,7 +191,7 @@ export default function EmailFallbackScreen() {
                 />
               </View>
 
-              <Button
+              <Button testID="btn-auto-629d2b"
                 testID="btn-verify"
                 haptics="heavy"
                 onPress={handleVerifyCode}

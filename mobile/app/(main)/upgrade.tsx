@@ -26,7 +26,7 @@ export default function UpgradeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl }}>
-          <TouchableOpacity testID="btn-auto-4762db" onPress={handleBack} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+          <TouchableOpacity testID="btn-auto-4c5692" testID="btn-auto-4762db" onPress={handleBack} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
             <Ionicons name="close" size={28} color={colorRoles.content.primary} />
           </TouchableOpacity>
         </View>
@@ -66,7 +66,7 @@ export default function UpgradeScreen() {
             ))}
           </View>
 
-          <PressableScale testID="btn-auto-a48ae0" 
+          <PressableScale testID="btn-auto-d2a6d5" testID="btn-auto-a48ae0" 
             haptics="heavy"
             onPress={handleSubscribe}
             style={{ backgroundColor: colorRoles.content.primary, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}

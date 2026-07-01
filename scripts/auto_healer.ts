@@ -64,7 +64,7 @@ function extractFilesFromLogs(logs: string): string[] {
   const files = new Set<string>();
   // Match common file paths in logs (e.g. src/Counter.sol, test/Counter.t.sol, app/page.tsx)
   const regex = new RegExp(
-    '((?:src|test|app|components|lib)/[a-zA-Z0-9_./-]+\\\\.(?:sol|ts|tsx|js|jsx))',
+    '((?:src|test|app|components|lib|mobile|.maestro)/[a-zA-Z0-9_./-]+\\\\.(?:sol|ts|tsx|js|jsx|yaml|yml))',
     'g',
   );
   let match;
