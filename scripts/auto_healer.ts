@@ -83,7 +83,8 @@ The script will be executed directly in the root of the repository.
 Requirements:
 1. Use standard bash commands (like sed, echo, npm, etc.) to modify files or install missing dependencies.
 2. If it's a code issue (TypeScript, lint, missing mock, invalid config), use 'cat > path/to/file << 'EOF' or 'sed' to fix it.
-3. Output ONLY the raw bash script without markdown formatting (no \`\`\`bash). Do not add explanations.
+3. Be careful with filenames! If fixing a GitHub workflow, note that the workflow files are in '.github/workflows/'. The logs might not explicitly state the filename. You can use commands like \`grep -rl "search string"\` to dynamically find the file before modifying it if you are unsure.
+4. Output ONLY the raw bash script without markdown formatting (no \`\`\`bash). Do not add explanations.
 
 Script should start with #!/bin/bash
 `;
