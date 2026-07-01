@@ -1,0 +1,41 @@
+name: Auto-Healer Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI", "EAS Build Pipeline", "EAS Update", "Dependabot AI Remediation Pipeline", "Jules AI Code Review", "test"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  auto-heal:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.name != 'Auto-Healer Pipeline' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g tsx
+          npm install @google/genai node-fetch
+
+      - name: Run AI Healer Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FAILED_RUN_ID: ${{ github.event.workflow_run.id }}
+          FAILED_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          npx tsx scripts/auto_healer.ts
