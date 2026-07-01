@@ -20,6 +20,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
+          token: ${{ secrets.GH_PAT || github.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,7 +34,7 @@ jobs:
 
       - name: Run AI Healer Script
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FAILED_RUN_ID: ${{ github.event.workflow_run.id }}
           FAILED_BRANCH: ${{ github.event.workflow_run.head_branch }}

@@ -66,6 +66,21 @@ async function main() {
       process.exit(0);
     }
 
+    const gitLog = execSync('git log -n 3 --pretty=format:"%an"', { encoding: 'utf-8' });
+    const authors = gitLog.split('\n').map((a) => a.trim());
+    if (authors.length >= 3 && authors.slice(0, 3).every((author) => author === 'Auto-Healer AI')) {
+      console.log(
+        'Detected 3 consecutive Auto-Healer AI commits. Aborting to prevent infinite loop.',
+      );
+      process.exit(1);
+    }
+
+    let previousAttempt = '';
+    if (authors[0] === 'Auto-Healer AI') {
+      const lastCommitDiff = execSync('git log -1 -p', { encoding: 'utf-8' });
+      previousAttempt = `\nNOTE: You previously attempted to fix this, but the pipeline failed again! Here is your previous commit diff. DO NOT repeat the exact same fix:\n\`\`\`\n${lastCommitDiff}\n\`\`\`\n`;
+    }
+
     const prompt = `
 You are an AI Auto-Healer agent tasked with automatically fixing a CI/CD pipeline failure.
 Repository: ${REPO}
@@ -85,6 +100,7 @@ Requirements:
 2. If it's a code issue (TypeScript, lint, missing mock, invalid config), use 'cat > path/to/file << 'EOF' or 'sed' to fix it.
 3. Be careful with filenames! If fixing a GitHub workflow, note that the workflow files are in '.github/workflows/'. The logs might not explicitly state the filename. You can use commands like \`grep -rl "search string"\` to dynamically find the file before modifying it if you are unsure.
 4. Output ONLY the raw bash script without markdown formatting (no \`\`\`bash). Do not add explanations.
+${previousAttempt}
 
 Script should start with #!/bin/bash
 `;
