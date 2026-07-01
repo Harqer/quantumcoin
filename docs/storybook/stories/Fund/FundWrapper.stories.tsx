@@ -52,6 +52,5 @@ export const Connected: Story = {
   name: 'Connected',
   args: {
     connected: true,
-    address: "0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1",
   },
 };

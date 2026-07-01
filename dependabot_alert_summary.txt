@@ -1,0 +1,51 @@
+      1 - axios (high): Axios: Header Injection via Prototype Pollution
+      1 - axios (high): Axios: Incomplete Fix for CVE-2025-62718 — NO_PROXY Protection Bypassed via RFC 1122 Loopback Subnet (127.0.0.0/8) in Axios 1.15.0
+      1 - axios (high): Axios is Vulnerable to Denial of Service via __proto__ Key in mergeConfig
+      1 - axios (high): Axios: Prototype Pollution Gadgets - Response Tampering, Data Exfiltration, and Request Hijacking
+      1 - axios (high): Axios: Proxy-Authorization Credential Leak to Origin Server Across HTTP-to-HTTPS Redirect in Axios Node.js HTTP Adapter
+      1 - axios (high): Axios: Proxy-Authorization header leaks to redirect target when proxy is re-evaluated to direct connection
+      1 - axios (high): Axios: Regular Expression Denial of Service (ReDoS) via Cookie Name Injection
+      1 - axios (high): axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL
+      1 - axios (high): axios's shouldBypassProxy does not recognize IPv4-mapped IPv6 addresses, allowing NO_PROXY bypass (incomplete fix for CVE-2025-62718)
+      1 - axios (high): axios Vulnerable to Credential Theft and Response Hijacking via Prototype Pollution Gadget in Config Merge
+      1 - axios (low): Axios: Null Byte Injection via Reverse-Encoding in AxiosURLSearchParams
+      1 - axios (medium): Axios: Authentication Bypass via Prototype Pollution Gadget in `validateStatus` Merge Strategy
+      1 - axios (medium): Axios Cross-Site Request Forgery Vulnerability
+      1 - axios (medium): Axios has a NO_PROXY Hostname Normalization Bypass that Leads to SSRF
+      1 - axios (medium): axios has DoS & Header Injection via Prototype Pollution Read-Side Gadgets in axios merge functions
+      1 - axios (medium): Axios has Unrestricted Cloud Metadata Exfiltration via Header Injection Chain
+      1 - axios (medium): Axios: HTTP adapter streamed responses bypass maxContentLength
+      1 - axios (medium): Axios' HTTP adapter-streamed uploads bypass maxBodyLength when maxRedirects: 0
+      1 - axios (medium): Axios: no_proxy bypass via IP alias allows SSRF
+      1 - axios (medium): Axios: unbounded recursion in toFormData causes DoS via deeply nested request data
+      1 - axios (medium): Axios: XSRF Token Cross-Origin Leakage via Prototype Pollution Gadget in `withXSRFToken` Boolean Coercion
+      1 - cookie (low): cookie accepts cookie name, path, and domain with out of bounds characters
+      2 - esbuild (low): esbuild allows arbitrary file read when running the development server on Windows
+      1 - esbuild (medium): esbuild enables any website to send any requests to the development server and read the response
+      5 - form-data (high): form-data: CRLF injection in form-data via unescaped multipart field names and filenames
+      4 - hono (high): hono: CORS Middleware reflects any Origin with credentials when `origin` defaults to the wildcard
+      4 - hono (medium): hono: AWS Lambda adapter merges multiple `Set-Cookie` headers into one value, dropping cookies on ALB single-header and Lattice
+      4 - hono (medium): hono: Body Limit Middleware can be bypassed on AWS Lambda by understating `Content-Length`
+      4 - hono (medium): hono: Lambda@Edge adapter keeps only the last value of a repeated request header, dropping the rest
+      4 - hono (medium): hono: Path traversal in `serve-static` on Windows via encoded backslash (`%5C`)
+      1 - jsonwebtoken (medium): jsonwebtoken has Type Confusion that leads to potential authorization bypass
+      2 - js-yaml (medium): JS-YAML: Quadratic-complexity DoS in merge key handling via repeated aliases
+      2 - next (high): Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes - Incomplete Fix Follow-Up
+      2 - @opentelemetry/core (medium): OpenTelemetry Core: Unbounded memory allocation in W3C Baggage propagation
+      1 - postcss (medium): PostCSS has XSS via Unescaped </style> in its CSS Stringify Output
+      4 - protobufjs (medium): protobufjs : Schema-derived names can shadow runtime-significant properties
+      1 - starlette (high): Starlette: request.form() limits silently ignored for application/x-www-form-urlencoded enable DoS
+      1 - Starlette (low): Starlette: Unvalidated request path concatenated into authority poisons request.url.hostname
+      1 - turbo (medium): Trubo: Login callback CSRF/session fixation
+      1 - undici (high): undici vulnerable to cross-origin request routing via SOCKS5 proxy pool reuse
+      1 - undici (high): undici vulnerable to TLS certificate validation bypass via dropped requestTls in SOCKS5 ProxyAgent
+      2 - undici (high): undici WebSocket client vulnerable to denial of service via fragment count bypass
+      4 - undici (low): undici vulnerable to HTTP response queue poisoning via keep-alive socket reuse
+      4 - undici (low): undici vulnerable to Set-Cookie SameSite attribute downgrade via permissive substring matching
+      1 - undici (medium): Undici has an HTTP Request/Response Smuggling issue
+      1 - undici (medium): Undici has CRLF Injection in undici via `upgrade` option
+      1 - undici (medium): undici vulnerable to cross-user information disclosure via shared cache whitespace bypass
+      4 - undici (medium): undici vulnerable to HTTP header injection via Set-Cookie percent-decoding
+      2 - uuid (medium): uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided
+      4 - ws (high): ws: Memory exhaustion DoS from tiny fragments and data chunks
+      1 - ws (medium): ws: Uninitialized memory disclosure

@@ -7,6 +7,20 @@ const connectorConfig = {
 };
 exports.connectorConfig = connectorConfig;
 
+const createChatMessageRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateChatMessage', inputVars);
+}
+createChatMessageRef.operationName = 'CreateChatMessage';
+exports.createChatMessageRef = createChatMessageRef;
+
+exports.createChatMessage = function createChatMessage(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createChatMessageRef(dcInstance, inputVars));
+}
+;
+
 const listChatMessagesRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -19,19 +33,5 @@ exports.listChatMessages = function listChatMessages(dcOrVars, varsOrOptions, op
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(listChatMessagesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
-}
-;
-
-const createChatMessageRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateChatMessage', inputVars);
-}
-createChatMessageRef.operationName = 'CreateChatMessage';
-exports.createChatMessageRef = createChatMessageRef;
-
-exports.createChatMessage = function createChatMessage(dcOrVars, vars) {
-  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(createChatMessageRef(dcInstance, inputVars));
 }
 ;

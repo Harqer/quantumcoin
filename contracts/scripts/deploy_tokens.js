@@ -13,13 +13,13 @@ async function main() {
   const validatorAddress = await quantumValidator.getAddress();
   console.log("   Quantum Validator deployed to:", validatorAddress);
 
-  // Deploy QubitCoin
-  console.log("\n2. Deploying QubitCoin...");
-  const QubitCoin = await hre.ethers.getContractFactory("QubitCoin");
-  const qubitCoin = await hre.upgrades.deployProxy(QubitCoin, [deployer.address, deployer.address], { kind: 'uups' });
-  await qubitCoin.waitForDeployment();
-  const qbcAddress = await qubitCoin.getAddress();
-  console.log("   QubitCoin deployed to:", qbcAddress);
+  // Deploy QBitcoin
+  console.log("\n2. Deploying QBitcoin...");
+  const QBitcoin = await hre.ethers.getContractFactory("QBitcoin");
+  const qBitcoin = await hre.upgrades.deployProxy(QBitcoin, [deployer.address, deployer.address], { kind: 'uups' });
+  await qBitcoin.waitForDeployment();
+  const qbcAddress = await qBitcoin.getAddress();
+  console.log("   QBitcoin deployed to:", qbcAddress);
 
   // Deploy WrappedQuantumCoin
   console.log("\n3. Deploying WrappedQuantumCoin...");
@@ -40,7 +40,7 @@ async function main() {
     timestamp: new Date().toISOString(),
     contracts: {
       quantumValidator: validatorAddress,
-      qubitCoin: qbcAddress,
+      qBitcoin: qbcAddress,
       wrappedQuantumCoin: wrappedAddress
     }
   };

@@ -39,18 +39,6 @@ export interface ListChatMessagesVariables {
   userId: string;
 }
 
-interface ListChatMessagesRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: ListChatMessagesVariables): QueryRef<ListChatMessagesData, ListChatMessagesVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: ListChatMessagesVariables): QueryRef<ListChatMessagesData, ListChatMessagesVariables>;
-  operationName: string;
-}
-export const listChatMessagesRef: ListChatMessagesRef;
-
-export function listChatMessages(vars: ListChatMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListChatMessagesData, ListChatMessagesVariables>;
-export function listChatMessages(dc: DataConnect, vars: ListChatMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListChatMessagesData, ListChatMessagesVariables>;
-
 interface CreateChatMessageRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: CreateChatMessageVariables): MutationRef<CreateChatMessageData, CreateChatMessageVariables>;
@@ -62,4 +50,16 @@ export const createChatMessageRef: CreateChatMessageRef;
 
 export function createChatMessage(vars: CreateChatMessageVariables): MutationPromise<CreateChatMessageData, CreateChatMessageVariables>;
 export function createChatMessage(dc: DataConnect, vars: CreateChatMessageVariables): MutationPromise<CreateChatMessageData, CreateChatMessageVariables>;
+
+interface ListChatMessagesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListChatMessagesVariables): QueryRef<ListChatMessagesData, ListChatMessagesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ListChatMessagesVariables): QueryRef<ListChatMessagesData, ListChatMessagesVariables>;
+  operationName: string;
+}
+export const listChatMessagesRef: ListChatMessagesRef;
+
+export function listChatMessages(vars: ListChatMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListChatMessagesData, ListChatMessagesVariables>;
+export function listChatMessages(dc: DataConnect, vars: ListChatMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListChatMessagesData, ListChatMessagesVariables>;
 
