@@ -1,12 +1,8 @@
 #!/bin/bash
-# Fix ReferenceError in scripts/fail.js
+set -e
 
-# Check if scripts/fail.js exists
-if [ -f "scripts/fail.js" ]; then
-    # Replace the line 'console.log(undefinedVariable);' with a valid console.log statement
-    sed -i 's/console.log(undefinedVariable);/console.log("Script executed successfully, variable is now defined!");/' scripts/fail.js
-    echo "Successfully fixed ReferenceError in scripts/fail.js"
-else
-    echo "Error: scripts/fail.js not found in the repository root."
-    exit 1
-fi
+# Fix formatting in src/Counter.sol as reported by forge fmt --check
+# The error was:
+# 8        |-          number= newNumber ;
+#     8    |+        number = newNumber;
+sed -i 's/number= newNumber ;/number = newNumber;/' src/Counter.sol
