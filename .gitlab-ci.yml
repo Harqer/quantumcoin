@@ -97,7 +97,7 @@ feature_test_staging:
     - echo "Running Maestro Cloud E2E Authentication tests..."
     # NOTE: You must provide a valid MAESTRO_API_KEY in GitLab CI/CD Variables
     # Assuming the APK is available from a previous build artifact. If not, it needs to be built.
-    - if [ -z "$MAESTRO_API_KEY" ]; then echo "MAESTRO_API_KEY is not set. Skipping Cloud upload."; else maestro cloud --apiKey $MAESTRO_API_KEY mobile/android/app/build/outputs/apk/release/app-release.apk .maestro/; fi
+    - if [ -z "$MAESTRO_API_KEY" ]; then echo "MAESTRO_API_KEY is not set. Skipping Cloud upload."; else maestro cloud --apiKey $MAESTRO_API_KEY mobile/android/app/build/outputs/apk/release/app-release.apk mobile/.maestro/; fi
   environment:
     name: staging
 
