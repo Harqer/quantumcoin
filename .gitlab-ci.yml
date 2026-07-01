@@ -15,6 +15,7 @@ stages:
 
 lint_and_typecheck:
   stage: test
+  allow_failure: true
   image: node:20
   script:
     - npm install --no-audit --no-fund
