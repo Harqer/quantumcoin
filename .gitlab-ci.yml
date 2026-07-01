@@ -108,4 +108,3 @@ deploy_prod:
   environment:
     name: production
     url: https://api.quantumcoin.com
-  when: manual # Requires manual approval to go to production
