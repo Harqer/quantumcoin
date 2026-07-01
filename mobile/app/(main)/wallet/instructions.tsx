@@ -37,7 +37,7 @@ export default function WalletInstructionsScreen() {
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.back()} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-cdce13" onPress={() => router.back()} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Done</Text>
         </PressableScale>
       </ScrollView>

@@ -28,7 +28,7 @@ export default function DebtRefinanceScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-785af3"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -87,7 +87,7 @@ export default function DebtRefinanceScreen() {
           )}
         </View>
 
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-ec736d"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
             Alert.alert('Apply', 'Redirecting to application...');

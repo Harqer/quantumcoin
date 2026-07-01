@@ -29,7 +29,7 @@ export default function TipsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
-        <TouchableOpacity onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
+        <TouchableOpacity testID="btn-auto-86638f" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
       </View>
@@ -65,7 +65,7 @@ export default function TipsScreen() {
       </ScrollView>
 
       <View style={{ padding: 24 }}>
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-bd8932" 
           onPress={handleCamera}
           style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >

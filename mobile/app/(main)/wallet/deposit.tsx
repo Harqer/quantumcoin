@@ -50,7 +50,7 @@ export default function WalletDepositScreen() {
 
         {/* Direct numerical input */}
         <View style={{ backgroundColor: colorRoles.background.secondary, borderRadius: 16, padding: spacing.l, marginBottom: spacing.xl }}>
-           <TextInput
+           <TextInput testID="input-auto-0c1345"
              style={{ fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary, textAlign: 'center' }}
              keyboardType="decimal-pad"
              placeholder="Enter amount"
@@ -63,7 +63,7 @@ export default function WalletDepositScreen() {
         <View style={{ flex: 1 }} />
 
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <PressableScale
+          <PressableScale testID="btn-auto-858ed6"
             haptics="medium"
             onPress={handleDeposit}
             disabled={depositMutation.isPending}

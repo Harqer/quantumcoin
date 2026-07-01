@@ -25,7 +25,7 @@ const MovementItem = React.memo(({ item, index, colorRoles, typography, spacing 
 
   return (
     <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100 + index * 50)} style={{ marginBottom: spacing.m }}>
-      <PressableScale
+      <PressableScale testID="btn-auto-274b72"
         haptics="medium"
         onPress={() => AudioHapticsManager.lightInteraction()}
         style={{ 
@@ -104,7 +104,7 @@ export default function MoneyMovementScreen() {
       
       {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.m, paddingVertical: spacing.s }}>
-        <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
+        <TouchableOpacity testID="btn-auto-d905d3" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ padding: spacing.s, marginLeft: -spacing.s }}>
           <Ionicons name="arrow-back" size={28} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: typography.bodyLarge.fontSize, fontWeight: '700', color: colorRoles.content.primary }}>
@@ -116,7 +116,7 @@ export default function MoneyMovementScreen() {
       {/* Horizontal Tabs */}
       <View style={{ flexDirection: 'row', paddingHorizontal: spacing.m, marginBottom: spacing.l, marginTop: spacing.s }}>
         <View style={{ flexDirection: 'row', backgroundColor: colorRoles.background.baseLight, borderRadius: 999, padding: 4, flex: 1 }}>
-          <TouchableOpacity 
+          <TouchableOpacity testID="btn-auto-f1638b" 
             onPress={() => handleTabChange('past')}
             style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 999, backgroundColor: activeTab === 'past' ? colorRoles.background.primary : 'transparent', shadowColor: activeTab === 'past' ? '#000' : 'transparent', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}
           >
@@ -124,7 +124,7 @@ export default function MoneyMovementScreen() {
               Past 30 Days
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity testID="btn-auto-e9bf4d" 
             onPress={() => handleTabChange('upcoming')}
             style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 999, backgroundColor: activeTab === 'upcoming' ? colorRoles.background.primary : 'transparent', shadowColor: activeTab === 'upcoming' ? '#000' : 'transparent', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}
           >

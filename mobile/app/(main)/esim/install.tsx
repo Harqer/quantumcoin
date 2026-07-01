@@ -189,7 +189,7 @@ export default function EsimInstall() {
           ))}
         </View>
 
-        <Button
+        <Button testID="btn-auto-10eea9"
           onPress={handleNext}
           disabled={isCheckingESimSupport || isInstalling}
           loading={isCheckingESimSupport || isInstalling}

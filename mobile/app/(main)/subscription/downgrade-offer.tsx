@@ -28,7 +28,7 @@ export default function DowngradeToQuarterlyPlusOfferScreen() {
           </Text>
         </View>
 
-        <PressableScale
+        <PressableScale testID="btn-auto-6ec427"
           haptics="heavy"
           onPress={async () => {
             AudioHapticsManager.success();
@@ -42,7 +42,7 @@ export default function DowngradeToQuarterlyPlusOfferScreen() {
           </Text>
         </PressableScale>
 
-        <PressableScale
+        <PressableScale testID="btn-auto-4b6d48"
           haptics="light"
           onPress={() => router.replace('/(main)/subscription/cancel-fomo')}
           style={{ paddingVertical: spacing.l, alignItems: 'center' }}

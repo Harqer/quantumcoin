@@ -64,7 +64,7 @@ export default function AddSubscriptionCardScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
-        <TouchableOpacity onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
+        <TouchableOpacity testID="btn-auto-fe2e07" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Montreal-Bold', fontSize: 18, color: colorRoles.content.primary }}>Add Card</Text>
@@ -106,7 +106,7 @@ export default function AddSubscriptionCardScreen() {
             </Text>
           </View>
           
-          <TouchableOpacity onPress={handleInfoPress} style={{ marginTop: 24, padding: 12, backgroundColor: colorRoles.background.baseLight, borderRadius: 8 }}>
+          <TouchableOpacity testID="btn-auto-4dc8b0" onPress={handleInfoPress} style={{ marginTop: 24, padding: 12, backgroundColor: colorRoles.background.baseLight, borderRadius: 8 }}>
             <Text style={{ fontFamily: 'Montreal-Bold', fontSize: 12, color: colorRoles.content.accentMid, textAlign: 'center' }}>
               View Account Linking Terms
             </Text>
@@ -122,7 +122,7 @@ export default function AddSubscriptionCardScreen() {
             <Text style={{ fontFamily: 'Montreal-Medium', fontSize: 14, color: colorRoles.content.secondary, marginBottom: 24, lineHeight: 20 }}>
               By adding this card, you authorize QuantumCoin to automatically withdraw subscription fees. Ensure this card belongs to you to avoid account suspension.
             </Text>
-            <TouchableOpacity onPress={() => setShowWarningModal(false)} style={{ backgroundColor: colorRoles.content.accentMid, padding: 16, borderRadius: 999 }}>
+            <TouchableOpacity testID="btn-i-understand" onPress={() => setShowWarningModal(false)} style={{ backgroundColor: colorRoles.content.accentMid, padding: 16, borderRadius: 999 }}>
               <Text style={{ color: colorRoles.content.onPrimary, textAlign: 'center', fontFamily: 'Montreal-Bold' }}>I Understand</Text>
             </TouchableOpacity>
           </View>
@@ -130,7 +130,7 @@ export default function AddSubscriptionCardScreen() {
       </Modal>
 
       <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 16, borderTopWidth: 1, borderTopColor: colorRoles.border.default, paddingTop: 24 }}>
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-807e65" 
           onPress={handleSubscribe}
           disabled={!isCardComplete || createSubscriptionIntent.isPending}
           style={{ 

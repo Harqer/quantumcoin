@@ -49,7 +49,7 @@ export default function OfflineScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <PressableScale 
+          <PressableScale testID="btn-auto-e0725e" 
             haptics="heavy" 
             onPress={handleRetry}
             disabled={isChecking}

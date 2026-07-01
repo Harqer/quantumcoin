@@ -29,7 +29,7 @@ export default function ResumeSubscriptionSuccessScreen() {
         </Text>
 
         <View style={{ width: '100%' }}>
-          <PressableScale onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-8fc754" onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Return to Dashboard</Text>
           </PressableScale>
         </View>

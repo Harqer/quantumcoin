@@ -66,7 +66,7 @@ export default function CancelSubscriptionScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
-        <TouchableOpacity onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
+        <TouchableOpacity testID="btn-auto-6aa658" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Montreal-Bold', fontSize: 18, color: colorRoles.content.primary }}>Cancel Subscription</Text>
@@ -112,7 +112,7 @@ export default function CancelSubscriptionScreen() {
       </View>
 
       <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 16, borderTopWidth: 1, borderTopColor: colorRoles.border.default, paddingTop: 24 }}>
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-d0991d" 
           onPress={() => router.back()}
           style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: 18, borderRadius: 9999, alignItems: 'center', marginBottom: 16 }}
         >
@@ -121,7 +121,7 @@ export default function CancelSubscriptionScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-ec17c0" 
           onPress={handleCancel}
           disabled={hasOutstandingAdvance || cancelMutation.isPending}
           style={{ paddingVertical: 16, alignItems: 'center' }}

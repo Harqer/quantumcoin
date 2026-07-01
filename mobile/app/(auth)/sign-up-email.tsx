@@ -218,6 +218,7 @@ export default function SignUpEmailScreen() {
                     borderColor: email ? colorRoles.border.selectedInverse : 'transparent',
                   }}
                   placeholder="Enter your email"
+                  testID="input-email"
                   placeholderTextColor={colorRoles.content.secondary}
                   value={email}
                   onChangeText={setEmail}
@@ -287,6 +288,7 @@ export default function SignUpEmailScreen() {
                     letterSpacing: 10,
                   }}
                   placeholder="------"
+                  testID="input-code"
                   placeholderTextColor={colorRoles.content.secondary}
                   value={code}
                   onChangeText={setCode}
@@ -318,6 +320,7 @@ export default function SignUpEmailScreen() {
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
           <Button
+            testID="btn-next"
             haptics="medium"
             onPress={!pendingVerification ? handleSendCode : handleVerifyAndCreatePasskey}
             disabled={

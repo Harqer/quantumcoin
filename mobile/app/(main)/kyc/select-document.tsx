@@ -29,7 +29,7 @@ export default function SelectDocumentScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
-        <TouchableOpacity onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
+        <TouchableOpacity testID="btn-auto-fbcb2f" onPress={() => { HapticsManager.light(); router.back(); }} style={{ padding: 8, marginLeft: -8 }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
       </View>
@@ -46,7 +46,7 @@ export default function SelectDocumentScreen() {
           <View style={{ gap: 16 }}>
             {documents.map((doc, index) => (
               <Animated.View key={doc.id} entering={FadeInDown.springify().stiffness(80).damping(28).delay(200 + index * 50)}>
-                <TouchableOpacity 
+                <TouchableOpacity testID="btn-auto-342c13" 
                   onPress={() => handleSelect(doc.id)}
                   style={{ backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                 >

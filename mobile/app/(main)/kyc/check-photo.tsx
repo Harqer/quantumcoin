@@ -50,7 +50,7 @@ export default function CheckPhotoScreen() {
       </View>
 
       <View style={{ padding: 24, gap: 16 }}>
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-55e940" 
           onPress={handleLooksGood}
           style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >
@@ -59,7 +59,7 @@ export default function CheckPhotoScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-03371e" 
           onPress={handleRetake}
           style={{ backgroundColor: colorRoles.background.baseLight, paddingVertical: 18, borderRadius: 9999, alignItems: 'center' }}
         >

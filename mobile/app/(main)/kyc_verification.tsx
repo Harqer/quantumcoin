@@ -65,7 +65,7 @@ export default function KYCVerificationScreen() {
         </View>
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-auto-03ad45" 
         className="w-full bg-blue-600 p-4 rounded-xl items-center flex-row justify-center"
         onPress={startVerification}
         disabled={isVerifying}
@@ -78,7 +78,7 @@ export default function KYCVerificationScreen() {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-auto-93063b" 
         className="w-full p-4 mt-4 items-center"
         onPress={() => router.push('/(main)/early_kyc')}
         disabled={isVerifying}

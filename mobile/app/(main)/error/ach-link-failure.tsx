@@ -40,7 +40,7 @@ export default function ErrorScreen() {
       </View>
 
       <View style={{ padding: spacing.xl, gap: spacing.m }}>
-        <PressableScale 
+        <PressableScale testID="btn-auto-dea034" 
           onPress={handleSupport}
           style={{ backgroundColor: colorRoles.content.primary, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}
         >
@@ -49,7 +49,7 @@ export default function ErrorScreen() {
           </Text>
         </PressableScale>
 
-        <PressableScale 
+        <PressableScale testID="btn-go-back" 
           onPress={handleBack}
           style={{ paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}
         >

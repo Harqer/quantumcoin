@@ -26,19 +26,19 @@ export default function DirectDepositCopyPasteManualFallbackScreen() {
           Update your payroll portal with these details to route your paycheck.
         </Text>
 
-        <PressableScale onPress={() => handleCopy('123456789', 'Routing Number')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-33a7f3" onPress={() => handleCopy('123456789', 'Routing Number')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m }}>
           <Text style={{ fontSize: 14, color: colorRoles.content.secondary, marginBottom: spacing.s }}>Routing Number</Text>
           <Text style={{ fontSize: 24, color: colorRoles.content.primary, fontWeight: 'bold' }}>123456789</Text>
         </PressableScale>
 
-        <PressableScale onPress={() => handleCopy('987654321012', 'Account Number')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-4ac294" onPress={() => handleCopy('987654321012', 'Account Number')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m }}>
           <Text style={{ fontSize: 14, color: colorRoles.content.secondary, marginBottom: spacing.s }}>Account Number</Text>
           <Text style={{ fontSize: 24, color: colorRoles.content.primary, fontWeight: 'bold' }}>987654321012</Text>
         </PressableScale>
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-c185a9" onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Done</Text>
         </PressableScale>
       </ScrollView>

@@ -41,7 +41,7 @@ export default function TriviaScoreScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-          <PressableScale haptics="heavy" onPress={handleNext} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-23fee5" haptics="heavy" onPress={handleNext} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
               {isPerfect ? 'Claim Prize' : 'Back to Home'}
             </Text>

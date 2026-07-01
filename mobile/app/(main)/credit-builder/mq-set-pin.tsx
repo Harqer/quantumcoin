@@ -35,7 +35,7 @@ export default function MqSetPin() {
             <Text className="text-gray-900 text-lg font-bold mb-2">Set New PIN</Text>
             <Text className="text-gray-500 text-center mb-6">Enter a 4-digit PIN for your Flex card. Do not use 1234 or your birth year.</Text>
             
-            <TextInput
+            <TextInput testID="input-pin"
               className="bg-white border border-gray-300 rounded-xl w-full text-center text-2xl font-mono tracking-[1em] py-4 mb-6 text-gray-900"
               keyboardType="number-pad"
               maxLength={4}
@@ -45,7 +45,7 @@ export default function MqSetPin() {
               placeholder="••••"
             />
 
-            <TouchableOpacity 
+            <TouchableOpacity testID="btn-set-pin" 
               className={`w-full py-4 rounded-xl items-center ${pin.length === 4 ? 'bg-blue-600' : 'bg-gray-300'}`}
               disabled={pin.length !== 4 || isSubmitting}
               onPress={handleSubmit}

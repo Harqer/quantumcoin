@@ -60,7 +60,7 @@ const BudgetWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
         You've spent <Text style={{ color: colorRoles.content.negativeDark, fontWeight: '700' }}>${data.money.toFixed(2)}</Text> this cycle. You have <Text style={{ color: colorRoles.content.positiveDark, fontWeight: '700' }}>${remaining.toFixed(2)}</Text> remaining.
       </Text>
-      <PressableScale haptics="medium" onPress={() => router.push('/(main)/budget')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+      <PressableScale testID="btn-nav-budget" haptics="medium" onPress={() => router.push('/(main)/budget')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>View Breakdown</Text>
       </PressableScale>
     </Animated.View>
@@ -82,7 +82,7 @@ const CashAdvanceWidget = React.memo(({ colorRoles, typography, spacing }: any) 
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: '#1E3A8A', marginBottom: spacing.l }}>
         I can spot you up to ${eligibility.limit.toFixed(2)} interest-free right now.
       </Text>
-      <PressableScale haptics="heavy" onPress={() => router.push('/(main)/advance')} style={{ backgroundColor: '#2563EB', paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+      <PressableScale testID="btn-claim-now" haptics="heavy" onPress={() => router.push('/(main)/advance')} style={{ backgroundColor: '#2563EB', paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Claim Now</Text>
       </PressableScale>
     </Animated.View>
@@ -100,7 +100,7 @@ const PlaidWidget = React.memo(({ colorRoles, typography, spacing }: any) => {
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: typography.bodyMedium.fontSize, color: colorRoles.content.secondary, marginBottom: spacing.l }}>
         Securely link your accounts via Plaid to unleash my full potential.
       </Text>
-      <PressableScale haptics="medium" onPress={() => router.push('/(main)/banks-list')} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
+      <PressableScale testID="btn-nav-banks-list" haptics="medium" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/banks-list'); }} style={{ backgroundColor: colorRoles.content.primary, paddingVertical: 12, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Link Account</Text>
       </PressableScale>
     </Animated.View>
@@ -123,7 +123,7 @@ const SponsoredAdWidget = React.memo(({ colorRoles, typography, spacing }: any) 
       <Text style={{ fontFamily: typography.bodyMedium.fontFamily, fontSize: 14, color: '#B45309', marginBottom: spacing.m }}>
         {campaign.description}
       </Text>
-      <PressableScale haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ backgroundColor: '#D97706', paddingVertical: 10, borderRadius: 999, alignItems: 'center' }}>
+      <PressableScale testID="btn-auto-74bcb4" haptics="light" onPress={() => { AudioHapticsManager.lightInteraction(); }} style={{ backgroundColor: '#D97706', paddingVertical: 10, borderRadius: 999, alignItems: 'center' }}>
         <Text style={{ color: '#FFFFFF', fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Learn More</Text>
       </PressableScale>
     </Animated.View>
@@ -311,7 +311,7 @@ export default function DashboardScreen() {
           <Text style={{ flex: 1, fontSize: 20, fontFamily: typography.titleLarge.fontFamily, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.5, color: mode === 'roast' ? colorRoles.content.accentMid : '#2DD4BF' }}>
             Quantum AI {isProTier && <Text style={{ color: '#D97706', fontSize: 16 }}>PRO</Text>}
           </Text>
-          <TouchableOpacity onPress={toggleMode} style={{ backgroundColor: colorRoles.background.baseLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }}>
+          <TouchableOpacity testID="btn-toggle-mode" onPress={toggleMode} style={{ backgroundColor: colorRoles.background.baseLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 }}>
             <Text style={{ fontFamily: typography.labelSmall.fontFamily, fontSize: 12, fontWeight: '700', color: colorRoles.content.primary }}>
               {mode === 'roast' ? '🔥 Roast Mode' : '✨ Hype Mode'}
             </Text>
@@ -339,8 +339,9 @@ export default function DashboardScreen() {
               control={control}
               name="message"
               render={({ field: { onChange, value } }) => (
-                <TextInput
+                <TextInput testID="input-auto-bc87c7"
                   value={value}
+                  testID="input-chat"
                   onChangeText={onChange}
                   placeholder={isProTier ? "Ask GPT-4 anything..." : "Ask me anything..."}
                   placeholderTextColor={colorRoles.content.secondary}
@@ -350,7 +351,8 @@ export default function DashboardScreen() {
               )}
             />
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity testID="btn-auto-ec8ecd" 
+            testID="btn-send"
             style={{ 
               backgroundColor: isValid ? colorRoles.content.accentMid : colorRoles.background.disabled, 
               width: 48, height: 48, borderRadius: 24, 

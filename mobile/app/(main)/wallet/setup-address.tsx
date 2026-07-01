@@ -19,16 +19,16 @@ export default function WalletSetupAddressScreen() {
           Please provide your current residential address. No PO Boxes.
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Street Address" placeholderTextColor={colorRoles.content.secondary} />
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Apt / Suite (Optional)" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-a5c2c2" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Street Address" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-b529c5" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="Apt / Suite (Optional)" placeholderTextColor={colorRoles.content.secondary} />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-           <TextInput style={{ flex: 1, backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16, marginRight: spacing.s }} placeholder="City" placeholderTextColor={colorRoles.content.secondary} />
-           <TextInput style={{ flex: 0.5, backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Zip" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" />
+           <TextInput testID="input-auto-b34d17" style={{ flex: 1, backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16, marginRight: spacing.s }} placeholder="City" placeholderTextColor={colorRoles.content.secondary} />
+           <TextInput testID="input-auto-9ad4f0" style={{ flex: 0.5, backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Zip" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" />
         </View>
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.push('/(main)/wallet/setup-ssn-last4')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-e72be5" onPress={() => router.push('/(main)/wallet/setup-ssn-last4')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Next Step</Text>
         </PressableScale>
       </ScrollView>

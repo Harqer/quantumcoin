@@ -3,49 +3,83 @@ name: Functional E2E Traversal
 ---
 - launchApp
 # Flow 1: Auth (Sign Up)
-- tapOn: "Sign up"
+- tapOn:
+    id: "btn-signup"
 - extendedWaitUntil:
-    visible: "First Name"
+    visible:
+      id: "input-first-name"
     timeout: 5000
+- tapOn:
+    id: "input-first-name"
 - inputText: "Alice"
-- tapOn: "Last Name"
+- tapOn:
+    id: "input-last-name"
 - inputText: "Quantum"
-- tapOn: "Next"
+- tapOn:
+    id: "btn-next"
 - extendedWaitUntil:
-    visible: "MM/DD/YYYY"
+    visible:
+      id: "input-dob"
     timeout: 5000
+- tapOn:
+    id: "input-dob"
 - inputText: "01/01/1990"
-- tapOn: "Next"
+- tapOn:
+    id: "btn-next"
 - extendedWaitUntil:
-    visible: "Enter your email"
+    visible:
+      id: "input-email"
     timeout: 5000
+- tapOn:
+    id: "input-email"
 - inputText: "alice@quantumcoin.com"
-- tapOn: "Send Code"
+- tapOn:
+    id: "btn-next"
 - extendedWaitUntil:
-    visible: "------"
+    visible:
+      id: "input-code"
     timeout: 5000
+- tapOn:
+    id: "input-code"
 - inputText: "123456"
-- tapOn: "Verify & Create Passkey"
+- tapOn:
+    id: "btn-next"
 
 # Flow 2: Dashboard Onboarding
 - extendedWaitUntil:
-    visible: "Nice to meet you"
+    visible:
+      id: "btn-next"
     timeout: 10000
-- tapOn: "Nice to meet you"
+- tapOn:
+    id: "btn-next"
 - extendedWaitUntil:
-    visible: "I'm ready"
+    visible:
+      id: "btn-next"
     timeout: 5000
-- tapOn: "I'm ready"
+- tapOn:
+    id: "btn-next"
 - extendedWaitUntil:
-    visible: "Stop Overspending"
+    visible:
+      id: "intent-budget"
     timeout: 5000
-- tapOn: "Stop Overspending"
-- tapOn: "Continue"
+- tapOn:
+    id: "intent-budget"
+- tapOn:
+    id: "btn-continue"
 
 # Flow 3: Main Dashboard actions
 - extendedWaitUntil:
-    visible: "Ask me anything..."
+    visible:
+      id: "input-chat"
     timeout: 10000
-- tapOn: "Ask me anything..."
+- tapOn:
+    id: "input-chat"
 - inputText: "What is my balance?"
-- pressKey: enter
+- tapOn:
+    id: "btn-send"
+- runFlow:
+    file: "flows/budget.yaml"
+- runFlow:
+    file: "flows/banks-list.yaml"
+- runFlow:
+    file: "flows/credit-builder.yaml"

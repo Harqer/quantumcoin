@@ -30,7 +30,7 @@ export default function WalletSetupStartScreen() {
         <View style={{ flex: 1 }} />
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale
+          <PressableScale testID="btn-auto-433bea"
             haptics="medium"
             onPress={() => {
               AudioHapticsManager.lightInteraction();

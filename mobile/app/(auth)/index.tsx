@@ -78,6 +78,7 @@ export default function IntroductionScreen() {
           style={{ width: '100%', gap: spacing.m, paddingHorizontal: spacing.l }}
         >
           <Button
+            testID="btn-signup"
             haptics="heavy"
             onPress={() => {
               AudioHapticsManager.mediumInteraction();
@@ -88,6 +89,7 @@ export default function IntroductionScreen() {
           />
 
           <Button
+            testID="btn-login"
             haptics="light"
             onPress={() => {
               AudioHapticsManager.lightInteraction();

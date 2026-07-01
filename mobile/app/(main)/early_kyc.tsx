@@ -69,7 +69,7 @@ export default function EarlyKYCDetailsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }}>
       <View style={[styles.header, { borderBottomColor: colorRoles.border.divider }]}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity testID="btn-basic-details" onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={[typography.heading3, { color: colorRoles.content.primary }]}>Basic Details</Text>
@@ -99,7 +99,7 @@ export default function EarlyKYCDetailsScreen() {
           Provide some basic information to get started. We'll ask for your ID later when you need to make a transaction.
         </Text>
 
-        <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('firstName')}>
+        <TouchableOpacity testID="btn-first-name" style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('firstName')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>First Name</Text>
             <Text style={[typography.bodyLarge, { color: !formData.firstName ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.firstName || 'Missing'}</Text>
@@ -107,7 +107,7 @@ export default function EarlyKYCDetailsScreen() {
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('lastName')}>
+        <TouchableOpacity testID="btn-last-name" style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('lastName')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Last Name</Text>
             <Text style={[typography.bodyLarge, { color: !formData.lastName ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.lastName || 'Missing'}</Text>
@@ -115,7 +115,7 @@ export default function EarlyKYCDetailsScreen() {
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('dob')}>
+        <TouchableOpacity testID="btn-date-of-birth" style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('dob')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Date of Birth</Text>
             <Text style={[typography.bodyLarge, { color: !formData.dob ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.dob || 'Missing'}</Text>
@@ -123,7 +123,7 @@ export default function EarlyKYCDetailsScreen() {
           <Ionicons name="chevron-forward" size={20} color={colorRoles.content.tertiary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('address')}>
+        <TouchableOpacity testID="btn-home-address" style={[styles.row, { borderBottomColor: colorRoles.border.divider }]} onPress={() => setDrawerType('address')}>
           <View>
             <Text style={[typography.labelMedium, { color: colorRoles.content.secondary, marginBottom: 4 }]}>Home Address</Text>
             <Text style={[typography.bodyLarge, { color: !formData.address ? colorRoles.status.error : colorRoles.content.primary }]}>{formData.address || 'Missing'}</Text>
@@ -133,7 +133,7 @@ export default function EarlyKYCDetailsScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { borderTopColor: colorRoles.border.divider }]}>
-        <TouchableOpacity 
+        <TouchableOpacity testID="btn-auto-816d69" 
           style={[styles.button, { backgroundColor: isComplete ? colorRoles.brand.primary : colorRoles.content.disabled }]}
           disabled={!isComplete}
           onPress={handleSubmit}

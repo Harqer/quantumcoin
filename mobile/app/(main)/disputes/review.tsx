@@ -40,7 +40,7 @@ export default function TransactionDisputeReviewScreen() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(200).springify()} style={{ width: '100%' }}>
-            <PressableScale haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+            <PressableScale testID="btn-auto-7b0548" haptics="heavy" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/wallet'); }} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
               <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
                 Done
               </Text>
@@ -83,7 +83,7 @@ export default function TransactionDisputeReviewScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <PressableScale 
+          <PressableScale testID="btn-auto-db5a41" 
             haptics="heavy" 
             disabled={isSubmitting}
             onPress={handleSubmit} 

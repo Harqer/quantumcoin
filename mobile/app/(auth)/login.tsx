@@ -178,6 +178,7 @@ export default function LoginScreen() {
           style={{ width: '100%' }}
         >
           <Button
+            testID="btn-google-login"
             haptics="heavy"
             onPress={handleGoogleOAuth}
             disabled={isLoading || !isRiskEngineReady}
@@ -198,6 +199,7 @@ export default function LoginScreen() {
           <View style={{ height: spacing.m }} />
 
           <Button
+            testID="btn-passkey-login"
             haptics="heavy"
             onPress={handlePasskeyLogin}
             disabled={isLoading || !isRiskEngineReady}
@@ -230,6 +232,7 @@ export default function LoginScreen() {
 
           {/* Fallback Option */}
           <TouchableOpacity
+            testID="link-email-fallback"
             style={{ marginTop: spacing.xl, alignItems: 'center', paddingVertical: spacing.s }}
             onPress={() => {
               AudioHapticsManager.lightInteraction();

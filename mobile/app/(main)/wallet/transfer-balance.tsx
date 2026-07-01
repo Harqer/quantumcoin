@@ -49,11 +49,11 @@ export default function TransferWalletBalanceScreen() {
           Available Balance: ${availableBalance.toFixed(2)}
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.xl, borderRadius: 16, marginBottom: spacing.xl, fontSize: 32, textAlign: 'center', fontWeight: 'bold' }} placeholder="$0.00" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" value={amount} onChangeText={setAmount} />
+        <TextInput testID="input-auto-59598a" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.xl, borderRadius: 16, marginBottom: spacing.xl, fontSize: 32, textAlign: 'center', fontWeight: 'bold' }} placeholder="$0.00" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" value={amount} onChangeText={setAmount} />
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={handleTransfer} disabled={transferMutation.isPending} style={{ backgroundColor: transferMutation.isPending ? colorRoles.background.disabled : colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-7a6f7a" onPress={handleTransfer} disabled={transferMutation.isPending} style={{ backgroundColor: transferMutation.isPending ? colorRoles.background.disabled : colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>
             {transferMutation.isPending ? 'Transferring...' : 'Confirm Transfer'}
           </Text>

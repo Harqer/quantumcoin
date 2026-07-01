@@ -29,7 +29,7 @@ export default function TransferWalletBalanceSuccessScreen() {
         </Text>
 
         <View style={{ width: '100%' }}>
-          <PressableScale onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-641c75" onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}>
             <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Done</Text>
           </PressableScale>
         </View>

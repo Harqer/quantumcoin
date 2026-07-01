@@ -19,7 +19,7 @@ export default function DirectDepositAuthorizationFormManualFallbackScreen() {
         <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 16, color: colorRoles.content.secondary, textAlign: 'center', marginBottom: spacing.xl }}>
           Your custom PDF authorization form is ready. You can print and hand it directly to your HR department.
         </Text>
-        <PressableScale onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, paddingHorizontal: spacing.xxl, borderRadius: 999, alignItems: 'center' }}>
+        <PressableScale testID="btn-auto-b600e2" onPress={() => router.replace('/(main)/dashboard')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, paddingHorizontal: spacing.xxl, borderRadius: 999, alignItems: 'center' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Done</Text>
         </PressableScale>
       </View>

@@ -134,6 +134,7 @@ export default function UserIntentReinforcementScreen() {
             return (
               <TouchableOpacity
                 key={intent.id}
+                testID={`intent-${intent.id}`}
                 onPress={() => {
                   AudioHapticsManager.selection();
                   setSelectedIntent(intent.id);
@@ -209,6 +210,7 @@ export default function UserIntentReinforcementScreen() {
         }}
       >
         <Button
+          testID="btn-continue"
           haptics="medium"
           onPress={handleNext}
           disabled={!selectedIntent || isUpdating}

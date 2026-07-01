@@ -20,7 +20,7 @@ export default function DirectDepositManualFallbackOptionsScreen() {
           If automatic linking failed, you can set up direct deposit manually using one of the methods below.
         </Text>
 
-        <PressableScale onPress={() => router.push('/(main)/direct-deposit/copy-paste')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-f4fc21" onPress={() => router.push('/(main)/direct-deposit/copy-paste')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
           <Ionicons name="copy" size={24} color={colorRoles.content.accentMid} style={{ marginRight: spacing.m }} />
           <View style={{ flex: 1 }}>
              <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, color: colorRoles.content.primary, fontWeight: 'bold' }}>Copy Details</Text>
@@ -28,7 +28,7 @@ export default function DirectDepositManualFallbackOptionsScreen() {
           </View>
         </PressableScale>
 
-        <PressableScale onPress={() => router.push('/(main)/direct-deposit/manual-form')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-40e9e5" onPress={() => router.push('/(main)/direct-deposit/manual-form')} style={{ backgroundColor: colorRoles.background.secondary, padding: spacing.l, borderRadius: 16, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.m }}>
           <Ionicons name="document-text" size={24} color={colorRoles.content.accentMid} style={{ marginRight: spacing.m }} />
           <View style={{ flex: 1 }}>
              <Text style={{ fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, color: colorRoles.content.primary, fontWeight: 'bold' }}>Download Form</Text>

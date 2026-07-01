@@ -140,7 +140,7 @@ export default function EsimIndex() {
               </Text>
             </View>
           </View>
-          <Button
+          <Button testID="btn-auto-8dd907"
             onPress={() => router.push('/(main)/esim/install')}
             variant="secondary"
             title="Select Basic"
@@ -272,7 +272,7 @@ export default function EsimIndex() {
               </Text>
             </View>
           </View>
-          <Button
+          <Button testID="btn-auto-afa738"
             onPress={() => router.push('/(main)/esim/install')}
             variant="primary"
             title="Get Premium"

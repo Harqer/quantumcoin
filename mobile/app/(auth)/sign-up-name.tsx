@@ -126,6 +126,7 @@ export default function SignUpNameScreen() {
                   borderColor: firstName ? colorRoles.border.selectedInverse : 'transparent',
                 }}
                 placeholder="First Name"
+                testID="input-first-name"
                 placeholderTextColor={colorRoles.content.secondary}
                 value={firstName}
                 onChangeText={setFirstName}
@@ -160,6 +161,7 @@ export default function SignUpNameScreen() {
                   borderColor: lastName ? colorRoles.border.selectedInverse : 'transparent',
                 }}
                 placeholder="Last Name"
+                testID="input-last-name"
                 placeholderTextColor={colorRoles.content.secondary}
                 value={lastName}
                 onChangeText={setLastName}
@@ -175,6 +177,7 @@ export default function SignUpNameScreen() {
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
           <Button
+            testID="btn-next"
             haptics="medium"
             onPress={handleNext}
             disabled={!isValid}

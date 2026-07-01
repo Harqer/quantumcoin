@@ -58,7 +58,7 @@ export default function WithdrawFundsScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-e8b70e"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -86,7 +86,7 @@ export default function WithdrawFundsScreen() {
         >
           Available Balance: ${isLoading ? '...' : budgetData?.limit?.toFixed(2) || '0.00'}
         </Text>
-        <TextInput
+        <TextInput testID="input-auto-fe159c"
           style={{
             borderWidth: 1,
             borderColor: colorRoles.border.default,
@@ -103,7 +103,7 @@ export default function WithdrawFundsScreen() {
           value={amount}
           onChangeText={setAmount}
         />
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-9a6af7"
           onPress={handleWithdraw}
           style={{
             backgroundColor: colorRoles.content.accentMid,

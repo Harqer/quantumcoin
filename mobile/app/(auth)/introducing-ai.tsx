@@ -167,6 +167,7 @@ export default function IntroducingAiScreen() {
           style={{ width: '100%' }}
         >
           <Button
+            testID="btn-next"
             haptics="heavy"
             onPress={handleNext}
             variant="primary"

@@ -24,7 +24,7 @@ export default function AutopilotSpendLimitCategoryDetailsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={15}>
+        <Pressable testID="btn-autopilot-limits" onPress={() => router.back()} hitSlop={15}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </Pressable>
         <Text style={styles.headerTitle}>Autopilot Limits</Text>

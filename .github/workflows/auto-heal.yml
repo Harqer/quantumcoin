@@ -2,7 +2,7 @@ name: Auto-Healer Pipeline
 
 on:
   workflow_run:
-    workflows: ["CI", "EAS Build Pipeline", "EAS Update", "Dependabot AI Remediation Pipeline", "Jules AI Code Review", "test"]
+    workflows: ["CI", "EAS Build Pipeline", "EAS Update", "Dependabot AI Remediation Pipeline", "Jules AI Code Review", "test", "UI Feature Tests"]
     types:
       - completed
 

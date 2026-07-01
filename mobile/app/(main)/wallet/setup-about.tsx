@@ -19,12 +19,12 @@ export default function WalletSetupAboutYouScreen() {
           To open a Quantum Wallet, federal law requires us to verify your legal identity.
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="First Legal Name" placeholderTextColor={colorRoles.content.secondary} />
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Last Legal Name" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-d7e76f" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.m, fontSize: 16 }} placeholder="First Legal Name" placeholderTextColor={colorRoles.content.secondary} />
+        <TextInput testID="input-auto-278c2c" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 16 }} placeholder="Last Legal Name" placeholderTextColor={colorRoles.content.secondary} />
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.push('/(main)/wallet/setup-address')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-a8c367" onPress={() => router.push('/(main)/wallet/setup-address')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Next Step</Text>
         </PressableScale>
       </ScrollView>

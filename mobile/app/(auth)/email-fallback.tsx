@@ -142,6 +142,7 @@ export default function EmailFallbackScreen() {
                 <TextInput
                   autoCapitalize="none"
                   value={emailAddress}
+                  testID="input-email"
                   placeholder="name@example.com"
                   placeholderTextColor={colorRoles.content.secondary}
                   onChangeText={(email) => setEmailAddress(email)}
@@ -158,6 +159,7 @@ export default function EmailFallbackScreen() {
               </View>
 
               <Button
+                testID="btn-continue"
                 haptics="heavy"
                 onPress={handleSignIn}
                 disabled={isLoading || !emailAddress}
@@ -171,6 +173,7 @@ export default function EmailFallbackScreen() {
               <View style={{ marginBottom: spacing.xl }}>
                 <TextInput
                   value={code}
+                  testID="input-code"
                   placeholder="123456"
                   placeholderTextColor={colorRoles.content.secondary}
                   onChangeText={(c) => setCode(c)}
@@ -189,6 +192,7 @@ export default function EmailFallbackScreen() {
               </View>
 
               <Button
+                testID="btn-verify"
                 haptics="heavy"
                 onPress={handleVerifyCode}
                 disabled={isLoading || !code}

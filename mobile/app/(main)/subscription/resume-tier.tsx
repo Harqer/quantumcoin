@@ -19,19 +19,19 @@ export default function ResumeSubscriptionChangeTierScreen() {
           Choose your plan before resuming your subscription.
         </Text>
 
-        <TouchableOpacity style={{ padding: spacing.l, borderRadius: 16, backgroundColor: colorRoles.background.secondary, marginBottom: spacing.m }}>
+        <TouchableOpacity testID="btn-standard" style={{ padding: spacing.l, borderRadius: 16, backgroundColor: colorRoles.background.secondary, marginBottom: spacing.m }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary }}>Standard</Text>
           <Text style={{ fontSize: 18, color: colorRoles.content.secondary }}>$5.99/mo</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: colorRoles.content.accentMid, backgroundColor: colorRoles.background.secondary, marginBottom: spacing.m }}>
+        <TouchableOpacity testID="btn-premium" style={{ padding: spacing.l, borderRadius: 16, borderWidth: 2, borderColor: colorRoles.content.accentMid, backgroundColor: colorRoles.background.secondary, marginBottom: spacing.m }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold', color: colorRoles.content.primary }}>Premium</Text>
           <Text style={{ fontSize: 18, color: colorRoles.content.secondary }}>$9.99/mo</Text>
         </TouchableOpacity>
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.push('/(main)/subscription/resume-credit')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-fe0e82" onPress={() => router.push('/(main)/subscription/resume-credit')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', marginBottom: spacing.m }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Continue</Text>
         </PressableScale>
       </ScrollView>

@@ -36,7 +36,7 @@ export default function SalaryAdvanceScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-b19d02"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -92,7 +92,7 @@ export default function SalaryAdvanceScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-0656d8"
           onPress={() => {
             if (advanceData?.eligibleAmount) {
               advanceMutation.mutate(advanceData.eligibleAmount);

@@ -55,7 +55,7 @@ export default function MobileEsimInstallSuccessScreen() {
         </Text>
       </View>
 
-      <Button
+      <Button testID="btn-auto-85c18a"
         onPress={() => router.push('/(main)/wallet')}
         variant="primary"
         title="See my plan"

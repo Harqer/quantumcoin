@@ -130,6 +130,7 @@ export default function SignUpDOBScreen() {
                 borderColor: dob ? colorRoles.border.selectedInverse : 'transparent',
               }}
               placeholder="MM/DD/YYYY"
+              testID="input-dob"
               placeholderTextColor={colorRoles.content.secondary}
               value={dob}
               onChangeText={handleDobChange}
@@ -145,6 +146,7 @@ export default function SignUpDOBScreen() {
           style={{ paddingHorizontal: spacing.l, paddingBottom: spacing.xxl }}
         >
           <Button
+            testID="btn-next"
             haptics="medium"
             onPress={handleNext}
             disabled={!isValid}

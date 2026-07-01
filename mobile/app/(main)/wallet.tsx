@@ -60,7 +60,7 @@ export default function WalletScreen() {
 
   const renderRightActions = (id: string) => {
     return (
-      <TouchableOpacity 
+      <TouchableOpacity testID="btn-auto-3907b4" 
         onPress={() => {
           AudioHapticsManager.heavyInteraction();
           Alert.alert('Are you sure?', 'This will hide the transaction.', [
@@ -131,7 +131,7 @@ export default function WalletScreen() {
     <View style={{paddingHorizontal: Platform.OS === 'web' ? 0 : spacing.l, paddingTop: spacing.l, paddingBottom: spacing.m}}>
       
       <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(100)}>
-        <PressableScale haptics="none" onPress={() => AudioHapticsManager.mediumInteraction()} style={{ backgroundColor: '#2563EB', borderRadius: 24, padding: spacing.l, marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-2711d1" haptics="none" onPress={() => AudioHapticsManager.mediumInteraction()} style={{ backgroundColor: '#2563EB', borderRadius: 24, padding: spacing.l, marginBottom: spacing.m }}>
           <Text style={{ color: '#BFDBFE', fontSize: typography.labelSmall.fontSize, fontFamily: typography.labelSmall.fontFamily, textTransform: 'uppercase', letterSpacing: 1 }}>Fiat / TradFi</Text>
           <View style={{ height: 48, justifyContent: 'center', marginVertical: spacing.xs }}>
             {isLoadingFiat && !isRefreshing ? (
@@ -148,7 +148,7 @@ export default function WalletScreen() {
       </Animated.View>
 
       <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(150)}>
-        <PressableScale haptics="none" onPress={() => AudioHapticsManager.mediumInteraction()} style={{ backgroundColor: '#7C3AED', borderRadius: 24, padding: spacing.l, marginBottom: spacing.m }}>
+        <PressableScale testID="btn-auto-38957b" haptics="none" onPress={() => AudioHapticsManager.mediumInteraction()} style={{ backgroundColor: '#7C3AED', borderRadius: 24, padding: spacing.l, marginBottom: spacing.m }}>
           <Text style={{ color: '#E9D5FF', fontSize: typography.labelSmall.fontSize, fontFamily: typography.labelSmall.fontFamily, textTransform: 'uppercase', letterSpacing: 1 }}>Crypto / Web3</Text>
           <View style={{ height: 48, justifyContent: 'center', marginVertical: spacing.xs }}>
             {isLoadingCrypto && !isRefreshing ? (
@@ -166,12 +166,12 @@ export default function WalletScreen() {
 
       <Animated.View entering={FadeInDown.springify().stiffness(80).damping(28).delay(175)}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.l }}>
-          <PressableScale haptics="medium" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/credit-builder'); }} style={{ flex: 1, backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.m, marginRight: spacing.s, borderWidth: 1, borderColor: colorRoles.border.default, alignItems: 'center' }}>
+          <PressableScale testID="btn-nav-credit-builder" haptics="medium" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/credit-builder'); }} style={{ flex: 1, backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.m, marginRight: spacing.s, borderWidth: 1, borderColor: colorRoles.border.default, alignItems: 'center' }}>
             <Ionicons name="card" size={32} color={colorRoles.content.primary} style={{ marginBottom: spacing.s }} />
             <Text style={{ color: colorRoles.content.primary, fontSize: typography.bodyMedium.fontSize, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Credit Builder</Text>
           </PressableScale>
 
-          <PressableScale haptics="medium" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/esim'); }} style={{ flex: 1, backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.m, marginLeft: spacing.s, borderWidth: 1, borderColor: colorRoles.border.default, alignItems: 'center' }}>
+          <PressableScale testID="btn-auto-0f5253" haptics="medium" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/esim'); }} style={{ flex: 1, backgroundColor: colorRoles.background.baseLight, borderRadius: 20, padding: spacing.m, marginLeft: spacing.s, borderWidth: 1, borderColor: colorRoles.border.default, alignItems: 'center' }}>
             <Ionicons name="cellular" size={32} color="#3b82f6" style={{ marginBottom: spacing.s }} />
             <Text style={{ color: colorRoles.content.primary, fontSize: typography.bodyMedium.fontSize, fontFamily: typography.bodyMedium.fontFamily, fontWeight: '700' }}>Quantum Mobile</Text>
           </PressableScale>
@@ -200,11 +200,11 @@ export default function WalletScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colorRoles.background.primary }} edges={['top']}>
       <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.l, paddingBottom: spacing.s, backgroundColor: colorRoles.background.primary}}>
-        <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colorRoles.background.baseLight, alignItems: 'center', justifyContent: 'center' }}>
+        <TouchableOpacity testID="btn-auto-f329cc" onPress={() => { AudioHapticsManager.lightInteraction(); router.back(); }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colorRoles.background.baseLight, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name="arrow-back" size={24} color={colorRoles.content.primary} />
         </TouchableOpacity>
         <Text style={{ color: colorRoles.content.primary, fontSize: typography.titleSmall.fontSize, fontFamily: typography.titleSmall.fontFamily, fontWeight: '700' }}>My Wallet</Text>
-        <TouchableOpacity onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/banks-list'); }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colorRoles.background.secondary, alignItems: 'center', justifyContent: 'center' }}>
+        <TouchableOpacity testID="btn-auto-ec7302" onPress={() => { AudioHapticsManager.lightInteraction(); router.push('/(main)/banks-list'); }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colorRoles.background.secondary, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name="add" size={24} color={colorRoles.content.accentMid} />
         </TouchableOpacity>
       </View>

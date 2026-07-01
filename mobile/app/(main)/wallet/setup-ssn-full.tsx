@@ -19,11 +19,11 @@ export default function WalletSetupSSNFullScreen() {
           We couldn't verify your identity with just the last 4 digits. Please enter your full Social Security Number.
         </Text>
 
-        <TextInput style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 24, letterSpacing: 4, textAlign: 'center', fontWeight: 'bold' }} placeholder="XXX-XX-XXXX" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" maxLength={9} />
+        <TextInput testID="input-auto-826723" style={{ backgroundColor: colorRoles.background.secondary, color: colorRoles.content.primary, padding: spacing.l, borderRadius: 16, marginBottom: spacing.xl, fontSize: 24, letterSpacing: 4, textAlign: 'center', fontWeight: 'bold' }} placeholder="XXX-XX-XXXX" placeholderTextColor={colorRoles.content.secondary} keyboardType="numeric" maxLength={9} />
 
         <View style={{ flex: 1 }} />
 
-        <PressableScale onPress={() => router.push('/(main)/wallet/setup-kyc')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
+        <PressableScale testID="btn-auto-0f7778" onPress={() => router.push('/(main)/wallet/setup-kyc')} style={{ backgroundColor: colorRoles.content.accentMid, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center', width: '100%' }}>
           <Text style={{ color: colorRoles.content.onPrimary, fontFamily: typography.bodyLarge.fontFamily, fontSize: 18, fontWeight: '800' }}>Verify Full SSN</Text>
         </PressableScale>
       </ScrollView>

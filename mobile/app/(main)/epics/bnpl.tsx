@@ -28,7 +28,7 @@ export default function BNPLScreen() {
           borderBottomColor: colorRoles.border.default,
         }}
       >
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-7b7569"
           onPress={() => router.back()}
           style={{ padding: spacing.s, marginLeft: -spacing.s }}
         >
@@ -85,7 +85,7 @@ export default function BNPLScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity
+        <TouchableOpacity testID="btn-auto-ad488b"
           onPress={() => {
             AudioHapticsManager.lightInteraction();
             Alert.alert('Buy Now, Pay Later', 'Generating virtual card for BNPL...');

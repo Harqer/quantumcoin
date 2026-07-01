@@ -40,7 +40,7 @@ export default function IdvFailureScreen() {
       </View>
 
       <View style={{ padding: spacing.xl, gap: spacing.m }}>
-        <PressableScale 
+        <PressableScale testID="btn-auto-adc9ad" 
           onPress={handleSupport}
           style={{ backgroundColor: colorRoles.content.primary, paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}
         >
@@ -49,7 +49,7 @@ export default function IdvFailureScreen() {
           </Text>
         </PressableScale>
 
-        <PressableScale 
+        <PressableScale testID="btn-go-back" 
           onPress={handleBack}
           style={{ paddingVertical: spacing.l, borderRadius: 999, alignItems: 'center' }}
         >
