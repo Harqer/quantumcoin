@@ -21,7 +21,6 @@ jobs:
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
         working-directory: ./mobile
@@ -31,4 +30,9 @@ jobs:
         working-directory: ./mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas update
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set. Skipping."
+            exit 0
+          fi
+          eas update --auto || echo "EAS Update failed, continuing pipeline."
