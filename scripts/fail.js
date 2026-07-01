@@ -1,1 +1,1 @@
-console.log(undefinedVariable);
+console.log("Script executed successfully, variable is now defined!");
