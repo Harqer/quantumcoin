@@ -21,7 +21,16 @@ export default [
       "**/design.md-main/",
       "**/.maestro/",
       "**/coverage/",
-      "**/classiq-library/"
+      "**/classiq-library/",
+      "**/.venv/",
+      "**/decompiled.js",
+      "**/decompiled_hermes.js",
+      "**/cleobin/",
+      "**/gleec1/",
+      "**/gleek/",
+      "**/generated/",
+      "**/quantum_backend/",
+      "**/web/public/"
     ],
   },
   ...compat.extends(
