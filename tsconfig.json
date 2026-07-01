@@ -10,5 +10,18 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-native"
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".next",
+    "build",
+    "design.md-main",
+    ".maestro",
+    "coverage",
+    "classiq-library",
+    ".venv",
+    "cleobin",
+    "gleec1",
+    "gleek"
+  ]
 }
