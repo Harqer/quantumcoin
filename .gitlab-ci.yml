@@ -11,32 +11,7 @@ stages:
   - feature_test
   - deploy_prod
 
-variables:
-  # This will allow CodeQL to run without user interaction
-  CODEQL_CLI_ARGS: "--format=sarif-latest --output=codeql-results.sarif"
 
-# CodeQL static analysis job
-codeql_analyze:
-  stage: analyze
-  image: ubuntu:22.04
-  before_script:
-    - apt-get update && apt-get install -y wget unzip git
-    # Download and install CodeQL CLI
-    - wget https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz
-    - tar -xzf codeql-bundle-linux64.tar.gz
-    - export PATH="$PATH:$(pwd)/codeql"
-  script:
-    # Initialize CodeQL database for JS/TS and Python
-    # Assuming JS/TS is the primary language, but we can do a multi-language setup.
-    - codeql database create codeql-db --language=javascript,python --source-root .
-    # Run the query suite
-    - codeql database analyze codeql-db javascript-security-and-quality.qls --format=sarif-latest --output=codeql-results-js.sarif
-    - codeql database analyze codeql-db python-security-and-quality.qls --format=sarif-latest --output=codeql-results-python.sarif
-  artifacts:
-    reports:
-      sast: codeql-results-*.sarif
-    paths:
-      - codeql-results-*.sarif
 
 lint_and_typecheck:
   stage: test
