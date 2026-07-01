@@ -1,0 +1,51 @@
+appId: com.harqer.quantumcoin
+name: Functional E2E Traversal
+---
+- launchApp
+# Flow 1: Auth (Sign Up)
+- tapOn: "Sign up"
+- extendedWaitUntil:
+    visible: "First Name"
+    timeout: 5000
+- inputText: "Alice"
+- tapOn: "Last Name"
+- inputText: "Quantum"
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "MM/DD/YYYY"
+    timeout: 5000
+- inputText: "01/01/1990"
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Enter your email"
+    timeout: 5000
+- inputText: "alice@quantumcoin.com"
+- tapOn: "Send Code"
+- extendedWaitUntil:
+    visible: "------"
+    timeout: 5000
+- inputText: "123456"
+- tapOn: "Verify & Create Passkey"
+
+# Flow 2: Dashboard Onboarding
+- extendedWaitUntil:
+    visible: "Nice to meet you"
+    timeout: 10000
+- tapOn: "Nice to meet you"
+- extendedWaitUntil:
+    visible: "I'm ready"
+    timeout: 5000
+- tapOn: "I'm ready"
+- extendedWaitUntil:
+    visible: "Stop Overspending"
+    timeout: 5000
+- tapOn: "Stop Overspending"
+- tapOn: "Continue"
+
+# Flow 3: Main Dashboard actions
+- extendedWaitUntil:
+    visible: "Ask me anything..."
+    timeout: 10000
+- tapOn: "Ask me anything..."
+- inputText: "What is my balance?"
+- pressKey: enter

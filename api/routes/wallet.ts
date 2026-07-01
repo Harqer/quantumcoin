@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../trpc';
+import { router, publicProcedure, protectedProcedure } from '../trpc';
 import { prisma } from '../db';
 
 export const walletRouter = router({
@@ -43,12 +43,30 @@ export const walletRouter = router({
       };
     }),
 
-  deposit: publicProcedure.input(z.object({ amount: z.number() })).mutation(async ({ input }) => {
-    await prisma.$transaction(async (tx) => {
-      // Find or create a user since some routes might just pass amount.
-      // Wait, input doesn't have userId.
-      // We will just return success if there's no userId to deposit to.
-    });
-    return { success: true, message: `Successfully deposited ${input.amount}` };
-  }),
+  deposit: protectedProcedure
+    .input(z.object({ amount: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      await prisma.$transaction(async (tx) => {
+        const user = await tx.user.findUnique({ where: { id: ctx.user.id } });
+        if (!user) throw new Error('User not found');
+
+        await tx.user.update({
+          where: { id: ctx.user.id },
+          data: { walletBalance: { increment: input.amount } },
+        });
+
+        await tx.transaction.create({
+          data: {
+            userId: ctx.user.id,
+            amount: input.amount,
+            currency: 'USD',
+            type: 'deposit',
+            direction: 'in',
+            status: 'completed',
+            description: `Deposit of ${input.amount} USD`,
+          },
+        });
+      });
+      return { success: true, message: `Successfully deposited ${input.amount}` };
+    }),
 });
