@@ -1,0 +1,8 @@
+node_modules
+.next
+build
+dist
+design.md-main
+.maestro
+coverage
+classiq-library
