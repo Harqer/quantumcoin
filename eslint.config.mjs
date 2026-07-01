@@ -12,6 +12,18 @@ const compat = new FlatCompat({
 });
 
 export default [
+  {
+    ignores: [
+      "**/node_modules/",
+      "**/.next/",
+      "**/build/",
+      "**/dist/",
+      "**/design.md-main/",
+      "**/.maestro/",
+      "**/coverage/",
+      "**/classiq-library/"
+    ],
+  },
   ...compat.extends(
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
