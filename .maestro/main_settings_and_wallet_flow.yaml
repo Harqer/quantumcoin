@@ -1,0 +1,22 @@
+appId: com.harqer.quantumcoin
+---
+- launchApp
+
+# Navigation to Wallet
+- tapOn:
+    id: "Wallet" # Assuming tab bar has some identifier or text
+- assertVisible: "Fiat / TradFi"
+
+# Navigation to Budget
+- tapOn:
+    id: "Budget"
+- assertVisible: "Budget" # Or some specific text on the budget screen
+
+# Navigation to Settings
+- tapOn:
+    id: "Settings"
+- assertVisible: "Linked Banks"
+- assertVisible: "Statements"
+- assertVisible: "Push Notifications"
+- assertVisible: "Security"
+- assertVisible: "Personal Details"

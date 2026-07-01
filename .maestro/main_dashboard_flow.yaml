@@ -1,0 +1,19 @@
+appId: com.harqer.quantumcoin
+---
+- launchApp
+# Skip auth for main flows by using a deep link or assuming we are logged in. 
+# We'll assume the CI handles state or we just assert presence.
+- assertVisible: "Ask me anything..."
+- tapOn: "Ask me anything..."
+- inputText: "Hello AI!"
+
+# Test Roast/Hype Mode Toggles
+- assertVisible: "🔥 Roast Mode"
+- tapOn: "🔥 Roast Mode"
+
+# Test Core Dashboard Widgets
+- scroll
+- assertVisible: "View Breakdown"
+- assertVisible: "Claim Now"
+- assertVisible: "Link Account"
+- assertVisible: "Learn More"

@@ -1,0 +1,42 @@
+appId: com.harqer.quantumcoin
+---
+- launchApp
+- assertVisible: "Sign up"
+- tapOn: "Sign up"
+
+# Sign Up Name Screen
+- assertVisible: "What's your name?"
+- tapOn: "First Name"
+- inputText: "Maestro"
+- tapOn: "Last Name"
+- inputText: "Tester"
+- tapOn: "Next"
+
+# Sign Up DOB Screen
+- assertVisible: "When's your birthday?"
+- tapOn: "MM/DD/YYYY"
+- inputText: "01012000"
+- tapOn: "Next"
+
+# Sign Up Email Screen
+- assertVisible: "Secure your account."
+- tapOn: "Enter your email"
+- inputText: "test+maestro@quantumcoin.com"
+- tapOn: "Send Code"
+
+# Verify OTP
+- assertVisible: "Check your email."
+- tapOn: "------"
+- inputText: "424242"
+- tapOn: "Verify & Create Passkey"
+
+# AI Intro
+- assertVisible: "Nice to meet you"
+- tapOn: "Nice to meet you"
+- assertVisible: "I'm ready"
+- tapOn: "I'm ready"
+
+# User Intent
+- assertVisible: "Stop Overspending"
+- tapOn: "Stop Overspending"
+- tapOn: "Continue"

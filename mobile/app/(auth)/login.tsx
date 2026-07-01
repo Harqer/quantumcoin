@@ -1,12 +1,16 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTrackScreen } from '../../hooks/useTelemetry';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useGlobalTheme } from '../../hooks/useGlobalTheme';
-import { useSignIn } from '@clerk/clerk-expo';
+import { useSignIn, useOAuth } from '@clerk/clerk-expo';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 import { useDeviceRisk } from '../../hooks/useDeviceRisk';
 import { coreTrpc } from '../../utils/trpc';
 
@@ -24,6 +28,26 @@ export default function LoginScreen() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const registerDeviceMutation = coreTrpc.auth.registerDevice.useMutation();
+
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
+
+  const handleGoogleOAuth = useCallback(async () => {
+    try {
+      AudioHapticsManager.lightInteraction();
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl: Linking.createURL('/(main)/dashboard', { scheme: 'quantumcoin' }),
+      });
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        AudioHapticsManager.success();
+        router.replace('/(main)/dashboard');
+      }
+    } catch (err) {
+      console.error('OAuth error', err);
+      AudioHapticsManager.error();
+      setErrorMsg('Google Sign-In failed or was cancelled.');
+    }
+  }, [startOAuthFlow, setActive, router]);
 
   // Rate Limiting / Debounce State
   const lastActionTime = useRef<number>(0);
@@ -153,6 +177,26 @@ export default function LoginScreen() {
           entering={FadeInDown.springify().stiffness(80).damping(28).delay(200)}
           style={{ width: '100%' }}
         >
+          <Button
+            haptics="heavy"
+            onPress={handleGoogleOAuth}
+            disabled={isLoading || !isRiskEngineReady}
+            loading={isLoading}
+            variant="secondary"
+            title="Continue with Google"
+            leftIcon={
+              <Ionicons
+                name="logo-google"
+                size={20}
+                color={
+                  isRiskEngineReady ? colorRoles.content.primary : colorRoles.content.secondary
+                }
+              />
+            }
+          />
+
+          <View style={{ height: spacing.m }} />
+
           <Button
             haptics="heavy"
             onPress={handlePasskeyLogin}

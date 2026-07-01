@@ -1,0 +1,24 @@
+appId: com.harqer.quantumcoin
+---
+- launchApp
+- assertVisible: "Log in"
+- tapOn: "Log in"
+
+# Verify standard Clerk Google OAuth button is present
+- assertVisible: "Continue with Google"
+
+# Verify Passkey Button is present
+- assertVisible: "Sign in with Passkey"
+
+# Test Email Fallback via Clerk Test Configuration
+- tapOn: "Lost your device? Use Email"
+- assertVisible: "Sign in with Email"
+- tapOn: "name@example.com"
+- inputText: "test+maestro@quantumcoin.com"
+- tapOn: "Continue"
+- assertVisible: "Enter Code"
+
+# Use Clerk's official standard testing OTP
+- tapOn: "123456"
+- inputText: "424242" 
+- tapOn: "Verify Code"

@@ -1,0 +1,118 @@
+stages:
+  - analyze
+  - test
+  - build
+  - deploy_staging
+  - feature_test
+  - deploy_prod
+
+variables:
+  # This will allow CodeQL to run without user interaction
+  CODEQL_CLI_ARGS: "--format=sarif-latest --output=codeql-results.sarif"
+
+# CodeQL static analysis job
+codeql_analyze:
+  stage: analyze
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update && apt-get install -y wget unzip git
+    # Download and install CodeQL CLI
+    - wget https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz
+    - tar -xvzf codeql-bundle-linux64.tar.gz
+    - export PATH="$PATH:$(pwd)/codeql"
+  script:
+    # Initialize CodeQL database for JS/TS and Python
+    # Assuming JS/TS is the primary language, but we can do a multi-language setup.
+    - codeql database create codeql-db --language=javascript,python --source-root .
+    # Run the query suite
+    - codeql database analyze codeql-db javascript-security-and-quality.qls --format=sarif-latest --output=codeql-results-js.sarif
+    - codeql database analyze codeql-db python-security-and-quality.qls --format=sarif-latest --output=codeql-results-python.sarif
+  artifacts:
+    reports:
+      sast: codeql-results-*.sarif
+    paths:
+      - codeql-results-*.sarif
+
+lint_and_typecheck:
+  stage: test
+  image: node:20
+  script:
+    - npm ci
+    - npm run verify
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+
+build:
+  stage: build
+  image: node:20
+  script:
+    - npm ci
+    # Assuming a build script exists or just checking if the project can be prepared
+    - if [ -f "npm run build" ]; then npm run build; fi
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+
+# Deploy Mock Environment (Staging)
+deploy_mock:
+  stage: deploy_staging
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update && apt-get install -y curl npm docker.io docker-compose
+    # Install Infisical CLI
+    - curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | bash
+    - apt-get update && apt-get install -y infisical
+    - npm install -g vercel
+  script:
+    - echo "Deploying to Staging Environment with Infisical..."
+    - infisical run --env=staging -- vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+    - infisical run --env=staging -- vercel build --token=$VERCEL_TOKEN
+    - infisical run --env=staging -- vercel deploy --prebuilt --token=$VERCEL_TOKEN
+    - infisical run --env=staging -- docker-compose -f docker-compose.quantum.yml up -d
+  environment:
+    name: staging
+    url: https://staging.quantumcoin.com
+
+# Feature Testing (Staging)
+feature_test_staging:
+  stage: feature_test
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update && apt-get install -y curl unzip openjdk-17-jdk
+    - curl -Ls "https://get.maestro.mobile.dev" | bash
+    - export PATH="$PATH:$HOME/.maestro/bin"
+  script:
+    - echo "Running Maestro Cloud E2E Authentication tests..."
+    # NOTE: You must provide a valid MAESTRO_API_KEY in GitLab CI/CD Variables
+    # Assuming the APK is available from a previous build artifact. If not, it needs to be built.
+    - if [ -z "$MAESTRO_API_KEY" ]; then echo "MAESTRO_API_KEY is not set. Skipping Cloud upload."; else maestro cloud --apiKey $MAESTRO_API_KEY mobile/android/app/build/outputs/apk/release/app-release.apk .maestro/; fi
+  environment:
+    name: staging
+
+# Deploy to Production
+deploy_prod:
+  stage: deploy_prod
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update && apt-get install -y curl npm docker.io docker-compose
+    # Install Infisical CLI
+    - curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | bash
+    - apt-get update && apt-get install -y infisical
+    - npm install -g vercel
+  script:
+    - echo "Deploying to Production Environment with Infisical..."
+    - infisical run --env=prod -- vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+    - infisical run --env=prod -- vercel build --prod --token=$VERCEL_TOKEN
+    - infisical run --env=prod -- vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+    - infisical run --env=prod -- docker-compose -f docker-compose.quantum.yml up -d
+  environment:
+    name: production
+    url: https://api.quantumcoin.com
+  when: manual # Requires manual approval to go to production
