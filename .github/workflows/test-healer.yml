@@ -12,6 +12,4 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Intentionally fail
-        run: |
-          echo "console.log(undefinedVariable);" > fail.js
-          node fail.js
+        run: node scripts/fail.js
