@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const REPO = process.env.GITHUB_REPOSITORY; // format: "owner/repo"
+const REPO = process.env.GITHUB_REPOSITORY;
 const FAILED_RUN_ID = process.env.FAILED_RUN_ID;
 const FAILED_BRANCH = process.env.FAILED_BRANCH || 'main';
 
@@ -48,12 +48,30 @@ async function fetchFailedLogs() {
 
     if (logResponse.ok) {
       const logs = await logResponse.text();
-      // Keep last 200 lines to avoid massive prompt size
-      const tailLogs = logs.split('\n').slice(-200).join('\n');
-      fullLogs += `\n--- Job: ${job.name} ---\n${tailLogs}`;
+      // Keep up to last 10000 lines to ensure we don't miss the error, but strip post-job
+      const logLines = logs.split('\n');
+      const filteredLogs = logLines
+        .filter((line) => !line.includes('Post job cleanup'))
+        .slice(-10000)
+        .join('\n');
+      fullLogs += `\n--- Job: ${job.name} ---\n${filteredLogs}`;
     }
   }
   return fullLogs;
+}
+
+function extractFilesFromLogs(logs: string): string[] {
+  const files = new Set<string>();
+  // Match common file paths in logs (e.g. src/Counter.sol, test/Counter.t.sol, app/page.tsx)
+  const regex = new RegExp(
+    '((?:src|test|app|components|lib)/[a-zA-Z0-9_./-]+\\\\.(?:sol|ts|tsx|js|jsx))',
+    'g',
+  );
+  let match;
+  while ((match = regex.exec(logs)) !== null) {
+    files.add(match[1]);
+  }
+  return Array.from(files);
 }
 
 async function main() {
@@ -78,31 +96,45 @@ async function main() {
     let previousAttempt = '';
     if (authors[0] === 'Auto-Healer AI') {
       const lastCommitDiff = execSync('git log -1 -p', { encoding: 'utf-8' });
-      previousAttempt = `\nNOTE: You previously attempted to fix this, but the pipeline failed again! Here is your previous commit diff. DO NOT repeat the exact same fix:\n\`\`\`\n${lastCommitDiff}\n\`\`\`\n`;
+      previousAttempt = `\nNOTE: You previously attempted to fix this, but the pipeline failed again! Here is your previous commit diff. DO NOT repeat the exact same fix. Analyze why it failed and try a different approach:\n\`\`\`\n${lastCommitDiff}\n\`\`\`\n`;
+    }
+
+    // Extract mentioned files and read them
+    const potentialFiles = extractFilesFromLogs(logs);
+    let fileContents = '';
+    for (const file of potentialFiles) {
+      if (fs.existsSync(file)) {
+        fileContents += `\n--- File: ${file} ---\n\`\`\`\n${fs.readFileSync(file, 'utf-8')}\n\`\`\`\n`;
+      }
     }
 
     const prompt = `
-You are an AI Auto-Healer agent tasked with automatically fixing a CI/CD pipeline failure.
+You are an advanced AI Auto-Healer agent tasked with automatically fixing a CI/CD pipeline failure.
 Repository: ${REPO}
 Branch: ${FAILED_BRANCH}
 
-Here are the tail logs from the failed GitHub Actions job(s):
+Here are the logs from the failed GitHub Actions job(s):
 \`\`\`
 ${logs}
 \`\`\`
 
-Analyze the logs to determine the cause of the failure.
+Based on the logs, here is the source code of the files that might be related to the error:
+${fileContents}
+
+Analyze the logs and the source code to determine the exact cause of the failure.
 Your goal is to output a single Bash script that automatically fixes this issue in the repository.
 The script will be executed directly in the root of the repository.
 
 Requirements:
-1. Use standard bash commands (like sed, echo, npm, etc.) to modify files or install missing dependencies.
-2. If it's a code issue (TypeScript, lint, missing mock, invalid config), use 'cat > path/to/file << 'EOF' or 'sed' to fix it.
-3. Be careful with filenames! If fixing a GitHub workflow, note that the workflow files are in '.github/workflows/'. The logs might not explicitly state the filename. You can use commands like \`grep -rl "search string"\` to dynamically find the file before modifying it if you are unsure.
-4. Output ONLY the raw bash script without markdown formatting (no \`\`\`bash). Do not add explanations.
+1. Use standard bash commands (like sed, echo, npm, etc.) to modify files.
+2. If it's a code issue, use \`cat > path/to/file << 'EOF'\` to completely overwrite the file with the corrected version, or use \`sed\` for surgical changes. Overwriting is usually safer if you have the full file context.
+3. Be careful with filenames!
+4. If the error mentions missing tools (like forge), try to fix the code rather than installing tools, as the environment should already have what it needs. If you MUST use a tool and it's missing, you can use \`npx\` or similar.
+5. Output ONLY the raw bash script without markdown formatting (no \`\`\`bash). Do not add explanations.
 ${previousAttempt}
 
 Script should start with #!/bin/bash
+set -e
 `;
 
     console.log('Asking AI for auto-healing strategy...');
@@ -122,9 +154,12 @@ Script should start with #!/bin/bash
 
     fs.writeFileSync('heal.sh', cleanScript, { mode: 0o755 });
 
+    // Explicitly add common paths in case the environment is missing them
+    const env = { ...process.env, PATH: `${process.env.PATH}:/home/runner/.foundry/bin` };
+
     console.log('Running remediation script...');
     try {
-      const output = execSync('./heal.sh', { encoding: 'utf-8' });
+      const output = execSync('bash heal.sh', { encoding: 'utf-8', env });
       console.log(output);
     } catch (e: any) {
       console.error('Execution failed:', e.stdout, e.stderr);
@@ -143,6 +178,7 @@ Script should start with #!/bin/bash
       console.log('Fix pushed successfully.');
     } else {
       console.log('No changes made by the auto-healer.');
+      process.exit(1); // Fail the job if no changes were made to prevent false successes
     }
   } catch (error) {
     console.error('Auto-Healing pipeline failed:', error);
