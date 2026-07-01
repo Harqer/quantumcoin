@@ -1,3 +1,8 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+
 stages:
   - analyze
   - test
@@ -60,8 +65,8 @@ build:
     paths:
       - node_modules/
 
-# Deploy Mock Environment (Staging)
-deploy_mock:
+# Deploy Staging Environment
+deploy_staging:
   stage: deploy_staging
   image: ubuntu:22.04
   before_script:
