@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { KYCDrawer } from '../../components/KYCDrawers';
+import { KYCDrawer } from '../../../components/KYCDrawers';
 
 export default function EarlyKYCMissingDetailsScreen() {
   const router = useRouter();

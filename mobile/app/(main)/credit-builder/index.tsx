@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { coreTrpc } from '@/utils/coreTrpc';
+import { coreTrpc } from '../../../utils/trpc';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Mock hook for parity

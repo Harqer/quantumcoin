@@ -5,9 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useGlobalTheme } from '../../../../hooks/useGlobalTheme';
-import PressableScale from '../../../../components/PressableScale';
-import AudioHapticsManager from '../../../../utils/AudioHapticsManager';
+import { useGlobalTheme } from '../../../hooks/useGlobalTheme';
+import PressableScale from '../../../components/PressableScale';
+import AudioHapticsManager from '../../../utils/AudioHapticsManager';
 
 export default function IdvFailureScreen() {
   const router = useRouter();
