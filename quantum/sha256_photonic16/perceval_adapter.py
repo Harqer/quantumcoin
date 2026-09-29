@@ -49,12 +49,6 @@ CARRY_UMA_TILE = _tile3("cuccaro_uma", CUCCARO_UMA_PERM)
 
 
 def pbs_unfold(path: int, polarization: str) -> int:
-    """Map one path×polarization state to one ordinary spatial rail.
-
-    A PBS separates H and V into two spatial channels:
-      (path, H) -> rail 2*path
-      (path, V) -> rail 2*path + 1
-    """
     if path < 0:
         raise ValueError("path must be non-negative")
     if polarization not in ("H", "V"):
@@ -68,7 +62,6 @@ def logical_value_to_rail(value: int) -> int:
 
 
 def path_only_basis_state(value: int, modes: int = 16) -> tuple[int, ...]:
-    """Non-polarized one-photon state accepted by RemoteProcessor."""
     if not 0 <= value < modes:
         raise ValueError("basis value does not fit tile")
     state = [0] * modes
@@ -77,7 +70,6 @@ def path_only_basis_state(value: int, modes: int = 16) -> tuple[int, ...]:
 
 
 def embedded_permutation(spec: PhotonicTileSpec) -> tuple[int, ...]:
-    """Embed an 8- or 16-state kernel into one reusable 16-mode path-only tile."""
     spec.validate()
     perm = list(range(spec.dual_rail_modes))
     for source, target in enumerate(spec.permutation):
@@ -97,7 +89,6 @@ def permutation_matrix(spec: PhotonicTileSpec) -> tuple[tuple[int, ...], ...]:
 
 
 def build_perceval_circuit(spec: PhotonicTileSpec):
-    """Build a current-Perceval path-only circuit for this kernel."""
     import perceval as pcvl
 
     return pcvl.Circuit(spec.dual_rail_modes, name=spec.name).add(
@@ -105,30 +96,21 @@ def build_perceval_circuit(spec: PhotonicTileSpec):
     )
 
 
-def build_remote_processor(
-    platform: str,
-    value: int,
-    spec: PhotonicTileSpec,
-    *,
-    token: str | None = None,
-):
-    """Create a RemoteProcessor using only non-polarized spatial input."""
+def build_experiment(value: int, spec: PhotonicTileSpec):
     import perceval as pcvl
 
     if not 0 <= value < spec.logical_dimension:
         raise ValueError("input is outside the kernel logical subspace")
 
-    circuit = build_perceval_circuit(spec)
-    state = pcvl.BasicState(list(path_only_basis_state(value, spec.dual_rail_modes)))
-    rp = pcvl.RemoteProcessor(platform, token=token, m=spec.dual_rail_modes)
-    rp.set_circuit(circuit)
-    rp.with_input(state)
-    rp.min_detected_photons_filter(1)
-    return rp
+    experiment = pcvl.Experiment(build_perceval_circuit(spec))
+    experiment.with_input(
+        pcvl.BasicState(list(path_only_basis_state(value, spec.dual_rail_modes)))
+    )
+    experiment.min_detected_photons_filter(1)
+    return experiment
 
 
 def decode_one_photon_state(state) -> int:
-    """Return the occupied rail from a one-photon BasicState."""
     counts = list(state)
     if sum(counts) != 1:
         raise ValueError(f"expected one detected photon, got {counts}")
@@ -140,23 +122,40 @@ def execute_remote_kernel(
     value: int,
     spec: PhotonicTileSpec,
     *,
-    token: str | None = None,
-    max_samples: int = 32,
+    token: str,
+    max_samples: int,
+    max_shots: int,
 ) -> dict:
-    """Submit one exact kernel to a current Quandela RemoteProcessor.
-
-    Returns the dominant decoded rail and whether it equals the ideal
-    permutation target. Multiple samples tolerate real-QPU loss/noise while
-    retaining an exact ideal circuit specification.
-    """
+    """Execute one exact basis-permutation kernel via current Perceval runtime."""
     if max_samples < 1:
         raise ValueError("max_samples must be positive")
+    if max_shots < max_samples:
+        raise ValueError("max_shots must be >= max_samples")
 
     import perceval as pcvl
 
-    rp = build_remote_processor(platform, value, spec, token=token)
-    sampler = pcvl.algorithm.Sampler(rp)
-    result = sampler.sample_count(max_samples)
+    experiment = build_experiment(value, spec)
+    computer = pcvl.RemoteComputer(
+        pcvl.QuandelaCommunicationLayer(platform, token)
+    )
+
+    constraints = computer.specs.constraints
+    max_modes = constraints.get("max_mode_count")
+    if max_modes is not None and max_modes < spec.dual_rail_modes:
+        raise RuntimeError(
+            f"{platform} supports at most {max_modes} modes; "
+            f"{spec.name} requires {spec.dual_rail_modes}"
+        )
+
+    factory = pcvl.ExecutionFactory(
+        computer,
+        experiment,
+        max_shots_per_call=max_shots,
+    )
+
+    with computer.acquire():
+        result = factory.sample_count(max_samples=max_samples)
+
     distribution = result["results"]
     if not distribution:
         raise RuntimeError("remote execution returned no detected samples")
