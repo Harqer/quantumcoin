@@ -21,14 +21,21 @@ def main() -> int:
         default=8,
         help="Detected samples requested for each remote basis-permutation kernel",
     )
+    parser.add_argument(
+        "--max-shots-per-kernel",
+        type=int,
+        required=True,
+        help="Hard QPU shot cap for every remote kernel execution",
+    )
     args = parser.parse_args()
 
     token = os.environ.get("QUANDELA_TOKEN")
     if not token:
         raise SystemExit("QUANDELA_TOKEN is not set")
-
     if args.samples_per_kernel < 1:
         raise SystemExit("--samples-per-kernel must be positive")
+    if args.max_shots_per_kernel < args.samples_per_kernel:
+        raise SystemExit("--max-shots-per-kernel must be >= --samples-per-kernel")
 
     message = (
         bytes.fromhex(args.hex_message)
@@ -40,6 +47,7 @@ def main() -> int:
         platform=args.platform,
         token=token,
         samples_per_kernel=args.samples_per_kernel,
+        max_shots_per_kernel=args.max_shots_per_kernel,
     )
 
     digest = sha256_remote(message, backend)
