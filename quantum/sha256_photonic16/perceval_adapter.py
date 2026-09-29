@@ -36,8 +36,6 @@ def _tile4(name: str, perm: Sequence[int]) -> PhotonicTileSpec:
 
 
 def _tile3(name: str, perm: Sequence[int]) -> PhotonicTileSpec:
-    # The 8-state carry kernel is embedded in the lower half of the same
-    # reusable 16-spatial-mode tile. Rails 8..15 pass through unchanged.
     spec = PhotonicTileSpec(name, 8, tuple(perm), 16)
     spec.validate()
     return spec
@@ -56,8 +54,6 @@ def pbs_unfold(path: int, polarization: str) -> int:
     A PBS separates H and V into two spatial channels:
       (path, H) -> rail 2*path
       (path, V) -> rail 2*path + 1
-
-    This removes polarization from the remote input entirely.
     """
     if path < 0:
         raise ValueError("path must be non-negative")
@@ -67,13 +63,12 @@ def pbs_unfold(path: int, polarization: str) -> int:
 
 
 def logical_value_to_rail(value: int) -> int:
-    """PBS-unfold the original 8-path×H/V QUDIT4 basis into 16 path-only rails."""
     path, pol = PolarizationQudit4.encode_value(value)
     return pbs_unfold(path, pol)
 
 
 def path_only_basis_state(value: int, modes: int = 16) -> tuple[int, ...]:
-    """Non-polarized one-photon BasicState payload accepted by RemoteProcessor."""
+    """Non-polarized one-photon state accepted by RemoteProcessor."""
     if not 0 <= value < modes:
         raise ValueError("basis value does not fit tile")
     state = [0] * modes
@@ -102,14 +97,12 @@ def permutation_matrix(spec: PhotonicTileSpec) -> tuple[tuple[int, ...], ...]:
 
 
 def build_perceval_circuit(spec: PhotonicTileSpec):
-    """Build a current-Perceval path-only circuit for this kernel.
-
-    Import is local so truth-table tests do not require Perceval to be installed.
-    """
+    """Build a current-Perceval path-only circuit for this kernel."""
     import perceval as pcvl
 
-    perm = list(embedded_permutation(spec))
-    return pcvl.Circuit(spec.dual_rail_modes, name=spec.name).add(0, pcvl.PERM(perm))
+    return pcvl.Circuit(spec.dual_rail_modes, name=spec.name).add(
+        0, pcvl.PERM(list(embedded_permutation(spec)))
+    )
 
 
 def build_remote_processor(
@@ -119,11 +112,7 @@ def build_remote_processor(
     *,
     token: str | None = None,
 ):
-    """Create a RemoteProcessor using only non-polarized spatial input.
-
-    Example platform names include the current Quandela Cloud platform IDs
-    exposed to the caller's account. No hardware name is hard-coded.
-    """
+    """Create a RemoteProcessor using only non-polarized spatial input."""
     import perceval as pcvl
 
     if not 0 <= value < spec.logical_dimension:
@@ -134,4 +123,55 @@ def build_remote_processor(
     rp = pcvl.RemoteProcessor(platform, token=token, m=spec.dual_rail_modes)
     rp.set_circuit(circuit)
     rp.with_input(state)
+    rp.min_detected_photons_filter(1)
     return rp
+
+
+def decode_one_photon_state(state) -> int:
+    """Return the occupied rail from a one-photon BasicState."""
+    counts = list(state)
+    if sum(counts) != 1:
+        raise ValueError(f"expected one detected photon, got {counts}")
+    return counts.index(1)
+
+
+def execute_remote_kernel(
+    platform: str,
+    value: int,
+    spec: PhotonicTileSpec,
+    *,
+    token: str | None = None,
+    max_samples: int = 32,
+) -> dict:
+    """Submit one exact kernel to a current Quandela RemoteProcessor.
+
+    Returns the dominant decoded rail and whether it equals the ideal
+    permutation target. Multiple samples tolerate real-QPU loss/noise while
+    retaining an exact ideal circuit specification.
+    """
+    if max_samples < 1:
+        raise ValueError("max_samples must be positive")
+
+    import perceval as pcvl
+
+    rp = build_remote_processor(platform, value, spec, token=token)
+    sampler = pcvl.algorithm.Sampler(rp)
+    result = sampler.sample_count(max_samples)
+    distribution = result["results"]
+    if not distribution:
+        raise RuntimeError("remote execution returned no detected samples")
+
+    winner_state, winner_count = max(distribution.items(), key=lambda item: item[1])
+    observed = decode_one_photon_state(winner_state)
+    expected = embedded_permutation(spec)[value]
+
+    return {
+        "kernel": spec.name,
+        "input_rail": value,
+        "expected_output_rail": expected,
+        "observed_output_rail": observed,
+        "winner_count": winner_count,
+        "total_detected_samples": sum(distribution.values()),
+        "matches_ideal": observed == expected,
+        "raw_result": result,
+    }
