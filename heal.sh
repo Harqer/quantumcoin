@@ -1,34 +1,35 @@
 #!/bin/bash
 set -e
 
-echo "--- Auto-Healer: Starting CI/CD pipeline fix ---"
+SUBMODULE_NAME="classiq-library"
+PROBLEM_URL="https://github.com/Harqer/classiq-library.git"
 
-# Fix 1: Install missing Node.js dependencies
-# The previous fix rewrote 'scripts/dependabot_ai_remediator.ts' to use
-# '@actions/github' and '@actions/core', but did not install these dependencies.
-# This caused the 'Error: Cannot find module '@actions/github''.
-echo "Installing missing Node.js modules: @actions/github and @actions/core..."
-npm install @actions/github @actions/core
+if [ -f .gitmodules ]; then
+    # Remove the block defining the problematic submodule from .gitmodules
+    # This awk command correctly removes lines starting from "[submodule "SUBMODULE_NAME"]"
+    # until the next line that starts with "[submodule" or the end of the file.
+    awk -v sub_name="\"$SUBMODULE_NAME\"" '
+    BEGIN { skip = 0 }
+    $1 == "[submodule" && index($0, sub_name) { skip = 1 }
+    $1 == "[submodule" && !index($0, sub_name) { skip = 0 }
+    { if (!skip) print }
+    ' .gitmodules > .gitmodules.tmp && mv .gitmodules.tmp .gitmodules
 
-# Fix 2: Update Node.js version in the workflow file
-# The logs show Node.js 20 being used (leading to EBADENGINE warning for 'undici'),
-# despite a previous attempt to update it. This change needs to persist for future runs.
-# We explicitly target the 'remediate-alerts.yml' workflow file.
-WORKFLOW_FILE=".github/workflows/remediate-alerts.yml"
-echo "Checking and updating Node.js version in $WORKFLOW_FILE..."
+    # Clean up the .git/config entry for the submodule
+    git config -f .git/config --remove-section submodule.$SUBMODULE_NAME || true
+    # Remove the submodule's specific git directory
+    rm -rf .git/modules/$SUBMODULE_NAME || true
 
-if [ -f "$WORKFLOW_FILE" ]; then
-    # Use sed to replace 'node-version: 20' with 'node-version: 22'.
-    # This ensures compatibility with dependencies like 'undici' (which requires >=22.19.0).
-    # This fix will be effective for subsequent runs of the workflow after this script's changes are committed.
-    if grep -q "node-version: 20" "$WORKFLOW_FILE"; then
-        sed -i 's/node-version: 20/node-version: 22/g' "$WORKFLOW_FILE"
-        echo "Successfully updated 'node-version: 20' to 'node-version: 22' in $WORKFLOW_FILE."
-    else
-        echo "Warning: 'node-version: 20' not found in $WORKFLOW_FILE. It might already be updated or specified differently."
+    # Deinitialize the submodule and remove its working directory if it exists
+    if [ -d "$SUBMODULE_NAME" ]; then
+        git submodule deinit -f "$SUBMODULE_NAME" || true
+        rm -rf "$SUBMODULE_NAME"
     fi
 else
-    echo "Error: Workflow file '$WORKFLOW_FILE' not found. Cannot update Node.js version."
+    echo ".gitmodules file not found. Skipping submodule cleanup in .gitmodules."
 fi
 
-echo "--- Auto-Healer: CI/CD pipeline fix completed ---"
+# Re-initialize and update all remaining submodules.
+# This ensures that other submodules are correctly set up after the problematic one is removed.
+git submodule sync --recursive || true
+git submodule update --init --recursive --force || true
