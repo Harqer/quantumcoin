@@ -18,28 +18,25 @@ MASK32 = 0xFFFFFFFF
 class QuandelaSha256Backend:
     """Remote-only SHA-256 primitive backend.
 
-    Every nonlinear Boolean result and every carry transition is obtained from
-    Quandela through the reusable 16-mode path-only tile. The host only:
-      - packs/unpacks basis values,
-      - applies SHA wire/index views (ROTR/SHR),
-      - schedules the 64 rounds,
-      - holds classical words between remote kernel invocations.
-
-    There is intentionally no local arithmetic/Boolean fallback.
+    All SHA Boolean results and all carry transitions are returned by the
+    remote 16-mode path-only tile. The host only packs/unpacks basis values,
+    applies wire/index views, schedules rounds, and retains classical words
+    between acquisitions. There is no local arithmetic or Boolean fallback.
     """
 
     platform: str
     token: str
-    samples_per_kernel: int = 8
+    samples_per_kernel: int
+    max_shots_per_kernel: int
 
-    def _run4(self, spec, x: int, y: int, z: int, t: int = 0) -> tuple[int, int, int, int]:
-        value = ((x & 1) << 3) | ((y & 1) << 2) | ((z & 1) << 1) | (t & 1)
+    def _execute(self, spec, value: int) -> int:
         result = execute_remote_kernel(
             self.platform,
             value,
             spec,
             token=self.token,
             max_samples=self.samples_per_kernel,
+            max_shots=self.max_shots_per_kernel,
         )
         if not result["matches_ideal"]:
             raise RuntimeError(
@@ -47,63 +44,36 @@ class QuandelaSha256Backend:
                 f"expected rail {result['expected_output_rail']}, "
                 f"observed {result['observed_output_rail']}"
             )
-        out = result["observed_output_rail"]
+        return result["observed_output_rail"]
+
+    def _run4(self, spec, x: int, y: int, z: int, t: int = 0) -> tuple[int, int, int, int]:
+        value = ((x & 1) << 3) | ((y & 1) << 2) | ((z & 1) << 1) | (t & 1)
+        out = self._execute(spec, value)
         return ((out >> 3) & 1, (out >> 2) & 1, (out >> 1) & 1, out & 1)
 
     def _run3(self, spec, a: int, b: int, c: int) -> tuple[int, int, int]:
         value = ((a & 1) << 2) | ((b & 1) << 1) | (c & 1)
-        result = execute_remote_kernel(
-            self.platform,
-            value,
-            spec,
-            token=self.token,
-            max_samples=self.samples_per_kernel,
-        )
-        if not result["matches_ideal"]:
-            raise RuntimeError(
-                f"{spec.name} remote kernel mismatch: "
-                f"expected rail {result['expected_output_rail']}, "
-                f"observed {result['observed_output_rail']}"
-            )
-        out = result["observed_output_rail"]
+        out = self._execute(spec, value)
         return ((out >> 2) & 1, (out >> 1) & 1, out & 1)
 
     def ch32(self, x: int, y: int, z: int) -> int:
         out = 0
         for i in range(32):
-            _, _, _, bit = self._run4(
-                CH_TILE,
-                (x >> i) & 1,
-                (y >> i) & 1,
-                (z >> i) & 1,
-                0,
-            )
+            _, _, _, bit = self._run4(CH_TILE, (x >> i) & 1, (y >> i) & 1, (z >> i) & 1)
             out |= bit << i
         return out
 
     def maj32(self, x: int, y: int, z: int) -> int:
         out = 0
         for i in range(32):
-            _, _, _, bit = self._run4(
-                MAJ_TILE,
-                (x >> i) & 1,
-                (y >> i) & 1,
-                (z >> i) & 1,
-                0,
-            )
+            _, _, _, bit = self._run4(MAJ_TILE, (x >> i) & 1, (y >> i) & 1, (z >> i) & 1)
             out |= bit << i
         return out
 
     def parity3_words(self, x: int, y: int, z: int) -> int:
         out = 0
         for i in range(32):
-            _, _, _, bit = self._run4(
-                PARITY_TILE,
-                (x >> i) & 1,
-                (y >> i) & 1,
-                (z >> i) & 1,
-                0,
-            )
+            _, _, _, bit = self._run4(PARITY_TILE, (x >> i) & 1, (y >> i) & 1, (z >> i) & 1)
             out |= bit << i
         return out
 
@@ -129,7 +99,7 @@ class QuandelaSha256Backend:
         return self.parity3_words(self.rotr(x, 17), self.rotr(x, 19), self.shr(x, 10))
 
     def add32(self, a_value: int, b_value: int) -> int:
-        """Exact modulo-2^32 Cuccaro addition using remote MAJ/UMA only."""
+        """Exact modulo-2^32 Cuccaro addition; every MAJ/UMA is remote."""
         a = [(a_value >> i) & 1 for i in range(32)]
         b = [(b_value >> i) & 1 for i in range(32)]
         cin = 0
@@ -140,8 +110,6 @@ class QuandelaSha256Backend:
                 CARRY_MAJ_TILE, a[i], b[i + 1], a[i + 1]
             )
 
-        # Modulo 2^32: the final carry is intentionally discarded after the
-        # reverse sweep restores the source register.
         for i in range(30, -1, -1):
             a[i], b[i + 1], a[i + 1] = self._run3(
                 CARRY_UMA_TILE, a[i], b[i + 1], a[i + 1]
@@ -150,6 +118,7 @@ class QuandelaSha256Backend:
 
         if cin != 0:
             raise RuntimeError("Cuccaro remote cleanup failed to restore cin")
+
         restored_a = sum(bit << i for i, bit in enumerate(a))
         if restored_a != (a_value & MASK32):
             raise RuntimeError("Cuccaro remote cleanup failed to restore source register")
