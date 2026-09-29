@@ -1,78 +1,64 @@
-# Exact SHA-256: current-hardware 16-spatial-mode path-only kernel
+# Exact SHA-256: remote-only 16-mode Quandela execution
 
-This implementation lowers the previous path×polarization design into ordinary non-polarized spatial encoding usable by current Perceval RemoteProcessor.
+This package has no local SHA execution fallback. The production path executes the full SHA-256 schedule while routing every Boolean result and every modulo-2^32 carry transition through the reusable 16-spatial-mode Quandela tile.
 
-## PBS lowering
+## Hardware encoding
 
-A polarizing beam splitter maps the old local states as:
+The prior path×polarization notation is PBS-unfolded into ordinary non-polarized spatial rails:
 
-(path p, H) -> spatial rail 2p
-(path p, V) -> spatial rail 2p+1
-
-Therefore the old 8-path × {H,V} 16-state tile becomes one photon across 16 ordinary spatial rails. No polarized input reaches the remote processor.
-
-### Example 1: four-bit Ch/Maj tile
-
-0000 -> path0,H -> rail 0
-0001 -> path0,V -> rail 1
-0010 -> path1,H -> rail 2
-...
-1111 -> path7,V -> rail 15
-
-Ch, Maj, and parity are exact 16-state spatial permutations, so they lower directly to pcvl.PERM([...]) on the 16 rails.
-
-### Example 2: three-bit Cuccaro carry tile
-
-The 8-state MAJ/UMA kernel uses rails 0..7:
-
-000 -> rail 0
-001 -> rail 1
-...
-111 -> rail 7
-
-It is embedded into the same 16-mode tile; rails 8..15 are identity. The same physical 16-mode region is reused for Boolean and carry kernels.
-
-## Physical budget
-
-one reusable path-only tile = 16 spatial modes
-polarization required remotely = no
-remote input type = non-polarized BasicState
-kernel photon count = 1
-
-This avoids the earlier 8+4+4 polarized remote assumption while keeping the physical path budget at 16 modes through serialization/reuse.
-
-## Exact SHA semantics retained
-
-- all 64 SHA-256 rounds;
-- exact message expansion;
-- exact Ch and Maj;
-- exact modulo-2^32 Cuccaro arithmetic;
-- exact feed-forward;
-- ROTR represented as a semantic wire/index permutation;
-- known-answer and randomized tests against hashlib.
-
-## Current Perceval use
-
-```python
-from quantum.sha256_photonic16.perceval_adapter import (
-    CH_TILE,
-    build_remote_processor,
-)
-
-rp = build_remote_processor(
-    platform="YOUR_QUANDELA_PLATFORM_ID",
-    value=0b1010,
-    spec=CH_TILE,
-    token="YOUR_QUANDELA_TOKEN",
-)
-
-print(rp.available_commands)
+```text
+(path p, H) -> rail 2p
+(path p, V) -> rail 2p+1
 ```
 
-The remote circuit contains only an ordinary 16-mode PERM and a non-polarized one-photon BasicState. Query rp.constraints before submission because exact platform limits are platform-specific.
+The resulting hardware representation is one reusable 16-mode path-only tile.
 
-Run semantic verification with:
+- Ch / Maj / parity: exact 16-state PERM on rails 0..15.
+- Cuccaro MAJ / UMA: exact 8-state PERM embedded on rails 0..7; rails 8..15 are identity.
+- Remote input: one-photon non-polarized BasicState.
+- No polarized RemoteProcessor input is required.
+
+## Full end-to-end SHA-256 path
+
+`sha256_remote()` performs:
+
+- standard SHA-256 padding;
+- all W[0..63] message-schedule words;
+- all 64 compression rounds;
+- exact Ch and Maj;
+- exact Σ0, Σ1, σ0, σ1;
+- exact modulo-2^32 Cuccaro addition;
+- final feed-forward.
+
+Host work is limited to orchestration, byte/word packing, holding classical words between QPU calls, and virtual ROTR/SHR index views. It does not calculate SHA Boolean functions or modular sums locally. If a remote kernel fails or disagrees with its exact permutation, the run aborts; there is no fallback.
+
+## Run the complete hash
 
 ```bash
-python -m pytest tests/test_sha256_photonic16.py
+export QUANDELA_TOKEN="..."
+
+python -m quantum.sha256_photonic16.run_sha256 \
+  --platform <YOUR_QUANDELA_PLATFORM_ID> \
+  --message "abc" \
+  --samples-per-kernel 8
 ```
+
+Expected final digest for `abc`:
+
+```text
+ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+```
+
+You may also pass raw bytes as hexadecimal:
+
+```bash
+python -m quantum.sha256_photonic16.run_sha256 \
+  --platform <YOUR_QUANDELA_PLATFORM_ID> \
+  --hex 616263
+```
+
+## Execution boundary
+
+This is one end-to-end CLI SHA run, but it necessarily orchestrates many remote kernel submissions because the current design serializes a reusable 16-state tile and keeps the 32-bit SHA words on the host between kernel calls. It is not one continuously coherent 256-bit photonic circuit and does not claim to be one.
+
+No QPU job is submitted automatically by tests or import.
