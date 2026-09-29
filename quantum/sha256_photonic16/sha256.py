@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from .adder import cuccaro_add_mod
-from .kernels import ch, maj
-
-MASK32 = 0xFFFFFFFF
+from .remote_backend import QuandelaSha256Backend
 
 K = (
     0x428A2F98,0x71374491,0xB5C0FBCF,0xE9B5DBA5,0x3956C25B,0x59F111F1,0x923F82A4,0xAB1C5ED5,
@@ -22,52 +19,6 @@ H0 = (
 )
 
 
-def _rotr(x: int, n: int) -> int:
-    n %= 32
-    return ((x >> n) | (x << (32 - n))) & MASK32
-
-
-def _shr(x: int, n: int) -> int:
-    return x >> n
-
-
-def _big_sigma0(x: int) -> int:
-    return _rotr(x, 2) ^ _rotr(x, 13) ^ _rotr(x, 22)
-
-
-def _big_sigma1(x: int) -> int:
-    return _rotr(x, 6) ^ _rotr(x, 11) ^ _rotr(x, 25)
-
-
-def _small_sigma0(x: int) -> int:
-    return _rotr(x, 7) ^ _rotr(x, 18) ^ _shr(x, 3)
-
-
-def _small_sigma1(x: int) -> int:
-    return _rotr(x, 17) ^ _rotr(x, 19) ^ _shr(x, 10)
-
-
-def _word_ch(x: int, y: int, z: int) -> int:
-    out = 0
-    for i in range(32):
-        out |= ch((x >> i) & 1, (y >> i) & 1, (z >> i) & 1) << i
-    return out
-
-
-def _word_maj(x: int, y: int, z: int) -> int:
-    out = 0
-    for i in range(32):
-        out |= maj((x >> i) & 1, (y >> i) & 1, (z >> i) & 1) << i
-    return out
-
-
-def _add_many(*values: int) -> int:
-    acc = 0
-    for value in values:
-        acc = cuccaro_add_mod(acc, value & MASK32, 32)
-    return acc
-
-
 def _pad(message: bytes) -> bytes:
     bit_len = len(message) * 8
     padded = message + b"\x80"
@@ -76,12 +27,12 @@ def _pad(message: bytes) -> bytes:
     return padded
 
 
-def sha256_digest(message: bytes) -> bytes:
-    """Full exact SHA-256 using the reversible kernel model.
+def sha256_remote(message: bytes, backend: QuandelaSha256Backend) -> bytes:
+    """Full 64-round SHA-256 with all Boolean/arithmetic primitives remote.
 
-    This executes all 64 rounds and exact modulo-2^32 arithmetic. ROTR/SHR are
-    semantic wire/index operations; Ch/Maj are bitwise QUDIT4-compatible maps;
-    modular addition is carried by exact MAJ/UMA reversible kernels.
+    The host performs only deterministic orchestration, byte parsing, word
+    placement, and wire/index views. There is no local Boolean/arithmetic
+    fallback.
     """
     h = list(H0)
     padded = _pad(message)
@@ -89,15 +40,39 @@ def sha256_digest(message: bytes) -> bytes:
     for block_offset in range(0, len(padded), 64):
         block = padded[block_offset:block_offset + 64]
         w = [int.from_bytes(block[i:i + 4], "big") for i in range(0, 64, 4)]
+
         for t in range(16, 64):
-            w.append(_add_many(_small_sigma1(w[t - 2]), w[t - 7], _small_sigma0(w[t - 15]), w[t - 16]))
+            w.append(
+                backend.add_many32(
+                    backend.small_sigma1(w[t - 2]),
+                    w[t - 7],
+                    backend.small_sigma0(w[t - 15]),
+                    w[t - 16],
+                )
+            )
 
         a, b, c, d, e, f, g, hh = h
-        for t in range(64):
-            t1 = _add_many(hh, _big_sigma1(e), _word_ch(e, f, g), K[t], w[t])
-            t2 = _add_many(_big_sigma0(a), _word_maj(a, b, c))
-            hh, g, f, e, d, c, b, a = g, f, e, _add_many(d, t1), c, b, a, _add_many(t1, t2)
 
-        h = [_add_many(x, y) for x, y in zip(h, (a, b, c, d, e, f, g, hh))]
+        for t in range(64):
+            t1 = backend.add_many32(
+                hh,
+                backend.big_sigma1(e),
+                backend.ch32(e, f, g),
+                K[t],
+                w[t],
+            )
+            t2 = backend.add_many32(
+                backend.big_sigma0(a),
+                backend.maj32(a, b, c),
+            )
+
+            new_e = backend.add32(d, t1)
+            new_a = backend.add32(t1, t2)
+            hh, g, f, e, d, c, b, a = g, f, e, new_e, c, b, a, new_a
+
+        h = [
+            backend.add32(x, y)
+            for x, y in zip(h, (a, b, c, d, e, f, g, hh))
+        ]
 
     return b"".join(word.to_bytes(4, "big") for word in h)
