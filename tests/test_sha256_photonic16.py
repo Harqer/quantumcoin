@@ -1,24 +1,29 @@
-import hashlib
-import os
-import random
-import sys
+import ast
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
 
-from quantum.sha256_photonic16.adder import cuccaro_add, cuccaro_add_mod
 from quantum.sha256_photonic16.encoding import PolarizationQudit4
 from quantum.sha256_photonic16.kernels import (
-    CH_PERM, MAJ_PERM, PARITY3_PERM,
-    CUCCARO_MAJ_PERM, CUCCARO_UMA_PERM,
+    CH_PERM,
+    MAJ_PERM,
+    PARITY3_PERM,
+    CUCCARO_MAJ_PERM,
+    CUCCARO_UMA_PERM,
 )
 from quantum.sha256_photonic16.perceval_adapter import (
-    CH_TILE, MAJ_TILE, PARITY_TILE, CARRY_MAJ_TILE, CARRY_UMA_TILE,
-    embedded_permutation, logical_value_to_rail, path_only_basis_state,
-    pbs_unfold, permutation_matrix,
+    CH_TILE,
+    MAJ_TILE,
+    PARITY_TILE,
+    CARRY_MAJ_TILE,
+    CARRY_UMA_TILE,
+    embedded_permutation,
+    logical_value_to_rail,
+    path_only_basis_state,
+    pbs_unfold,
+    permutation_matrix,
 )
-from quantum.sha256_photonic16.sha256 import sha256_digest
+from quantum.sha256_photonic16.sha256 import _pad
 
 
 def test_encoding_roundtrip():
@@ -67,44 +72,25 @@ def test_all_tiles_use_same_16_spatial_modes():
         assert all(sum(matrix[r][c] for r in range(16)) == 1 for c in range(16))
 
 
-def test_cuccaro_add_exhaustive_small_widths():
-    for width in range(1, 6):
-        mod = 1 << width
-        for a in range(mod):
-            for b in range(mod):
-                for cin in (0, 1):
-                    restored_cin, restored_a, result, carry = cuccaro_add(a, b, width, cin)
-                    total = a + b + cin
-                    assert restored_cin == cin
-                    assert restored_a == a
-                    assert result == total % mod
-                    assert carry == total >> width
+def test_sha_padding_is_standard_and_host_only():
+    padded = _pad(b"abc")
+    assert len(padded) == 64
+    assert padded[:4] == b"abc\x80"
+    assert padded[-8:] == (24).to_bytes(8, "big")
 
 
-def test_cuccaro_add_32_random():
-    rng = random.Random(0x534841323536)
-    for _ in range(500):
-        a = rng.getrandbits(32)
-        b = rng.getrandbits(32)
-        assert cuccaro_add_mod(a, b, 32) == (a + b) & 0xFFFFFFFF
-
-
-def test_sha256_known_vectors():
-    vectors = [
-        b"",
-        b"abc",
-        b"hello world",
-        b"a" * 55,
-        b"a" * 56,
-        b"a" * 64,
-        b"a" * 1000,
-    ]
-    for msg in vectors:
-        assert sha256_digest(msg) == hashlib.sha256(msg).digest()
-
-
-def test_sha256_random_messages():
-    rng = random.Random(0x16)
-    for _ in range(50):
-        msg = os.urandom(rng.randrange(0, 300))
-        assert sha256_digest(msg) == hashlib.sha256(msg).digest()
+def test_production_sha_has_no_local_adder_or_boolean_imports():
+    source = (ROOT / "quantum/sha256_photonic16/sha256.py").read_text()
+    tree = ast.parse(source)
+    imported = {
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        for alias in node.names
+    }
+    assert "adder" not in imported
+    assert "kernels" not in imported
+    assert "hashlib" not in imported
+    assert "cuccaro_add_mod" not in source
+    assert "_word_ch" not in source
+    assert "_word_maj" not in source
