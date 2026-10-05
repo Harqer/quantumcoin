@@ -149,6 +149,14 @@ class ReversibleCircuit:
         """Equivalent X/CX/CCX count without discarding macro structure."""
         return sum(gate.primitive_gate_count for gate in self.gates)
 
+    @property
+    def nonlinear_gate_count(self) -> int:
+        """Count CCX-equivalent nonlinear reversible operations."""
+        return sum(
+            gate.kind in {"CCX", "MAJ", "UMA", "MAJ_INV", "UMA_INV"}
+            for gate in self.gates
+        )
+
     def inverse(self) -> "ReversibleCircuit":
         out = ReversibleCircuit()
         n = len(self.gates)
