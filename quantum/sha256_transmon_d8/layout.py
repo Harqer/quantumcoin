@@ -3,11 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-_LAYOUT_TRANSMONS = {
+_FIXED_LAYOUT_TRANSMONS = {
     "aligned100": 100,
     "packed99": 99,
     "packed98": 98,
     "packed97": 97,
+}
+_COHERENT_LAYOUT_TRANSMONS = {
+    "coherent107": 107,
+}
+_LAYOUT_TRANSMONS = {
+    **_FIXED_LAYOUT_TRANSMONS,
+    **_COHERENT_LAYOUT_TRANSMONS,
 }
 
 _STATE_PADDING_SLOTS = tuple(
@@ -20,12 +27,16 @@ _STATE_PADDING_SLOTS = tuple(
 class D8Layout:
     """Map exact SHA state/workspace bits onto d=8 transmon carriers.
 
-    The eight 32-bit SHA state words remain word-aligned in every profile:
-    11 transmons/word, with one unused level-bit in the final transmon of each
-    word. Packed profiles borrow only those otherwise-unused level-bits for the
-    reusable scratch/carry workspace.
+    Fixed-message profiles map 289 logical level-bits:
+      256 state + 32 scratch + 1 carry.
 
-    Profiles:
+    The coherent107 profile maps exactly 321 logical level-bits:
+      256 state + 32 coherent nonce + 32 scratch + 1 carry.
+
+    All eight SHA state words remain word-aligned: 11 transmons/word, leaving
+    one otherwise-unused level-bit in the final transmon of each state word.
+
+    Fixed-message profiles:
       aligned100
         state 0..87, scratch 88..98, dedicated carry transmon 99.
 
@@ -40,8 +51,15 @@ class D8Layout:
         state 0..87, scratch[0:27] in 88..96, scratch[27:32] in five state
         padding levels, carry in a sixth padding level.
 
-    All profiles represent the same 289 logical bits (256 state + 32 scratch +
-    one carry). Packing changes only physical placement, never SHA semantics.
+    Coherent-input profile:
+      coherent107
+        state 0..87;
+        nonce[0:32] in 88..98 (the unused level of transmon 98 is carry);
+        scratch[0:24] in 99..106;
+        scratch[24:32] in the eight state-word padding levels.
+
+    coherent107 consumes every one of the 107 * 3 = 321 modeled d=8 level-bits
+    exactly once. There is no hidden second word of clean schedule workspace.
     """
 
     profile: str = "aligned100"
@@ -58,6 +76,10 @@ class D8Layout:
         self._validate_mapping()
 
     @property
+    def is_coherent_nonce(self) -> bool:
+        return self.profile in _COHERENT_LAYOUT_TRANSMONS
+
+    @property
     def total_transmons(self) -> int:
         return _LAYOUT_TRANSMONS[self.profile]
 
@@ -67,6 +89,9 @@ class D8Layout:
 
     @property
     def carry_bit(self) -> int:
+        if self.profile == "coherent107":
+            # nonce bits 30 and 31 occupy levels 0 and 1 of transmon 98.
+            return 98 * 3 + 2
         if self.profile == "aligned100":
             return 99 * 3
         if self.profile in {"packed99", "packed98"}:
@@ -90,9 +115,27 @@ class D8Layout:
             return self.scratch_bit(bit)
         return self._state_word_bit(slot, bit)
 
+    def nonce_bit(self, bit: int) -> int:
+        if not self.is_coherent_nonce:
+            raise ValueError(
+                f"layout {self.profile!r} has no coherent nonce register"
+            )
+        if not 0 <= bit < 32:
+            raise ValueError("nonce bit out of range")
+        transmon = 88 + bit // 3
+        return transmon * 3 + bit % 3
+
     def scratch_bit(self, bit: int) -> int:
         if not 0 <= bit < 32:
             raise ValueError("scratch bit out of range")
+
+        if self.profile == "coherent107":
+            # 24 contiguous bits in transmons 99..106 plus all eight state-word
+            # padding levels. This is the entire remaining clean word budget.
+            if bit < 24:
+                transmon = 99 + bit // 3
+                return transmon * 3 + bit % 3
+            return _STATE_PADDING_SLOTS[bit - 24]
 
         if self.profile in {"aligned100", "packed99"}:
             transmon = 88 + bit // 3
@@ -125,12 +168,21 @@ class D8Layout:
             for bit in range(32)
         )
         scratch = tuple(self.scratch_bit(bit) for bit in range(32))
-        return state + scratch + (self.carry_bit,)
+        carry = (self.carry_bit,)
+
+        if not self.is_coherent_nonce:
+            return state + scratch + carry
+
+        nonce = tuple(self.nonce_bit(bit) for bit in range(32))
+        return state + nonce + scratch + carry
 
     def _validate_mapping(self) -> None:
         mapped = self.mapped_bits()
-        if len(mapped) != 289:
-            raise AssertionError("d=8 SHA layout must map exactly 289 logical bits")
+        expected = 321 if self.is_coherent_nonce else 289
+        if len(mapped) != expected:
+            raise AssertionError(
+                f"d=8 SHA layout must map exactly {expected} logical bits"
+            )
         if len(set(mapped)) != len(mapped):
             raise ValueError(f"{self.profile} maps two logical values to one level-bit")
         if min(mapped) < 0 or max(mapped) >= self.logical_bit_capacity:
@@ -151,6 +203,23 @@ class D8Layout:
     def get_word(self, bits: list[int], slot: int) -> int:
         return sum(bits[self.word_bit(slot, i)] << i for i in range(32))
 
+    def set_nonce(self, bits: list[int], value: int) -> None:
+        if not self.is_coherent_nonce:
+            raise ValueError(
+                f"layout {self.profile!r} has no coherent nonce register"
+            )
+        if not 0 <= value < (1 << 32):
+            raise ValueError("nonce must fit 32 bits")
+        for i in range(32):
+            bits[self.nonce_bit(i)] = (value >> i) & 1
+
+    def get_nonce(self, bits: list[int]) -> int:
+        if not self.is_coherent_nonce:
+            raise ValueError(
+                f"layout {self.profile!r} has no coherent nonce register"
+            )
+        return sum(bits[self.nonce_bit(i)] << i for i in range(32))
+
     def assert_clean_workspace(self, bits: list[int]) -> None:
         if self.get_word(bits, self.scratch_slot) != 0:
             raise AssertionError("scratch word not restored to zero")
@@ -159,4 +228,10 @@ class D8Layout:
 
 
 def available_layout_profiles() -> tuple[str, ...]:
-    return tuple(_LAYOUT_TRANSMONS)
+    """Profiles for the existing fixed-classical-message compiler."""
+    return tuple(_FIXED_LAYOUT_TRANSMONS)
+
+
+def available_coherent_layout_profiles() -> tuple[str, ...]:
+    """Profiles that include a persistent coherent 32-bit nonce register."""
+    return tuple(_COHERENT_LAYOUT_TRANSMONS)
