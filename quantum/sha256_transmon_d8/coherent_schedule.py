@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .layout import D8Layout
+
 MASK32 = 0xFFFFFFFF
 
 
@@ -198,3 +200,51 @@ def bitcoin_second_block_template() -> tuple[int, ...]:
         words[index] = 0
     words[15] = 80 * 8
     return tuple(words)
+
+
+
+@dataclass(frozen=True)
+class CoherentLimbWorkspace:
+    """Deterministic allocation of schedule pebbles into coherent107 scratch.
+
+    The allocator does not create new logical storage. It partitions the single
+    32-bit scratch word into the exact limb-pebble budget selected by
+    plan_coherent_schedule().
+    """
+
+    layout: D8Layout
+    plan: CoherentSchedulePlan
+
+    def __post_init__(self) -> None:
+        if not self.layout.is_coherent_nonce:
+            raise ValueError("coherent limb workspace requires coherent107 layout")
+        if self.plan.limb_pebble_bits > 32:
+            raise ValueError("limb pebble allocation exceeds 32 scratch bits")
+
+    def pebble_bits(self, pebble: int) -> tuple[int, ...]:
+        if not 0 <= pebble < self.plan.max_word_pebbles:
+            raise ValueError("pebble index out of range")
+        start = pebble * self.plan.limb_bits
+        return tuple(
+            self.layout.scratch_bit(start + offset)
+            for offset in range(self.plan.limb_bits)
+        )
+
+    @property
+    def spare_bits(self) -> tuple[int, ...]:
+        return tuple(
+            self.layout.scratch_bit(index)
+            for index in range(self.plan.limb_pebble_bits, 32)
+        )
+
+    @property
+    def carry_bit(self) -> int:
+        return self.layout.carry_bit
+
+    def allocated_bits(self) -> tuple[int, ...]:
+        pebbles = tuple(
+            bit
+            for pebble in range(self.plan.max_word_pebbles)
+            for bit in self.pebble_bits(pebble)
+        )
+        return pebbles + self.spare_bits + (self.carry_bit,)
