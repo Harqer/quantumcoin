@@ -5,7 +5,9 @@ from .coherent_schedule import (
     CoherentSchedulePlan,
     compress_reference,
     evaluate_schedule,
+    evaluate_word_with_recomputation,
     plan_coherent_schedule,
+    plan_word_recompute_strategies,
 )
 from .layout import (
     D8Layout,
@@ -23,6 +25,8 @@ __all__ = [
     "compile_single_block_sha256",
     "compress_reference",
     "evaluate_schedule",
+    "evaluate_word_with_recomputation",
     "plan_coherent_schedule",
+    "plan_word_recompute_strategies",
     "simulate_compiled_sha256",
 ]
