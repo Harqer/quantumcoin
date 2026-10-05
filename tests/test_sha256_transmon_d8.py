@@ -68,6 +68,42 @@ def test_exact_sha256_known_vectors(message):
     assert simulate_compiled_sha256(message) == hashlib.sha256(message).digest()
 
 
+@pytest.mark.parametrize("profile", available_layout_profiles())
+@pytest.mark.parametrize("strategy", ("anf", "low_multiplicative"))
+def test_boolean_strategies_preserve_exact_sha_and_inverse(profile, strategy):
+    layout = D8Layout(profile=profile)
+    compiled = compile_single_block_sha256(
+        b"abc",
+        layout=layout,
+        boolean_strategy=strategy,
+    )
+    start = initial_state(compiled)
+    output = simulate(compiled.circuit, start)
+
+    assert simulate_compiled_sha256(
+        b"abc",
+        layout=layout,
+        boolean_strategy=strategy,
+    ) == hashlib.sha256(b"abc").digest()
+    compiled.layout.assert_clean_workspace(output)
+    assert simulate(compiled.circuit.inverse(), output) == start
+
+
+def test_low_multiplicative_boolean_strategy_reduces_nonlinear_work():
+    anf = compile_single_block_sha256(b"abc", boolean_strategy="anf")
+    low = compile_single_block_sha256(
+        b"abc",
+        boolean_strategy="low_multiplicative",
+    )
+
+    assert low.nonlinear_gate_count < anf.nonlinear_gate_count
+    assert anf.nonlinear_gate_count <= 45_314
+    assert low.nonlinear_gate_count <= 33_026
+    # The low-multiplicative candidate intentionally trades more linear work
+    # for fewer nonlinear products, so neither candidate dominates a priori.
+    assert low.logical_gate_count > anf.logical_gate_count
+
+
 def test_random_single_block_messages():
     rng = random.Random(0xD8_256)
     for _ in range(20):
