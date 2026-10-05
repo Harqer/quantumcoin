@@ -206,6 +206,25 @@ def validate_checkpoint_selection(
                 f"base={base_slots}, checkpoints={live}"
             )
 
+    # A checkpoint is erased by re-planning its independent compute into the
+    # same target slot and applying that plan in reverse. At last use, the
+    # target plus all temporary slots required by that independent plan must fit
+    # alongside every other still-live checkpoint.
+    for word in selected:
+        checkpoint = candidates[word]
+        other_live = sum(
+            1
+            for other_word in selected
+            if other_word != word
+            and candidates[other_word].live_at(checkpoint.last_use_round)
+        )
+        if checkpoint.slot_count + other_live > problem.max_word_pebbles:
+            raise ValueError(
+                f"checkpoint W[{word}] cannot be cleaned at round "
+                f"{checkpoint.last_use_round}: needs {checkpoint.slot_count} "
+                f"slots with {other_live} other checkpoints live"
+            )
+
 
 def plan_from_sample(
     problem: Round16LoweringProblem,
@@ -332,6 +351,24 @@ def build_luna_model(problem: Round16LoweringProblem):
         capacity = problem.max_word_pebbles - base_slots
         model.constraints += sum(live) <= capacity, (
             f"pebble_capacity_r{round_index}"
+        )
+
+    # Conditional cleanup capacity. If checkpoint c is selected, its
+    # independent inverse plan must fit with every other checkpoint still live
+    # at c's last-use boundary.
+    big_m = problem.max_word_pebbles
+    for candidate in problem.candidates:
+        others = [
+            variables[other.word]
+            for other in problem.candidates
+            if other.word != candidate.word
+            and other.live_at(candidate.last_use_round)
+        ]
+        lhs = (candidate.slot_count + big_m) * variables[candidate.word]
+        if others:
+            lhs += sum(others)
+        model.constraints += lhs <= problem.max_word_pebbles + big_m, (
+            f"checkpoint_cleanup_w{candidate.word}"
         )
 
     return model
