@@ -1,5 +1,15 @@
 """Exact reversible SHA-256 compiler for d=8 transmon packing."""
 
+from .coherent_compile import (
+    CoherentRound16Block,
+    CompiledCoherentSha256,
+    coherent_digest_words,
+    coherent_initial_state,
+    compile_coherent_nonce_sha256,
+    lower_pebble_actions,
+    simulate_compiled_coherent_sha256,
+    verify_compiled_coherent_sha256,
+)
 from .coherent_dag import (
     BooleanDag,
     CoherentScheduleDag,
@@ -41,6 +51,7 @@ from .luna_lowering import (
     build_luna_model,
     build_round16_lowering_problem,
     plan_from_sample,
+    solve_exact_locally,
     solve_with_luna,
     validate_checkpoint_selection,
 )
@@ -53,6 +64,14 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
+    "CoherentRound16Block",
+    "CompiledCoherentSha256",
+    "coherent_digest_words",
+    "coherent_initial_state",
+    "compile_coherent_nonce_sha256",
+    "lower_pebble_actions",
+    "simulate_compiled_coherent_sha256",
+    "verify_compiled_coherent_sha256",
     "CheckpointCandidate",
     "LoweringPlan",
     "LoweringWeights",
@@ -60,6 +79,7 @@ __all__ = [
     "build_luna_model",
     "build_round16_lowering_problem",
     "plan_from_sample",
+    "solve_exact_locally",
     "solve_with_luna",
     "validate_checkpoint_selection",
     "CoherentLimbWorkspace",
