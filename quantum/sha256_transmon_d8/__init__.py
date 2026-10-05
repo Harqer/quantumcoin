@@ -6,6 +6,16 @@ from .coherent_dag import (
     ScheduleDagStats,
     build_schedule_dag,
 )
+from .coherent_pebble import (
+    LimbStreamingCandidate,
+    PebbleAction,
+    WordPebbleProgram,
+    execute_compute_use_uncompute,
+    execute_word_program,
+    limb_streaming_candidate,
+    plan_word_pebbles,
+    sigma_maps_are_invertible,
+)
 from .coherent_schedule import (
     CoherentLimbWorkspace,
     CoherentSchedulePlan,
@@ -23,16 +33,24 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 __all__ = [
     "BooleanDag",
     "CoherentLimbWorkspace",
+    "LimbStreamingCandidate",
+    "PebbleAction",
     "CoherentScheduleDag",
     "CoherentSchedulePlan",
     "D8Layout",
     "ScheduleDagStats",
+    "WordPebbleProgram",
     "available_coherent_layout_profiles",
     "available_layout_profiles",
     "build_schedule_dag",
     "compile_single_block_sha256",
     "compress_reference",
     "evaluate_schedule",
+    "execute_compute_use_uncompute",
+    "execute_word_program",
+    "limb_streaming_candidate",
     "plan_coherent_schedule",
+    "plan_word_pebbles",
+    "sigma_maps_are_invertible",
     "simulate_compiled_sha256",
 ]
