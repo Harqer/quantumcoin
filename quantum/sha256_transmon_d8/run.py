@@ -27,11 +27,21 @@ def main() -> int:
         default="aligned100",
         help="d=8 physical placement profile",
     )
+    parser.add_argument(
+        "--boolean-strategy",
+        choices=("anf", "low_multiplicative"),
+        default="anf",
+        help="exact Ch/Maj synthesis strategy",
+    )
     args = parser.parse_args()
 
     message = args.message.encode("utf-8")
     layout = D8Layout(profile=args.layout_profile)
-    compiled = compile_single_block_sha256(message, layout=layout)
+    compiled = compile_single_block_sha256(
+        message,
+        layout=layout,
+        boolean_strategy=args.boolean_strategy,
+    )
     start = initial_state(compiled)
     output = simulate(compiled.circuit, start)
     digest = digest_from_state(compiled, output)
@@ -51,8 +61,10 @@ def main() -> int:
 
     print(f"digest={digest.hex()}")
     print(f"layout_profile={compiled.layout.profile}")
+    print(f"boolean_strategy={compiled.boolean_strategy}")
     print(f"transmons={compiled.layout.total_transmons}")
     print(f"primitive_equivalent_gates={compiled.logical_gate_count}")
+    print(f"nonlinear_gates={compiled.nonlinear_gate_count}")
     print(f"semantic_ir_nodes={compiled.ir_node_count}")
     print(f"round16_blocks={len(compiled.round16_blocks)}")
     for candidate in candidates:
