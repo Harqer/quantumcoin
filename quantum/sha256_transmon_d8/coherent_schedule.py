@@ -43,28 +43,14 @@ class CoherentSchedulePlan:
     spare_scratch_bits: int
 
 
-def evaluate_schedule(
-    fixed_words: tuple[int, ...],
-    nonce_word_index: int,
-    nonce: int,
-) -> tuple[int, ...]:
-    """Evaluate the exact SHA-256 message schedule for one variable 32-bit word.
+def expand_schedule(words16: tuple[int, ...]) -> tuple[int, ...]:
+    """Expand sixteen exact SHA-256 message words into W[0:64]."""
+    if len(words16) != 16:
+        raise ValueError("words16 must contain exactly sixteen 32-bit words")
+    if any(not 0 <= word < (1 << 32) for word in words16):
+        raise ValueError("every schedule word must fit 32 bits")
 
-    fixed_words must contain all sixteen initial W[0:16] values. The entry at
-    nonce_word_index is ignored and replaced by nonce.
-    """
-    if len(fixed_words) != 16:
-        raise ValueError("fixed_words must contain exactly sixteen 32-bit words")
-    if not 0 <= nonce_word_index < 16:
-        raise ValueError("nonce_word_index must be in 0..15")
-    if not 0 <= nonce < (1 << 32):
-        raise ValueError("nonce must fit 32 bits")
-    if any(not 0 <= word < (1 << 32) for word in fixed_words):
-        raise ValueError("every fixed schedule word must fit 32 bits")
-
-    words = list(fixed_words)
-    words[nonce_word_index] = nonce
-
+    words = list(words16)
     for t in range(16, 64):
         words.append(
             (
@@ -76,6 +62,95 @@ def evaluate_schedule(
             & MASK32
         )
     return tuple(words)
+
+
+def evaluate_schedule(
+    fixed_words: tuple[int, ...],
+    nonce_word_index: int,
+    nonce: int,
+) -> tuple[int, ...]:
+    """Evaluate the exact SHA-256 message schedule for one variable 32-bit word.
+
+    fixed_words must contain all sixteen initial W[0:16] values. The entry at
+    nonce_word_index is ignored and replaced by nonce.
+    """
+    if not 0 <= nonce_word_index < 16:
+        raise ValueError("nonce_word_index must be in 0..15")
+    if not 0 <= nonce < (1 << 32):
+        raise ValueError("nonce must fit 32 bits")
+
+    words = list(fixed_words)
+    if len(words) != 16:
+        raise ValueError("fixed_words must contain exactly sixteen 32-bit words")
+    words[nonce_word_index] = nonce
+    return expand_schedule(tuple(words))
+
+
+def _big_sigma0(x: int) -> int:
+    return _rotr(x, 2) ^ _rotr(x, 13) ^ _rotr(x, 22)
+
+
+def _big_sigma1(x: int) -> int:
+    return _rotr(x, 6) ^ _rotr(x, 11) ^ _rotr(x, 25)
+
+
+def _ch(x: int, y: int, z: int) -> int:
+    return (x & y) ^ ((~x) & z)
+
+
+def _maj(x: int, y: int, z: int) -> int:
+    return (x & y) ^ (x & z) ^ (y & z)
+
+
+def compress_reference(
+    initial_state: tuple[int, ...],
+    fixed_words: tuple[int, ...],
+    nonce_word_index: int,
+    nonce: int,
+    round_constants: tuple[int, ...],
+) -> tuple[int, ...]:
+    """Exact classical reference for the coherent-nonce compression contract.
+
+    This is intentionally independent of the reversible lowering. It is the
+    known-answer oracle used to verify future 4-bit limb/pebbling circuits.
+    """
+    if len(initial_state) != 8:
+        raise ValueError("initial_state must contain eight 32-bit words")
+    if len(round_constants) != 64:
+        raise ValueError("round_constants must contain 64 SHA-256 constants")
+    if any(not 0 <= word < (1 << 32) for word in initial_state):
+        raise ValueError("initial_state words must fit 32 bits")
+
+    schedule = evaluate_schedule(fixed_words, nonce_word_index, nonce)
+    a, b, c, d, e, f, g, h = initial_state
+
+    for t in range(64):
+        t1 = (
+            h
+            + _big_sigma1(e)
+            + _ch(e, f, g)
+            + round_constants[t]
+            + schedule[t]
+        ) & MASK32
+        t2 = (_big_sigma0(a) + _maj(a, b, c)) & MASK32
+        a, b, c, d, e, f, g, h = (
+            (t1 + t2) & MASK32,
+            a,
+            b,
+            c,
+            (d + t1) & MASK32,
+            e,
+            f,
+            g,
+        )
+
+    return tuple(
+        (initial + final) & MASK32
+        for initial, final in zip(
+            initial_state,
+            (a, b, c, d, e, f, g, h),
+        )
+    )
 
 
 def dynamic_schedule_words(nonce_word_index: int) -> tuple[bool, ...]:
