@@ -5,8 +5,10 @@ import pytest
 from quantum.sha256_transmon_d8.coherent_schedule import (
     CoherentLimbWorkspace,
     bitcoin_second_block_template,
+    compress_reference,
     dynamic_schedule_words,
     evaluate_schedule,
+    expand_schedule,
     plan_coherent_schedule,
     small_sigma0,
     small_sigma1,
@@ -18,6 +20,8 @@ from quantum.sha256_transmon_d8.layout import (
     available_layout_profiles,
 )
 from quantum.sha256_transmon_d8.sha256 import (
+    H0,
+    K,
     _add_bits,
     compile_single_block_sha256,
 )
@@ -196,3 +200,71 @@ def test_bit_width_generic_cuccaro_adder_is_exact_and_cleans_carry():
             assert out_target == (source + target) & 0xF
             assert output[carry] == 0
             assert simulate(circuit.inverse(), output) == state
+
+
+
+def _compress_fixed_block(initial_state, block64):
+    words = tuple(
+        int.from_bytes(block64[i:i + 4], "big")
+        for i in range(0, 64, 4)
+    )
+    schedule = expand_schedule(words)
+
+    rotr = lambda x, n: ((x >> n) | (x << (32 - n))) & MASK32
+    big0 = lambda x: rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22)
+    big1 = lambda x: rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25)
+    ch = lambda x, y, z: (x & y) ^ ((~x) & z)
+    maj = lambda x, y, z: (x & y) ^ (x & z) ^ (y & z)
+
+    a, b, c, d, e, f, g, h = initial_state
+    for t in range(64):
+        t1 = (h + big1(e) + ch(e, f, g) + K[t] + schedule[t]) & MASK32
+        t2 = (big0(a) + maj(a, b, c)) & MASK32
+        a, b, c, d, e, f, g, h = (
+            (t1 + t2) & MASK32,
+            a,
+            b,
+            c,
+            (d + t1) & MASK32,
+            e,
+            f,
+            g,
+        )
+
+    return tuple(
+        (initial + final) & MASK32
+        for initial, final in zip(initial_state, (a, b, c, d, e, f, g, h))
+    )
+
+
+def test_coherent_compression_reference_matches_hashlib_for_80_byte_headers():
+    import hashlib
+
+    rng = random.Random(0xB17C01)
+    for _ in range(12):
+        header = bytes(rng.randrange(0, 256) for _ in range(80))
+        first_block = header[:64]
+        tail = header[64:80]
+
+        midstate = _compress_fixed_block(H0, first_block)
+
+        second = tail + b"\x80" + b"\x00" * (56 - 17) + (80 * 8).to_bytes(8, "big")
+        assert len(second) == 64
+        words = tuple(
+            int.from_bytes(second[i:i + 4], "big")
+            for i in range(0, 64, 4)
+        )
+        nonce_word = words[3]
+        fixed = list(words)
+        fixed[3] = 0
+
+        final_words = compress_reference(
+            midstate,
+            tuple(fixed),
+            nonce_word_index=3,
+            nonce=nonce_word,
+            round_constants=K,
+        )
+        digest = b"".join(word.to_bytes(4, "big") for word in final_words)
+
+        assert digest == hashlib.sha256(header).digest()
