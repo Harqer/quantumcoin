@@ -5,7 +5,10 @@ import pytest
 
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
 from quantum.sha256_transmon_d8.layout import D8Layout
-from quantum.sha256_transmon_d8.pulse_targets import unique_calibration_targets
+from quantum.sha256_transmon_d8.pulse_targets import (
+    fuse_for_direct_pulse_calibration,
+    unique_calibration_targets,
+)
 from quantum.sha256_transmon_d8.sha256 import (
     H0,
     K,
@@ -162,6 +165,38 @@ def test_current_hardware_width_is_100_transmons():
 def test_rejects_multiblock_contract_instead_of_silent_compromise():
     with pytest.raises(ValueError, match="one padded SHA-256 block"):
         compile_single_block_sha256(b"a" * 56)
+
+
+def test_semantic_regions_cover_reusable_adders_and_superblocks():
+    compiled = compile_single_block_sha256(b"abc")
+    kinds = [region.kind for region in compiled.circuit.regions]
+
+    assert kinds.count("ROUND16") == 4
+    assert kinds.count("ADD32") >= 64
+
+
+def test_region_preserving_pulse_targets_do_not_cross_reusable_boundaries():
+    compiled = compile_single_block_sha256(b"abc")
+    targets = fuse_for_direct_pulse_calibration(compiled.circuit)
+    boundaries = compiled.circuit.region_boundaries({"ADD32", "ROUND16"})
+
+    assert targets
+    assert all(
+        not any(target.gate_start < boundary < target.gate_stop for boundary in boundaries)
+        for target in targets
+    )
+
+
+def test_aggressive_pulse_fusion_is_explicit_pareto_candidate():
+    compiled = compile_single_block_sha256(b"abc")
+    preserved = fuse_for_direct_pulse_calibration(compiled.circuit)
+    aggressive = fuse_for_direct_pulse_calibration(
+        compiled.circuit,
+        preserve_region_kinds=(),
+    )
+
+    # Removing semantic cuts can only keep or reduce the number of pulse blocks.
+    assert len(aggressive) <= len(preserved)
 
 
 def test_direct_pulse_targets_never_exceed_three_transmons():
