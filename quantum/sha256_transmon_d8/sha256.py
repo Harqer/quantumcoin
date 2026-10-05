@@ -70,6 +70,12 @@ class CompiledSha256:
 
     @property
     def logical_gate_count(self) -> int:
+        """Primitive-equivalent X/CX/CCX count for resource comparison."""
+        return self.circuit.primitive_gate_count
+
+    @property
+    def ir_node_count(self) -> int:
+        """Number of semantic IR nodes after reusable-macro preservation."""
         return len(self.circuit.gates)
 
 
@@ -112,18 +118,14 @@ def _single_block_schedule(message: bytes) -> tuple[int, ...]:
 
 
 def _maj(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
-    # Exact Cuccaro MAJ permutation:
-    # b ^= carry; a ^= carry; carry ^= a & b
-    c.cx(carry, b)
-    c.cx(carry, a)
-    c.ccx(a, b, carry)
+    # Keep the exact Cuccaro permutation as one reusable IR macro. Hardware
+    # lowering may target the full 2-3-transmon permutation directly.
+    c.maj(a, b, carry)
 
 
 def _uma(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
-    # Exact Cuccaro UMA reverse-sweep primitive.
-    c.ccx(a, b, carry)
-    c.cx(carry, a)
-    c.cx(a, b)
+    # Exact inverse of MAJ, preserved as the paired reusable macro.
+    c.uma(a, b, carry)
 
 
 def _add32(
