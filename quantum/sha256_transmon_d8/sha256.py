@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ir import ReversibleCircuit, simulate
+from .ir import ReversibleCircuit, simulate, specialize_basis_constants
 from .layout import D8Layout
 
 MASK32 = 0xFFFFFFFF
@@ -251,16 +251,63 @@ def _add_constant32(
     target_slot: int,
     value: int,
 ) -> None:
-    """Add a compile-time constant modulo 2^32 with no persistent register."""
+    """Specialized exact target <- target + value mod 2^32.
+
+    Build the clean-scratch Cuccaro reference region, then propagate the proven
+    basis constants (scratch=0, carry=0) before committing gates to the main
+    circuit. This preserves the exact arithmetic contract while removing gates
+    whose controls are compile-time constants.
+    """
     value &= MASK32
     if value == 0:
         return
-    _compute_add_uncompute(
-        c,
-        lambda cc, v=value: _load_scratch_constant(cc, layout, v),
-        layout,
-        target_slot,
-        region_kind="CONST_ADD",
+
+    reference = ReversibleCircuit()
+    _load_scratch_constant(reference, layout, value)
+
+    a = [layout.scratch_bit(i) for i in range(32)]
+    b = [layout.word_bit(target_slot, i) for i in range(32)]
+    carry = layout.carry_bit
+
+    # Primitive Cuccaro reference form is intentional here: the semantic
+    # constant-propagation pass operates only on X/CX/CCX basis-state logic.
+    reference.cx(carry, b[0])
+    reference.cx(carry, a[0])
+    reference.ccx(a[0], b[0], carry)
+    for i in range(31):
+        reference.cx(a[i], b[i + 1])
+        reference.cx(a[i], a[i + 1])
+        reference.ccx(a[i + 1], b[i + 1], a[i])
+
+    for i in range(30, -1, -1):
+        reference.ccx(a[i + 1], b[i + 1], a[i])
+        reference.cx(a[i], a[i + 1])
+        reference.cx(a[i + 1], b[i + 1])
+    reference.ccx(a[0], b[0], carry)
+    reference.cx(carry, a[0])
+    reference.cx(a[0], b[0])
+
+    _load_scratch_constant(reference, layout, value)
+
+    known_clean = {layout.scratch_bit(i): 0 for i in range(32)}
+    known_clean[layout.carry_bit] = 0
+    optimized, residual_known = specialize_basis_constants(
+        reference.gates,
+        known_clean,
+    )
+
+    if any(residual_known.values()):
+        raise AssertionError(
+            "constant-specialized ADD32 left a virtual nonzero clean ancilla"
+        )
+
+    start = len(c.gates)
+    c.extend(optimized)
+    c.add_region(
+        "CONST_ADD",
+        start,
+        len(c.gates),
+        target_slot=target_slot,
     )
 
 
