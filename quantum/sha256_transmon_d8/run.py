@@ -4,6 +4,7 @@ import argparse
 import hashlib
 
 from .ir import simulate
+from .layout import D8Layout, available_layout_profiles
 from .pulse_targets import (
     pareto_pulse_candidates,
     pulse_candidates,
@@ -20,10 +21,17 @@ def main() -> int:
         description="Compile and verify exact reversible d=8 SHA-256."
     )
     parser.add_argument("--message", required=True, help="UTF-8 message, max 55 bytes")
+    parser.add_argument(
+        "--layout-profile",
+        choices=available_layout_profiles(),
+        default="aligned100",
+        help="d=8 physical placement profile",
+    )
     args = parser.parse_args()
 
     message = args.message.encode("utf-8")
-    compiled = compile_single_block_sha256(message)
+    layout = D8Layout(profile=args.layout_profile)
+    compiled = compile_single_block_sha256(message, layout=layout)
     start = initial_state(compiled)
     output = simulate(compiled.circuit, start)
     digest = digest_from_state(compiled, output)
@@ -42,6 +50,7 @@ def main() -> int:
     frontier = pareto_pulse_candidates(compiled.circuit)
 
     print(f"digest={digest.hex()}")
+    print(f"layout_profile={compiled.layout.profile}")
     print(f"transmons={compiled.layout.total_transmons}")
     print(f"primitive_equivalent_gates={compiled.logical_gate_count}")
     print(f"semantic_ir_nodes={compiled.ir_node_count}")
