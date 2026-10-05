@@ -236,6 +236,91 @@ python -m quantum.sha256_transmon_d8.run \
 
 The ROUND16 and arithmetic optimizations do not increase logical workspace.
 
+## Coherent 32-bit nonce path
+
+The coherent-input compiler is being lowered separately from the fixed-message
+compiler so a 107-transmon width claim cannot accidentally reuse classical
+W[t] constants.
+
+The exact coherent layout is now explicit:
+
+```text
+256 SHA state bits
+ 32 persistent coherent nonce bits
+ 32 reusable scratch bits
+  1 reusable carry bit
+---
+321 modeled d=8 level-bits
+=
+107 transmons exactly
+```
+
+The physical packing uses:
+
+```text
+state      transmons 0..87
+nonce      transmons 88..98
+carry      unused level of transmon 98
+scratch    transmons 99..106 plus the eight state-word padding levels
+```
+
+All 321 level-bits are mapped exactly once. There is no hidden second schedule
+word.
+
+### Why the coherent schedule cannot stay word-at-a-time
+
+For a Bitcoin-style second SHA block with the coherent nonce at W3, the exact
+dependency frontier is:
+
+```text
+W18..W24   1 clean word pebble
+W25..W31   2
+W32..W38   3
+W39..W45   4
+W46..W52   5
+W53..W59   6
+W60..W63   7
+```
+
+This is computed with arbitrary recomputation allowed. Therefore even the
+width-first full-word strategy eventually needs seven simultaneous clean
+32-bit word pebbles and cannot fit the single 32-bit scratch budget.
+
+The coherent planner consequently selects **4-bit limbs**:
+
+```text
+7 worst-case pebbles × 4 bits = 28 scratch bits
+4 scratch bits remain for local reversible staging
+carry remains separate
+```
+
+A uniform 5-bit limb would require 35 scratch bits and is rejected.
+
+The reusable Cuccaro kernel has been generalized from ADD32 to an exact
+little-endian n-bit adder, so the same verified arithmetic primitive is reused
+for the 4-bit schedule limbs rather than introducing a second arithmetic
+implementation.
+
+### Coherent verification oracle
+
+`coherent_schedule.py` contains an exact independent compression reference for:
+
+- a fixed eight-word SHA midstate;
+- sixteen second-block words with one coherent 32-bit word;
+- exact W0..W63 expansion;
+- all 64 SHA-256 rounds;
+- exact feed-forward.
+
+For an 80-byte header, the W3 contract matches the second SHA block layout and
+is regression-tested against `hashlib.sha256(header)`.
+
+The remaining coherent implementation step is gate-level lowering of the
+4-bit recompute/use/uncompute schedule plan into the existing ROUND16 engine.
+Until that lowering is complete, `compile_single_block_sha256` deliberately
+rejects the `coherent107` layout instead of silently treating the nonce as
+classical.
+
+
 ## Why this is pulse-native
 
 The bit-level X/CX/CCX IR exists only as an exact reversible specification.

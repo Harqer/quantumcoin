@@ -155,6 +155,34 @@ def _uma(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
     c.uma(a, b, carry)
 
 
+def _add_bits(
+    c: ReversibleCircuit,
+    source_bits: list[int],
+    target_bits: list[int],
+    carry: int,
+) -> None:
+    """Exact little-endian target += source mod 2^n.
+
+    The source register and carry are restored. This is the reusable Cuccaro
+    arithmetic kernel for both 32-bit SHA words and the coherent schedule's
+    subword limbs.
+    """
+    if not source_bits or len(source_bits) != len(target_bits):
+        raise ValueError("source_bits and target_bits must have equal nonzero width")
+    if carry in source_bits or carry in target_bits:
+        raise ValueError("carry must be distinct from source and target bits")
+    if set(source_bits) & set(target_bits):
+        raise ValueError("source and target bits must be disjoint")
+
+    _maj(c, carry, target_bits[0], source_bits[0])
+    for i in range(len(source_bits) - 1):
+        _maj(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
+
+    for i in range(len(source_bits) - 2, -1, -1):
+        _uma(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
+    _uma(c, carry, target_bits[0], source_bits[0])
+
+
 def _add32(
     c: ReversibleCircuit,
     layout: D8Layout,
@@ -164,17 +192,12 @@ def _add32(
 ) -> None:
     """target <- target + source mod 2^32, restoring source and carry."""
     start = len(c.gates)
-    a = [layout.word_bit(source_slot, i) for i in range(32)]
-    b = [layout.word_bit(target_slot, i) for i in range(32)]
-    cin = layout.carry_bit
-
-    _maj(c, cin, b[0], a[0])
-    for i in range(31):
-        _maj(c, a[i], b[i + 1], a[i + 1])
-
-    for i in range(30, -1, -1):
-        _uma(c, a[i], b[i + 1], a[i + 1])
-    _uma(c, cin, b[0], a[0])
+    _add_bits(
+        c,
+        [layout.word_bit(source_slot, i) for i in range(32)],
+        [layout.word_bit(target_slot, i) for i in range(32)],
+        layout.carry_bit,
+    )
 
     c.add_region(
         region_kind,
@@ -536,6 +559,11 @@ def compile_single_block_sha256(
     contract.
     """
     layout = layout or D8Layout()
+    if layout.is_coherent_nonce:
+        raise ValueError(
+            "compile_single_block_sha256 is the fixed-classical-message compiler; "
+            "coherent107 requires the coherent nonce schedule lowering path"
+        )
     if boolean_strategy not in {"anf", "low_multiplicative"}:
         raise ValueError(
             "boolean_strategy must be 'anf' or 'low_multiplicative'"
