@@ -143,6 +143,7 @@ def plan_checkpointed_round16(
                 {},
                 max_word_pebbles,
                 nonce_word_index,
+                reserved_slots=tuple(live.values()),
             )
             live[round_index] = target_slot
             immediate_cleanup: tuple[PebbleAction, ...] = ()
