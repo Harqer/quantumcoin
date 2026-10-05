@@ -216,8 +216,10 @@ def _compute_add_uncompute(
     compute(c)
     compute_gates = c.gates[start:].copy()
     _add32(c, layout, layout.scratch_slot, target_slot)
-    # X/CX/CCX are self-inverse; reverse the exact compute path.
-    c.extend(reversed(compute_gates))
+    # Uncompute through each operation's exact inverse. This remains correct
+    # when future compute regions contain paired reusable macros such as
+    # MAJ/UMA rather than only self-inverse primitive gates.
+    c.extend(gate.inverse() for gate in reversed(compute_gates))
 
 
 def _add_constant32(
