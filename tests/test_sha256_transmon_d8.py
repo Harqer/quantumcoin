@@ -10,9 +10,9 @@ from quantum.sha256_transmon_d8.pulse_targets import (
     DEFAULT_PULSE_REGION_KINDS,
     TERM_FUSED_REGION_KINDS,
     fuse_for_direct_pulse_calibration,
+    pareto_pulse_candidates,
     pulse_candidates,
     pulse_layer_depth,
-    select_pulse_candidate,
     unique_calibration_targets,
 )
 from quantum.sha256_transmon_d8.sha256 import (
@@ -228,19 +228,36 @@ def test_pulse_fusion_exposes_three_explicit_pareto_candidates():
     assert len(aggressive) <= len(adder_template)
 
 
-def test_pulse_candidate_selection_uses_measured_structural_score():
+def test_pulse_candidate_selection_preserves_pareto_frontier():
     compiled = compile_single_block_sha256(b"abc")
     candidates = pulse_candidates(compiled.circuit)
-    selected = select_pulse_candidate(compiled.circuit)
+    frontier = pareto_pulse_candidates(compiled.circuit)
 
     assert {candidate.name for candidate in candidates} == {
         "adder_template",
         "term_fused",
         "aggressive",
     }
-    assert selected.structural_score == min(
-        candidate.structural_score for candidate in candidates
-    )
+    assert frontier
+    for candidate in frontier:
+        assert not any(
+            other is not candidate
+            and all(
+                a <= b
+                for a, b in zip(
+                    other.structural_score,
+                    candidate.structural_score,
+                )
+            )
+            and any(
+                a < b
+                for a, b in zip(
+                    other.structural_score,
+                    candidate.structural_score,
+                )
+            )
+            for other in candidates
+        )
 
 
 
