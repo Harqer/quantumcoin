@@ -171,6 +171,100 @@ class ReversibleCircuit:
             region.validate(len(self.gates))
 
 
+
+
+def specialize_basis_constants(
+    gates: Iterable[Gate],
+    known_bits: dict[int, int],
+) -> tuple[list[Gate], dict[int, int]]:
+    """Exact constant propagation for X/CX/CCX basis-state regions.
+
+    `known_bits` are virtual computational-basis constants. Deterministic
+    operations on them are folded without materializing gates. If an unknown
+    control would make a known target data-dependent, a virtual |1> target is
+    materialized first and the bit leaves the known set.
+
+    This pass is exact only for X/CX/CCX regions and deliberately rejects
+    semantic macros so phase/compound semantics cannot be simplified by
+    accident.
+    """
+    known = dict(known_bits)
+    out: list[Gate] = []
+
+    if any(value not in (0, 1) for value in known.values()):
+        raise ValueError("known basis values must be 0 or 1")
+
+    def materialize_target(target: int) -> None:
+        if target not in known:
+            return
+        if known[target] == 1:
+            out.append(Gate("X", (target,)))
+        del known[target]
+
+    for gate in gates:
+        gate.validate()
+
+        if gate.kind == "X":
+            (target,) = gate.qubits
+            if target in known:
+                known[target] ^= 1
+            else:
+                out.append(gate)
+            continue
+
+        if gate.kind == "CX":
+            control, target = gate.qubits
+            control_value = known.get(control)
+
+            if control_value == 0:
+                continue
+            if control_value == 1:
+                if target in known:
+                    known[target] ^= 1
+                else:
+                    out.append(Gate("X", (target,)))
+                continue
+
+            materialize_target(target)
+            out.append(gate)
+            continue
+
+        if gate.kind == "CCX":
+            control0, control1, target = gate.qubits
+            value0 = known.get(control0)
+            value1 = known.get(control1)
+
+            if value0 == 0 or value1 == 0:
+                continue
+
+            if value0 == 1 and value1 == 1:
+                if target in known:
+                    known[target] ^= 1
+                else:
+                    out.append(Gate("X", (target,)))
+                continue
+
+            if value0 == 1:
+                materialize_target(target)
+                out.append(Gate("CX", (control1, target)))
+                continue
+
+            if value1 == 1:
+                materialize_target(target)
+                out.append(Gate("CX", (control0, target)))
+                continue
+
+            materialize_target(target)
+            out.append(gate)
+            continue
+
+        raise ValueError(
+            f"constant propagation does not lower semantic macro {gate.kind}"
+        )
+
+    return out, known
+
+
 def _apply_maj(state: list[int], a: int, b: int, carry: int) -> None:
     # Exact Cuccaro MAJ:
     #   b ^= carry
