@@ -39,6 +39,10 @@ def main() -> int:
         raise SystemExit("reversibility verification failed")
 
     pulse_blocks = fuse_for_direct_pulse_calibration(compiled.circuit)
+    adder_template_blocks = fuse_for_direct_pulse_calibration(
+        compiled.circuit,
+        preserve_region_kinds=("ADD32", "ADD32_INNER", "ROUND16"),
+    )
     aggressive_blocks = fuse_for_direct_pulse_calibration(
         compiled.circuit,
         preserve_region_kinds=(),
@@ -50,7 +54,8 @@ def main() -> int:
     print(f"primitive_equivalent_gates={compiled.logical_gate_count}")
     print(f"semantic_ir_nodes={compiled.ir_node_count}")
     print(f"round16_blocks={len(compiled.round16_blocks)}")
-    print(f"pulse_blocks_region_preserving={len(pulse_blocks)}")
+    print(f"pulse_blocks_term_fused={len(pulse_blocks)}")
+    print(f"pulse_blocks_adder_template={len(adder_template_blocks)}")
     print(f"pulse_blocks_aggressive={len(aggressive_blocks)}")
     print(f"unique_calibration_targets={len(unique)}")
     print("scratch_clean=yes")
