@@ -137,18 +137,46 @@ almost depth-identical to aggressive while retaining the cleanest reusable
 adder boundary. No production winner is selected until live calibrated pulse
 durations/error data are available.
 
-## Width
+## Width and placement Pareto profiles
 
-d=8 stores three logical bits per transmon.
+The current d=8 model contains exactly **289 simultaneously addressable logical
+basis bits**:
 
-- 8 x 32-bit SHA working words: 88 transmons.
-- reusable 32-bit scratch word: 11 transmons.
-- clean carry ancilla: 1 transmon.
-- W_t and K_t: classical parameters and consume no transmon.
+- 256 state bits;
+- 32 reusable scratch bits;
+- one reusable carry bit.
 
-Total: **100 physical transmons**.
+The information-capacity floor is therefore:
 
-The ROUND16 refactor reduces depth/gate work without increasing this width.
+```text
+ceil(289 / 3) = 97 transmons
+```
+
+The compiler keeps all eight 32-bit SHA words aligned and exposes four physical
+placement profiles. Packed profiles reuse only the otherwise-unused third
+level-bit of selected final word transmons:
+
+```text
+aligned100  100 transmons  scratch word aligned + dedicated carry
+packed99     99 transmons  carry borrows one state-word padding level
+packed98     98 transmons  2 scratch bits + carry borrow padding levels
+packed97     97 transmons  5 scratch bits + carry borrow padding levels
+```
+
+All four profiles represent the same reversible SHA circuit. They trade physical
+width against pulse locality; **97 is not automatically the fastest profile**.
+The production layout remains a Pareto decision until live calibrated
+pulse/routing data are available.
+
+Run any profile offline with:
+
+```bash
+python -m quantum.sha256_transmon_d8.run \
+  --message abc \
+  --layout-profile packed97
+```
+
+The ROUND16 and arithmetic optimizations do not increase logical workspace.
 
 ## Why this is pulse-native
 
@@ -194,7 +222,10 @@ from quantum.sha256_transmon_d8.rigetti_runtime import (
 )
 
 qc, target = load_live_target("YOUR_QPU_NAME")
-print(preflight_current_hardware(target))
+from quantum.sha256_transmon_d8.layout import D8Layout
+
+layout = D8Layout(profile="packed97")
+print(preflight_current_hardware(target, layout=layout))
 ```
 
 This fetches the live qubit list, coupler topology, and Quil-T calibration
