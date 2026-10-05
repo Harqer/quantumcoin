@@ -338,6 +338,35 @@ cross limb boundaries. Those dependencies must be lowered from the exact
 bit-level DAG into the four helper bits (plus the separately mapped carry bit)
 before `coherent107` is considered executable.
 
+### ROUND16 coherent schedule integration
+
+The coherent schedule now uses the same four-superblock hierarchy as the SHA
+round engine:
+
+```text
+rounds  0..15  -> coherent ROUND16 block 0
+rounds 16..31  -> coherent ROUND16 block 1
+rounds 32..47  -> coherent ROUND16 block 2
+rounds 48..63  -> coherent ROUND16 block 3
+```
+
+Each round's reversible schedule program computes:
+
+```text
+(W[t] + K[t]) mod 2^32
+```
+
+directly in the target pebble before the term is consumed. The constant is then
+removed automatically by the inverse cleanup stream. This preserves the same
+K+W fusion already used by the fixed-message compiler and does not allocate an
+extra word pebble.
+
+The full 64-round coherent schedule therefore retains the existing seven-word
+worst-case abstract pebble ceiling. The remaining depth problem is no longer
+basic correctness; it is reducing recomputation by retaining carefully chosen
+checkpoints across rounds inside each ROUND16 block while still cleaning every
+schedule pebble at the block boundary.
+
 ### Coherent verification oracle
 
 `coherent_schedule.py` contains an exact independent compression reference for:
