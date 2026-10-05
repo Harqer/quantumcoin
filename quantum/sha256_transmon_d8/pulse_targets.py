@@ -247,6 +247,32 @@ def pulse_candidates(circuit: ReversibleCircuit) -> tuple[PulseCandidate, ...]:
     return tuple(candidates)
 
 
-def select_pulse_candidate(circuit: ReversibleCircuit) -> PulseCandidate:
-    """Select the best structural candidate without changing SHA semantics."""
-    return min(pulse_candidates(circuit), key=lambda candidate: candidate.structural_score)
+def pareto_pulse_candidates(
+    circuit: ReversibleCircuit,
+) -> tuple[PulseCandidate, ...]:
+    """Keep non-dominated reuse/fusion candidates until live calibration.
+
+    Structural unit-depth, execution block count, and unique calibration
+    surface are intentionally kept as separate objectives. A production winner
+    is chosen only after calibrated pulse durations/error data are available.
+    """
+    candidates = pulse_candidates(circuit)
+    frontier: list[PulseCandidate] = []
+
+    for candidate in candidates:
+        dominated = False
+        for other in candidates:
+            if other is candidate:
+                continue
+            other_metrics = other.structural_score
+            candidate_metrics = candidate.structural_score
+            if (
+                all(a <= b for a, b in zip(other_metrics, candidate_metrics))
+                and any(a < b for a, b in zip(other_metrics, candidate_metrics))
+            ):
+                dominated = True
+                break
+        if not dominated:
+            frontier.append(candidate)
+
+    return tuple(frontier)
