@@ -8,8 +8,10 @@ from quantum.sha256_transmon_d8.coherent_schedule import (
     compress_reference,
     dynamic_schedule_words,
     evaluate_schedule,
+    evaluate_word_with_recomputation,
     expand_schedule,
     plan_coherent_schedule,
+    plan_word_recompute_strategies,
     small_sigma0,
     small_sigma1,
 )
@@ -268,3 +270,69 @@ def test_coherent_compression_reference_matches_hashlib_for_80_byte_headers():
         digest = b"".join(word.to_bytes(4, "big") for word in final_words)
 
         assert digest == hashlib.sha256(header).digest()
+
+
+
+def test_recompute_strategy_matches_pebble_frontier():
+    plan = plan_coherent_schedule()
+    strategies = plan_word_recompute_strategies()
+
+    assert strategies[3] is not None
+    assert strategies[3].required_pebbles == 1
+
+    for t in plan.dynamic_words:
+        strategy = strategies[t]
+        assert strategy is not None
+        assert strategy.required_pebbles == plan.word_pebbles[t]
+
+    assert strategies[25].required_pebbles == 2
+    assert strategies[32].required_pebbles == 3
+    assert strategies[39].required_pebbles == 4
+    assert strategies[46].required_pebbles == 5
+    assert strategies[53].required_pebbles == 6
+    assert strategies[60].required_pebbles == 7
+    assert strategies[63].required_pebbles == 7
+
+
+def test_recompute_evaluator_matches_exact_schedule_for_all_dynamic_words():
+    rng = random.Random(0x5E7A_107)
+    fixed = list(bitcoin_second_block_template())
+    fixed[0] = 0x01234567
+    fixed[1] = 0x89ABCDEF
+    fixed[2] = 0x13579BDF
+    fixed = tuple(fixed)
+
+    nonce = rng.randrange(1 << 32)
+    exact = evaluate_schedule(fixed, 3, nonce)
+    plan = plan_coherent_schedule()
+
+    for t in plan.dynamic_words:
+        value, stats = evaluate_word_with_recomputation(
+            fixed,
+            nonce_word_index=3,
+            nonce=nonce,
+            word_index=t,
+        )
+        assert value == exact[t]
+        assert stats.peak_pebbles == plan.word_pebbles[t]
+
+
+@pytest.mark.parametrize("word_index", (18, 25, 32, 39, 46, 53, 60, 63))
+def test_recompute_evaluator_is_nonce_coherent(word_index):
+    rng = random.Random(0xA11CE + word_index)
+    fixed = list(bitcoin_second_block_template())
+    fixed[0:3] = [0xA5A5A5A5, 0x5A5A5A5A, 0xC001D00D]
+    fixed = tuple(fixed)
+    plan = plan_coherent_schedule()
+
+    for _ in range(4):
+        nonce = rng.randrange(1 << 32)
+        exact = evaluate_schedule(fixed, 3, nonce)
+        value, stats = evaluate_word_with_recomputation(
+            fixed,
+            nonce_word_index=3,
+            nonce=nonce,
+            word_index=word_index,
+        )
+        assert value == exact[word_index]
+        assert stats.peak_pebbles == plan.word_pebbles[word_index]
