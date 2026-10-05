@@ -20,7 +20,7 @@ def test_lowering_problem_preserves_seven_role_frontier():
     problem = build_round16_lowering_problem(
         _fixed_template(),
         K,
-        block_index=3,
+        block_index=1,
         nonce_word_index=3,
     )
 
@@ -38,13 +38,13 @@ def test_candidates_are_real_dynamic_words_with_future_reuse():
     problem = build_round16_lowering_problem(
         _fixed_template(),
         K,
-        block_index=2,
+        block_index=1,
         nonce_word_index=3,
     )
 
     assert problem.candidates
     for candidate in problem.candidates:
-        assert 32 <= candidate.word < 48
+        assert 16 <= candidate.word < 32
         assert candidate.use_rounds
         assert candidate.last_use_round == max(candidate.use_rounds)
         assert candidate.standalone_recompute_actions > 0
