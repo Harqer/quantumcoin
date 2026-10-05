@@ -323,3 +323,237 @@ class CoherentLimbWorkspace:
             for bit in self.pebble_bits(pebble)
         )
         return pebbles + self.spare_bits + (self.carry_bit,)
+
+
+
+@dataclass(frozen=True)
+class ScheduleDependency:
+    word_index: int
+    transform: str
+
+    def __post_init__(self) -> None:
+        if self.transform not in {"identity", "sigma0", "sigma1"}:
+            raise ValueError(f"unsupported schedule transform {self.transform!r}")
+
+
+@dataclass(frozen=True)
+class WordRecomputeStrategy:
+    """Deterministic reversible-pebble order for one dynamic W[t]."""
+
+    word_index: int
+    required_pebbles: int
+    seed: ScheduleDependency | None
+    additions: tuple[ScheduleDependency, ...]
+
+
+@dataclass(frozen=True)
+class RecomputeStats:
+    evaluations: int
+    peak_pebbles: int
+
+
+def _schedule_dependencies(t: int) -> tuple[ScheduleDependency, ...]:
+    if not 16 <= t < 64:
+        raise ValueError("expanded schedule dependency exists only for W16..W63")
+    return (
+        ScheduleDependency(t - 2, "sigma1"),
+        ScheduleDependency(t - 7, "identity"),
+        ScheduleDependency(t - 15, "sigma0"),
+        ScheduleDependency(t - 16, "identity"),
+    )
+
+
+def plan_word_recompute_strategies(
+    nonce_word_index: int = 3,
+) -> tuple[WordRecomputeStrategy | None, ...]:
+    """Choose an exact deterministic compute/add/uncompute order for every W[t].
+
+    The highest-pressure predecessor is preferentially used as the seed because
+    it can occupy the destination pebble directly. Remaining dynamic
+    predecessors are evaluated into one-higher pebble slots and consumed in
+    descending pressure order.
+    """
+    dynamic = dynamic_schedule_words(nonce_word_index)
+    requirements = _word_pebble_requirements(nonce_word_index)
+    strategies: list[WordRecomputeStrategy | None] = [None] * 64
+
+    strategies[nonce_word_index] = WordRecomputeStrategy(
+        word_index=nonce_word_index,
+        required_pebbles=1,
+        seed=None,
+        additions=(),
+    )
+
+    for t in range(16, 64):
+        if not dynamic[t]:
+            continue
+
+        dependencies = [
+            dependency
+            for dependency in _schedule_dependencies(t)
+            if dynamic[dependency.word_index]
+        ]
+        if not dependencies:
+            raise AssertionError("dynamic schedule word has no dynamic predecessor")
+
+        candidates = []
+        for position, seed in enumerate(dependencies):
+            others = [
+                dependency
+                for dependency in dependencies
+                if dependency != seed
+            ]
+            required = max(
+                [requirements[seed.word_index]]
+                + [1 + requirements[item.word_index] for item in others]
+            )
+            candidates.append(
+                (
+                    required,
+                    -requirements[seed.word_index],
+                    position,
+                    seed,
+                    others,
+                )
+            )
+
+        required, _, _, seed, others = min(
+            candidates,
+            key=lambda item: item[:3],
+        )
+        ordered_others = tuple(
+            sorted(
+                others,
+                key=lambda item: (
+                    -requirements[item.word_index],
+                    item.word_index,
+                    item.transform,
+                ),
+            )
+        )
+        if required != requirements[t]:
+            raise AssertionError(
+                f"recompute strategy for W{t} requires {required} pebbles; "
+                f"planner predicted {requirements[t]}"
+            )
+
+        strategies[t] = WordRecomputeStrategy(
+            word_index=t,
+            required_pebbles=required,
+            seed=seed,
+            additions=ordered_others,
+        )
+
+    return tuple(strategies)
+
+
+def _apply_dependency_transform(transform: str, value: int) -> int:
+    if transform == "identity":
+        return value
+    if transform == "sigma0":
+        return small_sigma0(value)
+    if transform == "sigma1":
+        return small_sigma1(value)
+    raise AssertionError(transform)
+
+
+def evaluate_word_with_recomputation(
+    fixed_words: tuple[int, ...],
+    nonce_word_index: int,
+    nonce: int,
+    word_index: int,
+) -> tuple[int, RecomputeStats]:
+    """Evaluate one W[t] using exactly the selected reversible-pebble tree.
+
+    This is the semantic execution model for the upcoming limb lowerer. A seed
+    predecessor occupies the destination slot. Every additional dynamic
+    predecessor is recomputed one slot deeper, consumed, and immediately
+    released. Non-dynamic predecessors are compile-time constants.
+
+    The function intentionally performs recomputation instead of memoization so
+    its peak recursion depth equals the actual clean-pebble pressure.
+    """
+    if len(fixed_words) != 16:
+        raise ValueError("fixed_words must contain exactly sixteen 32-bit words")
+    if not 0 <= nonce < (1 << 32):
+        raise ValueError("nonce must fit 32 bits")
+    if not 0 <= word_index < 64:
+        raise ValueError("word_index must be in 0..63")
+
+    exact = evaluate_schedule(fixed_words, nonce_word_index, nonce)
+    fixed_schedule = evaluate_schedule(fixed_words, nonce_word_index, 0)
+    dynamic = dynamic_schedule_words(nonce_word_index)
+    strategies = plan_word_recompute_strategies(nonce_word_index)
+
+    evaluations = 0
+    peak = 0
+
+    def compute(t: int, slot: int) -> int:
+        nonlocal evaluations, peak
+        evaluations += 1
+        peak = max(peak, slot + 1)
+
+        if t < 16:
+            if t == nonce_word_index:
+                return nonce
+            return fixed_words[t]
+
+        if not dynamic[t]:
+            return fixed_schedule[t]
+
+        strategy = strategies[t]
+        if strategy is None or strategy.seed is None:
+            raise AssertionError(f"missing dynamic recompute strategy for W{t}")
+
+        seed = strategy.seed
+        accumulator = _apply_dependency_transform(
+            seed.transform,
+            compute(seed.word_index, slot),
+        )
+
+        dynamic_additions = {
+            dependency
+            for dependency in strategy.additions
+        }
+
+        # Compile-time terms are accumulated without allocating a pebble.
+        for dependency in _schedule_dependencies(t):
+            if not dynamic[dependency.word_index]:
+                accumulator = (
+                    accumulator
+                    + _apply_dependency_transform(
+                        dependency.transform,
+                        fixed_schedule[dependency.word_index],
+                    )
+                ) & MASK32
+
+        # Dynamic non-seed terms use one deeper slot, then are released.
+        for dependency in strategy.additions:
+            operand = _apply_dependency_transform(
+                dependency.transform,
+                compute(dependency.word_index, slot + 1),
+            )
+            accumulator = (accumulator + operand) & MASK32
+
+        return accumulator
+
+    value = compute(word_index, 0)
+    if value != exact[word_index]:
+        raise AssertionError(
+            f"recompute evaluator produced {value:08x} for W{word_index}; "
+            f"expected {exact[word_index]:08x}"
+        )
+
+    expected_peak = _word_pebble_requirements(nonce_word_index)[word_index]
+    # Constant words do not allocate clean schedule pebbles in the compiler.
+    if not dynamic[word_index]:
+        expected_peak = 0
+    if peak != expected_peak and dynamic[word_index]:
+        raise AssertionError(
+            f"W{word_index} used {peak} pebbles; expected {expected_peak}"
+        )
+
+    return value, RecomputeStats(
+        evaluations=evaluations,
+        peak_pebbles=peak if dynamic[word_index] else 0,
+    )
