@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .coherent_pebble import plan_word_pebbles
 from .coherent_round16 import plan_round16_schedule
 
 
@@ -152,19 +151,17 @@ def build_round16_lowering_problem(
         if not use_rounds:
             continue
 
-        raw = plan_word_pebbles(
-            fixed_words,
-            target_word=word,
-            nonce_word_index=nonce_word_index,
-        )
+        schedule_actions = term.forward_action_count
+        if term.round_constant:
+            schedule_actions -= 1  # remove fused K[t] action; checkpoint stores W[t]
         candidates.append(
             CheckpointCandidate(
                 word=word,
                 create_round=word,
                 last_use_round=max(use_rounds),
                 use_rounds=use_rounds,
-                slot_count=raw.slot_count,
-                standalone_recompute_actions=2 * len(raw.actions),
+                slot_count=term.slot_count,
+                standalone_recompute_actions=2 * schedule_actions,
             )
         )
 
