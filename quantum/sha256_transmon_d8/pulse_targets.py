@@ -8,6 +8,17 @@ from .ir import Gate, ReversibleCircuit
 from .layout import D8Layout
 
 
+DEFAULT_PULSE_REGION_KINDS = (
+    "SIGMA1_ADD",
+    "CH_ADD",
+    "CONST_ADD",
+    "ADD32",
+    "SIGMA0_ADD",
+    "MAJ_ADD",
+    "ROUND16",
+)
+
+
 @dataclass(frozen=True)
 class PulseTarget:
     """One directly calibratable exact d=8 permutation block."""
@@ -56,15 +67,15 @@ def _normalize(
 def fuse_for_direct_pulse_calibration(
     circuit: ReversibleCircuit,
     max_transmons: int = 3,
-    preserve_region_kinds: tuple[str, ...] = ("ADD32", "ROUND16"),
+    preserve_region_kinds: tuple[str, ...] = DEFAULT_PULSE_REGION_KINDS,
 ) -> list[PulseTarget]:
     """Fuse reversible logic into <=3-transmon direct pulse targets.
 
-    By default, lowering preserves the reusable ADD32 and ROUND16 semantic
-    boundaries recorded by the compiler. Gates fuse freely *inside* those
-    regions, but a pulse target cannot accidentally combine arithmetic with a
-    neighboring unrelated expression. This makes repeated calibration shapes
-    stable across rounds and superblocks.
+    By default, lowering preserves reusable compute-add-uncompute term blocks,
+    the direct d+=T1 ADD32, and ROUND16. The nested ADD32_INNER boundaries are
+    intentionally *not* cuts, so preparation logic can fuse into its adder and
+    cleanup inside one coherent reusable term target. This keeps templates
+    stable without blocking useful local fusion.
 
     Pass preserve_region_kinds=() to produce the aggressive cross-boundary
     Pareto candidate for comparison.
@@ -137,7 +148,7 @@ def fuse_for_direct_pulse_calibration(
 def unique_calibration_targets(
     circuit: ReversibleCircuit,
     max_transmons: int = 3,
-    preserve_region_kinds: tuple[str, ...] = ("ADD32", "ROUND16"),
+    preserve_region_kinds: tuple[str, ...] = DEFAULT_PULSE_REGION_KINDS,
 ) -> dict[str, PulseTarget]:
     unique: dict[str, PulseTarget] = {}
     for target in fuse_for_direct_pulse_calibration(
