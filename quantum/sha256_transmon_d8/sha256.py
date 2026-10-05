@@ -386,7 +386,10 @@ def _emit_round16(
     return roles, block
 
 
-def compile_single_block_sha256(message: bytes) -> CompiledSha256:
+def compile_single_block_sha256(
+    message: bytes,
+    layout: D8Layout | None = None,
+) -> CompiledSha256:
     """Compile exact 64-round SHA-256 for one padded classical message block.
 
     Contract:
@@ -403,7 +406,7 @@ def compile_single_block_sha256(message: bytes) -> CompiledSha256:
     storage and is intentionally rejected rather than silently changing the
     contract.
     """
-    layout = D8Layout()
+    layout = layout or D8Layout()
     w = _single_block_schedule(message)
     c = ReversibleCircuit()
     roles = dict(zip("abcdefgh", range(8)))
@@ -439,7 +442,10 @@ def digest_from_state(compiled: CompiledSha256, state: list[int]) -> bytes:
     return b"".join(word.to_bytes(4, "big") for word in words)
 
 
-def simulate_compiled_sha256(message: bytes) -> bytes:
-    compiled = compile_single_block_sha256(message)
+def simulate_compiled_sha256(
+    message: bytes,
+    layout: D8Layout | None = None,
+) -> bytes:
+    compiled = compile_single_block_sha256(message, layout=layout)
     output = simulate(compiled.circuit, initial_state(compiled))
     return digest_from_state(compiled, output)
