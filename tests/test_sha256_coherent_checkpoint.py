@@ -59,7 +59,9 @@ def test_exact_local_checkpointing_never_increases_semantic_action_count():
     # Checkpoint plan excludes K[t] fusion actions; those are applied in the
     # round engine after W[t] is consumed, so compare schedule-only work.
     baseline_schedule_actions = sum(
-        term.total_action_count - (2 if term.round_constant else 0)
+        term.forward_action_count
+        + term.cleanup_action_count
+        - (2 if term.round_constant else 0)
         for term in baseline.terms
     )
 
