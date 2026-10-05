@@ -29,8 +29,13 @@ class CoherentSchedulePlan:
 
     The production 107-transmon layout owns only one 32-bit scratch word, so a
     word-pebble count >1 proves that full-word schedule materialization is not a
-    legal lowering strategy. limb_bits is the largest uniform subword size that
-    fits the same worst-case pebble count into the 32 scratch bits.
+    legal lowering strategy.
+
+    limb_bits is only a word-level partition candidate. It is NOT a proof that
+    such limbs lower reversibly inside the scratch budget: SHA small-sigma
+    rotations cross limb boundaries and modular addition carries couple lower
+    and higher limbs. The exact bit-level DAG in coherent_dag.py is the source
+    of truth for the subsequent pebbling/lowering pass.
     """
 
     nonce_word_index: int
@@ -112,7 +117,7 @@ def compress_reference(
     """Exact classical reference for the coherent-nonce compression contract.
 
     This is intentionally independent of the reversible lowering. It is the
-    known-answer oracle used to verify future 4-bit limb/pebbling circuits.
+    known-answer oracle used to verify every coherent schedule/circuit lowering.
     """
     if len(initial_state) != 8:
         raise ValueError("initial_state must contain eight 32-bit words")
@@ -238,8 +243,10 @@ def plan_coherent_schedule(
         None,
     )
 
-    # Uniform limb size is intentionally conservative. A wider limb would
-    # exceed the scratch budget at the worst schedule dependency frontier.
+    # Word-level partition candidate only. The exact bit-level dependency DAG
+    # must still prove that cross-limb sigma references and carry propagation
+    # fit the same scratch budget before this candidate is used for hardware
+    # lowering.
     limb_bits = scratch_bits // max_pebbles
     if limb_bits < 1:
         raise RuntimeError(
@@ -283,8 +290,10 @@ class CoherentLimbWorkspace:
     """Deterministic allocation of schedule pebbles into coherent107 scratch.
 
     The allocator does not create new logical storage. It partitions the single
-    32-bit scratch word into the exact limb-pebble budget selected by
-    plan_coherent_schedule().
+    32-bit scratch word according to the word-level limb candidate selected by
+    plan_coherent_schedule(). This is a deterministic candidate allocation, not
+    a completed reversible-lowering proof; coherent_dag.py supplies the exact
+    cross-limb dependency graph that the next pebbling pass must satisfy.
     """
 
     layout: D8Layout
