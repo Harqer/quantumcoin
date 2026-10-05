@@ -6,9 +6,13 @@ import pytest
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
 from quantum.sha256_transmon_d8.layout import D8Layout
 from quantum.sha256_transmon_d8.pulse_targets import (
+    ADDER_TEMPLATE_REGION_KINDS,
     DEFAULT_PULSE_REGION_KINDS,
+    TERM_FUSED_REGION_KINDS,
     fuse_for_direct_pulse_calibration,
+    pulse_candidates,
     pulse_layer_depth,
+    select_pulse_candidate,
     unique_calibration_targets,
 )
 from quantum.sha256_transmon_d8.sha256 import (
@@ -205,19 +209,38 @@ def test_region_preserving_pulse_targets_do_not_cross_reusable_boundaries():
 
 def test_pulse_fusion_exposes_three_explicit_pareto_candidates():
     compiled = compile_single_block_sha256(b"abc")
-    term_fused = fuse_for_direct_pulse_calibration(compiled.circuit)
     adder_template = fuse_for_direct_pulse_calibration(
         compiled.circuit,
-        preserve_region_kinds=("ADD32", "ADD32_INNER", "ROUND16"),
+        preserve_region_kinds=ADDER_TEMPLATE_REGION_KINDS,
+    )
+    term_fused = fuse_for_direct_pulse_calibration(
+        compiled.circuit,
+        preserve_region_kinds=TERM_FUSED_REGION_KINDS,
     )
     aggressive = fuse_for_direct_pulse_calibration(
         compiled.circuit,
         preserve_region_kinds=(),
     )
 
+    assert DEFAULT_PULSE_REGION_KINDS == ADDER_TEMPLATE_REGION_KINDS
     # Removing semantic cuts can only keep or reduce the number of pulse blocks.
     assert len(aggressive) <= len(term_fused)
     assert len(aggressive) <= len(adder_template)
+
+
+def test_pulse_candidate_selection_uses_measured_structural_score():
+    compiled = compile_single_block_sha256(b"abc")
+    candidates = pulse_candidates(compiled.circuit)
+    selected = select_pulse_candidate(compiled.circuit)
+
+    assert {candidate.name for candidate in candidates} == {
+        "adder_template",
+        "term_fused",
+        "aggressive",
+    }
+    assert selected.structural_score == min(
+        candidate.structural_score for candidate in candidates
+    )
 
 
 
