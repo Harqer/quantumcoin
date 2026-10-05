@@ -317,31 +317,69 @@ seven-word frontier but is intentionally expensive (roughly 275k semantic
 word-level actions before limb/gate lowering). This is why ROUND16-level
 checkpoint reuse is the next depth optimization.
 
-### 32-bit scratch partition candidate
+### Width-safe coherent reference and 107-transmon target
 
-The 107-transmon layout still has only one 32-bit clean scratch word. A
-word-level seven-pebble program therefore cannot be materialized as seven
-32-bit registers.
-
-The allocator retains the following candidate partition:
+The 107-transmon profile remains the optimized hardware target:
 
 ```text
-7 word-pebble roles × 4 scratch bits = 28 bits
-local helper budget                   =  4 bits
-                                      --------
-scratch total                         = 32 bits
+256 state + 32 nonce + 32 scratch + 1 carry = 321 level-bits
+321 / 3 = 107 d=8 transmons
 ```
 
-This is now deliberately labeled a **candidate**, not a completed lowering
-proof. Rotated sigma references cross 4-bit boundaries and modular-add carries
-cross limb boundaries. Those dependencies must be lowered from the exact
-bit-level DAG into the four helper bits (plus the separately mapped carry bit)
-before `coherent107` is considered executable.
+Its earlier `28 + 4` partition remains an optimization candidate only:
 
-### ROUND16 coherent schedule integration
+```text
+7 abstract word-pebble roles × 4 bits = 28
+helper budget                         =  4
+                                      ----
+scratch                               = 32 bits
+```
 
-The coherent schedule now uses the same four-superblock hierarchy as the SHA
-round engine:
+The exact bit-DAG audit showed that a naive recursive Boolean lowering cannot
+justify those four helpers; late-round outputs such as W63 have much larger
+nested temporary requirements if arithmetic structure is discarded. The
+compiler therefore does not claim coherent107 is executable yet.
+
+Two explicit wider reference layouts separate correctness from width reduction:
+
+```text
+coherent171
+  256 state + 32 nonce + 224 schedule + 1 carry = 513 level-bits
+  171 d=8 transmons
+  seven full schedule pebbles, but no separate arithmetic word
+
+coherent182
+  256 state + 32 nonce + 224 schedule
+  + 32 reusable arithmetic scratch + 1 carry
+  = 545 mapped level-bits
+  182 d=8 transmons (546 level-bit capacity)
+```
+
+`coherent182` is the executable full-word reference. Its seven schedule
+pebbles are physically distinct from the reusable 32-bit arithmetic word used
+by exact constant addition, Sigma/Ch/Maj accumulation, and cleanup.
+
+### Gate-level coherent schedule lowering
+
+`coherent_compile.py` lowers the word-pebble action stream into the reversible
+IR:
+
+```text
+LOAD_NONCE   -> 32 CX from the persistent nonce
+XOR_CONST    -> basis X gates
+SIGMA0/1     -> exact in-place GF(2) CNOT networks
+ADD_SOURCE   -> exact Cuccaro modular add
+SUB_SOURCE   -> inverse Cuccaro add
+ADD_CONST    -> exact constant-specialized modular add
+SUB_CONST    -> modular addition of -constant
+```
+
+The in-place small-sigma matrices are synthesized by Gaussian elimination into
+CNOT networks and their inverses are emitted exactly.
+
+### ROUND16 checkpointed coherent execution
+
+The coherent compiler uses the same four-superblock hierarchy:
 
 ```text
 rounds  0..15  -> coherent ROUND16 block 0
@@ -350,42 +388,51 @@ rounds 32..47  -> coherent ROUND16 block 2
 rounds 48..63  -> coherent ROUND16 block 3
 ```
 
-Each round's reversible schedule program computes:
+Inside each block, the exact local checkpoint optimizer selects schedule words
+worth retaining. A selected W[t] stays live only through its last dependent
+round; it is then erased by an independently planned inverse computation.
+Unselected words are compute -> consume -> uncompute immediately.
+
+For dynamic rounds the executable reference performs:
 
 ```text
-(W[t] + K[t]) mod 2^32
+Sigma1(e) + Ch(e,f,g)
+        +
+coherently computed W[t]
+        +
+constant K[t]
+        ↓
+exact T1 accumulation
+        ↓
+d += T1
+        ↓
+Sigma0(a) + Maj(a,b,c)
+        ↓
+new a
 ```
 
-directly in the target pebble before the term is consumed. The constant is then
-removed automatically by the inverse cleanup stream. This preserves the same
-K+W fusion already used by the fixed-message compiler and does not allocate an
-extra word pebble.
+This keeps K constant-specialized without requiring a second hidden schedule
+word. Fixed schedule rounds still fuse `K[t] + W[t]` at compile time.
 
-The full 64-round coherent schedule therefore retains the existing seven-word
-worst-case abstract pebble ceiling. The remaining depth problem is no longer
-basic correctness; it is reducing recomputation by retaining carefully chosen
-checkpoints across rounds inside each ROUND16 block while still cleaning every
-schedule pebble at the block boundary.
+All checkpoints are required to be zero again at each ROUND16 boundary.
 
 ### Coherent verification oracle
 
-`coherent_schedule.py` contains an exact independent compression reference for:
+`coherent_schedule.py` remains the independent reference for:
 
-- a fixed eight-word SHA midstate;
+- a fixed eight-word incoming midstate;
 - sixteen second-block words with one coherent 32-bit word;
 - exact W0..W63 expansion;
 - all 64 SHA-256 rounds;
-- exact feed-forward.
+- exact Davies-Meyer feed-forward.
 
-For an 80-byte header, the W3 contract matches the second SHA block layout and
-is regression-tested against `hashlib.sha256(header)`.
+`verify_compiled_coherent_sha256()` checks the forward digest against that
+reference, verifies nonce preservation and clean workspace, applies the entire
+inverse circuit, and requires exact restoration of the initial state.
 
-The remaining coherent implementation step is gate-level lowering of the
-4-bit recompute/use/uncompute schedule plan into the existing ROUND16 engine.
-Until that lowering is complete, `compile_single_block_sha256` deliberately
-rejects the `coherent107` layout instead of silently treating the nonce as
-classical.
-
+The optimized `coherent107` path remains intentionally blocked until a
+separate exact lowering proves that the same semantics fit its single 32-bit
+scratch word.
 
 ## LunaSolve lowering optimizer
 
