@@ -6,6 +6,7 @@ import pytest
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
 from quantum.sha256_transmon_d8.layout import D8Layout
 from quantum.sha256_transmon_d8.pulse_targets import (
+    DEFAULT_PULSE_REGION_KINDS,
     fuse_for_direct_pulse_calibration,
     unique_calibration_targets,
 )
@@ -173,12 +174,19 @@ def test_semantic_regions_cover_reusable_adders_and_superblocks():
 
     assert kinds.count("ROUND16") == 4
     assert kinds.count("ADD32") >= 64
+    assert kinds.count("ADD32_INNER") >= 64
+    assert kinds.count("SIGMA1_ADD") == 64
+    assert kinds.count("CH_ADD") == 64
+    assert kinds.count("SIGMA0_ADD") == 64
+    assert kinds.count("MAJ_ADD") == 64
 
 
 def test_region_preserving_pulse_targets_do_not_cross_reusable_boundaries():
     compiled = compile_single_block_sha256(b"abc")
     targets = fuse_for_direct_pulse_calibration(compiled.circuit)
-    boundaries = compiled.circuit.region_boundaries({"ADD32", "ROUND16"})
+    boundaries = compiled.circuit.region_boundaries(
+        set(DEFAULT_PULSE_REGION_KINDS)
+    )
 
     assert targets
     assert all(
@@ -187,16 +195,21 @@ def test_region_preserving_pulse_targets_do_not_cross_reusable_boundaries():
     )
 
 
-def test_aggressive_pulse_fusion_is_explicit_pareto_candidate():
+def test_pulse_fusion_exposes_three_explicit_pareto_candidates():
     compiled = compile_single_block_sha256(b"abc")
-    preserved = fuse_for_direct_pulse_calibration(compiled.circuit)
+    term_fused = fuse_for_direct_pulse_calibration(compiled.circuit)
+    adder_template = fuse_for_direct_pulse_calibration(
+        compiled.circuit,
+        preserve_region_kinds=("ADD32", "ADD32_INNER", "ROUND16"),
+    )
     aggressive = fuse_for_direct_pulse_calibration(
         compiled.circuit,
         preserve_region_kinds=(),
     )
 
     # Removing semantic cuts can only keep or reduce the number of pulse blocks.
-    assert len(aggressive) <= len(preserved)
+    assert len(aggressive) <= len(term_fused)
+    assert len(aggressive) <= len(adder_template)
 
 
 def test_direct_pulse_targets_never_exceed_three_transmons():
