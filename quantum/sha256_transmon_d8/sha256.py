@@ -117,6 +117,28 @@ def _single_block_schedule(message: bytes) -> tuple[int, ...]:
     return tuple(w)
 
 
+def _maj_primitives(
+    c: ReversibleCircuit,
+    a: int,
+    b: int,
+    carry: int,
+) -> None:
+    c.cx(carry, b)
+    c.cx(carry, a)
+    c.ccx(a, b, carry)
+
+
+def _uma_primitives(
+    c: ReversibleCircuit,
+    a: int,
+    b: int,
+    carry: int,
+) -> None:
+    c.ccx(a, b, carry)
+    c.cx(carry, a)
+    c.cx(a, b)
+
+
 def _maj(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
     # Keep the exact Cuccaro permutation as one reusable IR macro. Hardware
     # lowering may target the full 2-3-transmon permutation directly.
@@ -271,21 +293,13 @@ def _add_constant32(
 
     # Primitive Cuccaro reference form is intentional here: the semantic
     # constant-propagation pass operates only on X/CX/CCX basis-state logic.
-    reference.cx(carry, b[0])
-    reference.cx(carry, a[0])
-    reference.ccx(a[0], b[0], carry)
+    _maj_primitives(reference, carry, b[0], a[0])
     for i in range(31):
-        reference.cx(a[i], b[i + 1])
-        reference.cx(a[i], a[i + 1])
-        reference.ccx(a[i + 1], b[i + 1], a[i])
+        _maj_primitives(reference, a[i], b[i + 1], a[i + 1])
 
     for i in range(30, -1, -1):
-        reference.ccx(a[i + 1], b[i + 1], a[i])
-        reference.cx(a[i], a[i + 1])
-        reference.cx(a[i + 1], b[i + 1])
-    reference.ccx(a[0], b[0], carry)
-    reference.cx(carry, a[0])
-    reference.cx(a[0], b[0])
+        _uma_primitives(reference, a[i], b[i + 1], a[i + 1])
+    _uma_primitives(reference, carry, b[0], a[0])
 
     _load_scratch_constant(reference, layout, value)
 
