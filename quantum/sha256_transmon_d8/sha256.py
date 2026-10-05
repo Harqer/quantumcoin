@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ir import Gate, ReversibleCircuit, simulate
+from .ir import ReversibleCircuit, simulate
 from .layout import D8Layout
 
 MASK32 = 0xFFFFFFFF
@@ -24,12 +24,49 @@ H0 = (
 )
 
 
+def _frozen_roles(roles: dict[str, int]) -> tuple[tuple[str, int], ...]:
+    return tuple((name, roles[name]) for name in "abcdefgh")
+
+
+@dataclass(frozen=True)
+class Round16Block:
+    """One reusable 16-round SHA-256 superblock instance.
+
+    The block owns no persistent workspace. `gate_start:gate_stop` is the exact
+    gate span for sixteen rounds. All scratch/carry state must be restored at
+    the exit boundary so the same physical workspace can be reused by the next
+    block.
+    """
+
+    index: int
+    round_start: int
+    round_stop: int
+    gate_start: int
+    gate_stop: int
+    entry_roles: tuple[tuple[str, int], ...]
+    exit_roles: tuple[tuple[str, int], ...]
+    fused_round_constants: tuple[int, ...]
+
+    @property
+    def gate_count(self) -> int:
+        return self.gate_stop - self.gate_start
+
+    @property
+    def entry_role_map(self) -> dict[str, int]:
+        return dict(self.entry_roles)
+
+    @property
+    def exit_role_map(self) -> dict[str, int]:
+        return dict(self.exit_roles)
+
+
 @dataclass(frozen=True)
 class CompiledSha256:
     circuit: ReversibleCircuit
     layout: D8Layout
     final_roles: dict[str, int]
     schedule_words: tuple[int, ...]
+    round16_blocks: tuple[Round16Block, ...]
 
     @property
     def logical_gate_count(self) -> int:
@@ -121,6 +158,7 @@ def _scratch_xor_sigma(
     source_slot: int,
     rotations: tuple[int, int, int],
 ) -> None:
+    # ROTR is a logical source-index view. No SWAP/permutation circuit is emitted.
     for i in range(32):
         for rotation in rotations:
             c.cx(
@@ -136,6 +174,7 @@ def _scratch_xor_ch(
     y_slot: int,
     z_slot: int,
 ) -> None:
+    # ANF: Ch(x,y,z) = z XOR xy XOR xz.
     for i in range(32):
         target = layout.scratch_bit(i)
         x = layout.word_bit(x_slot, i)
@@ -153,6 +192,7 @@ def _scratch_xor_maj(
     y_slot: int,
     z_slot: int,
 ) -> None:
+    # ANF: Maj(x,y,z) = xy XOR xz XOR yz.
     for i in range(32):
         target = layout.scratch_bit(i)
         x = layout.word_bit(x_slot, i)
@@ -169,12 +209,141 @@ def _compute_add_uncompute(
     layout: D8Layout,
     target_slot: int,
 ) -> None:
+    """Lease scratch, compute a 32-bit term, add it, then restore scratch."""
     start = len(c.gates)
     compute(c)
     compute_gates = c.gates[start:].copy()
     _add32(c, layout, layout.scratch_slot, target_slot)
-    # X/CX/CCX are self-inverse; reverse exact compute path.
+    # X/CX/CCX are self-inverse; reverse the exact compute path.
     c.extend(reversed(compute_gates))
+
+
+def _add_constant32(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    target_slot: int,
+    value: int,
+) -> None:
+    """Add a compile-time constant modulo 2^32 with no persistent register."""
+    value &= MASK32
+    if value == 0:
+        return
+    _compute_add_uncompute(
+        c,
+        lambda cc, v=value: _load_scratch_constant(cc, layout, v),
+        layout,
+        target_slot,
+    )
+
+
+def _shift_roles(roles: dict[str, int]) -> dict[str, int]:
+    """Implement the SHA register shift by reference renaming only."""
+    return {
+        "a": roles["h"],
+        "b": roles["a"],
+        "c": roles["b"],
+        "d": roles["c"],
+        "e": roles["d"],
+        "f": roles["e"],
+        "g": roles["f"],
+        "h": roles["g"],
+    }
+
+
+def _emit_round(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    roles: dict[str, int],
+    round_constant: int,
+) -> dict[str, int]:
+    """Emit one exact in-place SHA-256 round.
+
+    `round_constant` is `(K[t] + W[t]) mod 2^32`. Fusing these two classical
+    terms is exact by associativity of addition modulo 2^32 and removes one
+    complete reusable ADD32 path from every round.
+    """
+    h = roles["h"]
+
+    # h accumulates T1 in-place.
+    _compute_add_uncompute(
+        c,
+        lambda cc, e=roles["e"]: _scratch_xor_sigma(
+            cc, layout, e, (6, 11, 25)
+        ),
+        layout,
+        h,
+    )
+    _compute_add_uncompute(
+        c,
+        lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: _scratch_xor_ch(
+            cc, layout, e, f, g
+        ),
+        layout,
+        h,
+    )
+    _add_constant32(c, layout, h, round_constant)
+
+    # old d becomes new e; h still holds T1.
+    _add32(c, layout, h, roles["d"])
+
+    # h becomes new a = T1 + T2.
+    _compute_add_uncompute(
+        c,
+        lambda cc, a=roles["a"]: _scratch_xor_sigma(
+            cc, layout, a, (2, 13, 22)
+        ),
+        layout,
+        h,
+    )
+    _compute_add_uncompute(
+        c,
+        lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: _scratch_xor_maj(
+            cc, layout, a, b, cslot
+        ),
+        layout,
+        h,
+    )
+
+    return _shift_roles(roles)
+
+
+def _emit_round16(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    roles: dict[str, int],
+    schedule_words: tuple[int, ...],
+    round_start: int,
+) -> tuple[dict[str, int], Round16Block]:
+    """Emit the reusable 16-round optimization unit.
+
+    Workspace ownership is block-scoped: every round borrows the same scratch
+    word and carry bit and restores them before the next round. Consequently,
+    the block exits with no live temporary state and can be instantiated four
+    times without garbage accumulation.
+    """
+    if round_start not in (0, 16, 32, 48):
+        raise ValueError("ROUND16 must start at SHA round 0, 16, 32, or 48")
+
+    entry_roles = _frozen_roles(roles)
+    gate_start = len(c.gates)
+    fused_constants: list[int] = []
+
+    for t in range(round_start, round_start + 16):
+        fused = (K[t] + schedule_words[t]) & MASK32
+        fused_constants.append(fused)
+        roles = _emit_round(c, layout, roles, fused)
+
+    block = Round16Block(
+        index=round_start // 16,
+        round_start=round_start,
+        round_stop=round_start + 16,
+        gate_start=gate_start,
+        gate_stop=len(c.gates),
+        entry_roles=entry_roles,
+        exit_roles=_frozen_roles(roles),
+        fused_round_constants=tuple(fused_constants),
+    )
+    return roles, block
 
 
 def compile_single_block_sha256(message: bytes) -> CompiledSha256:
@@ -182,95 +351,35 @@ def compile_single_block_sha256(message: bytes) -> CompiledSha256:
 
     Contract:
       * full standard SHA-256 semantics for messages <=55 bytes;
+      * four reusable 16-round superblock instances;
       * no intermediate measurement/reset;
       * every emitted operation is reversible;
-      * scratch and carry return to |0>;
-      * W_t and K_t are classical pulse parameters, not quantum registers;
+      * scratch and carry return to |0> after every leased operation and block;
+      * W_t and K_t are classical parameters, not quantum registers;
+      * K_t + W_t is fused before reversible synthesis;
       * final feed-forward is reversible because H0 is a fixed constant.
 
-    This is the current-hardware reversible contract. Arbitrary coherent-message
-    or multi-block chaining requires more quantum storage and is intentionally
-    rejected rather than silently changing the contract.
+    Arbitrary coherent-message or multi-block chaining requires more quantum
+    storage and is intentionally rejected rather than silently changing the
+    contract.
     """
     layout = D8Layout()
     w = _single_block_schedule(message)
     c = ReversibleCircuit()
     roles = dict(zip("abcdefgh", range(8)))
+    blocks: list[Round16Block] = []
 
-    for t in range(64):
-        _compute_add_uncompute(
-            c,
-            lambda cc, e=roles["e"]: _scratch_xor_sigma(
-                cc, layout, e, (6, 11, 25)
-            ),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: _scratch_xor_ch(
-                cc, layout, e, f, g
-            ),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=K[t]: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=w[t]: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles["h"],
-        )
-
-        # d <- d + T1, while h still contains T1.
-        _add32(c, layout, roles["h"], roles["d"])
-
-        _compute_add_uncompute(
-            c,
-            lambda cc, a=roles["a"]: _scratch_xor_sigma(
-                cc, layout, a, (2, 13, 22)
-            ),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: _scratch_xor_maj(
-                cc, layout, a, b, cslot
-            ),
-            layout,
-            roles["h"],
-        )
-
-        # Pure role relabeling implements the SHA register shift at zero gate cost.
-        roles = {
-            "a": roles["h"],
-            "b": roles["a"],
-            "c": roles["b"],
-            "d": roles["c"],
-            "e": roles["d"],
-            "f": roles["e"],
-            "g": roles["f"],
-            "h": roles["g"],
-        }
+    for round_start in range(0, 64, 16):
+        roles, block = _emit_round16(c, layout, roles, w, round_start)
+        blocks.append(block)
 
     # For the first/fixed-IV SHA block, feed-forward is constant addition and
     # therefore bijective in place.
     for name, initial in zip("abcdefgh", H0):
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=initial: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles[name],
-        )
+        _add_constant32(c, layout, roles[name], initial)
 
     c.validate()
-    return CompiledSha256(c, layout, roles, w)
+    return CompiledSha256(c, layout, roles, w, tuple(blocks))
 
 
 def initial_state(compiled: CompiledSha256) -> list[int]:
