@@ -8,7 +8,7 @@ from .ir import Gate, ReversibleCircuit
 from .layout import D8Layout
 
 
-DEFAULT_PULSE_REGION_KINDS = (
+TERM_FUSED_REGION_KINDS = (
     "SIGMA1_ADD",
     "CH_ADD",
     "CONST_ADD",
@@ -17,6 +17,17 @@ DEFAULT_PULSE_REGION_KINDS = (
     "MAJ_ADD",
     "ROUND16",
 )
+
+ADDER_TEMPLATE_REGION_KINDS = (
+    "ADD32",
+    "ADD32_INNER",
+    "ROUND16",
+)
+
+# Width is identical for every candidate. Until live calibrated durations are
+# available, preserve the adder template by default; select_pulse_candidate()
+# evaluates all candidates using structural transmon-conflict depth.
+DEFAULT_PULSE_REGION_KINDS = ADDER_TEMPLATE_REGION_KINDS
 
 
 @dataclass(frozen=True)
@@ -71,14 +82,16 @@ def fuse_for_direct_pulse_calibration(
 ) -> list[PulseTarget]:
     """Fuse reversible logic into <=3-transmon direct pulse targets.
 
-    By default, lowering preserves reusable compute-add-uncompute term blocks,
-    the direct d+=T1 ADD32, and ROUND16. The nested ADD32_INNER boundaries are
-    intentionally *not* cuts, so preparation logic can fuse into its adder and
-    cleanup inside one coherent reusable term target. This keeps templates
-    stable without blocking useful local fusion.
+    The default preserves ADD32/ADD32_INNER and ROUND16 so the same optimized
+    adder template can be reused consistently. Alternative region sets are
+    evaluated explicitly rather than assumed superior:
 
-    Pass preserve_region_kinds=() to produce the aggressive cross-boundary
-    Pareto candidate for comparison.
+      * TERM_FUSED_REGION_KINDS: fuse preparation + add + cleanup per SHA term;
+      * ADDER_TEMPLATE_REGION_KINDS: preserve reusable adders (default);
+      * (): fully aggressive cross-boundary fusion.
+
+    Calibrated pulse durations can replace the structural proxy later without
+    changing these semantic candidates.
     """
     if max_transmons not in (1, 2, 3):
         raise ValueError("current calibration path supports 1..3 transmons")
@@ -184,3 +197,56 @@ def pulse_layer_depth(targets: list[PulseTarget]) -> int:
         depth = max(depth, layer)
 
     return depth
+
+
+
+@dataclass(frozen=True)
+class PulseCandidate:
+    name: str
+    targets: tuple[PulseTarget, ...]
+    unit_depth: int
+    unique_target_count: int
+
+    @property
+    def block_count(self) -> int:
+        return len(self.targets)
+
+    @property
+    def structural_score(self) -> tuple[int, int, int]:
+        # Runtime depth first, then execution block count, then calibration
+        # surface. Live calibrated durations will supersede this proxy.
+        return (self.unit_depth, self.block_count, self.unique_target_count)
+
+
+def pulse_candidates(circuit: ReversibleCircuit) -> tuple[PulseCandidate, ...]:
+    specs = (
+        ("adder_template", ADDER_TEMPLATE_REGION_KINDS),
+        ("term_fused", TERM_FUSED_REGION_KINDS),
+        ("aggressive", ()),
+    )
+    candidates: list[PulseCandidate] = []
+
+    for name, region_kinds in specs:
+        targets = tuple(
+            fuse_for_direct_pulse_calibration(
+                circuit,
+                preserve_region_kinds=region_kinds,
+            )
+        )
+        candidates.append(
+            PulseCandidate(
+                name=name,
+                targets=targets,
+                unit_depth=pulse_layer_depth(list(targets)),
+                unique_target_count=len(
+                    {target.target_id for target in targets}
+                ),
+            )
+        )
+
+    return tuple(candidates)
+
+
+def select_pulse_candidate(circuit: ReversibleCircuit) -> PulseCandidate:
+    """Select the best structural candidate without changing SHA semantics."""
+    return min(pulse_candidates(circuit), key=lambda candidate: candidate.structural_score)
