@@ -11,14 +11,18 @@ _PRIMITIVE_COST = {
     # MAJ = CX, CX, CCX; UMA = CCX, CX, CX.
     "MAJ": 3,
     "UMA": 3,
+    "MAJ_INV": 3,
+    "UMA_INV": 3,
 }
 
 _INVERSE_KIND = {
     "X": "X",
     "CX": "CX",
     "CCX": "CCX",
-    "MAJ": "UMA",
-    "UMA": "MAJ",
+    "MAJ": "MAJ_INV",
+    "MAJ_INV": "MAJ",
+    "UMA": "UMA_INV",
+    "UMA_INV": "UMA",
 }
 
 
@@ -28,7 +32,15 @@ class Gate:
     qubits: tuple[int, ...]
 
     def validate(self) -> None:
-        expected = {"X": 1, "CX": 2, "CCX": 3, "MAJ": 3, "UMA": 3}
+        expected = {
+            "X": 1,
+            "CX": 2,
+            "CCX": 3,
+            "MAJ": 3,
+            "UMA": 3,
+            "MAJ_INV": 3,
+            "UMA_INV": 3,
+        }
         if self.kind not in expected:
             raise ValueError(f"unsupported reversible gate {self.kind}")
         if len(self.qubits) != expected[self.kind]:
@@ -93,6 +105,12 @@ class ReversibleCircuit:
 
     def uma(self, a: int, b: int, carry: int) -> None:
         self.gates.append(Gate("UMA", (a, b, carry)))
+
+    def maj_inv(self, a: int, b: int, carry: int) -> None:
+        self.gates.append(Gate("MAJ_INV", (a, b, carry)))
+
+    def uma_inv(self, a: int, b: int, carry: int) -> None:
+        self.gates.append(Gate("UMA_INV", (a, b, carry)))
 
     def extend(self, gates: Iterable[Gate]) -> None:
         self.gates.extend(gates)
@@ -163,11 +181,25 @@ def _apply_maj(state: list[int], a: int, b: int, carry: int) -> None:
     state[carry] ^= state[a] & state[b]
 
 
+def _apply_maj_inv(state: list[int], a: int, b: int, carry: int) -> None:
+    # Exact inverse of MAJ = reverse(CCX(a,b,c), CX(c,a), CX(c,b)).
+    state[carry] ^= state[a] & state[b]
+    state[a] ^= state[carry]
+    state[b] ^= state[carry]
+
+
 def _apply_uma(state: list[int], a: int, b: int, carry: int) -> None:
-    # Exact inverse of MAJ.
+    # Cuccaro unmajority-and-add, not the literal inverse of MAJ.
     state[carry] ^= state[a] & state[b]
     state[a] ^= state[carry]
     state[b] ^= state[a]
+
+
+def _apply_uma_inv(state: list[int], a: int, b: int, carry: int) -> None:
+    # Exact inverse of UMA = reverse(CCX(a,b,c), CX(c,a), CX(a,b)).
+    state[b] ^= state[a]
+    state[a] ^= state[carry]
+    state[carry] ^= state[a] & state[b]
 
 
 def simulate(circuit: ReversibleCircuit, bits: list[int]) -> list[int]:
@@ -183,8 +215,12 @@ def simulate(circuit: ReversibleCircuit, bits: list[int]) -> list[int]:
             state[target] ^= state[c0] & state[c1]
         elif gate.kind == "MAJ":
             _apply_maj(state, *gate.qubits)
+        elif gate.kind == "MAJ_INV":
+            _apply_maj_inv(state, *gate.qubits)
         elif gate.kind == "UMA":
             _apply_uma(state, *gate.qubits)
+        elif gate.kind == "UMA_INV":
+            _apply_uma_inv(state, *gate.qubits)
         else:
             raise AssertionError(gate.kind)
     return state
