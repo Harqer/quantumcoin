@@ -67,6 +67,7 @@ class CompiledSha256:
     final_roles: dict[str, int]
     schedule_words: tuple[int, ...]
     round16_blocks: tuple[Round16Block, ...]
+    boolean_strategy: str
 
     @property
     def logical_gate_count(self) -> int:
@@ -77,6 +78,10 @@ class CompiledSha256:
     def ir_node_count(self) -> int:
         """Number of semantic IR nodes after reusable-macro preservation."""
         return len(self.circuit.gates)
+
+    @property
+    def nonlinear_gate_count(self) -> int:
+        return self.circuit.nonlinear_gate_count
 
 
 def _rotr(x: int, n: int) -> int:
@@ -219,6 +224,52 @@ def _scratch_xor_ch(
         c.ccx(x, z, target)
 
 
+def _scratch_xor_ch_low_multiplicative(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    x_slot: int,
+    y_slot: int,
+    z_slot: int,
+) -> None:
+    """Ch = z XOR x(y XOR z), using one nonlinear product per bit.
+
+    z is borrowed as dirty workspace and restored before returning.
+    """
+    for i in range(32):
+        target = layout.scratch_bit(i)
+        x = layout.word_bit(x_slot, i)
+        y = layout.word_bit(y_slot, i)
+        z = layout.word_bit(z_slot, i)
+        c.cx(z, target)
+        c.cx(y, z)
+        c.ccx(x, z, target)
+        c.cx(y, z)
+
+
+def _scratch_xor_maj_low_multiplicative(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    x_slot: int,
+    y_slot: int,
+    z_slot: int,
+) -> None:
+    """Maj = x XOR (x XOR y)(x XOR z), one nonlinear product per bit.
+
+    y and z are borrowed as dirty workspace and restored before returning.
+    """
+    for i in range(32):
+        target = layout.scratch_bit(i)
+        x = layout.word_bit(x_slot, i)
+        y = layout.word_bit(y_slot, i)
+        z = layout.word_bit(z_slot, i)
+        c.cx(x, target)
+        c.cx(x, y)
+        c.cx(x, z)
+        c.ccx(y, z, target)
+        c.cx(x, z)
+        c.cx(x, y)
+
+
 def _scratch_xor_maj(
     c: ReversibleCircuit,
     layout: D8Layout,
@@ -344,6 +395,7 @@ def _emit_round(
     layout: D8Layout,
     roles: dict[str, int],
     round_constant: int,
+    boolean_strategy: str,
 ) -> dict[str, int]:
     """Emit one exact in-place SHA-256 round.
 
@@ -352,6 +404,14 @@ def _emit_round(
     complete reusable ADD32 path from every round.
     """
     h = roles["h"]
+    if boolean_strategy == "anf":
+        ch_compute = _scratch_xor_ch
+        maj_compute = _scratch_xor_maj
+    elif boolean_strategy == "low_multiplicative":
+        ch_compute = _scratch_xor_ch_low_multiplicative
+        maj_compute = _scratch_xor_maj_low_multiplicative
+    else:
+        raise ValueError(f"unknown boolean strategy {boolean_strategy!r}")
 
     # h accumulates T1 in-place.
     _compute_add_uncompute(
@@ -365,7 +425,7 @@ def _emit_round(
     )
     _compute_add_uncompute(
         c,
-        lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: _scratch_xor_ch(
+        lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: ch_compute(
             cc, layout, e, f, g
         ),
         layout,
@@ -389,7 +449,7 @@ def _emit_round(
     )
     _compute_add_uncompute(
         c,
-        lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: _scratch_xor_maj(
+        lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: maj_compute(
             cc, layout, a, b, cslot
         ),
         layout,
@@ -406,6 +466,7 @@ def _emit_round16(
     roles: dict[str, int],
     schedule_words: tuple[int, ...],
     round_start: int,
+    boolean_strategy: str,
 ) -> tuple[dict[str, int], Round16Block]:
     """Emit the reusable 16-round optimization unit.
 
@@ -424,7 +485,13 @@ def _emit_round16(
     for t in range(round_start, round_start + 16):
         fused = (K[t] + schedule_words[t]) & MASK32
         fused_constants.append(fused)
-        roles = _emit_round(c, layout, roles, fused)
+        roles = _emit_round(
+            c,
+            layout,
+            roles,
+            fused,
+            boolean_strategy=boolean_strategy,
+        )
 
     c.add_region(
         "ROUND16",
@@ -450,6 +517,7 @@ def _emit_round16(
 def compile_single_block_sha256(
     message: bytes,
     layout: D8Layout | None = None,
+    boolean_strategy: str = "anf",
 ) -> CompiledSha256:
     """Compile exact 64-round SHA-256 for one padded classical message block.
 
@@ -468,13 +536,24 @@ def compile_single_block_sha256(
     contract.
     """
     layout = layout or D8Layout()
+    if boolean_strategy not in {"anf", "low_multiplicative"}:
+        raise ValueError(
+            "boolean_strategy must be 'anf' or 'low_multiplicative'"
+        )
     w = _single_block_schedule(message)
     c = ReversibleCircuit()
     roles = dict(zip("abcdefgh", range(8)))
     blocks: list[Round16Block] = []
 
     for round_start in range(0, 64, 16):
-        roles, block = _emit_round16(c, layout, roles, w, round_start)
+        roles, block = _emit_round16(
+            c,
+            layout,
+            roles,
+            w,
+            round_start,
+            boolean_strategy=boolean_strategy,
+        )
         blocks.append(block)
 
     # For the first/fixed-IV SHA block, feed-forward is constant addition and
@@ -483,7 +562,14 @@ def compile_single_block_sha256(
         _add_constant32(c, layout, roles[name], initial)
 
     c.validate()
-    return CompiledSha256(c, layout, roles, w, tuple(blocks))
+    return CompiledSha256(
+        c,
+        layout,
+        roles,
+        w,
+        tuple(blocks),
+        boolean_strategy,
+    )
 
 
 def initial_state(compiled: CompiledSha256) -> list[int]:
@@ -506,7 +592,12 @@ def digest_from_state(compiled: CompiledSha256, state: list[int]) -> bytes:
 def simulate_compiled_sha256(
     message: bytes,
     layout: D8Layout | None = None,
+    boolean_strategy: str = "anf",
 ) -> bytes:
-    compiled = compile_single_block_sha256(message, layout=layout)
+    compiled = compile_single_block_sha256(
+        message,
+        layout=layout,
+        boolean_strategy=boolean_strategy,
+    )
     output = simulate(compiled.circuit, initial_state(compiled))
     return digest_from_state(compiled, output)
