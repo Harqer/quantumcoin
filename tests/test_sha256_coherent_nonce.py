@@ -101,7 +101,7 @@ def test_nonce_at_w3_schedule_dependency_frontier():
     assert len(dynamic_indices) == 47
 
 
-def test_word_pebbling_proves_full_word_schedule_does_not_fit_one_scratch_word():
+def test_word_pebbling_rejects_full_word_materialization_and_proposes_limb_candidate():
     plan = plan_coherent_schedule(nonce_word_index=3, scratch_bits=32)
 
     assert plan.first_multiword_round == 25
@@ -114,8 +114,9 @@ def test_word_pebbling_proves_full_word_schedule_does_not_fit_one_scratch_word()
     assert plan.word_pebbles[60] == 7
     assert plan.max_word_pebbles == 7
 
-    # Seven simultaneous pebbles force 4-bit-or-smaller uniform limbs:
-    # floor(32 / 7) = 4. A 5-bit limb would require 35 scratch bits.
+    # The word-level model proposes 4-bit limbs because floor(32 / 7) = 4.
+    # This is not yet a lowering proof: the exact bit-level DAG must also
+    # account for cross-limb sigma references and arithmetic carries.
     assert plan.limb_bits == 4
     assert plan.limb_pebble_bits == 28
     assert plan.spare_scratch_bits == 4
