@@ -8,6 +8,7 @@ from quantum.sha256_transmon_d8.layout import D8Layout
 from quantum.sha256_transmon_d8.pulse_targets import (
     DEFAULT_PULSE_REGION_KINDS,
     fuse_for_direct_pulse_calibration,
+    pulse_layer_depth,
     unique_calibration_targets,
 )
 from quantum.sha256_transmon_d8.sha256 import (
@@ -210,6 +211,23 @@ def test_pulse_fusion_exposes_three_explicit_pareto_candidates():
     # Removing semantic cuts can only keep or reduce the number of pulse blocks.
     assert len(aggressive) <= len(term_fused)
     assert len(aggressive) <= len(adder_template)
+
+
+
+
+def test_pulse_layer_depth_parallelizes_disjoint_targets():
+    circuit = ReversibleCircuit()
+    circuit.x(0)   # transmon 0
+    circuit.x(3)   # transmon 1
+    circuit.x(0)   # transmon 0 again
+
+    targets = fuse_for_direct_pulse_calibration(
+        circuit,
+        max_transmons=1,
+        preserve_region_kinds=(),
+    )
+
+    assert pulse_layer_depth(targets) == 2
 
 
 def test_direct_pulse_targets_never_exceed_three_transmons():
