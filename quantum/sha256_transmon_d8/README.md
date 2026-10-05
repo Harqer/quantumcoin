@@ -90,6 +90,53 @@ The same physical workspace is reused for Sigma, Ch, Maj, constants, additions,
 all 16 rounds in a superblock, and all four superblocks. No block is allowed to
 leave live temporary garbage.
 
+### Reusable arithmetic macros
+
+Cuccaro `MAJ` and `UMA` are first-class semantic IR operations rather than
+being flattened immediately into `CX/CX/CCX` sequences. Their exact inverse
+operations are represented separately (`MAJ_INV`, `UMA_INV`) because
+Cuccaro UMA is an unmajority-and-add primitive, not literally the inverse of
+MAJ.
+
+This preserves the arithmetic structure for direct 2-3-transmon pulse
+optimization while retaining primitive-equivalent resource accounting.
+
+For `abc`:
+
+```text
+primitive-equivalent gates = 126740
+semantic IR nodes          = 76564
+```
+
+The 50,176-node difference is representation reuse, not hidden work:
+`MAJ/UMA` still contribute their full primitive-equivalent cost until a
+calibrated direct pulse replaces that decomposition.
+
+### Pulse-reuse Pareto candidates
+
+Pulse lowering evaluates three exact candidates:
+
+```text
+adder_template  preserve ADD32 / ADD32_INNER / ROUND16
+term_fused      preserve complete compute-add-uncompute SHA terms
+aggressive      permit all legal cross-boundary fusion
+```
+
+The unit-duration transmon-conflict scheduler for `abc` currently reports:
+
+```text
+candidate        depth   blocks   unique calibration targets
+adder_template   17388   44022    438
+term_fused       17582   44202    420
+aggressive       17387   44021    440
+```
+
+All three remain on the Pareto frontier: aggressive has the shortest structural
+depth, term-fused has the smallest calibration surface, and adder-template is
+almost depth-identical to aggressive while retaining the cleanest reusable
+adder boundary. No production winner is selected until live calibrated pulse
+durations/error data are available.
+
 ## Width
 
 d=8 stores three logical bits per transmon.
