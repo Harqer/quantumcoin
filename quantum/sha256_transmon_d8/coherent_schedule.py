@@ -511,11 +511,6 @@ def evaluate_word_with_recomputation(
             compute(seed.word_index, slot),
         )
 
-        dynamic_additions = {
-            dependency
-            for dependency in strategy.additions
-        }
-
         # Compile-time terms are accumulated without allocating a pebble.
         for dependency in _schedule_dependencies(t):
             if not dynamic[dependency.word_index]:
