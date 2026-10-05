@@ -16,6 +16,27 @@ from quantum.sha256_transmon_d8.sha256 import (
 )
 
 
+
+
+def test_maj_uma_macros_are_exact_inverses():
+    for basis in range(8):
+        state = [(basis >> i) & 1 for i in range(3)]
+        circuit = ReversibleCircuit()
+        circuit.maj(0, 1, 2)
+        circuit.uma(0, 1, 2)
+        assert simulate(circuit, state) == state
+
+
+def test_macro_ir_preserves_primitive_resource_accounting():
+    circuit = ReversibleCircuit()
+    circuit.maj(0, 1, 2)
+    circuit.uma(0, 1, 2)
+
+    assert len(circuit.gates) == 2
+    assert circuit.primitive_gate_count == 6
+    assert circuit.inverse().primitive_gate_count == 6
+
+
 @pytest.mark.parametrize(
     "message",
     [
@@ -101,6 +122,14 @@ def test_round_constants_fuse_k_and_w_before_reversible_synthesis():
     )
 
 
+def test_reusable_macros_reduce_ir_nodes_without_hiding_primitive_cost():
+    compiled = compile_single_block_sha256(b"abc")
+
+    assert compiled.ir_node_count < compiled.logical_gate_count
+    assert any(gate.kind == "MAJ" for gate in compiled.circuit.gates)
+    assert any(gate.kind == "UMA" for gate in compiled.circuit.gates)
+
+
 def test_fused_round_constants_reduce_logical_gate_count():
     compiled = compile_single_block_sha256(b"abc")
 
@@ -141,3 +170,8 @@ def test_direct_pulse_targets_never_exceed_three_transmons():
     assert targets
     assert all(1 <= len(target.transmons) <= 3 for target in targets.values())
     assert all(target.dimension in (8, 64, 512) for target in targets.values())
+    assert any(
+        kind in {"MAJ", "UMA"}
+        for target in targets.values()
+        for kind, _ in target.normalized_gates
+    )
