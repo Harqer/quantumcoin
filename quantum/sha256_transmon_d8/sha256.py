@@ -133,6 +133,7 @@ def _add32(
     layout: D8Layout,
     source_slot: int,
     target_slot: int,
+    region_kind: str = "ADD32",
 ) -> None:
     """target <- target + source mod 2^32, restoring source and carry."""
     start = len(c.gates)
@@ -149,7 +150,7 @@ def _add32(
     _uma(c, cin, b[0], a[0])
 
     c.add_region(
-        "ADD32",
+        region_kind,
         start,
         len(c.gates),
         source_slot=source_slot,
@@ -219,16 +220,29 @@ def _compute_add_uncompute(
     compute,
     layout: D8Layout,
     target_slot: int,
+    region_kind: str,
 ) -> None:
-    """Lease scratch, compute a 32-bit term, add it, then restore scratch."""
+    """Lease scratch, compute a term, add it, restore it, and close the block."""
     start = len(c.gates)
     compute(c)
     compute_gates = c.gates[start:].copy()
-    _add32(c, layout, layout.scratch_slot, target_slot)
+    _add32(
+        c,
+        layout,
+        layout.scratch_slot,
+        target_slot,
+        region_kind="ADD32_INNER",
+    )
     # Uncompute through each operation's exact inverse. This remains correct
     # when future compute regions contain paired reusable macros such as
     # MAJ/UMA rather than only self-inverse primitive gates.
     c.extend(gate.inverse() for gate in reversed(compute_gates))
+    c.add_region(
+        region_kind,
+        start,
+        len(c.gates),
+        target_slot=target_slot,
+    )
 
 
 def _add_constant32(
@@ -246,6 +260,7 @@ def _add_constant32(
         lambda cc, v=value: _load_scratch_constant(cc, layout, v),
         layout,
         target_slot,
+        region_kind="CONST_ADD",
     )
 
 
@@ -285,6 +300,7 @@ def _emit_round(
         ),
         layout,
         h,
+        region_kind="SIGMA1_ADD",
     )
     _compute_add_uncompute(
         c,
@@ -293,6 +309,7 @@ def _emit_round(
         ),
         layout,
         h,
+        region_kind="CH_ADD",
     )
     _add_constant32(c, layout, h, round_constant)
 
@@ -307,6 +324,7 @@ def _emit_round(
         ),
         layout,
         h,
+        region_kind="SIGMA0_ADD",
     )
     _compute_add_uncompute(
         c,
@@ -315,6 +333,7 @@ def _emit_round(
         ),
         layout,
         h,
+        region_kind="MAJ_ADD",
     )
 
     return _shift_roles(roles)
