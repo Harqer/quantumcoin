@@ -11,6 +11,7 @@ _FIXED_LAYOUT_TRANSMONS = {
 }
 _COHERENT_LAYOUT_TRANSMONS = {
     "coherent107": 107,
+    "coherent171": 171,
 }
 _LAYOUT_TRANSMONS = {
     **_FIXED_LAYOUT_TRANSMONS,
@@ -32,6 +33,12 @@ class D8Layout:
 
     The coherent107 profile maps exactly 321 logical level-bits:
       256 state + 32 coherent nonce + 32 scratch + 1 carry.
+
+    The coherent171 profile is the fully materialized seven-word-pebble
+    reference layout:
+      256 state + 32 coherent nonce + 224 schedule/scratch bits + 1 carry.
+    It is the executable correctness baseline while coherent107 remains the
+    width-optimized target.
 
     All eight SHA state words remain word-aligned: 11 transmons/word, leaving
     one otherwise-unused level-bit in the final transmon of each state word.
@@ -60,6 +67,11 @@ class D8Layout:
 
     coherent107 consumes every one of the 107 * 3 = 321 modeled d=8 level-bits
     exactly once. There is no hidden second word of clean schedule workspace.
+
+    coherent171 consumes every one of 171 * 3 = 513 modeled level-bits:
+    the carry uses the nonce padding level, eight state padding levels are
+    reclaimed by schedule workspace, and transmons 99..170 provide the
+    remaining 216 schedule-workspace bits.
     """
 
     profile: str = "aligned100"
@@ -89,7 +101,7 @@ class D8Layout:
 
     @property
     def carry_bit(self) -> int:
-        if self.profile == "coherent107":
+        if self.profile in {"coherent107", "coherent171"}:
             # nonce bits 30 and 31 occupy levels 0 and 1 of transmon 98.
             return 98 * 3 + 2
         if self.profile == "aligned100":
@@ -137,6 +149,9 @@ class D8Layout:
                 return transmon * 3 + bit % 3
             return _STATE_PADDING_SLOTS[bit - 24]
 
+        if self.profile == "coherent171":
+            return self.schedule_pebble_bit(0, bit)
+
         if self.profile in {"aligned100", "packed99"}:
             transmon = 88 + bit // 3
             return transmon * 3 + bit % 3
@@ -153,6 +168,30 @@ class D8Layout:
             return transmon * 3 + bit % 3
         return _STATE_PADDING_SLOTS[bit - 27]
 
+    def schedule_pebble_bit(self, pebble: int, bit: int) -> int:
+        """Map one of seven full 32-bit coherent schedule pebbles.
+
+        Only coherent171 exposes seven materialized word pebbles. Pebble zero
+        is also the normal round scratch word, so schedule compute/uncompute
+        returns it clean before Sigma/Ch/Maj reuse.
+        """
+        if self.profile != "coherent171":
+            if pebble == 0:
+                return self.scratch_bit(bit)
+            raise ValueError(
+                f"layout {self.profile!r} does not expose full schedule pebble {pebble}"
+            )
+        if not 0 <= pebble < 7:
+            raise ValueError("schedule pebble index must be in 0..6")
+        if not 0 <= bit < 32:
+            raise ValueError("schedule pebble bit out of range")
+
+        flat = pebble * 32 + bit
+        if flat < 216:
+            transmon = 99 + flat // 3
+            return transmon * 3 + flat % 3
+        return _STATE_PADDING_SLOTS[flat - 216]
+
     @staticmethod
     def transmon_of(bit_index: int) -> int:
         return bit_index // 3
@@ -167,18 +206,30 @@ class D8Layout:
             for slot in range(self.state_words)
             for bit in range(32)
         )
-        scratch = tuple(self.scratch_bit(bit) for bit in range(32))
         carry = (self.carry_bit,)
 
         if not self.is_coherent_nonce:
+            scratch = tuple(self.scratch_bit(bit) for bit in range(32))
             return state + scratch + carry
 
         nonce = tuple(self.nonce_bit(bit) for bit in range(32))
+        if self.profile == "coherent171":
+            scratch = tuple(
+                self.schedule_pebble_bit(pebble, bit)
+                for pebble in range(7)
+                for bit in range(32)
+            )
+            return state + nonce + scratch + carry
+
+        scratch = tuple(self.scratch_bit(bit) for bit in range(32))
         return state + nonce + scratch + carry
 
     def _validate_mapping(self) -> None:
         mapped = self.mapped_bits()
-        expected = 321 if self.is_coherent_nonce else 289
+        if self.profile == "coherent171":
+            expected = 513
+        else:
+            expected = 321 if self.is_coherent_nonce else 289
         if len(mapped) != expected:
             raise AssertionError(
                 f"d=8 SHA layout must map exactly {expected} logical bits"
