@@ -389,9 +389,11 @@ classical.
 
 ## LunaSolve lowering optimizer
 
-The coherent path now has an optional offline compiler-optimization layer built on
+The coherent path now has an optional pre-execution compiler-optimization layer built on
 LunaSolve. LunaSolve is not the SHA execution engine and is never used to submit
-the cryptographic workload to a QPU.
+the cryptographic workload to a QPU. Calling a LunaSolve algorithm may upload the
+optimization model to the Luna platform; that model contains checkpoint decision
+variables and lowering costs, not a quantum SHA execution payload.
 
 The optimizer operates on the exact ROUND16 schedule after the semantic
 reductions have already been applied:
@@ -446,7 +448,7 @@ Install the optional compiler optimizer with:
 pip install luna-quantum
 ```
 
-Build and solve one block offline:
+Build and solve one compiler block:
 
 ```python
 from quantum.sha256_transmon_d8 import (
