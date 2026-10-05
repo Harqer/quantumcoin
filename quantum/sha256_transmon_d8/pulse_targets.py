@@ -160,3 +160,27 @@ def unique_calibration_targets(
         if existing is None:
             unique[target.target_id] = target
     return unique
+
+
+
+def pulse_layer_depth(targets: list[PulseTarget]) -> int:
+    """Return unit-duration depth under transmon exclusivity.
+
+    Targets on disjoint transmons may execute in the same layer. Targets that
+    share a transmon retain their original dependency order. This is a hardware-
+    aware structural depth metric; calibrated pulse durations are applied later
+    by the live runtime scheduler.
+    """
+    last_layer: dict[int, int] = {}
+    depth = 0
+
+    for target in targets:
+        layer = 1 + max(
+            (last_layer.get(transmon, 0) for transmon in target.transmons),
+            default=0,
+        )
+        for transmon in target.transmons:
+            last_layer[transmon] = layer
+        depth = max(depth, layer)
+
+    return depth
