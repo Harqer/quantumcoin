@@ -23,13 +23,16 @@ from quantum.sha256_transmon_d8.sha256 import (
 
 
 
-def test_maj_uma_macros_are_exact_inverses():
-    for basis in range(8):
-        state = [(basis >> i) & 1 for i in range(3)]
-        circuit = ReversibleCircuit()
-        circuit.maj(0, 1, 2)
-        circuit.uma(0, 1, 2)
-        assert simulate(circuit, state) == state
+def test_cuccaro_macros_have_exact_explicit_inverses():
+    for kind in ("maj", "uma"):
+        for basis in range(8):
+            state = [(basis >> i) & 1 for i in range(3)]
+            circuit = ReversibleCircuit()
+            getattr(circuit, kind)(0, 1, 2)
+
+            output = simulate(circuit, state)
+            restored = simulate(circuit.inverse(), output)
+            assert restored == state
 
 
 def test_macro_ir_preserves_primitive_resource_accounting():
@@ -40,6 +43,10 @@ def test_macro_ir_preserves_primitive_resource_accounting():
     assert len(circuit.gates) == 2
     assert circuit.primitive_gate_count == 6
     assert circuit.inverse().primitive_gate_count == 6
+    assert [gate.kind for gate in circuit.inverse().gates] == [
+        "UMA_INV",
+        "MAJ_INV",
+    ]
 
 
 @pytest.mark.parametrize(
