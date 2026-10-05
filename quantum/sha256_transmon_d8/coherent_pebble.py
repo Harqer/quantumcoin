@@ -414,6 +414,81 @@ def plan_word_pebbles(
 
 
 
+
+def count_word_actions_with_checkpoints(
+    fixed_words: tuple[int, ...],
+    target_word: int,
+    free_slot_count: int,
+    checkpoint_words: frozenset[int] = frozenset(),
+    nonce_word_index: int = 3,
+) -> int:
+    """Count the exact planner action length without materializing actions.
+
+    This mirrors _Planner.emit_compute, including checkpoint hits and inverse
+    cleanup of nested temporary words. It is used by the optimizer so late
+    ROUND16 checkpoint choices are scored by actual recursive recomputation
+    cost instead of a direct-use proxy.
+    """
+    if free_slot_count < 0:
+        raise RuntimeError("free_slot_count must be nonnegative")
+    planner = _Planner(
+        fixed_words,
+        nonce_word_index,
+        available_words={
+            word: index for index, word in enumerate(checkpoint_words)
+        },
+    )
+
+    memo: dict[tuple[int, int], int] = {}
+
+    def count(t: int, free_count: int) -> int:
+        key = (t, free_count)
+        if key in memo:
+            return memo[key]
+
+        if t in checkpoint_words:
+            memo[key] = 1
+            return 1
+        if t == nonce_word_index:
+            memo[key] = 1
+            return 1
+        if t < 16 or not planner.dynamic[t]:
+            memo[key] = 1
+            return 1
+
+        terms = _term_specs(t)
+        base = planner.choose_base(terms)
+        if base is None:
+            raise AssertionError("dynamic word must have a dynamic predecessor")
+
+        base_word, base_transform = base
+        total = count(base_word, free_count)
+        if _transform_kind(base_transform) is not None:
+            total += 1
+
+        remaining = list(terms)
+        remaining.remove(base)
+        for source_word, transform in remaining:
+            if planner.dynamic[source_word]:
+                if free_count < 1:
+                    raise RuntimeError("insufficient word pebbles")
+                nested = count(source_word, free_count - 1)
+                transformed = _transform_kind(transform) is not None
+                total += 2 * nested + 1 + (2 if transformed else 0)
+            else:
+                constant = _apply_transform(
+                    planner.fixed_schedule[source_word],
+                    transform,
+                )
+                if constant:
+                    total += 1
+
+        memo[key] = total
+        return total
+
+    return count(target_word, free_slot_count)
+
+
 def plan_word_actions_with_checkpoints(
     fixed_words: tuple[int, ...],
     target_word: int,
