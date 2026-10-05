@@ -73,12 +73,16 @@ def _plan_into_slot(
     checkpoints: dict[int, int],
     max_slots: int,
     nonce_word_index: int,
+    reserved_slots: tuple[int, ...] = (),
 ) -> tuple[PebbleAction, ...]:
+    occupied = dict(checkpoints)
+    for index, reserved in enumerate(reserved_slots):
+        occupied[-1 - index] = reserved
     free = tuple(
         candidate
         for candidate in _free_slots(
             max_slots,
-            checkpoints,
+            occupied,
             exclude=(slot,),
         )
     )
@@ -180,6 +184,7 @@ def plan_checkpointed_round16(
                         {},
                         max_word_pebbles,
                         nonce_word_index,
+                        reserved_slots=tuple(others.values()),
                     )
                     # Ensure the fresh independent plan did not choose another
                     # occupied checkpoint slot as temporary workspace.
