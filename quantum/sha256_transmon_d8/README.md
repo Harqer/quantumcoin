@@ -387,6 +387,91 @@ rejects the `coherent107` layout instead of silently treating the nonce as
 classical.
 
 
+## LunaSolve lowering optimizer
+
+The coherent path now has an optional offline compiler-optimization layer built on
+LunaSolve. LunaSolve is not the SHA execution engine and is never used to submit
+the cryptographic workload to a QPU.
+
+The optimizer operates on the exact ROUND16 schedule after the semantic
+reductions have already been applied:
+
+```text
+exact W[t] dependency DAG
+  -> two 3:2 carry-save compressors
+  -> one final carry-propagate boundary
+  -> in-place invertible sigma0/sigma1
+  -> direct (W[t] + K[t]) mod 2^32 fusion
+  -> reversible compute/use/uncompute
+  -> LunaSolve checkpoint selection
+  -> d=8 physical lowering
+```
+
+The decision variables are ROUND16-local schedule checkpoints. A checkpoint may
+retain an already-computed dynamic `W[t]` for a later direct dependency instead
+of recomputing that word from the nonce.
+
+The objective uses measured reversible-program action counts:
+
+```text
+minimize
+    checkpoint_lifetime_cost
+  - standalone_recompute_actions_saved
+```
+
+Capacity constraints are intentionally conservative. At every round:
+
+```text
+base_word_pebbles + live_checkpoints <= 7
+```
+
+so Luna cannot reduce the objective by exceeding the established seven-role
+abstract frontier. With 32 scratch bits and four helper bits, the physical
+streaming target remains:
+
+```text
+7 pebble roles x 4 bits = 28
+helpers                 =  4
+                         ----
+scratch                  = 32 bits
+```
+
+The arithmetic reductions are not optional solver decisions. Carry-save
+schedule arithmetic, in-place small-sigma transforms, K+W fusion, exact modular
+arithmetic, and inverse cleanup remain mandatory invariants.
+
+Install the optional compiler optimizer with:
+
+```bash
+pip install luna-quantum
+```
+
+Build and solve one block offline:
+
+```python
+from quantum.sha256_transmon_d8 import (
+    build_round16_lowering_problem,
+    solve_with_luna,
+)
+from quantum.sha256_transmon_d8.coherent_schedule import (
+    bitcoin_second_block_template,
+)
+from quantum.sha256_transmon_d8.sha256 import K
+
+problem = build_round16_lowering_problem(
+    bitcoin_second_block_template(),
+    K,
+    block_index=3,
+    nonce_word_index=3,
+)
+plan = solve_with_luna(problem)
+print(plan)
+```
+
+The Luna job optimizes compiler metadata only. The returned checkpoint plan must
+still pass exact schedule equivalence and cleanup verification before physical
+lowering.
+
 ## Why this is pulse-native
 
 The bit-level X/CX/CCX IR exists only as an exact reversible specification.
