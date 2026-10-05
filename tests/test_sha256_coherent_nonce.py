@@ -3,6 +3,7 @@ import random
 import pytest
 
 from quantum.sha256_transmon_d8.coherent_arithmetic import (
+    add_from_ephemeral_bit_oracle,
     add_from_source_bits,
     controlled_increment_power_of_two,
     max_clean_ancillas_for_increment,
@@ -462,3 +463,51 @@ def test_32_bit_ephemeral_source_increment_fits_coherent107_scratch():
     assert max_clean_ancillas_for_increment(32) == 30
     assert len(available_clean) >= max_clean_ancillas_for_increment(32)
     assert source_bit != layout.carry_bit
+
+
+
+def test_ephemeral_bit_oracle_adds_source_and_cleans_control():
+    width = 4
+    source_bits = tuple(range(width))
+    target_bits = tuple(range(width, 2 * width))
+    ephemeral = 2 * width
+    ancilla_count = max_clean_ancillas_for_increment(width)
+    ancillas = tuple(
+        range(2 * width + 1, 2 * width + 1 + ancilla_count)
+    )
+
+    circuit = ReversibleCircuit()
+
+    def compute_bit(c, bit_index, target):
+        c.cx(source_bits[bit_index], target)
+
+    add_from_ephemeral_bit_oracle(
+        circuit,
+        target_bits,
+        ephemeral,
+        ancillas,
+        compute_bit,
+    )
+
+    for source in range(1 << width):
+        for target in range(1 << width):
+            state = [0] * (2 * width + 1 + ancilla_count)
+            for index in range(width):
+                state[source_bits[index]] = (source >> index) & 1
+                state[target_bits[index]] = (target >> index) & 1
+
+            output = simulate(circuit, state)
+            actual_source = sum(
+                output[bit] << index
+                for index, bit in enumerate(source_bits)
+            )
+            actual_target = sum(
+                output[bit] << index
+                for index, bit in enumerate(target_bits)
+            )
+
+            assert actual_source == source
+            assert actual_target == (source + target) & ((1 << width) - 1)
+            assert output[ephemeral] == 0
+            assert all(output[bit] == 0 for bit in ancillas)
+            assert simulate(circuit.inverse(), output) == state
