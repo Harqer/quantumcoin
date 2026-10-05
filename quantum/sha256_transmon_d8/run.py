@@ -5,8 +5,8 @@ import hashlib
 
 from .ir import simulate
 from .pulse_targets import (
+    pareto_pulse_candidates,
     pulse_candidates,
-    select_pulse_candidate,
 )
 from .sha256 import (
     compile_single_block_sha256,
@@ -39,7 +39,7 @@ def main() -> int:
         raise SystemExit("reversibility verification failed")
 
     candidates = pulse_candidates(compiled.circuit)
-    selected = select_pulse_candidate(compiled.circuit)
+    frontier = pareto_pulse_candidates(compiled.circuit)
 
     print(f"digest={digest.hex()}")
     print(f"transmons={compiled.layout.total_transmons}")
@@ -53,7 +53,10 @@ def main() -> int:
             f"blocks:{candidate.block_count},"
             f"unique:{candidate.unique_target_count}"
         )
-    print(f"selected_pulse_candidate={selected.name}")
+    print(
+        "pareto_pulse_candidates="
+        + ",".join(candidate.name for candidate in frontier)
+    )
     print("scratch_clean=yes")
     print("carry_clean=yes")
     print("inverse_restores_input=yes")
