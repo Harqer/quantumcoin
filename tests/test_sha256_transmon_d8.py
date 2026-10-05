@@ -4,7 +4,7 @@ import random
 import pytest
 
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
-from quantum.sha256_transmon_d8.layout import D8Layout
+from quantum.sha256_transmon_d8.layout import D8Layout, available_layout_profiles
 from quantum.sha256_transmon_d8.pulse_targets import (
     ADDER_TEMPLATE_REGION_KINDS,
     DEFAULT_PULSE_REGION_KINDS,
@@ -169,10 +169,52 @@ def test_fused_round_constants_reduce_logical_gate_count():
     assert compiled.logical_gate_count < legacy_rounds + legacy_feed_forward
 
 
-def test_current_hardware_width_is_100_transmons():
+@pytest.mark.parametrize(
+    ("profile", "transmons"),
+    [
+        ("aligned100", 100),
+        ("packed99", 99),
+        ("packed98", 98),
+        ("packed97", 97),
+    ],
+)
+def test_layout_profiles_have_exact_width_and_no_aliases(profile, transmons):
+    layout = D8Layout(profile=profile)
+    mapped = layout.mapped_bits()
+
+    assert layout.total_transmons == transmons
+    assert len(mapped) == 289
+    assert len(set(mapped)) == 289
+    assert max(mapped) < transmons * 3
+
+
+def test_default_layout_remains_aligned100():
     layout = D8Layout()
+    assert layout.profile == "aligned100"
     assert layout.total_transmons == 100
     assert layout.carry_transmon == 99
+    assert available_layout_profiles() == (
+        "aligned100",
+        "packed99",
+        "packed98",
+        "packed97",
+    )
+
+
+@pytest.mark.parametrize("profile", available_layout_profiles())
+def test_exact_sha_and_inverse_hold_for_every_layout_profile(profile):
+    layout = D8Layout(profile=profile)
+    message = b"abc"
+    compiled = compile_single_block_sha256(message, layout=layout)
+    start = initial_state(compiled)
+    output = simulate(compiled.circuit, start)
+
+    assert simulate_compiled_sha256(message, layout=layout) == hashlib.sha256(message).digest()
+    compiled.layout.assert_clean_workspace(output)
+
+    restored = simulate(compiled.circuit.inverse(), output)
+    assert restored == start
+    compiled.layout.assert_clean_workspace(restored)
 
 
 def test_rejects_multiblock_contract_instead_of_silent_compromise():
