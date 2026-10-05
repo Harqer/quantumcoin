@@ -243,6 +243,54 @@ def plan_from_sample(
     )
 
 
+
+def solve_exact_locally(
+    problem: Round16LoweringProblem,
+) -> LoweringPlan:
+    """Solve the small ROUND16 checkpoint problem exactly without Luna.
+
+    ROUND16 exposes at most fourteen checkpoint candidates for the W3 nonce
+    contract, so exhaustive subset search is practical (2^14 = 16384). This is
+    the deterministic compiler baseline and the verification oracle for a Luna
+    result. Luna remains useful when the model grows to include placement,
+    pulse, or routing variables.
+    """
+    candidates = problem.candidates
+    best: LoweringPlan | None = None
+
+    for mask in range(1 << len(candidates)):
+        selected = tuple(
+            candidate.word
+            for index, candidate in enumerate(candidates)
+            if (mask >> index) & 1
+        )
+        try:
+            validate_checkpoint_selection(problem, selected)
+        except ValueError:
+            continue
+
+        sample = {
+            f"checkpoint_w{candidate.word}": int(candidate.word in selected)
+            for candidate in candidates
+        }
+        plan = plan_from_sample(problem, sample)
+        if best is None or (
+            plan.objective_value,
+            plan.checkpoint_lifetime_rounds,
+            plan.checkpoint_count,
+            plan.checkpoints,
+        ) < (
+            best.objective_value,
+            best.checkpoint_lifetime_rounds,
+            best.checkpoint_count,
+            best.checkpoints,
+        ):
+            best = plan
+
+    if best is None:
+        raise RuntimeError("no feasible ROUND16 lowering plan")
+    return best
+
 def build_luna_model(problem: Round16LoweringProblem):
     """Create a LunaModel instance without importing Luna at package import time."""
     try:
