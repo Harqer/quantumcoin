@@ -78,6 +78,23 @@ and performs one constant addition rather than two. This is exactly equivalent
 by associativity of addition modulo 2^32 and removes one complete `ADD32` path
 from every SHA round.
 
+### Constant-specialized modular addition
+
+Known `K[t] + W[t]` values and fixed-IV feed-forward constants no longer use
+the generic load-constant + ADD32 + unload path unchanged. The compiler first
+builds that exact Cuccaro reference region, then applies computational-basis
+constant propagation to X/CX/CCX controls while scratch and carry are proven
+clean. No approximation or phase relaxation is introduced.
+
+For `abc`, this removes another **2,394 primitive-equivalent operations**:
+
+```text
+after K+W fusion          126740
+after constant specialize 124346
+original baseline         140530
+total reduction            16184  (~11.5%)
+```
+
 ### Block-scoped ancilla reuse
 
 Scratch/carry follow:
@@ -101,16 +118,17 @@ MAJ.
 This preserves the arithmetic structure for direct 2-3-transmon pulse
 optimization while retaining primitive-equivalent resource accounting.
 
-For `abc`:
+For `abc`, after constant-specialized arithmetic:
 
 ```text
-primitive-equivalent gates = 126740
-semantic IR nodes          = 76564
+primitive-equivalent gates = 124346
+semantic IR nodes          = 83386
 ```
 
-The 50,176-node difference is representation reuse, not hidden work:
-`MAJ/UMA` still contribute their full primitive-equivalent cost until a
-calibrated direct pulse replaces that decomposition.
+The semantic-node count is not a gate-cost estimate: reusable MAJ/UMA macros
+retain their full primitive-equivalent cost, while constant-specialized adds
+are deliberately expanded to primitive X/CX/CCX so proven basis constants can
+be eliminated exactly before pulse lowering.
 
 ### Pulse-reuse Pareto candidates
 
@@ -122,20 +140,18 @@ term_fused      preserve complete compute-add-uncompute SHA terms
 aggressive      permit all legal cross-boundary fusion
 ```
 
-The unit-duration transmon-conflict scheduler for `abc` currently reports:
+With the aligned100 placement, the unit-duration transmon-conflict scheduler
+for `abc` currently reports:
 
 ```text
 candidate        depth   blocks   unique calibration targets
-adder_template   17388   44022    438
-term_fused       17582   44202    420
-aggressive       17387   44021    440
+adder_template   17255   43721    295
+term_fused       17436   43909    280
+aggressive       17255   43721    295
 ```
 
-All three remain on the Pareto frontier: aggressive has the shortest structural
-depth, term-fused has the smallest calibration surface, and adder-template is
-almost depth-identical to aggressive while retaining the cleanest reusable
-adder boundary. No production winner is selected until live calibrated pulse
-durations/error data are available.
+The candidate set remains explicit until live calibrated pulse durations/error
+data are available. Structural depth alone is only a proxy.
 
 ## Width and placement Pareto profiles
 
@@ -167,6 +183,19 @@ All four profiles represent the same reversible SHA circuit. They trade physical
 width against pulse locality; **97 is not automatically the fastest profile**.
 The production layout remains a Pareto decision until live calibrated
 pulse/routing data are available.
+
+For the current `abc` structural-depth proxy with the reusable adder boundary:
+
+```text
+profile      transmons   depth    depth penalty vs aligned100
+aligned100       100     17255    baseline
+packed99          99     17455    +1.16%
+packed98          98     17707    +2.62%
+packed97          97     18161    +5.25%
+```
+
+This gives a genuine width/depth Pareto frontier rather than assuming minimum
+width is automatically the fastest execution.
 
 Run any profile offline with:
 
