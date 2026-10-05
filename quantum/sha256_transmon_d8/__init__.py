@@ -33,6 +33,17 @@ from .coherent_schedule import (
     evaluate_schedule,
     plan_coherent_schedule,
 )
+from .luna_lowering import (
+    CheckpointCandidate,
+    LoweringPlan,
+    LoweringWeights,
+    Round16LoweringProblem,
+    build_luna_model,
+    build_round16_lowering_problem,
+    plan_from_sample,
+    solve_with_luna,
+    validate_checkpoint_selection,
+)
 from .layout import (
     D8Layout,
     available_coherent_layout_profiles,
@@ -42,6 +53,15 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
+    "CheckpointCandidate",
+    "LoweringPlan",
+    "LoweringWeights",
+    "Round16LoweringProblem",
+    "build_luna_model",
+    "build_round16_lowering_problem",
+    "plan_from_sample",
+    "solve_with_luna",
+    "validate_checkpoint_selection",
     "CoherentLimbWorkspace",
     "LimbStreamingCandidate",
     "PebbleAction",
