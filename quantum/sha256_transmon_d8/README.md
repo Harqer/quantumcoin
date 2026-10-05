@@ -521,6 +521,38 @@ The Luna job optimizes compiler metadata only. The returned checkpoint plan must
 still pass exact schedule equivalence and cleanup verification before physical
 lowering.
 
+## Coherent execution API
+
+The complete reference compiler is invoked directly:
+
+```python
+from quantum.sha256_transmon_d8 import (
+    D8Layout,
+    compile_coherent_nonce_sha256,
+    verify_compiled_coherent_sha256,
+)
+
+compiled = compile_coherent_nonce_sha256(
+    initial_state_words=midstate_words,
+    fixed_words=second_block_words,
+    nonce_word_index=3,
+    layout=D8Layout(profile="coherent182"),
+)
+
+digest_words = verify_compiled_coherent_sha256(
+    compiled,
+    nonce=0x12345678,
+)
+```
+
+This performs the exact 64-round coherent computation, checks the result against
+the independent compression oracle, verifies that the nonce is preserved,
+requires all seven schedule pebbles plus arithmetic scratch and carry to return
+to zero, then applies the entire inverse circuit and requires exact restoration
+of the input state.
+
+No QPU submission occurs in this verification path.
+
 ## Why this is pulse-native
 
 The bit-level X/CX/CCX IR exists only as an exact reversible specification.
