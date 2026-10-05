@@ -69,7 +69,7 @@ def _emit_mcx_dirty(
         raise RuntimeError("MCX decomposition requires one borrowed dirty bit")
 
     rest = tuple(bit for bit in borrowed if bit != dirty)
-    split = n // 2
+    split = (n + 1) // 2
     left = controls[:split]
     right = controls[split:]
 
