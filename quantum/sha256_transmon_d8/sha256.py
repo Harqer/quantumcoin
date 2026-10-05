@@ -135,6 +135,7 @@ def _add32(
     target_slot: int,
 ) -> None:
     """target <- target + source mod 2^32, restoring source and carry."""
+    start = len(c.gates)
     a = [layout.word_bit(source_slot, i) for i in range(32)]
     b = [layout.word_bit(target_slot, i) for i in range(32)]
     cin = layout.carry_bit
@@ -146,6 +147,14 @@ def _add32(
     for i in range(30, -1, -1):
         _uma(c, a[i], b[i + 1], a[i + 1])
     _uma(c, cin, b[0], a[0])
+
+    c.add_region(
+        "ADD32",
+        start,
+        len(c.gates),
+        source_slot=source_slot,
+        target_slot=target_slot,
+    )
 
 
 def _load_scratch_constant(c: ReversibleCircuit, layout: D8Layout, value: int) -> None:
@@ -336,6 +345,14 @@ def _emit_round16(
         fused = (K[t] + schedule_words[t]) & MASK32
         fused_constants.append(fused)
         roles = _emit_round(c, layout, roles, fused)
+
+    c.add_region(
+        "ROUND16",
+        gate_start,
+        len(c.gates),
+        block_index=round_start // 16,
+        round_start=round_start,
+    )
 
     block = Round16Block(
         index=round_start // 16,
