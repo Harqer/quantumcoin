@@ -130,6 +130,34 @@ retain their full primitive-equivalent cost, while constant-specialized adds
 are deliberately expanded to primitive X/CX/CCX so proven basis constants can
 be eliminated exactly before pulse lowering.
 
+### Boolean synthesis Pareto candidates
+
+The compiler also preserves two exact Ch/Maj implementations:
+
+```text
+anf
+  Ch  = z XOR xy XOR xz
+  Maj = xy XOR xz XOR yz
+
+low_multiplicative
+  Ch  = z XOR x(y XOR z)
+  Maj = x XOR (x XOR y)(x XOR z)
+```
+
+The low-multiplicative form borrows source bits only temporarily and restores
+them before returning. For `abc` on the aligned layout:
+
+```text
+strategy             primitive-equivalent   nonlinear   structural depth
+anf                          124346             45314          17255
+low_multiplicative           140730             33026          17500
+```
+
+So the second strategy removes **12,288 nonlinear operations (~27.1%)** at the
+cost of additional linear CX work. Neither is selected purely from gate count:
+live calibrated pulse duration/error data determines whether the nonlinear
+reduction pays for the extra linear operations.
+
 ### Pulse-reuse Pareto candidates
 
 Pulse lowering evaluates three exact candidates:
@@ -202,7 +230,8 @@ Run any profile offline with:
 ```bash
 python -m quantum.sha256_transmon_d8.run \
   --message abc \
-  --layout-profile packed97
+  --layout-profile packed97 \
+  --boolean-strategy anf
 ```
 
 The ROUND16 and arithmetic optimizations do not increase logical workspace.
