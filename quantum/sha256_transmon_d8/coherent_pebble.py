@@ -211,6 +211,7 @@ class _Planner:
         self,
         fixed_words: tuple[int, ...],
         nonce_word_index: int,
+        available_words: dict[int, int] | None = None,
     ) -> None:
         if len(fixed_words) != 16:
             raise ValueError("fixed_words must contain exactly sixteen words")
@@ -221,6 +222,7 @@ class _Planner:
 
         self.fixed_words = fixed_words
         self.nonce_word_index = nonce_word_index
+        self.available_words = dict(available_words or {})
         self.dynamic = dynamic_schedule_words(nonce_word_index)
         self.requirements = _word_pebble_requirements(nonce_word_index)
         self.fixed_schedule = evaluate_schedule(
@@ -242,7 +244,11 @@ class _Planner:
             return None
         return max(
             dynamic_terms,
-            key=lambda term: (self.requirements[term[0]], term[0]),
+            key=lambda term: (
+                term[0] in self.available_words,
+                self.requirements[term[0]],
+                term[0],
+            ),
         )
 
     def emit_compute(
@@ -253,6 +259,19 @@ class _Planner:
     ) -> list[PebbleAction]:
         if target_slot in free_slots:
             raise ValueError("target slot cannot also be free")
+
+        available_slot = self.available_words.get(t)
+        if available_slot is not None:
+            if available_slot == target_slot:
+                return []
+            return [
+                PebbleAction(
+                    "ADD_SOURCE",
+                    slot=target_slot,
+                    source_slot=available_slot,
+                    word=t,
+                )
+            ]
 
         if t == self.nonce_word_index:
             return [
@@ -393,6 +412,45 @@ def plan_word_pebbles(
         actions=tuple(actions),
     )
 
+
+
+def plan_word_actions_with_checkpoints(
+    fixed_words: tuple[int, ...],
+    target_word: int,
+    target_slot: int,
+    free_slots: tuple[int, ...],
+    checkpoints: dict[int, int],
+    nonce_word_index: int = 3,
+) -> tuple[PebbleAction, ...]:
+    """Plan W[target_word] into an arbitrary clean slot using live checkpoints.
+
+    checkpoints maps already-materialized W indices to occupied slots. The
+    target and free slots must not overlap checkpoint slots. Returned actions
+    assume target/free slots are clean; every nested temporary is uncomputed,
+    leaving only W[target_word] in target_slot.
+    """
+    if not 0 <= target_word < 64:
+        raise ValueError("target_word must be in 0..63")
+    occupied = set(checkpoints.values())
+    if target_slot in occupied:
+        raise ValueError("target slot is occupied by a checkpoint")
+    if target_slot in free_slots:
+        raise ValueError("target slot cannot also be free")
+    if occupied & set(free_slots):
+        raise ValueError("free slots overlap live checkpoints")
+
+    planner = _Planner(
+        fixed_words,
+        nonce_word_index,
+        available_words=checkpoints,
+    )
+    return tuple(
+        planner.emit_compute(
+            target_word,
+            target_slot=target_slot,
+            free_slots=free_slots,
+        )
+    )
 
 def limb_streaming_candidate(
     program: WordPebbleProgram,
