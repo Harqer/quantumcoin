@@ -14,6 +14,8 @@ class PulseTarget:
 
     transmons: tuple[int, ...]
     normalized_gates: tuple[tuple[str, tuple[tuple[int, int], ...]], ...]
+    gate_start: int
+    gate_stop: int
     repetitions: int = 1
 
     @property
@@ -24,6 +26,10 @@ class PulseTarget:
     def target_id(self) -> str:
         raw = json.dumps(self.normalized_gates, separators=(",", ":")).encode()
         return sha256(raw).hexdigest()[:16]
+
+    @property
+    def gate_count(self) -> int:
+        return self.gate_stop - self.gate_start
 
 
 def _support(gate: Gate) -> set[int]:
@@ -50,53 +56,95 @@ def _normalize(
 def fuse_for_direct_pulse_calibration(
     circuit: ReversibleCircuit,
     max_transmons: int = 3,
+    preserve_region_kinds: tuple[str, ...] = ("ADD32", "ROUND16"),
 ) -> list[PulseTarget]:
-    """Greedily fuse consecutive reversible logic into <=3-transmon targets.
+    """Fuse reversible logic into <=3-transmon direct pulse targets.
 
-    Every returned target is an exact permutation on 8^k basis states and can
-    therefore be used directly as an optimal-control target instead of first
-    decomposing it into a generic qubit gate set.
+    By default, lowering preserves the reusable ADD32 and ROUND16 semantic
+    boundaries recorded by the compiler. Gates fuse freely *inside* those
+    regions, but a pulse target cannot accidentally combine arithmetic with a
+    neighboring unrelated expression. This makes repeated calibration shapes
+    stable across rounds and superblocks.
+
+    Pass preserve_region_kinds=() to produce the aggressive cross-boundary
+    Pareto candidate for comparison.
     """
     if max_transmons not in (1, 2, 3):
         raise ValueError("current calibration path supports 1..3 transmons")
 
-    raw: list[tuple[tuple[int, ...], list[Gate]]] = []
+    boundaries = (
+        circuit.region_boundaries(set(preserve_region_kinds))
+        if preserve_region_kinds
+        else set()
+    )
+
+    raw: list[tuple[int, int, tuple[int, ...], list[Gate]]] = []
     current: list[Gate] = []
     support: set[int] = set()
+    current_start = 0
 
-    for gate in circuit.gates:
+    def flush(stop: int) -> None:
+        nonlocal current, support, current_start
+        if current:
+            raw.append(
+                (
+                    current_start,
+                    stop,
+                    tuple(sorted(support)),
+                    current,
+                )
+            )
+            current = []
+            support = set()
+        current_start = stop
+
+    for index, gate in enumerate(circuit.gates):
+        if current and index in boundaries:
+            flush(index)
+
         gate_support = _support(gate)
         if current and len(support | gate_support) > max_transmons:
-            raw.append((tuple(sorted(support)), current))
-            current = [gate]
-            support = set(gate_support)
-        else:
-            current.append(gate)
-            support |= gate_support
+            flush(index)
 
-    if current:
-        raw.append((tuple(sorted(support)), current))
+        if not current:
+            current_start = index
+
+        current.append(gate)
+        support |= gate_support
+
+    flush(len(circuit.gates))
 
     # Preserve execution order while annotating repeated calibration shapes.
     counts: dict[tuple, int] = {}
-    normalized_raw: list[tuple[tuple[int, ...], tuple]] = []
-    for transmons, gates in raw:
+    normalized_raw: list[tuple[int, int, tuple[int, ...], tuple]] = []
+    for start, stop, transmons, gates in raw:
         normalized = _normalize(transmons, gates)
         counts[normalized] = counts.get(normalized, 0) + 1
-        normalized_raw.append((transmons, normalized))
+        normalized_raw.append((start, stop, transmons, normalized))
 
     return [
-        PulseTarget(transmons, normalized, counts[normalized])
-        for transmons, normalized in normalized_raw
+        PulseTarget(
+            transmons=transmons,
+            normalized_gates=normalized,
+            gate_start=start,
+            gate_stop=stop,
+            repetitions=counts[normalized],
+        )
+        for start, stop, transmons, normalized in normalized_raw
     ]
 
 
 def unique_calibration_targets(
     circuit: ReversibleCircuit,
     max_transmons: int = 3,
+    preserve_region_kinds: tuple[str, ...] = ("ADD32", "ROUND16"),
 ) -> dict[str, PulseTarget]:
     unique: dict[str, PulseTarget] = {}
-    for target in fuse_for_direct_pulse_calibration(circuit, max_transmons):
+    for target in fuse_for_direct_pulse_calibration(
+        circuit,
+        max_transmons,
+        preserve_region_kinds=preserve_region_kinds,
+    ):
         existing = unique.get(target.target_id)
         if existing is None:
             unique[target.target_id] = target
