@@ -381,8 +381,9 @@ def solve_with_luna(
 ) -> LoweringPlan:
     """Solve checkpoint placement using LunaSolve SimulatedAnnealing.
 
-    This is an offline compiler optimization job. It does not submit SHA, a
-    quantum circuit, or a QPU workload.
+    This is a pre-execution compiler optimization job. LunaSolve may upload
+    the optimization model to the Luna platform, but it does not submit SHA,
+    a quantum circuit, or a QPU workload.
     """
     try:
         from luna_quantum.algorithms import SimulatedAnnealing
