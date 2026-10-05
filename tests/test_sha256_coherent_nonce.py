@@ -2,6 +2,12 @@ import random
 
 import pytest
 
+from quantum.sha256_transmon_d8.coherent_arithmetic import (
+    add_from_source_bits,
+    controlled_increment_power_of_two,
+    max_clean_ancillas_for_increment,
+    mcx_clean,
+)
 from quantum.sha256_transmon_d8.coherent_schedule import (
     CoherentLimbWorkspace,
     bitcoin_second_block_template,
@@ -336,3 +342,123 @@ def test_recompute_evaluator_is_nonce_coherent(word_index):
         )
         assert value == exact[word_index]
         assert stats.peak_pebbles == plan.word_pebbles[word_index]
+
+
+
+@pytest.mark.parametrize("control_count", range(0, 7))
+def test_clean_mcx_truth_table_and_ancilla_cleanup(control_count):
+    controls = tuple(range(control_count))
+    target = control_count
+    ancillas = tuple(
+        range(control_count + 1, control_count + 1 + max(0, control_count - 2))
+    )
+
+    circuit = ReversibleCircuit()
+    mcx_clean(circuit, controls, target, ancillas)
+
+    for control_values in range(1 << control_count):
+        for target_value in (0, 1):
+            state = [0] * (control_count + 1 + len(ancillas))
+            for index in range(control_count):
+                state[controls[index]] = (control_values >> index) & 1
+            state[target] = target_value
+
+            output = simulate(circuit, state)
+            should_flip = control_values == (1 << control_count) - 1
+            assert output[target] == (target_value ^ should_flip)
+            assert all(output[bit] == 0 for bit in ancillas)
+            assert simulate(circuit.inverse(), output) == state
+
+
+@pytest.mark.parametrize("width", (1, 2, 3, 4, 5))
+def test_controlled_increment_is_exact_for_small_widths(width):
+    control = 0
+    target_bits = tuple(range(1, 1 + width))
+    ancilla_count = max_clean_ancillas_for_increment(width)
+    ancillas = tuple(range(1 + width, 1 + width + ancilla_count))
+
+    for bit_index in range(width):
+        circuit = ReversibleCircuit()
+        controlled_increment_power_of_two(
+            circuit,
+            control,
+            target_bits,
+            bit_index,
+            ancillas,
+        )
+
+        for control_value in (0, 1):
+            for value in range(1 << width):
+                state = [0] * (1 + width + ancilla_count)
+                state[control] = control_value
+                for index, bit in enumerate(target_bits):
+                    state[bit] = (value >> index) & 1
+
+                output = simulate(circuit, state)
+                actual = sum(
+                    output[bit] << index
+                    for index, bit in enumerate(target_bits)
+                )
+                expected = (
+                    value + (control_value << bit_index)
+                ) & ((1 << width) - 1)
+
+                assert actual == expected
+                assert output[control] == control_value
+                assert all(output[bit] == 0 for bit in ancillas)
+                assert simulate(circuit.inverse(), output) == state
+
+
+@pytest.mark.parametrize("width", (1, 2, 3, 4, 5))
+def test_source_preserving_adder_is_exact_for_small_widths(width):
+    source_bits = tuple(range(width))
+    target_bits = tuple(range(width, 2 * width))
+    ancilla_count = max_clean_ancillas_for_increment(width)
+    ancillas = tuple(
+        range(2 * width, 2 * width + ancilla_count)
+    )
+
+    circuit = ReversibleCircuit()
+    add_from_source_bits(
+        circuit,
+        source_bits,
+        target_bits,
+        ancillas,
+    )
+
+    for source in range(1 << width):
+        for target in range(1 << width):
+            state = [0] * (2 * width + ancilla_count)
+            for index in range(width):
+                state[source_bits[index]] = (source >> index) & 1
+                state[target_bits[index]] = (target >> index) & 1
+
+            output = simulate(circuit, state)
+            actual_source = sum(
+                output[bit] << index
+                for index, bit in enumerate(source_bits)
+            )
+            actual_target = sum(
+                output[bit] << index
+                for index, bit in enumerate(target_bits)
+            )
+
+            assert actual_source == source
+            assert actual_target == (source + target) & ((1 << width) - 1)
+            assert all(output[bit] == 0 for bit in ancillas)
+            assert simulate(circuit.inverse(), output) == state
+
+
+def test_32_bit_ephemeral_source_increment_fits_coherent107_scratch():
+    layout = D8Layout(profile="coherent107")
+    source_bit = layout.scratch_bit(28)
+    available_clean = tuple(
+        layout.scratch_bit(index)
+        for index in range(32)
+        if layout.scratch_bit(index) != source_bit
+    )
+
+    assert len(available_clean) == 31
+    assert max_clean_ancillas_for_increment(32) == 30
+    assert len(available_clean) >= max_clean_ancillas_for_increment(32)
+    assert source_bit != layout.carry_bit
