@@ -267,10 +267,30 @@ scratch    transmons 99..106 plus the eight state-word padding levels
 All 321 level-bits are mapped exactly once. There is no hidden second schedule
 word.
 
-### Why the coherent schedule cannot stay word-at-a-time
+### Exact coherent schedule dependency IR
+
+The coherent schedule is no longer planned only at word granularity.
+`coherent_dag.py` builds the exact W0..W63 dependency graph over XOR/AND
+nodes, with the 32 persistent nonce bits as its only variable inputs.
+
+Each four-operand SHA schedule sum is represented as:
+
+```text
+3:2 compressor
+      ↓
+3:2 compressor
+      ↓
+one final carry-propagate addition
+```
+
+so the semantic schedule has one long carry-propagation boundary instead of
+three chained ripple additions. Randomized nonce evaluations of this graph are
+checked against the independent SHA schedule evaluator.
+
+### Reversible word-pebble schedule
 
 For a Bitcoin-style second SHA block with the coherent nonce at W3, the exact
-dependency frontier is:
+word dependency frontier still reaches seven clean word pebbles:
 
 ```text
 W18..W24   1 clean word pebble
@@ -282,24 +302,41 @@ W53..W59   6
 W60..W63   7
 ```
 
-This is computed with arbitrary recomputation allowed. Therefore even the
-width-first full-word strategy eventually needs seven simultaneous clean
-32-bit word pebbles and cannot fit the single 32-bit scratch budget.
+`coherent_pebble.py` now emits an explicit compute/use/uncompute action stream
+for this recurrence instead of treating that count as a paper estimate.
+Representative programs through W63 are verified against the exact reference
+schedule and then reversed; every temporary word pebble returns to zero.
 
-The coherent planner consequently selects **4-bit limbs**:
+A key optimization is that both SHA-256 small-sigma transforms are full-rank
+32x32 GF(2) linear maps. They can therefore be applied to a pebble in place and
+later inverted exactly. At gate lowering they require linear CNOT networks, not
+a second 32-bit destination register.
+
+For W63, the width-first standalone recomputation program reaches the expected
+seven-word frontier but is intentionally expensive (roughly 275k semantic
+word-level actions before limb/gate lowering). This is why ROUND16-level
+checkpoint reuse is the next depth optimization.
+
+### 32-bit scratch partition candidate
+
+The 107-transmon layout still has only one 32-bit clean scratch word. A
+word-level seven-pebble program therefore cannot be materialized as seven
+32-bit registers.
+
+The allocator retains the following candidate partition:
 
 ```text
-7 worst-case pebbles × 4 bits = 28 scratch bits
-4 scratch bits remain for local reversible staging
-carry remains separate
+7 word-pebble roles × 4 scratch bits = 28 bits
+local helper budget                   =  4 bits
+                                      --------
+scratch total                         = 32 bits
 ```
 
-A uniform 5-bit limb would require 35 scratch bits and is rejected.
-
-The reusable Cuccaro kernel has been generalized from ADD32 to an exact
-little-endian n-bit adder, so the same verified arithmetic primitive is reused
-for the 4-bit schedule limbs rather than introducing a second arithmetic
-implementation.
+This is now deliberately labeled a **candidate**, not a completed lowering
+proof. Rotated sigma references cross 4-bit boundaries and modular-add carries
+cross limb boundaries. Those dependencies must be lowered from the exact
+bit-level DAG into the four helper bits (plus the separately mapped carry bit)
+before `coherent107` is considered executable.
 
 ### Coherent verification oracle
 
