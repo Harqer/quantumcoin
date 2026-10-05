@@ -300,8 +300,10 @@ class CoherentLimbWorkspace:
     plan: CoherentSchedulePlan
 
     def __post_init__(self) -> None:
-        if not self.layout.is_coherent_nonce:
-            raise ValueError("coherent limb workspace requires coherent107 layout")
+        if self.layout.profile != "coherent107":
+            raise ValueError(
+                "coherent limb workspace is only the coherent107 optimization candidate"
+            )
         if self.plan.limb_pebble_bits > 32:
             raise ValueError("limb pebble allocation exceeds 32 scratch bits")
 
