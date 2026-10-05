@@ -133,3 +133,51 @@ def max_clean_ancillas_for_increment(width: int) -> int:
     # The worst increment is bit 0 toggling the MSB: one external control plus
     # width-1 lower target controls => width total controls => width-2 ancillas.
     return max(0, width - 2)
+
+
+
+def add_from_ephemeral_bit_oracle(
+    circuit: ReversibleCircuit,
+    target_bits: tuple[int, ...],
+    ephemeral_bit: int,
+    clean_ancillas: tuple[int, ...],
+    compute_bit,
+) -> None:
+    """Exact target += F(input) using one computed source bit at a time.
+
+    compute_bit(circuit, bit_index, ephemeral_bit) must toggle ephemeral_bit by
+    the requested source bit while returning every other workspace bit to its
+    entry state. The emitted compute gates are reversed immediately after the
+    controlled increment, so ephemeral_bit is restored to |0> before the next
+    bit is requested.
+
+    This is the integration boundary for coherent SHA schedule limbs:
+      compute W[t][i] -> controlled +2**i -> uncompute W[t][i].
+    """
+    width = len(target_bits)
+    if not width:
+        raise ValueError("target_bits must be non-empty")
+    if ephemeral_bit in target_bits:
+        raise ValueError("ephemeral bit must be distinct from target")
+    if ephemeral_bit in clean_ancillas:
+        raise ValueError("ephemeral bit must not also be an increment ancilla")
+    if set(clean_ancillas) & set(target_bits):
+        raise ValueError("increment ancillas must be disjoint from target")
+
+    for bit_index in range(width):
+        start = len(circuit.gates)
+        compute_bit(circuit, bit_index, ephemeral_bit)
+        compute_gates = circuit.gates[start:].copy()
+
+        controlled_increment_power_of_two(
+            circuit,
+            ephemeral_bit,
+            target_bits,
+            bit_index,
+            clean_ancillas,
+        )
+
+        circuit.extend(
+            gate.inverse()
+            for gate in reversed(compute_gates)
+        )
