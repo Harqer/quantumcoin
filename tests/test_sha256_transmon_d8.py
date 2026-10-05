@@ -19,6 +19,7 @@ from quantum.sha256_transmon_d8.sha256 import (
     H0,
     K,
     MASK32,
+    _add_constant32,
     compile_single_block_sha256,
     initial_state,
     simulate_compiled_sha256,
@@ -144,6 +145,50 @@ def test_reusable_macros_reduce_ir_nodes_without_hiding_primitive_cost():
     assert compiled.ir_node_count < compiled.logical_gate_count
     assert any(gate.kind == "MAJ" for gate in compiled.circuit.gates)
     assert any(gate.kind == "UMA" for gate in compiled.circuit.gates)
+
+
+def test_constant_specialized_add32_is_exact_and_cleans_workspace():
+    rng = random.Random(0xC05A_32)
+
+    for profile in available_layout_profiles():
+        layout = D8Layout(profile=profile)
+        for _ in range(12):
+            constant = rng.randrange(1 << 32)
+            value = rng.randrange(1 << 32)
+            state = layout.empty_state()
+            layout.set_word(state, 0, value)
+
+            circuit = ReversibleCircuit()
+            _add_constant32(circuit, layout, 0, constant)
+
+            output = simulate(circuit, state)
+            assert layout.get_word(output, 0) == (value + constant) & MASK32
+            layout.assert_clean_workspace(output)
+
+            restored = simulate(circuit.inverse(), output)
+            assert restored == state
+
+
+def test_constant_specialization_beats_generic_constant_addition():
+    compiled = compile_single_block_sha256(b"abc")
+    constant_regions = [
+        region
+        for region in compiled.circuit.regions
+        if region.kind == "CONST_ADD"
+    ]
+
+    assert len(constant_regions) == 72
+    # A generic clean-scratch Cuccaro constant add costs at least 192
+    # primitives before load/unload X gates. Specialization should reduce the
+    # aggregate cost below that floor for this fixed SHA workload.
+    specialized_cost = sum(
+        sum(
+            gate.primitive_gate_count
+            for gate in compiled.circuit.gates[region.start:region.stop]
+        )
+        for region in constant_regions
+    )
+    assert specialized_cost < 72 * 192
 
 
 def test_fused_round_constants_reduce_logical_gate_count():
