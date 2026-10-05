@@ -44,19 +44,40 @@ class Gate:
         return Gate(_INVERSE_KIND[self.kind], self.qubits)
 
 
+@dataclass(frozen=True)
+class SemanticRegion:
+    """Named reusable interval in the reversible IR."""
+
+    kind: str
+    start: int
+    stop: int
+    metadata: tuple[tuple[str, int], ...] = ()
+
+    def validate(self, gate_count: int) -> None:
+        if not self.kind:
+            raise ValueError("semantic region kind must be non-empty")
+        if not 0 <= self.start < self.stop <= gate_count:
+            raise ValueError(
+                f"invalid {self.kind} region [{self.start}, {self.stop}) "
+                f"for {gate_count} gates"
+            )
+
+
 class ReversibleCircuit:
-    """Exact classical-basis reversible IR.
+    """Exact classical-basis reversible IR with reusable semantic regions.
 
     X/CX/CCX remain primitive reversible operations. Cuccaro MAJ/UMA are kept
     as first-class inverse macros so hardware lowering can calibrate the exact
     three-wire permutation directly instead of repeatedly rediscovering the
     same CX/CX/CCX sequence.
 
-    The same IR is later fused into d=8 transmon pulse targets.
+    Regions such as ADD32 and ROUND16 survive until pulse lowering. They are
+    optimization boundaries, not extra operations.
     """
 
     def __init__(self) -> None:
         self.gates: list[Gate] = []
+        self.regions: list[SemanticRegion] = []
 
     def x(self, q: int) -> None:
         self.gates.append(Gate("X", (q,)))
@@ -76,6 +97,35 @@ class ReversibleCircuit:
     def extend(self, gates: Iterable[Gate]) -> None:
         self.gates.extend(gates)
 
+    def add_region(
+        self,
+        kind: str,
+        start: int,
+        stop: int,
+        **metadata: int,
+    ) -> SemanticRegion:
+        region = SemanticRegion(
+            kind=kind,
+            start=start,
+            stop=stop,
+            metadata=tuple(sorted(metadata.items())),
+        )
+        region.validate(len(self.gates))
+        self.regions.append(region)
+        return region
+
+    def region_boundaries(self, kinds: set[str] | None = None) -> set[int]:
+        selected = (
+            self.regions
+            if kinds is None
+            else [region for region in self.regions if region.kind in kinds]
+        )
+        return {
+            boundary
+            for region in selected
+            for boundary in (region.start, region.stop)
+        }
+
     @property
     def primitive_gate_count(self) -> int:
         """Equivalent X/CX/CCX count without discarding macro structure."""
@@ -83,12 +133,24 @@ class ReversibleCircuit:
 
     def inverse(self) -> "ReversibleCircuit":
         out = ReversibleCircuit()
+        n = len(self.gates)
         out.gates = [gate.inverse() for gate in reversed(self.gates)]
+        out.regions = [
+            SemanticRegion(
+                kind=region.kind,
+                start=n - region.stop,
+                stop=n - region.start,
+                metadata=region.metadata,
+            )
+            for region in self.regions
+        ]
         return out
 
     def validate(self) -> None:
         for gate in self.gates:
             gate.validate()
+        for region in self.regions:
+            region.validate(len(self.gates))
 
 
 def _apply_maj(state: list[int], a: int, b: int, carry: int) -> None:
