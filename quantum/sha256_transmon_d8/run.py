@@ -4,9 +4,10 @@ import argparse
 import hashlib
 
 from .ir import simulate
+from .layout import D8Layout, available_layout_profiles
 from .pulse_targets import (
-    fuse_for_direct_pulse_calibration,
-    unique_calibration_targets,
+    pareto_pulse_candidates,
+    pulse_candidates,
 )
 from .sha256 import (
     compile_single_block_sha256,
@@ -20,10 +21,27 @@ def main() -> int:
         description="Compile and verify exact reversible d=8 SHA-256."
     )
     parser.add_argument("--message", required=True, help="UTF-8 message, max 55 bytes")
+    parser.add_argument(
+        "--layout-profile",
+        choices=available_layout_profiles(),
+        default="aligned100",
+        help="d=8 physical placement profile",
+    )
+    parser.add_argument(
+        "--boolean-strategy",
+        choices=("anf", "low_multiplicative"),
+        default="anf",
+        help="exact Ch/Maj synthesis strategy",
+    )
     args = parser.parse_args()
 
     message = args.message.encode("utf-8")
-    compiled = compile_single_block_sha256(message)
+    layout = D8Layout(profile=args.layout_profile)
+    compiled = compile_single_block_sha256(
+        message,
+        layout=layout,
+        boolean_strategy=args.boolean_strategy,
+    )
     start = initial_state(compiled)
     output = simulate(compiled.circuit, start)
     digest = digest_from_state(compiled, output)
@@ -38,14 +56,28 @@ def main() -> int:
     if restored != start:
         raise SystemExit("reversibility verification failed")
 
-    pulse_blocks = fuse_for_direct_pulse_calibration(compiled.circuit)
-    unique = unique_calibration_targets(compiled.circuit)
+    candidates = pulse_candidates(compiled.circuit)
+    frontier = pareto_pulse_candidates(compiled.circuit)
 
     print(f"digest={digest.hex()}")
+    print(f"layout_profile={compiled.layout.profile}")
+    print(f"boolean_strategy={compiled.boolean_strategy}")
     print(f"transmons={compiled.layout.total_transmons}")
-    print(f"logical_gates={compiled.logical_gate_count}")
-    print(f"pulse_blocks_max3={len(pulse_blocks)}")
-    print(f"unique_calibration_targets={len(unique)}")
+    print(f"primitive_equivalent_gates={compiled.logical_gate_count}")
+    print(f"nonlinear_gates={compiled.nonlinear_gate_count}")
+    print(f"semantic_ir_nodes={compiled.ir_node_count}")
+    print(f"round16_blocks={len(compiled.round16_blocks)}")
+    for candidate in candidates:
+        print(
+            f"pulse_candidate_{candidate.name}="
+            f"depth:{candidate.unit_depth},"
+            f"blocks:{candidate.block_count},"
+            f"unique:{candidate.unique_target_count}"
+        )
+    print(
+        "pareto_pulse_candidates="
+        + ",".join(candidate.name for candidate in frontier)
+    )
     print("scratch_clean=yes")
     print("carry_clean=yes")
     print("inverse_restores_input=yes")

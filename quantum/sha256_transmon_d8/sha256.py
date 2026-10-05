@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ir import Gate, ReversibleCircuit, simulate
+from .ir import ReversibleCircuit, simulate, specialize_basis_constants
 from .layout import D8Layout
 
 MASK32 = 0xFFFFFFFF
@@ -24,16 +24,64 @@ H0 = (
 )
 
 
+def _frozen_roles(roles: dict[str, int]) -> tuple[tuple[str, int], ...]:
+    return tuple((name, roles[name]) for name in "abcdefgh")
+
+
+@dataclass(frozen=True)
+class Round16Block:
+    """One reusable 16-round SHA-256 superblock instance.
+
+    The block owns no persistent workspace. `gate_start:gate_stop` is the exact
+    gate span for sixteen rounds. All scratch/carry state must be restored at
+    the exit boundary so the same physical workspace can be reused by the next
+    block.
+    """
+
+    index: int
+    round_start: int
+    round_stop: int
+    gate_start: int
+    gate_stop: int
+    entry_roles: tuple[tuple[str, int], ...]
+    exit_roles: tuple[tuple[str, int], ...]
+    fused_round_constants: tuple[int, ...]
+
+    @property
+    def gate_count(self) -> int:
+        return self.gate_stop - self.gate_start
+
+    @property
+    def entry_role_map(self) -> dict[str, int]:
+        return dict(self.entry_roles)
+
+    @property
+    def exit_role_map(self) -> dict[str, int]:
+        return dict(self.exit_roles)
+
+
 @dataclass(frozen=True)
 class CompiledSha256:
     circuit: ReversibleCircuit
     layout: D8Layout
     final_roles: dict[str, int]
     schedule_words: tuple[int, ...]
+    round16_blocks: tuple[Round16Block, ...]
+    boolean_strategy: str
 
     @property
     def logical_gate_count(self) -> int:
+        """Primitive-equivalent X/CX/CCX count for resource comparison."""
+        return self.circuit.primitive_gate_count
+
+    @property
+    def ir_node_count(self) -> int:
+        """Number of semantic IR nodes after reusable-macro preservation."""
         return len(self.circuit.gates)
+
+    @property
+    def nonlinear_gate_count(self) -> int:
+        return self.circuit.nonlinear_gate_count
 
 
 def _rotr(x: int, n: int) -> int:
@@ -74,19 +122,37 @@ def _single_block_schedule(message: bytes) -> tuple[int, ...]:
     return tuple(w)
 
 
-def _maj(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
-    # Exact Cuccaro MAJ permutation:
-    # b ^= carry; a ^= carry; carry ^= a & b
+def _maj_primitives(
+    c: ReversibleCircuit,
+    a: int,
+    b: int,
+    carry: int,
+) -> None:
     c.cx(carry, b)
     c.cx(carry, a)
     c.ccx(a, b, carry)
 
 
-def _uma(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
-    # Exact Cuccaro UMA reverse-sweep primitive.
+def _uma_primitives(
+    c: ReversibleCircuit,
+    a: int,
+    b: int,
+    carry: int,
+) -> None:
     c.ccx(a, b, carry)
     c.cx(carry, a)
     c.cx(a, b)
+
+
+def _maj(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
+    # Keep the exact Cuccaro permutation as one reusable IR macro. Hardware
+    # lowering may target the full 2-3-transmon permutation directly.
+    c.maj(a, b, carry)
+
+
+def _uma(c: ReversibleCircuit, a: int, b: int, carry: int) -> None:
+    # Exact inverse of MAJ, preserved as the paired reusable macro.
+    c.uma(a, b, carry)
 
 
 def _add32(
@@ -94,8 +160,10 @@ def _add32(
     layout: D8Layout,
     source_slot: int,
     target_slot: int,
+    region_kind: str = "ADD32",
 ) -> None:
     """target <- target + source mod 2^32, restoring source and carry."""
+    start = len(c.gates)
     a = [layout.word_bit(source_slot, i) for i in range(32)]
     b = [layout.word_bit(target_slot, i) for i in range(32)]
     cin = layout.carry_bit
@@ -107,6 +175,14 @@ def _add32(
     for i in range(30, -1, -1):
         _uma(c, a[i], b[i + 1], a[i + 1])
     _uma(c, cin, b[0], a[0])
+
+    c.add_region(
+        region_kind,
+        start,
+        len(c.gates),
+        source_slot=source_slot,
+        target_slot=target_slot,
+    )
 
 
 def _load_scratch_constant(c: ReversibleCircuit, layout: D8Layout, value: int) -> None:
@@ -121,6 +197,7 @@ def _scratch_xor_sigma(
     source_slot: int,
     rotations: tuple[int, int, int],
 ) -> None:
+    # ROTR is a logical source-index view. No SWAP/permutation circuit is emitted.
     for i in range(32):
         for rotation in rotations:
             c.cx(
@@ -136,6 +213,7 @@ def _scratch_xor_ch(
     y_slot: int,
     z_slot: int,
 ) -> None:
+    # ANF: Ch(x,y,z) = z XOR xy XOR xz.
     for i in range(32):
         target = layout.scratch_bit(i)
         x = layout.word_bit(x_slot, i)
@@ -146,6 +224,52 @@ def _scratch_xor_ch(
         c.ccx(x, z, target)
 
 
+def _scratch_xor_ch_low_multiplicative(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    x_slot: int,
+    y_slot: int,
+    z_slot: int,
+) -> None:
+    """Ch = z XOR x(y XOR z), using one nonlinear product per bit.
+
+    z is borrowed as dirty workspace and restored before returning.
+    """
+    for i in range(32):
+        target = layout.scratch_bit(i)
+        x = layout.word_bit(x_slot, i)
+        y = layout.word_bit(y_slot, i)
+        z = layout.word_bit(z_slot, i)
+        c.cx(z, target)
+        c.cx(y, z)
+        c.ccx(x, z, target)
+        c.cx(y, z)
+
+
+def _scratch_xor_maj_low_multiplicative(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    x_slot: int,
+    y_slot: int,
+    z_slot: int,
+) -> None:
+    """Maj = x XOR (x XOR y)(x XOR z), one nonlinear product per bit.
+
+    y and z are borrowed as dirty workspace and restored before returning.
+    """
+    for i in range(32):
+        target = layout.scratch_bit(i)
+        x = layout.word_bit(x_slot, i)
+        y = layout.word_bit(y_slot, i)
+        z = layout.word_bit(z_slot, i)
+        c.cx(x, target)
+        c.cx(x, y)
+        c.cx(x, z)
+        c.ccx(y, z, target)
+        c.cx(x, z)
+        c.cx(x, y)
+
+
 def _scratch_xor_maj(
     c: ReversibleCircuit,
     layout: D8Layout,
@@ -153,6 +277,7 @@ def _scratch_xor_maj(
     y_slot: int,
     z_slot: int,
 ) -> None:
+    # ANF: Maj(x,y,z) = xy XOR xz XOR yz.
     for i in range(32):
         target = layout.scratch_bit(i)
         x = layout.word_bit(x_slot, i)
@@ -168,109 +293,283 @@ def _compute_add_uncompute(
     compute,
     layout: D8Layout,
     target_slot: int,
+    region_kind: str,
 ) -> None:
+    """Lease scratch, compute a term, add it, restore it, and close the block."""
     start = len(c.gates)
     compute(c)
     compute_gates = c.gates[start:].copy()
-    _add32(c, layout, layout.scratch_slot, target_slot)
-    # X/CX/CCX are self-inverse; reverse exact compute path.
-    c.extend(reversed(compute_gates))
+    _add32(
+        c,
+        layout,
+        layout.scratch_slot,
+        target_slot,
+        region_kind="ADD32_INNER",
+    )
+    # Uncompute through each operation's exact inverse. This remains correct
+    # when future compute regions contain paired reusable macros such as
+    # MAJ/UMA rather than only self-inverse primitive gates.
+    c.extend(gate.inverse() for gate in reversed(compute_gates))
+    c.add_region(
+        region_kind,
+        start,
+        len(c.gates),
+        target_slot=target_slot,
+    )
 
 
-def compile_single_block_sha256(message: bytes) -> CompiledSha256:
+def _add_constant32(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    target_slot: int,
+    value: int,
+) -> None:
+    """Specialized exact target <- target + value mod 2^32.
+
+    Build the clean-scratch Cuccaro reference region, then propagate the proven
+    basis constants (scratch=0, carry=0) before committing gates to the main
+    circuit. This preserves the exact arithmetic contract while removing gates
+    whose controls are compile-time constants.
+    """
+    value &= MASK32
+    if value == 0:
+        return
+
+    reference = ReversibleCircuit()
+    _load_scratch_constant(reference, layout, value)
+
+    a = [layout.scratch_bit(i) for i in range(32)]
+    b = [layout.word_bit(target_slot, i) for i in range(32)]
+    carry = layout.carry_bit
+
+    # Primitive Cuccaro reference form is intentional here: the semantic
+    # constant-propagation pass operates only on X/CX/CCX basis-state logic.
+    _maj_primitives(reference, carry, b[0], a[0])
+    for i in range(31):
+        _maj_primitives(reference, a[i], b[i + 1], a[i + 1])
+
+    for i in range(30, -1, -1):
+        _uma_primitives(reference, a[i], b[i + 1], a[i + 1])
+    _uma_primitives(reference, carry, b[0], a[0])
+
+    _load_scratch_constant(reference, layout, value)
+
+    known_clean = {layout.scratch_bit(i): 0 for i in range(32)}
+    known_clean[layout.carry_bit] = 0
+    optimized, residual_known = specialize_basis_constants(
+        reference.gates,
+        known_clean,
+    )
+
+    if any(residual_known.values()):
+        raise AssertionError(
+            "constant-specialized ADD32 left a virtual nonzero clean ancilla"
+        )
+
+    start = len(c.gates)
+    c.extend(optimized)
+    c.add_region(
+        "CONST_ADD",
+        start,
+        len(c.gates),
+        target_slot=target_slot,
+    )
+
+
+def _shift_roles(roles: dict[str, int]) -> dict[str, int]:
+    """Implement the SHA register shift by reference renaming only."""
+    return {
+        "a": roles["h"],
+        "b": roles["a"],
+        "c": roles["b"],
+        "d": roles["c"],
+        "e": roles["d"],
+        "f": roles["e"],
+        "g": roles["f"],
+        "h": roles["g"],
+    }
+
+
+def _emit_round(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    roles: dict[str, int],
+    round_constant: int,
+    boolean_strategy: str,
+) -> dict[str, int]:
+    """Emit one exact in-place SHA-256 round.
+
+    `round_constant` is `(K[t] + W[t]) mod 2^32`. Fusing these two classical
+    terms is exact by associativity of addition modulo 2^32 and removes one
+    complete reusable ADD32 path from every round.
+    """
+    h = roles["h"]
+    if boolean_strategy == "anf":
+        ch_compute = _scratch_xor_ch
+        maj_compute = _scratch_xor_maj
+    elif boolean_strategy == "low_multiplicative":
+        ch_compute = _scratch_xor_ch_low_multiplicative
+        maj_compute = _scratch_xor_maj_low_multiplicative
+    else:
+        raise ValueError(f"unknown boolean strategy {boolean_strategy!r}")
+
+    # h accumulates T1 in-place.
+    _compute_add_uncompute(
+        c,
+        lambda cc, e=roles["e"]: _scratch_xor_sigma(
+            cc, layout, e, (6, 11, 25)
+        ),
+        layout,
+        h,
+        region_kind="SIGMA1_ADD",
+    )
+    _compute_add_uncompute(
+        c,
+        lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: ch_compute(
+            cc, layout, e, f, g
+        ),
+        layout,
+        h,
+        region_kind="CH_ADD",
+    )
+    _add_constant32(c, layout, h, round_constant)
+
+    # old d becomes new e; h still holds T1.
+    _add32(c, layout, h, roles["d"])
+
+    # h becomes new a = T1 + T2.
+    _compute_add_uncompute(
+        c,
+        lambda cc, a=roles["a"]: _scratch_xor_sigma(
+            cc, layout, a, (2, 13, 22)
+        ),
+        layout,
+        h,
+        region_kind="SIGMA0_ADD",
+    )
+    _compute_add_uncompute(
+        c,
+        lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: maj_compute(
+            cc, layout, a, b, cslot
+        ),
+        layout,
+        h,
+        region_kind="MAJ_ADD",
+    )
+
+    return _shift_roles(roles)
+
+
+def _emit_round16(
+    c: ReversibleCircuit,
+    layout: D8Layout,
+    roles: dict[str, int],
+    schedule_words: tuple[int, ...],
+    round_start: int,
+    boolean_strategy: str,
+) -> tuple[dict[str, int], Round16Block]:
+    """Emit the reusable 16-round optimization unit.
+
+    Workspace ownership is block-scoped: every round borrows the same scratch
+    word and carry bit and restores them before the next round. Consequently,
+    the block exits with no live temporary state and can be instantiated four
+    times without garbage accumulation.
+    """
+    if round_start not in (0, 16, 32, 48):
+        raise ValueError("ROUND16 must start at SHA round 0, 16, 32, or 48")
+
+    entry_roles = _frozen_roles(roles)
+    gate_start = len(c.gates)
+    fused_constants: list[int] = []
+
+    for t in range(round_start, round_start + 16):
+        fused = (K[t] + schedule_words[t]) & MASK32
+        fused_constants.append(fused)
+        roles = _emit_round(
+            c,
+            layout,
+            roles,
+            fused,
+            boolean_strategy=boolean_strategy,
+        )
+
+    c.add_region(
+        "ROUND16",
+        gate_start,
+        len(c.gates),
+        block_index=round_start // 16,
+        round_start=round_start,
+    )
+
+    block = Round16Block(
+        index=round_start // 16,
+        round_start=round_start,
+        round_stop=round_start + 16,
+        gate_start=gate_start,
+        gate_stop=len(c.gates),
+        entry_roles=entry_roles,
+        exit_roles=_frozen_roles(roles),
+        fused_round_constants=tuple(fused_constants),
+    )
+    return roles, block
+
+
+def compile_single_block_sha256(
+    message: bytes,
+    layout: D8Layout | None = None,
+    boolean_strategy: str = "anf",
+) -> CompiledSha256:
     """Compile exact 64-round SHA-256 for one padded classical message block.
 
     Contract:
       * full standard SHA-256 semantics for messages <=55 bytes;
+      * four reusable 16-round superblock instances;
       * no intermediate measurement/reset;
       * every emitted operation is reversible;
-      * scratch and carry return to |0>;
-      * W_t and K_t are classical pulse parameters, not quantum registers;
+      * scratch and carry return to |0> after every leased operation and block;
+      * W_t and K_t are classical parameters, not quantum registers;
+      * K_t + W_t is fused before reversible synthesis;
       * final feed-forward is reversible because H0 is a fixed constant.
 
-    This is the current-hardware reversible contract. Arbitrary coherent-message
-    or multi-block chaining requires more quantum storage and is intentionally
-    rejected rather than silently changing the contract.
+    Arbitrary coherent-message or multi-block chaining requires more quantum
+    storage and is intentionally rejected rather than silently changing the
+    contract.
     """
-    layout = D8Layout()
+    layout = layout or D8Layout()
+    if boolean_strategy not in {"anf", "low_multiplicative"}:
+        raise ValueError(
+            "boolean_strategy must be 'anf' or 'low_multiplicative'"
+        )
     w = _single_block_schedule(message)
     c = ReversibleCircuit()
     roles = dict(zip("abcdefgh", range(8)))
+    blocks: list[Round16Block] = []
 
-    for t in range(64):
-        _compute_add_uncompute(
+    for round_start in range(0, 64, 16):
+        roles, block = _emit_round16(
             c,
-            lambda cc, e=roles["e"]: _scratch_xor_sigma(
-                cc, layout, e, (6, 11, 25)
-            ),
             layout,
-            roles["h"],
+            roles,
+            w,
+            round_start,
+            boolean_strategy=boolean_strategy,
         )
-        _compute_add_uncompute(
-            c,
-            lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: _scratch_xor_ch(
-                cc, layout, e, f, g
-            ),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=K[t]: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=w[t]: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles["h"],
-        )
-
-        # d <- d + T1, while h still contains T1.
-        _add32(c, layout, roles["h"], roles["d"])
-
-        _compute_add_uncompute(
-            c,
-            lambda cc, a=roles["a"]: _scratch_xor_sigma(
-                cc, layout, a, (2, 13, 22)
-            ),
-            layout,
-            roles["h"],
-        )
-        _compute_add_uncompute(
-            c,
-            lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: _scratch_xor_maj(
-                cc, layout, a, b, cslot
-            ),
-            layout,
-            roles["h"],
-        )
-
-        # Pure role relabeling implements the SHA register shift at zero gate cost.
-        roles = {
-            "a": roles["h"],
-            "b": roles["a"],
-            "c": roles["b"],
-            "d": roles["c"],
-            "e": roles["d"],
-            "f": roles["e"],
-            "g": roles["f"],
-            "h": roles["g"],
-        }
+        blocks.append(block)
 
     # For the first/fixed-IV SHA block, feed-forward is constant addition and
     # therefore bijective in place.
     for name, initial in zip("abcdefgh", H0):
-        _compute_add_uncompute(
-            c,
-            lambda cc, value=initial: _load_scratch_constant(cc, layout, value),
-            layout,
-            roles[name],
-        )
+        _add_constant32(c, layout, roles[name], initial)
 
     c.validate()
-    return CompiledSha256(c, layout, roles, w)
+    return CompiledSha256(
+        c,
+        layout,
+        roles,
+        w,
+        tuple(blocks),
+        boolean_strategy,
+    )
 
 
 def initial_state(compiled: CompiledSha256) -> list[int]:
@@ -290,7 +589,15 @@ def digest_from_state(compiled: CompiledSha256, state: list[int]) -> bytes:
     return b"".join(word.to_bytes(4, "big") for word in words)
 
 
-def simulate_compiled_sha256(message: bytes) -> bytes:
-    compiled = compile_single_block_sha256(message)
+def simulate_compiled_sha256(
+    message: bytes,
+    layout: D8Layout | None = None,
+    boolean_strategy: str = "anf",
+) -> bytes:
+    compiled = compile_single_block_sha256(
+        message,
+        layout=layout,
+        boolean_strategy=boolean_strategy,
+    )
     output = simulate(compiled.circuit, initial_state(compiled))
     return digest_from_state(compiled, output)

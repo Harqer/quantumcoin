@@ -69,9 +69,13 @@ def _largest_component(target: LiveRigettiTarget) -> set[int]:
     return largest
 
 
-def preflight_current_hardware(target: LiveRigettiTarget) -> dict:
-    """Reject a target that cannot even host the exact d=8 state layout."""
-    required = D8Layout().total_transmons
+def preflight_current_hardware(
+    target: LiveRigettiTarget,
+    layout: D8Layout | None = None,
+) -> dict:
+    """Reject a target that cannot host the selected exact d=8 layout."""
+    layout = layout or D8Layout()
+    required = layout.total_transmons
     component = _largest_component(target)
 
     if len(target.physical_qubits) < required:
@@ -87,6 +91,7 @@ def preflight_current_hardware(target: LiveRigettiTarget) -> dict:
 
     return {
         "qpu": target.name,
+        "layout_profile": layout.profile,
         "available_transmons": len(target.physical_qubits),
         "largest_connected_component": len(component),
         "required_transmons": required,
