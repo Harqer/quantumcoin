@@ -71,6 +71,14 @@ def main() -> int:
     print(f"carrier_local_permutations={carrier_program.local_permutation_count}")
     print(f"carrier_local_source_gates={carrier_program.fused_local_gate_count}")
     print(f"carrier_cross_gates={carrier_program.cross_carrier_gate_count}")
+    print(
+        f"carrier_local_identity_gates_eliminated="
+        f"{carrier_program.eliminated_local_identity_gates}"
+    )
+    print(
+        f"carrier_cross_inverse_gates_cancelled="
+        f"{carrier_program.cancelled_cross_carrier_gates}"
+    )
     print(f"peak_clean_workspace_bits={liveness.peak_clean_bits}")
     print(f"peak_borrowed_state_bits={liveness.peak_borrowed_bits}")
     print(f"peak_extra_workspace_bits={liveness.peak_extra_bits}")
