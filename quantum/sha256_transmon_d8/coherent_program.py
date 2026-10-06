@@ -16,6 +16,7 @@ from .sha256 import (
     _add32,
     _add_constant32,
     _compute_add_uncompute,
+    _emit_round,
     _scratch_xor_ch,
     _scratch_xor_ch_low_multiplicative,
     _scratch_xor_maj,
@@ -209,11 +210,31 @@ def compile_coherent_nonce_sha256(
         )
 
     schedule = select_schedule_dag(fixed_words, nonce_word_index)
+    fixed_schedule = schedule.evaluate(0)
+    dynamic_rounds = set(schedule.stats.dynamic_schedule_words)
     roles = dict(zip("abcdefgh", range(8)))
     operations: list[CoherentOperation] = []
     reports: list[StreamedWordAddReport] = []
 
     for round_index in range(64):
+        if round_index not in dynamic_rounds:
+            # Preserve the strongest classical specialization wherever the
+            # coherent nonce provably cannot affect W[t].
+            static_round = ReversibleCircuit()
+            fused = (K[round_index] + fixed_schedule[round_index]) & MASK32
+            roles = _emit_round(
+                static_round,
+                layout,
+                roles,
+                fused,
+                boolean_strategy,
+            )
+            static_round.validate()
+            operations.append(
+                CircuitBlock(static_round, f"ROUND_{round_index}_STATIC")
+            )
+            continue
+
         prefix = _round_prefix(layout, roles, boolean_strategy)
         operations.append(CircuitBlock(prefix, f"ROUND_{round_index}_PREFIX"))
 
