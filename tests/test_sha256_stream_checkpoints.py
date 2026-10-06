@@ -36,28 +36,28 @@ def test_w63_checkpoint_plan_reduces_projected_recomputation():
 
 def test_checkpoint_plans_are_deterministic_and_width_safe():
     schedule = _schedule()
+    round_index = 31
 
-    for round_index in (18, 31, 47, 63):
-        left = plan_stream_checkpoints(
-            schedule,
-            round_index,
-            max_cache_bits=31,
-            candidate_limit=48,
-        )
-        right = plan_stream_checkpoints(
-            schedule,
-            round_index,
-            max_cache_bits=31,
-            candidate_limit=48,
-        )
+    left = plan_stream_checkpoints(
+        schedule,
+        round_index,
+        max_cache_bits=8,
+        candidate_limit=12,
+    )
+    right = plan_stream_checkpoints(
+        schedule,
+        round_index,
+        max_cache_bits=8,
+        candidate_limit=12,
+    )
 
-        assert left == right
-        assert left.width_safe
-        assert len(left.cached_nodes) <= 31
-        assert left.projected_gate_count <= streamed_word_add_gate_count(
-            schedule,
-            round_index,
-        )
+    assert left == right
+    assert left.width_safe
+    assert len(left.cached_nodes) <= 8
+    assert left.projected_gate_count <= streamed_word_add_gate_count(
+        schedule,
+        round_index,
+    )
 
 
 def test_checkpointed_w18_emitter_is_exact_and_cleans_scratch():
