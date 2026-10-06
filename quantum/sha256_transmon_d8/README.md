@@ -317,122 +317,64 @@ seven-word frontier but is intentionally expensive (roughly 275k semantic
 word-level actions before limb/gate lowering). This is why ROUND16-level
 checkpoint reuse is the next depth optimization.
 
-### Width-safe coherent reference and 107-transmon target
+### coherent107 optimization target
 
-The 107-transmon profile remains the optimized hardware target:
-
-```text
-256 state + 32 nonce + 32 scratch + 1 carry = 321 level-bits
-321 / 3 = 107 d=8 transmons
-```
-
-Its earlier `28 + 4` partition remains an optimization candidate only:
+The coherent target remains exactly:
 
 ```text
-7 abstract word-pebble roles × 4 bits = 28
-helper budget                         =  4
-                                      ----
-scratch                               = 32 bits
+256 SHA state
+ 32 coherent nonce
+ 32 reusable workspace
+  1 carry
+---
+321 logical basis bits
+= 107 d=8 carrier labels
 ```
 
-The exact bit-DAG audit showed that a naive recursive Boolean lowering cannot
-justify those four helpers; late-round outputs such as W63 have much larger
-nested temporary requirements if arithmetic structure is discarded. The
-compiler therefore does not claim coherent107 is executable yet.
-
-Two explicit wider reference layouts separate correctness from width reduction:
+The compiler treats these as one continuous reversible computation. Temporary
+schedule/arithmetic values are live quantum state, not classical storage.
+Workspace follows explicit liveness and cleanup contracts:
 
 ```text
-coherent171
-  256 state + 32 nonce + 224 schedule + 1 carry = 513 level-bits
-  171 d=8 transmons
-  seven full schedule pebbles, but no separate arithmetic word
-
-coherent182
-  256 state + 32 nonce + 224 schedule
-  + 32 reusable arithmetic scratch + 1 carry
-  = 545 mapped level-bits
-  182 d=8 transmons (546 level-bit capacity)
+compute -> consume -> uncompute -> reuse
 ```
 
-`coherent182` is the executable full-word reference. Its seven schedule
-pebbles are physically distinct from the reusable 32-bit arithmetic word used
-by exact constant addition, Sigma/Ch/Maj accumulation, and cleanup.
+Retain an intermediate only when measured reuse cost beats recomputation.
+Otherwise erase it immediately after its final consumer and reuse the same
+workspace.
 
-### Gate-level coherent schedule lowering
-
-`coherent_compile.py` lowers the word-pebble action stream into the reversible
-IR:
+The existing seven-role word-pebble frontier is a dependency/liveness model,
+not seven physical stored words. The 28+4 scratch partition remains a candidate
+schedule for those live roles:
 
 ```text
-LOAD_NONCE   -> 32 CX from the persistent nonce
-XOR_CONST    -> basis X gates
-SIGMA0/1     -> exact in-place GF(2) CNOT networks
-ADD_SOURCE   -> exact Cuccaro modular add
-SUB_SOURCE   -> inverse Cuccaro add
-ADD_CONST    -> exact constant-specialized modular add
-SUB_CONST    -> modular addition of -constant
+7 abstract roles x 4 bits = 28
+local helpers             =  4
+                           ----
+workspace                 = 32 bits
 ```
 
-The in-place small-sigma matrices are synthesized by Gaussian elimination into
-CNOT networks and their inverses are emitted exactly.
+Exact lowering must preserve cross-slice sigma dependencies and arithmetic
+carry semantics; no wider fallback layout is part of the target architecture.
 
-### ROUND16 checkpointed coherent execution
+### Exact carrier-level fusion
 
-The coherent compiler uses the same four-superblock hierarchy:
+`carrier_ir.py` lowers contiguous reversible logic confined to one d=8 carrier
+into its exact eight-state basis permutation:
 
 ```text
-rounds  0..15  -> coherent ROUND16 block 0
-rounds 16..31  -> coherent ROUND16 block 1
-rounds 32..47  -> coherent ROUND16 block 2
-rounds 48..63  -> coherent ROUND16 block 3
+binary reversible IR
+    -> carrier-local maximal region
+    -> exact permutation P:{0..7}->{0..7}
 ```
 
-Inside each block, the exact local checkpoint optimizer selects schedule words
-worth retaining. A selected W[t] stays live only through its last dependent
-round; it is then erased by an independently planned inverse computation.
-Unselected words are compute -> consume -> uncompute immediately.
+The pass performs no gate reordering. Any gate touching multiple carriers stays
+explicit and unchanged. This keeps the optimization mathematically exact while
+leaving backend realization separate from SHA semantics.
 
-For dynamic rounds the executable reference performs:
-
-```text
-Sigma1(e) + Ch(e,f,g)
-        +
-coherently computed W[t]
-        +
-constant K[t]
-        ↓
-exact T1 accumulation
-        ↓
-d += T1
-        ↓
-Sigma0(a) + Maj(a,b,c)
-        ↓
-new a
-```
-
-This keeps K constant-specialized without requiring a second hidden schedule
-word. Fixed schedule rounds still fuse `K[t] + W[t]` at compile time.
-
-All checkpoints are required to be zero again at each ROUND16 boundary.
-
-### Coherent verification oracle
-
-`coherent_schedule.py` remains the independent reference for:
-
-- a fixed eight-word incoming midstate;
-- sixteen second-block words with one coherent 32-bit word;
-- exact W0..W63 expansion;
-- all 64 SHA-256 rounds;
-- exact Davies-Meyer feed-forward.
-
-`verify_compiled_coherent_sha256()` checks the forward digest against that
-reference, verifies nonce preservation and clean workspace, applies the entire
-inverse circuit, and requires exact restoration of the initial state.
-
-The optimized `coherent107` path remains intentionally blocked until a
-separate exact lowering proves that the same semantics fit its single 32-bit
-scratch word.
+The backend may realize a local permutation through a calibrated multilevel
+gate, compiled gate sequence, or another supported mechanism. The compiler does
+not assume user-authored pulse control.
 
 ## LunaSolve lowering optimizer
 
@@ -521,45 +463,23 @@ The Luna job optimizes compiler metadata only. The returned checkpoint plan must
 still pass exact schedule equivalence and cleanup verification before physical
 lowering.
 
-## Coherent execution API
-
-The complete reference compiler is invoked directly:
+## Carrier lowering API
 
 ```python
 from quantum.sha256_transmon_d8 import (
     D8Layout,
-    compile_coherent_nonce_sha256,
-    verify_compiled_coherent_sha256,
+    compile_carrier_program,
 )
 
-compiled = compile_coherent_nonce_sha256(
-    initial_state_words=midstate_words,
-    fixed_words=second_block_words,
-    nonce_word_index=3,
-    layout=D8Layout(profile="coherent182"),
-)
-
-digest_words = verify_compiled_coherent_sha256(
-    compiled,
-    nonce=0x12345678,
+carrier_program = compile_carrier_program(
+    reversible_circuit,
+    D8Layout(profile="coherent107"),
 )
 ```
 
-This performs the exact 64-round coherent computation, checks the result against
-the independent compression oracle, verifies that the nonce is preserved,
-requires all seven schedule pebbles plus arithmetic scratch and carry to return
-to zero, then applies the entire inverse circuit and requires exact restoration
-of the input state.
-
-No QPU submission occurs in this verification path.
-
-## Why this is pulse-native
-
-The bit-level X/CX/CCX IR exists only as an exact reversible specification.
-`pulse_targets.py` fuses consecutive logic into exact one-, two-, or
-three-transmon basis permutations (dimensions 8, 64, or 512). Those
-permutations are the direct optimal-control targets. The hardware path must not
-decompose them back into generic qubit gates.
+Verification compares carrier-program execution against the original reversible
+IR on basis states. Local 8-state permutations and explicit cross-carrier gates
+must produce the same exact map.
 
 ## Offline verification
 
@@ -606,6 +526,6 @@ print(preflight_current_hardware(target, layout=layout))
 This fetches the live qubit list, coupler topology, and Quil-T calibration
 program. Current QCS data is the placement/calibration source of truth.
 
-Actual d=8 pulse execution is blocked until the live |0>..|7> transition,
-readout, and multi-transmon pulse calibrations are measured. There is no binary
-gate fallback because using it would defeat the d=8 depth/width architecture.
+Backend lowering must use only operations exposed and validated by the selected
+Rigetti target. Higher-dimensional carrier fusion remains an exact compiler IR;
+it does not imply unsupported hardware instructions.
