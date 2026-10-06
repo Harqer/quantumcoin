@@ -1,14 +1,13 @@
 """Exact reversible SHA-256 compiler for d=8 transmon packing."""
 
-from .coherent_compile import (
-    CoherentRound16Block,
-    CompiledCoherentSha256,
-    coherent_digest_words,
-    coherent_initial_state,
-    compile_coherent_nonce_sha256,
-    lower_pebble_actions,
-    simulate_compiled_coherent_sha256,
-    verify_compiled_coherent_sha256,
+from .carrier_ir import (
+    CarrierProgram,
+    CrossCarrierGate,
+    LocalPermutation8,
+    compile_carrier_program,
+    exact_local_permutation,
+    simulate_carrier_program,
+    verify_carrier_program,
 )
 from .coherent_dag import (
     BooleanDag,
@@ -64,14 +63,13 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
-    "CoherentRound16Block",
-    "CompiledCoherentSha256",
-    "coherent_digest_words",
-    "coherent_initial_state",
-    "compile_coherent_nonce_sha256",
-    "lower_pebble_actions",
-    "simulate_compiled_coherent_sha256",
-    "verify_compiled_coherent_sha256",
+    "verify_carrier_program",
+    "simulate_carrier_program",
+    "exact_local_permutation",
+    "compile_carrier_program",
+    "LocalPermutation8",
+    "CrossCarrierGate",
+    "CarrierProgram",
     "CheckpointCandidate",
     "LoweringPlan",
     "LoweringWeights",
