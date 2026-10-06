@@ -155,27 +155,6 @@ class WordPebbleProgram:
         return tuple(action.inverse() for action in reversed(self.actions))
 
 
-@dataclass(frozen=True)
-class LimbStreamingCandidate:
-    """Scratch partition for lowering a word-pebble program into subwords.
-
-    This proves only the allocation arithmetic:
-      word_slots * limb_bits + helper_bits <= 32.
-
-    It does not yet claim that the local cross-limb add/sub kernels have been
-    synthesized into helper_bits. That obligation remains explicit.
-    """
-
-    word_slots: int
-    limb_bits: int
-    pebble_bits: int
-    helper_bits: int
-    total_scratch_bits: int
-
-    @property
-    def fits_32_bit_scratch(self) -> bool:
-        return self.total_scratch_bits <= 32
-
 
 def _transform_kind(transform: str) -> tuple[str, str] | None:
     if transform == "identity":
@@ -211,7 +190,6 @@ class _Planner:
         self,
         fixed_words: tuple[int, ...],
         nonce_word_index: int,
-        available_words: dict[int, int] | None = None,
     ) -> None:
         if len(fixed_words) != 16:
             raise ValueError("fixed_words must contain exactly sixteen words")
@@ -222,7 +200,6 @@ class _Planner:
 
         self.fixed_words = fixed_words
         self.nonce_word_index = nonce_word_index
-        self.available_words = dict(available_words or {})
         self.dynamic = dynamic_schedule_words(nonce_word_index)
         self.requirements = _word_pebble_requirements(nonce_word_index)
         self.fixed_schedule = evaluate_schedule(
@@ -245,7 +222,6 @@ class _Planner:
         return max(
             dynamic_terms,
             key=lambda term: (
-                term[0] in self.available_words,
                 self.requirements[term[0]],
                 term[0],
             ),
@@ -260,18 +236,6 @@ class _Planner:
         if target_slot in free_slots:
             raise ValueError("target slot cannot also be free")
 
-        available_slot = self.available_words.get(t)
-        if available_slot is not None:
-            if available_slot == target_slot:
-                return []
-            return [
-                PebbleAction(
-                    "ADD_SOURCE",
-                    slot=target_slot,
-                    source_slot=available_slot,
-                    word=t,
-                )
-            ]
 
         if t == self.nonce_word_index:
             return [
@@ -414,144 +378,6 @@ def plan_word_pebbles(
 
 
 
-
-def count_word_actions_with_checkpoints(
-    fixed_words: tuple[int, ...],
-    target_word: int,
-    free_slot_count: int,
-    checkpoint_words: frozenset[int] = frozenset(),
-    nonce_word_index: int = 3,
-) -> int:
-    """Count the exact planner action length without materializing actions.
-
-    This mirrors _Planner.emit_compute, including checkpoint hits and inverse
-    cleanup of nested temporary words. It is used by the optimizer so late
-    ROUND16 checkpoint choices are scored by actual recursive recomputation
-    cost instead of a direct-use proxy.
-    """
-    if free_slot_count < 0:
-        raise RuntimeError("free_slot_count must be nonnegative")
-    planner = _Planner(
-        fixed_words,
-        nonce_word_index,
-        available_words={
-            word: index for index, word in enumerate(checkpoint_words)
-        },
-    )
-
-    memo: dict[tuple[int, int], int] = {}
-
-    def count(t: int, free_count: int) -> int:
-        key = (t, free_count)
-        if key in memo:
-            return memo[key]
-
-        if t in checkpoint_words:
-            memo[key] = 1
-            return 1
-        if t == nonce_word_index:
-            memo[key] = 1
-            return 1
-        if t < 16 or not planner.dynamic[t]:
-            memo[key] = 1
-            return 1
-
-        terms = _term_specs(t)
-        base = planner.choose_base(terms)
-        if base is None:
-            raise AssertionError("dynamic word must have a dynamic predecessor")
-
-        base_word, base_transform = base
-        total = count(base_word, free_count)
-        if _transform_kind(base_transform) is not None:
-            total += 1
-
-        remaining = list(terms)
-        remaining.remove(base)
-        for source_word, transform in remaining:
-            if planner.dynamic[source_word]:
-                if free_count < 1:
-                    raise RuntimeError("insufficient word pebbles")
-                nested = count(source_word, free_count - 1)
-                transformed = _transform_kind(transform) is not None
-                total += 2 * nested + 1 + (2 if transformed else 0)
-            else:
-                constant = _apply_transform(
-                    planner.fixed_schedule[source_word],
-                    transform,
-                )
-                if constant:
-                    total += 1
-
-        memo[key] = total
-        return total
-
-    return count(target_word, free_slot_count)
-
-
-def plan_word_actions_with_checkpoints(
-    fixed_words: tuple[int, ...],
-    target_word: int,
-    target_slot: int,
-    free_slots: tuple[int, ...],
-    checkpoints: dict[int, int],
-    nonce_word_index: int = 3,
-) -> tuple[PebbleAction, ...]:
-    """Plan W[target_word] into an arbitrary clean slot using live checkpoints.
-
-    checkpoints maps already-materialized W indices to occupied slots. The
-    target and free slots must not overlap checkpoint slots. Returned actions
-    assume target/free slots are clean; every nested temporary is uncomputed,
-    leaving only W[target_word] in target_slot.
-    """
-    if not 0 <= target_word < 64:
-        raise ValueError("target_word must be in 0..63")
-    occupied = set(checkpoints.values())
-    if target_slot in occupied:
-        raise ValueError("target slot is occupied by a checkpoint")
-    if target_slot in free_slots:
-        raise ValueError("target slot cannot also be free")
-    if occupied & set(free_slots):
-        raise ValueError("free slots overlap live checkpoints")
-
-    planner = _Planner(
-        fixed_words,
-        nonce_word_index,
-        available_words=checkpoints,
-    )
-    return tuple(
-        planner.emit_compute(
-            target_word,
-            target_slot=target_slot,
-            free_slots=free_slots,
-        )
-    )
-
-def limb_streaming_candidate(
-    program: WordPebbleProgram,
-    scratch_bits: int = 32,
-    helper_bits: int = 4,
-) -> LimbStreamingCandidate:
-    if scratch_bits <= 0:
-        raise ValueError("scratch_bits must be positive")
-    if not 0 <= helper_bits < scratch_bits:
-        raise ValueError("helper_bits must leave positive pebble space")
-
-    available = scratch_bits - helper_bits
-    limb_bits = available // program.slot_count
-    if limb_bits < 1:
-        raise RuntimeError(
-            "scratch budget cannot allocate one bit per word pebble"
-        )
-
-    pebble_bits = limb_bits * program.slot_count
-    return LimbStreamingCandidate(
-        word_slots=program.slot_count,
-        limb_bits=limb_bits,
-        pebble_bits=pebble_bits,
-        helper_bits=helper_bits,
-        total_scratch_bits=pebble_bits + helper_bits,
-    )
 
 
 def _execute_actions(
