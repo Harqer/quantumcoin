@@ -6,6 +6,7 @@ import hashlib
 from .ir import simulate
 from .carrier_ir import compile_carrier_program, verify_carrier_program
 from .layout import D8Layout, available_layout_profiles
+from .workspace_liveness import analyze_workspace_liveness
 from .sha256 import (
     compile_single_block_sha256,
     digest_from_state,
@@ -55,6 +56,8 @@ def main() -> int:
 
     carrier_program = compile_carrier_program(compiled.circuit, layout)
     verify_carrier_program(compiled.circuit, carrier_program, (start, output))
+    liveness = analyze_workspace_liveness(compiled.circuit, layout)
+    liveness.assert_valid()
 
     print(f"digest={digest.hex()}")
     print(f"layout_profile={compiled.layout.profile}")
@@ -68,6 +71,9 @@ def main() -> int:
     print(f"carrier_local_permutations={carrier_program.local_permutation_count}")
     print(f"carrier_local_source_gates={carrier_program.fused_local_gate_count}")
     print(f"carrier_cross_gates={carrier_program.cross_carrier_gate_count}")
+    print(f"peak_clean_workspace_bits={liveness.peak_clean_bits}")
+    print(f"peak_borrowed_state_bits={liveness.peak_borrowed_bits}")
+    print(f"peak_extra_workspace_bits={liveness.peak_extra_bits}")
     print("scratch_clean=yes")
     print("carry_clean=yes")
     print("inverse_restores_input=yes")
