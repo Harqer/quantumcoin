@@ -25,6 +25,17 @@ from .coherent_pebble import (
     plan_word_pebbles,
     sigma_maps_are_invertible,
 )
+from .coherent_program import (
+    CircuitBlock,
+    CompiledCoherentSha256,
+    StreamedScheduleAdd,
+    coherent_digest_words,
+    coherent_initial_state,
+    compile_coherent_nonce_sha256,
+    lower_streamed_schedule_operation,
+    simulate_coherent_operations,
+    verify_compiled_coherent_sha256,
+)
 from .coherent_round16 import (
     CoherentRound16Schedule,
     CoherentRound64Schedule,
@@ -61,6 +72,15 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
+    "verify_compiled_coherent_sha256",
+    "simulate_coherent_operations",
+    "lower_streamed_schedule_operation",
+    "compile_coherent_nonce_sha256",
+    "coherent_initial_state",
+    "coherent_digest_words",
+    "StreamedScheduleAdd",
+    "CompiledCoherentSha256",
+    "CircuitBlock",
     "streamed_word_add_report",
     "emit_streamed_schedule_add",
     "emit_node_xor",
