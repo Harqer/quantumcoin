@@ -49,6 +49,11 @@ from .layout import (
     available_coherent_layout_profiles,
     available_layout_profiles,
 )
+from .workspace_liveness import (
+    WorkspaceLease,
+    WorkspaceLivenessReport,
+    analyze_workspace_liveness,
+)
 from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
@@ -69,6 +74,9 @@ __all__ = [
     "CoherentRound64Schedule",
     "CoherentRoundTerm",
     "D8Layout",
+    "analyze_workspace_liveness",
+    "WorkspaceLivenessReport",
+    "WorkspaceLease",
     "ScheduleDagStats",
     "WordPebbleProgram",
     "available_coherent_layout_profiles",
