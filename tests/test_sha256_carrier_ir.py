@@ -94,3 +94,36 @@ def test_coherent107_layout_is_the_only_coherent_target():
     assert layout.logical_bit_capacity == 321
     assert len(layout.mapped_bits()) == 321
     assert len(set(layout.mapped_bits())) == 321
+
+
+def test_identity_local_regions_are_eliminated_exactly():
+    circuit = ReversibleCircuit()
+    circuit.x(0)
+    circuit.x(0)
+
+    program = compile_carrier_program(
+        circuit,
+        D8Layout(profile="aligned100"),
+    )
+
+    assert program.operations == ()
+    assert program.eliminated_local_identity_gates == 2
+    state = [0] * 300
+    assert simulate_carrier_program(program, state) == simulate(circuit, state)
+
+
+def test_adjacent_inverse_cross_carrier_gates_cancel():
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 3)
+    circuit.cx(0, 3)
+
+    program = compile_carrier_program(
+        circuit,
+        D8Layout(profile="aligned100"),
+    )
+
+    assert program.operations == ()
+    assert program.cancelled_cross_carrier_gates == 2
+    state = [0] * 300
+    state[0] = 1
+    verify_carrier_program(circuit, program, (state,))
