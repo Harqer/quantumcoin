@@ -1,0 +1,35 @@
+name: Quantum Python CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "quantum/**"
+      - "tests/test_sha256_*.py"
+      - ".github/workflows/quantum-python.yml"
+  pull_request:
+    paths:
+      - "quantum/**"
+      - "tests/test_sha256_*.py"
+      - ".github/workflows/quantum-python.yml"
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Run SHA-256 regression suite
+        run: python -m pytest -q tests/test_sha256_*.py
