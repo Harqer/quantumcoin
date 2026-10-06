@@ -240,34 +240,27 @@ def plan_stream_checkpoints(
         selected,
     )
 
-    while len(selected) < max_cache_bits:
-        winner: tuple[int, int, int] | None = None
-        winner_nodes: tuple[int, ...] | None = None
-
-        for candidate in ranked:
-            if candidate in selected:
-                continue
-            trial = tuple(sorted(selected + (candidate,)))
-            projected, depth = _checkpoint_projected_cost(
-                schedule,
-                round_index,
-                trial,
-            )
-            available = 288 - len(trial)
-            if depth > available:
-                continue
-            score = (projected, depth, candidate)
-            if winner is None or score < winner:
-                winner = score
-                winner_nodes = trial
-
-        if winner is None or winner_nodes is None:
-            break
-        if winner[0] >= best_cost:
+    # Ranked greedy selection avoids an O(k^2 * |DAG|) compiler search. Each
+    # candidate is evaluated once against the currently accepted checkpoint
+    # set. A candidate is retained only when it strictly lowers projected gate
+    # count and preserves the dirty-workspace bound.
+    for candidate in ranked:
+        if len(selected) >= max_cache_bits:
             break
 
-        selected = winner_nodes
-        best_cost, best_depth = winner[0], winner[1]
+        trial = tuple(sorted(selected + (candidate,)))
+        projected, depth = _checkpoint_projected_cost(
+            schedule,
+            round_index,
+            trial,
+        )
+        available = 288 - len(trial)
+        if depth > available or projected >= best_cost:
+            continue
+
+        selected = trial
+        best_cost = projected
+        best_depth = depth
 
     return StreamCheckpointPlan(
         round_index=round_index,
