@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .coherent_dag import select_schedule_dag
 from .layout import D8Layout
 
 MASK32 = 0xFFFFFFFF
@@ -46,6 +47,11 @@ class CoherentSchedulePlan:
     limb_bits: int
     limb_pebble_bits: int
     spare_scratch_bits: int
+    schedule_arithmetic: str
+    dag_node_count: int
+    dag_and_nodes: int
+    dag_xor_nodes: int
+    dag_max_depth: int
 
 
 def expand_schedule(words16: tuple[int, ...]) -> tuple[int, ...]:
@@ -229,11 +235,21 @@ def _word_pebble_requirements(
 def plan_coherent_schedule(
     nonce_word_index: int = 3,
     scratch_bits: int = 32,
+    fixed_words: tuple[int, ...] | None = None,
 ) -> CoherentSchedulePlan:
     """Plan exact schedule recomputation under a hard clean-scratch budget."""
     if scratch_bits <= 0:
         raise ValueError("scratch_bits must be positive")
 
+    fixed_words = (
+        bitcoin_second_block_template()
+        if fixed_words is None
+        else fixed_words
+    )
+    selected_dag = select_schedule_dag(
+        fixed_words,
+        nonce_word_index=nonce_word_index,
+    )
     dynamic = dynamic_schedule_words(nonce_word_index)
     pebbles = _word_pebble_requirements(nonce_word_index)
     max_pebbles = max(pebbles)
@@ -265,6 +281,11 @@ def plan_coherent_schedule(
         limb_bits=limb_bits,
         limb_pebble_bits=limb_pebble_bits,
         spare_scratch_bits=scratch_bits - limb_pebble_bits,
+        schedule_arithmetic=selected_dag.arithmetic,
+        dag_node_count=selected_dag.stats.node_count,
+        dag_and_nodes=selected_dag.stats.and_nodes,
+        dag_xor_nodes=selected_dag.stats.xor_nodes,
+        dag_max_depth=selected_dag.stats.max_depth,
     )
 
 
