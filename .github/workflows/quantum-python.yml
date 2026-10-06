@@ -33,3 +33,17 @@ jobs:
 
       - name: Run SHA-256 regression suite
         run: python -m pytest -q tests/test_sha256_*.py
+
+      - name: Report coherent schedule metrics
+        run: >-
+          python -c "from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template;
+          from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag;
+          from quantum.sha256_transmon_d8.coherent_stream import streamed_word_add_gate_count, plan_stream_checkpoints;
+          d=select_schedule_dag(bitcoin_second_block_template(),3);
+          counts=[streamed_word_add_gate_count(d,t) for t in d.stats.dynamic_schedule_words];
+          p=plan_stream_checkpoints(d,63);
+          p97=plan_stream_checkpoints(d,63,max_cache_bits=2,available_dirty_bits=258);
+          print('schedule',d.arithmetic,d.stats);
+          print('streamed_max_digits',len(str(max(counts))));
+          print('W63_checkpoint_bits',len(p.cached_nodes),'projected_digits',len(str(p.projected_gate_count)),'dirty',p.max_effective_dirty_bits,'available',p.available_dirty_bits);
+          print('W63_97_candidate',len(p97.cached_nodes),'dirty',p97.max_effective_dirty_bits,'available',p97.available_dirty_bits,'safe',p97.width_safe)"
