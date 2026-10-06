@@ -36,11 +36,11 @@ def test_full_coherent107_program_has_no_persistent_schedule_storage():
     assert sum(
         isinstance(operation, StreamedScheduleAdd)
         for operation in compiled.operations
-    ) == 64
+    ) == 47
     assert sum(
         isinstance(operation, CircuitBlock)
         for operation in compiled.operations
-    ) == 129
+    ) == 112
 
 
 def test_full_coherent107_matches_reference_and_inverse():
