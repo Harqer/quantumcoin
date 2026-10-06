@@ -4,11 +4,8 @@ import argparse
 import hashlib
 
 from .ir import simulate
+from .carrier_ir import compile_carrier_program, verify_carrier_program
 from .layout import D8Layout, available_layout_profiles
-from .pulse_targets import (
-    pareto_pulse_candidates,
-    pulse_candidates,
-)
 from .sha256 import (
     compile_single_block_sha256,
     digest_from_state,
@@ -56,8 +53,8 @@ def main() -> int:
     if restored != start:
         raise SystemExit("reversibility verification failed")
 
-    candidates = pulse_candidates(compiled.circuit)
-    frontier = pareto_pulse_candidates(compiled.circuit)
+    carrier_program = compile_carrier_program(compiled.circuit, layout)
+    verify_carrier_program(compiled.circuit, carrier_program, (start, output))
 
     print(f"digest={digest.hex()}")
     print(f"layout_profile={compiled.layout.profile}")
@@ -67,17 +64,10 @@ def main() -> int:
     print(f"nonlinear_gates={compiled.nonlinear_gate_count}")
     print(f"semantic_ir_nodes={compiled.ir_node_count}")
     print(f"round16_blocks={len(compiled.round16_blocks)}")
-    for candidate in candidates:
-        print(
-            f"pulse_candidate_{candidate.name}="
-            f"depth:{candidate.unit_depth},"
-            f"blocks:{candidate.block_count},"
-            f"unique:{candidate.unique_target_count}"
-        )
-    print(
-        "pareto_pulse_candidates="
-        + ",".join(candidate.name for candidate in frontier)
-    )
+    print(f"carrier_operations={len(carrier_program.operations)}")
+    print(f"carrier_local_permutations={carrier_program.local_permutation_count}")
+    print(f"carrier_local_source_gates={carrier_program.fused_local_gate_count}")
+    print(f"carrier_cross_gates={carrier_program.cross_carrier_gate_count}")
     print("scratch_clean=yes")
     print("carry_clean=yes")
     print("inverse_restores_input=yes")
