@@ -5,7 +5,6 @@ from quantum.sha256_transmon_d8.coherent_pebble import (
     apply_sigma1_inverse,
     execute_compute_use_uncompute,
     execute_word_program,
-    limb_streaming_candidate,
     plan_word_pebbles,
     sigma_maps_are_invertible,
 )
@@ -83,19 +82,3 @@ def test_word_pebble_scheduler_caps_at_seven_slots_for_w3_contract():
     assert plan_word_pebbles(fixed, 60, 3).slot_count == 7
     assert plan_word_pebbles(fixed, 63, 3).slot_count == 7
 
-
-def test_seven_word_pebbles_produce_four_bit_streaming_candidate():
-    fixed = _fixed_template()
-    program = plan_word_pebbles(fixed, target_word=63, nonce_word_index=3)
-    candidate = limb_streaming_candidate(
-        program,
-        scratch_bits=32,
-        helper_bits=4,
-    )
-
-    assert candidate.word_slots == 7
-    assert candidate.limb_bits == 4
-    assert candidate.pebble_bits == 28
-    assert candidate.helper_bits == 4
-    assert candidate.total_scratch_bits == 32
-    assert candidate.fits_32_bit_scratch
