@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .coherent_dag import select_schedule_dag
-from .layout import D8Layout
 
 MASK32 = 0xFFFFFFFF
 
@@ -32,11 +31,8 @@ class CoherentSchedulePlan:
     word-pebble count >1 proves that full-word schedule materialization is not a
     legal lowering strategy.
 
-    limb_bits is only a word-level partition candidate. It is NOT a proof that
-    such limbs lower reversibly inside the scratch budget: SHA small-sigma
-    rotations cross limb boundaries and modular addition carries couple lower
-    and higher limbs. The exact bit-level DAG in coherent_dag.py is the source
-    of truth for the subsequent pebbling/lowering pass.
+    The word-level count is diagnostic only. It rejects illegal full-word
+    materialization and directs production lowering to the exact bit-level DAG.
     """
 
     nonce_word_index: int
