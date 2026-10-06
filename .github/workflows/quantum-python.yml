@@ -38,11 +38,11 @@ jobs:
         run: >-
           python -c "from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template;
           from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag;
-          from quantum.sha256_transmon_d8.coherent_stream import streamed_word_add_gate_count, plan_stream_checkpoints;
+          from quantum.sha256_transmon_d8.coherent_stream import streamed_word_add_gate_count, plan_stream_checkpoints, plan_depth_cut_checkpoints;
           d=select_schedule_dag(bitcoin_second_block_template(),3);
           counts=[streamed_word_add_gate_count(d,t) for t in d.stats.dynamic_schedule_words];
           p=plan_stream_checkpoints(d,63);
-          p97=plan_stream_checkpoints(d,63,max_cache_bits=2,available_dirty_bits=258);
+          p97=plan_depth_cut_checkpoints(d,63,max_cache_bits=2,available_dirty_bits=258,candidate_limit=40);
           print('schedule',d.arithmetic,d.stats);
           print('streamed_max_digits',len(str(max(counts))));
           print('W63_checkpoint_bits',len(p.cached_nodes),'projected_digits',len(str(p.projected_gate_count)),'dirty',p.max_effective_dirty_bits,'available',p.available_dirty_bits);
