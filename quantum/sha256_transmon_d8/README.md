@@ -115,8 +115,7 @@ operations are represented separately (`MAJ_INV`, `UMA_INV`) because
 Cuccaro UMA is an unmajority-and-add primitive, not literally the inverse of
 MAJ.
 
-This preserves the arithmetic structure for direct 2-3-transmon pulse
-optimization while retaining primitive-equivalent resource accounting.
+This preserves arithmetic structure for later exact carrier/backend lowering while retaining primitive-equivalent resource accounting.
 
 For `abc`, after constant-specialized arithmetic:
 
@@ -154,32 +153,8 @@ low_multiplicative           140730             33026          17500
 ```
 
 So the second strategy removes **12,288 nonlinear operations (~27.1%)** at the
-cost of additional linear CX work. Neither is selected purely from gate count:
-live calibrated pulse duration/error data determines whether the nonlinear
-reduction pays for the extra linear operations.
+cost of additional linear CX work. Neither is selected purely from gate count; width, nonlinear work, depth, and cleanup cost remain separate optimization objectives.
 
-### Pulse-reuse Pareto candidates
-
-Pulse lowering evaluates three exact candidates:
-
-```text
-adder_template  preserve ADD32 / ADD32_INNER / ROUND16
-term_fused      preserve complete compute-add-uncompute SHA terms
-aggressive      permit all legal cross-boundary fusion
-```
-
-With the aligned100 placement, the unit-duration transmon-conflict scheduler
-for `abc` currently reports:
-
-```text
-candidate        depth   blocks   unique calibration targets
-adder_template   17255   43721    295
-term_fused       17436   43909    280
-aggressive       17255   43721    295
-```
-
-The candidate set remains explicit until live calibrated pulse durations/error
-data are available. Structural depth alone is only a proxy.
 
 ## Width and placement Pareto profiles
 
