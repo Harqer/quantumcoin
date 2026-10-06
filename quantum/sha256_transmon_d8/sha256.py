@@ -317,6 +317,7 @@ def _compute_add_uncompute(
     layout: D8Layout,
     target_slot: int,
     region_kind: str,
+    borrowed_slots: tuple[int, ...] = (),
 ) -> None:
     """Lease scratch, compute a term, add it, restore it, and close the block."""
     start = len(c.gates)
@@ -333,11 +334,18 @@ def _compute_add_uncompute(
     # when future compute regions contain paired reusable macros such as
     # MAJ/UMA rather than only self-inverse primitive gates.
     c.extend(gate.inverse() for gate in reversed(compute_gates))
+    metadata = {"target_slot": target_slot}
+    metadata.update(
+        {
+            f"borrowed{index}": slot
+            for index, slot in enumerate(borrowed_slots)
+        }
+    )
     c.add_region(
         region_kind,
         start,
         len(c.gates),
-        target_slot=target_slot,
+        **metadata,
     )
 
 
@@ -430,9 +438,13 @@ def _emit_round(
     if boolean_strategy == "anf":
         ch_compute = _scratch_xor_ch
         maj_compute = _scratch_xor_maj
+        ch_borrowed: tuple[int, ...] = ()
+        maj_borrowed: tuple[int, ...] = ()
     elif boolean_strategy == "low_multiplicative":
         ch_compute = _scratch_xor_ch_low_multiplicative
         maj_compute = _scratch_xor_maj_low_multiplicative
+        ch_borrowed = (roles["g"],)
+        maj_borrowed = (roles["b"], roles["c"])
     else:
         raise ValueError(f"unknown boolean strategy {boolean_strategy!r}")
 
@@ -454,6 +466,7 @@ def _emit_round(
         layout,
         h,
         region_kind="CH_ADD",
+        borrowed_slots=ch_borrowed,
     )
     _add_constant32(c, layout, h, round_constant)
 
@@ -478,6 +491,7 @@ def _emit_round(
         layout,
         h,
         region_kind="MAJ_ADD",
+        borrowed_slots=maj_borrowed,
     )
 
     return _shift_roles(roles)
