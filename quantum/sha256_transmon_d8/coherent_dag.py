@@ -43,6 +43,7 @@ class ScheduleDagStats:
     xor_nodes: int
     and_nodes: int
     max_depth: int
+    max_and_depth: int
     dynamic_schedule_words: tuple[int, ...]
 
 
@@ -223,6 +224,43 @@ class BooleanDag:
             carry = self.majority(a[bit], b[bit], carry)
         return tuple(out)
 
+
+    def add2_prefix(
+        self,
+        a: tuple[int, ...],
+        b: tuple[int, ...],
+    ) -> tuple[int, ...]:
+        """Exact 32-bit parallel-prefix a+b mod 2^32.
+
+        Generate/propagate pairs are combined in log2(32) prefix stages.
+        OR is represented as XOR where generate and propagate-generate terms
+        are mutually exclusive by construction.
+        """
+        if len(a) != 32 or len(b) != 32:
+            raise ValueError("add2_prefix requires 32-bit words")
+
+        bit_propagate = [self.xor(a[i], b[i]) for i in range(32)]
+        propagate = bit_propagate.copy()
+        generate = [self.and_(a[i], b[i]) for i in range(32)]
+
+        distance = 1
+        while distance < 32:
+            prev_p = propagate.copy()
+            prev_g = generate.copy()
+            for bit in range(distance, 32):
+                bridge = self.and_(prev_p[bit], prev_g[bit - distance])
+                generate[bit] = self.xor(prev_g[bit], bridge)
+                propagate[bit] = self.and_(
+                    prev_p[bit],
+                    prev_p[bit - distance],
+                )
+            distance <<= 1
+
+        out = [bit_propagate[0]]
+        for bit in range(1, 32):
+            out.append(self.xor(bit_propagate[bit], generate[bit - 1]))
+        return tuple(out)
+
     def add4_carry_save(
         self,
         a: tuple[int, ...],
@@ -245,6 +283,23 @@ class BooleanDag:
         """Exact four-operand sum using three chained ripple additions."""
         return self.add2(self.add2(self.add2(a, b), c), d)
 
+
+    def add4_prefix(
+        self,
+        a: tuple[int, ...],
+        b: tuple[int, ...],
+        c: tuple[int, ...],
+        d: tuple[int, ...],
+    ) -> tuple[int, ...]:
+        """Exact four-operand sum using low-nonlinear-depth prefix adders."""
+        return self.add2_prefix(
+            self.add2_prefix(
+                self.add2_prefix(a, b),
+                c,
+            ),
+            d,
+        )
+
     @cached_property
     def depth(self) -> tuple[int, ...]:
         depths = [0] * len(self.nodes)
@@ -253,6 +308,21 @@ class BooleanDag:
                 depths[index] = 0
             else:
                 depths[index] = 1 + max(depths[parent] for parent in node.inputs)
+        return tuple(depths)
+
+
+    @cached_property
+    def and_depth(self) -> tuple[int, ...]:
+        """Multiplicative depth when XOR layers are treated as linear work."""
+        depths = [0] * len(self.nodes)
+        for index, node in enumerate(self.nodes):
+            if node.kind in {"const", "nonce"}:
+                continue
+            parent_depth = max(
+                (depths[parent] for parent in node.inputs),
+                default=0,
+            )
+            depths[index] = parent_depth + (1 if node.kind == "and" else 0)
         return tuple(depths)
 
     def evaluate(self, nonce: int) -> tuple[int, ...]:
@@ -306,6 +376,11 @@ class CoherentScheduleDag:
             xor_nodes=sum(node.kind == "xor" for node in self.dag.nodes),
             and_nodes=sum(node.kind == "and" for node in self.dag.nodes),
             max_depth=max(self.dag.depth[node] for word in self.words for node in word),
+            max_and_depth=max(
+                self.dag.and_depth[node]
+                for word in self.words
+                for node in word
+            ),
             dynamic_schedule_words=dynamic,
         )
 
@@ -359,8 +434,10 @@ def build_schedule_dag(
     if any(not 0 <= word < (1 << 32) for word in fixed_words):
         raise ValueError("every fixed word must fit 32 bits")
 
-    if arithmetic not in {"carry_save", "ripple"}:
-        raise ValueError("arithmetic must be 'carry_save' or 'ripple'")
+    if arithmetic not in {"carry_save", "ripple", "prefix"}:
+        raise ValueError(
+            "arithmetic must be 'carry_save', 'ripple', or 'prefix'"
+        )
 
     dag = BooleanDag()
     words: list[tuple[int, ...]] = []
@@ -371,11 +448,11 @@ def build_schedule_dag(
         else:
             words.append(dag.constant_word(fixed_words[t]))
 
-    add4 = (
-        dag.add4_carry_save
-        if arithmetic == "carry_save"
-        else dag.add4_ripple
-    )
+    add4 = {
+        "carry_save": dag.add4_carry_save,
+        "ripple": dag.add4_ripple,
+        "prefix": dag.add4_prefix,
+    }[arithmetic]
     for t in range(16, 64):
         words.append(
             add4(
@@ -405,7 +482,7 @@ def build_schedule_dag_candidates(
             nonce_word_index,
             arithmetic=arithmetic,
         )
-        for arithmetic in ("carry_save", "ripple")
+        for arithmetic in ("carry_save", "ripple", "prefix")
     )
 
 
@@ -413,10 +490,11 @@ def select_schedule_dag(
     fixed_words: tuple[int, ...],
     nonce_word_index: int = 3,
 ) -> CoherentScheduleDag:
-    """Choose the exact schedule DAG with the best nonlinear/depth/size cost.
+    """Choose the exact schedule DAG for bounded reversible workspace.
 
-    AND count is primary because it maps to nonlinear reversible work. Depth
-    breaks ties, followed by total semantic node count and XOR count.
+    Multiplicative depth is primary because nested nonlinear dependencies
+    determine dirty-borrow depth in the coherent107 lowering. Once feasible
+    width is minimized, nonlinear count, total depth, and DAG size break ties.
     """
     candidates = build_schedule_dag_candidates(
         fixed_words,
@@ -425,6 +503,7 @@ def select_schedule_dag(
     return min(
         candidates,
         key=lambda candidate: (
+            candidate.stats.max_and_depth,
             candidate.stats.and_nodes,
             candidate.stats.max_depth,
             candidate.stats.node_count,
