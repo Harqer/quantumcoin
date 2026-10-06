@@ -262,35 +262,14 @@ so the semantic schedule has one long carry-propagation boundary instead of
 three chained ripple additions. Randomized nonce evaluations of this graph are
 checked against the independent SHA schedule evaluator.
 
-### Reversible word-pebble schedule
+### Reversible schedule liveness model
 
-For a Bitcoin-style second SHA block with the coherent nonce at W3, the exact
-word dependency frontier still reaches seven clean word pebbles:
+The word-level pebble analysis remains diagnostic only: it identifies dependency
+pressure and recomputation opportunities, but it does not allocate seven physical
+32-bit registers. Production coherent lowering must consume the exact bit-level
+DAG inside the single coherent107 workspace and clean each temporary immediately
+after its last use.
 
-```text
-W18..W24   1 clean word pebble
-W25..W31   2
-W32..W38   3
-W39..W45   4
-W46..W52   5
-W53..W59   6
-W60..W63   7
-```
-
-`coherent_pebble.py` now emits an explicit compute/use/uncompute action stream
-for this recurrence instead of treating that count as a paper estimate.
-Representative programs through W63 are verified against the exact reference
-schedule and then reversed; every temporary word pebble returns to zero.
-
-A key optimization is that both SHA-256 small-sigma transforms are full-rank
-32x32 GF(2) linear maps. They can therefore be applied to a pebble in place and
-later inverted exactly. At gate lowering they require linear CNOT networks, not
-a second 32-bit destination register.
-
-For W63, the width-first standalone recomputation program reaches the expected
-seven-word frontier but is intentionally expensive (roughly 275k semantic
-word-level actions before limb/gate lowering). This is why ROUND16-level
-checkpoint reuse is the next depth optimization.
 
 ### coherent107 optimization target
 
@@ -351,92 +330,6 @@ The backend may realize a local permutation through a calibrated multilevel
 gate, compiled gate sequence, or another supported mechanism. The compiler does
 not assume user-authored pulse control.
 
-## LunaSolve lowering optimizer
-
-The coherent path now has an optional pre-execution compiler-optimization layer built on
-LunaSolve. LunaSolve is not the SHA execution engine and is never used to submit
-the cryptographic workload to a QPU. Calling a LunaSolve algorithm may upload the
-optimization model to the Luna platform; that model contains checkpoint decision
-variables and lowering costs, not a quantum SHA execution payload.
-
-The optimizer operates on the exact ROUND16 schedule after the semantic
-reductions have already been applied:
-
-```text
-exact W[t] dependency DAG
-  -> two 3:2 carry-save compressors
-  -> one final carry-propagate boundary
-  -> in-place invertible sigma0/sigma1
-  -> direct (W[t] + K[t]) mod 2^32 fusion
-  -> reversible compute/use/uncompute
-  -> LunaSolve checkpoint selection
-  -> d=8 physical lowering
-```
-
-The decision variables are ROUND16-local schedule checkpoints. A checkpoint may
-retain an already-computed dynamic `W[t]` for a later direct dependency instead
-of recomputing that word from the nonce.
-
-The objective uses measured reversible-program action counts:
-
-```text
-minimize
-    checkpoint_lifetime_cost
-  - standalone_recompute_actions_saved
-```
-
-Capacity constraints are intentionally conservative. At every round:
-
-```text
-base_word_pebbles + live_checkpoints <= 7
-```
-
-so Luna cannot reduce the objective by exceeding the established seven-role
-abstract frontier. With 32 scratch bits and four helper bits, the physical
-streaming target remains:
-
-```text
-7 pebble roles x 4 bits = 28
-helpers                 =  4
-                         ----
-scratch                  = 32 bits
-```
-
-The arithmetic reductions are not optional solver decisions. Carry-save
-schedule arithmetic, in-place small-sigma transforms, K+W fusion, exact modular
-arithmetic, and inverse cleanup remain mandatory invariants.
-
-Install the optional compiler optimizer with:
-
-```bash
-pip install luna-quantum
-```
-
-Build and solve one compiler block:
-
-```python
-from quantum.sha256_transmon_d8 import (
-    build_round16_lowering_problem,
-    solve_with_luna,
-)
-from quantum.sha256_transmon_d8.coherent_schedule import (
-    bitcoin_second_block_template,
-)
-from quantum.sha256_transmon_d8.sha256 import K
-
-problem = build_round16_lowering_problem(
-    bitcoin_second_block_template(),
-    K,
-    block_index=3,
-    nonce_word_index=3,
-)
-plan = solve_with_luna(problem)
-print(plan)
-```
-
-The Luna job optimizes compiler metadata only. The returned checkpoint plan must
-still pass exact schedule equivalence and cleanup verification before physical
-lowering.
 
 ## Carrier lowering API
 
