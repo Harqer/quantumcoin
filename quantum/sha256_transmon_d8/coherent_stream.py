@@ -201,6 +201,7 @@ def plan_stream_checkpoints(
     *,
     max_cache_bits: int = 31,
     candidate_limit: int = 48,
+    available_dirty_bits: int = 288,
 ) -> StreamCheckpointPlan:
     """Choose reusable DAG checkpoints under the existing 32-bit scratch budget.
 
@@ -212,6 +213,8 @@ def plan_stream_checkpoints(
         raise ValueError("round_index must be in 0..63")
     if not 0 <= max_cache_bits <= 31:
         raise ValueError("max_cache_bits must be in 0..31")
+    if available_dirty_bits < 0:
+        raise ValueError("available_dirty_bits must be nonnegative")
 
     dag = schedule.dag
     naive_costs = _oracle_cost_vector(dag)
@@ -254,9 +257,9 @@ def plan_stream_checkpoints(
             round_index,
             trial,
         )
-        available = 288 - len(trial)
+        available = available_dirty_bits - len(trial)
 
-        current_available = 288 - len(selected)
+        current_available = available_dirty_bits - len(selected)
         current_excess = max(0, best_depth - current_available)
         trial_excess = max(0, depth - available)
 
@@ -280,7 +283,7 @@ def plan_stream_checkpoints(
         cached_nodes=selected,
         projected_gate_count=best_cost,
         max_effective_dirty_bits=best_depth,
-        available_dirty_bits=288 - len(selected),
+        available_dirty_bits=available_dirty_bits - len(selected),
     )
 
 def _emit_mcx_dirty(
