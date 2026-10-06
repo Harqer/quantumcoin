@@ -115,9 +115,10 @@ def test_word_pebbling_rejects_full_word_materialization_and_proposes_limb_candi
 
     assert plan.scratch_bits == 32
     assert not plan.full_word_materialization_legal
-    assert plan.schedule_arithmetic == "ripple"
+    assert plan.schedule_arithmetic == "prefix"
     assert plan.dag_and_nodes > 0
     assert plan.dag_max_depth > 0
+    assert plan.dag_max_and_depth <= 288
 
 
 
