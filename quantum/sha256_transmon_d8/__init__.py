@@ -18,12 +18,10 @@ from .coherent_dag import (
     select_schedule_dag,
 )
 from .coherent_pebble import (
-    LimbStreamingCandidate,
     PebbleAction,
     WordPebbleProgram,
     execute_compute_use_uncompute,
     execute_word_program,
-    limb_streaming_candidate,
     plan_word_pebbles,
     sigma_maps_are_invertible,
 )
@@ -38,7 +36,6 @@ from .coherent_round16 import (
     verify_round_term,
 )
 from .coherent_schedule import (
-    CoherentLimbWorkspace,
     CoherentSchedulePlan,
     compress_reference,
     evaluate_schedule,
@@ -65,8 +62,6 @@ __all__ = [
     "LocalPermutation8",
     "CrossCarrierGate",
     "CarrierProgram",
-    "CoherentLimbWorkspace",
-    "LimbStreamingCandidate",
     "PebbleAction",
     "CoherentScheduleDag",
     "CoherentSchedulePlan",
@@ -90,7 +85,6 @@ __all__ = [
     "fuse_round_constant",
     "execute_compute_use_uncompute",
     "execute_word_program",
-    "limb_streaming_candidate",
     "plan_coherent_schedule",
     "plan_round16_schedule",
     "plan_round64_schedule",
