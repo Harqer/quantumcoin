@@ -340,8 +340,22 @@ def _emit_controlled_node_xor(
     controls: tuple[int, ...],
     target: int,
     borrowed: tuple[int, ...],
+    cached_nodes: dict[int, int] | None = None,
 ) -> None:
     """Apply target ^= AND(controls) * node(nonce), restoring all borrowed bits."""
+    cached_nodes = cached_nodes or {}
+    cached_wire = cached_nodes.get(node_index)
+    if cached_wire is not None:
+        if cached_wire == target:
+            raise ValueError("cached node wire cannot alias oracle target")
+        _emit_mcx_dirty(
+            circuit,
+            controls + (cached_wire,),
+            target,
+            tuple(bit for bit in borrowed if bit not in cached_nodes.values()),
+        )
+        return
+
     node = dag.nodes[node_index]
 
     if node.kind == "const":
@@ -370,6 +384,7 @@ def _emit_controlled_node_xor(
                 controls,
                 target,
                 borrowed,
+                cached_nodes,
             )
         return
 
@@ -407,6 +422,7 @@ def _emit_controlled_node_xor(
         controls,
         dirty,
         rest,
+        cached_nodes,
     )
     _emit_controlled_node_xor(
         circuit,
@@ -416,6 +432,7 @@ def _emit_controlled_node_xor(
         (dirty,),
         target,
         rest,
+        cached_nodes,
     )
     _emit_controlled_node_xor(
         circuit,
@@ -425,6 +442,7 @@ def _emit_controlled_node_xor(
         controls,
         dirty,
         rest,
+        cached_nodes,
     )
     _emit_controlled_node_xor(
         circuit,
@@ -434,6 +452,7 @@ def _emit_controlled_node_xor(
         (dirty,),
         target,
         rest,
+        cached_nodes,
     )
 
 
@@ -444,20 +463,26 @@ def emit_node_xor(
     nonce_bits: tuple[int, ...],
     target: int,
     borrowed: tuple[int, ...],
+    cached_nodes: dict[int, int] | None = None,
 ) -> None:
     """Apply target ^= node(nonce) with exact dirty-workspace restoration."""
     if len(nonce_bits) != 32:
         raise ValueError("nonce_bits must contain exactly 32 wires")
     if target in nonce_bits:
         raise ValueError("oracle target cannot alias the coherent nonce")
+    cached_nodes = cached_nodes or {}
+    cache_wires = set(cached_nodes.values())
     available = tuple(
         dict.fromkeys(
             bit
             for bit in borrowed
-            if bit != target and bit not in nonce_bits
+            if bit != target
+            and bit not in nonce_bits
+            and bit not in cache_wires
         )
     )
-    required = _node_dirty_need(dag, node_index)
+    depths = _oracle_depth_vector(dag, frozenset(cached_nodes))
+    required = depths[node_index]
     if required > len(available):
         raise RuntimeError(
             f"node {node_index} requires {required} dirty bits; "
@@ -471,6 +496,7 @@ def emit_node_xor(
         (),
         target,
         available,
+        cached_nodes,
     )
 
 
