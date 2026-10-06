@@ -277,10 +277,10 @@ def _apply_schedule_macro(
     compiled: CompiledCoherentSha256,
     operation: StreamedScheduleAdd,
     state: list[int],
+    schedule_words: tuple[int, ...],
 ) -> list[int]:
     out = state[:]
-    nonce = compiled.layout.get_nonce(out)
-    schedule_word = compiled.schedule.evaluate(nonce)[operation.round_index]
+    schedule_word = schedule_words[operation.round_index]
     current = compiled.layout.get_word(out, operation.target_slot)
     updated = (
         current + operation.direction * schedule_word
@@ -294,12 +294,32 @@ def simulate_coherent_operations(
     state: list[int],
     operations: tuple[CoherentOperation, ...] | None = None,
 ) -> list[int]:
+    selected = operations or compiled.operations
     out = state[:]
-    for operation in operations or compiled.operations:
+
+    # The coherent nonce is preserved by contract, so the exact 64-word
+    # schedule is invariant for the whole forward or inverse execution. Compute
+    # it once and reuse it instead of reevaluating the DAG for every round.
+    needs_schedule = any(
+        isinstance(operation, StreamedScheduleAdd)
+        for operation in selected
+    )
+    schedule_words = (
+        compiled.schedule.evaluate(compiled.layout.get_nonce(out))
+        if needs_schedule
+        else ()
+    )
+
+    for operation in selected:
         if isinstance(operation, CircuitBlock):
             out = simulate(operation.circuit, out)
         else:
-            out = _apply_schedule_macro(compiled, operation, out)
+            out = _apply_schedule_macro(
+                compiled,
+                operation,
+                out,
+                schedule_words,
+            )
     return out
 
 
