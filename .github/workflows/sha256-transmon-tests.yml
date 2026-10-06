@@ -27,5 +27,8 @@ jobs:
         run: >-
           python -c "from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template;
           from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag;
+          from quantum.sha256_transmon_d8.coherent_stream import streamed_word_add_gate_count;
           d=select_schedule_dag(bitcoin_second_block_template(),3);
-          from quantum.sha256_transmon_d8.coherent_stream import streamed_word_add_gate_count;\n          counts=[streamed_word_add_gate_count(d,t) for t in d.stats.dynamic_schedule_words];\n          print(d.arithmetic, d.stats); print(\"streamed_max_gates\", max(counts), \"digits\", len(str(max(counts))))"
+          counts=[streamed_word_add_gate_count(d,t) for t in d.stats.dynamic_schedule_words];
+          print(d.arithmetic, d.stats);
+          print('streamed_max_gates', max(counts), 'digits', len(str(max(counts))))"
