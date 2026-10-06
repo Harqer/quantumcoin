@@ -108,6 +108,7 @@ def test_schedule_arithmetic_candidates_are_exact_and_select_actual_winner():
     assert {candidate.arithmetic for candidate in candidates} == {
         "carry_save",
         "ripple",
+        "prefix",
     }
 
     rng = random.Random(0xA11C_0C)
@@ -118,7 +119,23 @@ def test_schedule_arithmetic_candidates_are_exact_and_select_actual_winner():
 
     selected = select_schedule_dag(fixed, nonce_word_index=3)
     by_name = {candidate.arithmetic: candidate for candidate in candidates}
-    assert selected.arithmetic == "ripple"
-    assert selected.stats.and_nodes <= by_name["carry_save"].stats.and_nodes
-    assert selected.stats.node_count <= by_name["carry_save"].stats.node_count
-    assert selected.stats.max_depth <= by_name["carry_save"].stats.max_depth
+    assert selected.arithmetic == "prefix"
+    assert selected.stats.max_and_depth < by_name["ripple"].stats.max_and_depth
+    assert selected.stats.max_and_depth < by_name["carry_save"].stats.max_and_depth
+    assert selected.stats.max_and_depth <= 288
+
+
+def test_prefix_add2_matches_integer_modulo_arithmetic():
+    rng = random.Random(0xBEEF_320)
+
+    for _ in range(24):
+        left = rng.randrange(1 << 32)
+        right = rng.randrange(1 << 32)
+        dag = BooleanDag()
+        result = dag.add2_prefix(
+            dag.constant_word(left),
+            dag.constant_word(right),
+        )
+        values = dag.evaluate(0)
+        actual = sum(values[node] << bit for bit, node in enumerate(result))
+        assert actual == (left + right) & MASK32
