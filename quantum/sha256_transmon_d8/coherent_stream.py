@@ -255,8 +255,21 @@ def plan_stream_checkpoints(
             trial,
         )
         available = 288 - len(trial)
-        if depth > available or projected >= best_cost:
-            continue
+
+        current_available = 288 - len(selected)
+        current_excess = max(0, best_depth - current_available)
+        trial_excess = max(0, depth - available)
+
+        if current_excess:
+            # Width feasibility is lexicographically primary. Permit transient
+            # intermediate plans that are still infeasible when they strictly
+            # reduce the dirty-depth deficit; otherwise a deep arithmetic DAG
+            # could never reach a feasible cached form one node at a time.
+            if trial_excess >= current_excess:
+                continue
+        else:
+            if trial_excess or projected >= best_cost:
+                continue
 
         selected = trial
         best_cost = projected
