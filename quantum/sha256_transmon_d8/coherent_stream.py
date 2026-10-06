@@ -22,6 +22,72 @@ class StreamedWordAddReport:
         return self.max_oracle_dirty_bits <= self.available_dirty_bits
 
 
+
+@lru_cache(maxsize=None)
+def _dirty_mcx_gate_count(control_count: int) -> int:
+    if control_count < 0:
+        raise ValueError("control_count must be nonnegative")
+    if control_count <= 2:
+        return 1
+    split = (control_count + 1) // 2
+    return (
+        2 * _dirty_mcx_gate_count(split)
+        + 2 * _dirty_mcx_gate_count(1 + control_count - split)
+    )
+
+
+def dirty_oracle_gate_count(dag: BooleanDag, node_index: int) -> int:
+    """Exact primitive-node count emitted by emit_node_xor for one DAG node."""
+    memo: dict[int, int] = {}
+
+    def visit(index: int) -> int:
+        cached = memo.get(index)
+        if cached is not None:
+            return cached
+        node = dag.nodes[index]
+        if node.kind == "const":
+            value = 1 if index == 1 else 0
+        elif node.kind == "nonce":
+            value = 1
+        elif node.kind == "xor":
+            value = sum(visit(parent) for parent in node.inputs)
+        elif node.kind == "and":
+            left, right = node.inputs
+            value = 2 * visit(left) + 2 * visit(right)
+        else:
+            raise ValueError(f"unsupported Boolean DAG node {node.kind!r}")
+        memo[index] = value
+        return value
+
+    return visit(node_index)
+
+
+def conditional_increment_gate_count(width: int, start: int) -> int:
+    """Primitive-node count for a dirty-ancilla controlled +2**start."""
+    if width <= 0:
+        raise ValueError("width must be positive")
+    if not 0 <= start < width:
+        raise ValueError("increment start out of range")
+    # Final CX plus one MCX for each more-significant target bit.
+    return 1 + sum(
+        _dirty_mcx_gate_count(1 + (target_index - start))
+        for target_index in range(start + 1, width)
+    )
+
+
+def streamed_word_add_gate_count(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+) -> int:
+    """Exact eager-expansion gate count for one streamed W[t] addition."""
+    if not 0 <= round_index < 64:
+        raise ValueError("round_index must be in 0..63")
+    return sum(
+        2 * dirty_oracle_gate_count(schedule.dag, node_index)
+        + conditional_increment_gate_count(32, bit_index)
+        for bit_index, node_index in enumerate(schedule.words[round_index])
+    )
+
 def _emit_mcx_dirty(
     circuit: ReversibleCircuit,
     controls: tuple[int, ...],
