@@ -633,3 +633,134 @@ def emit_streamed_schedule_add(
         )
 
     return report
+
+
+def emit_streamed_schedule_add_checkpointed(
+    circuit: ReversibleCircuit,
+    layout: D8Layout,
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    target_slot: int,
+    *,
+    plan: StreamCheckpointPlan | None = None,
+) -> StreamCheckpointPlan:
+    """Add W[t] with transient reusable DAG checkpoints.
+
+    Cached nodes occupy scratch only inside this macro:
+      compute caches -> stream 32 output bits -> uncompute caches.
+    No cached schedule value survives the macro boundary.
+    """
+    if layout.profile != "coherent107":
+        raise ValueError("checkpointed coherent lowering requires coherent107")
+    if not 0 <= target_slot < layout.state_words:
+        raise ValueError("target_slot must be a SHA state slot")
+
+    selected = plan or plan_stream_checkpoints(schedule, round_index)
+    if selected.round_index != round_index:
+        raise ValueError("checkpoint plan round does not match requested round")
+    if not selected.width_safe:
+        raise RuntimeError("checkpoint plan exceeds coherent107 dirty workspace")
+
+    nonce = tuple(layout.nonce_bit(bit) for bit in range(32))
+    scratch = tuple(layout.scratch_bit(bit) for bit in range(32))
+    target = tuple(layout.word_bit(target_slot, bit) for bit in range(32))
+    state = _state_bits(layout)
+
+    ordered_nodes = tuple(sorted(selected.cached_nodes))
+    cache_wires = {
+        node_index: scratch[index]
+        for index, node_index in enumerate(ordered_nodes)
+    }
+    stream_temp = scratch[len(ordered_nodes)]
+
+    active: dict[int, int] = {}
+    for node_index in ordered_nodes:
+        cache_wire = cache_wires[node_index]
+        reserved = set(active.values())
+        borrowed = tuple(
+            dict.fromkeys(
+                state
+                + tuple(
+                    bit
+                    for bit in scratch
+                    if bit != cache_wire and bit not in reserved
+                )
+                + (layout.carry_bit,)
+            )
+        )
+        emit_node_xor(
+            circuit,
+            schedule.dag,
+            node_index,
+            nonce,
+            cache_wire,
+            borrowed,
+            cached_nodes=active,
+        )
+        active[node_index] = cache_wire
+
+    reserved_cache_wires = set(active.values())
+    stream_borrowed = tuple(
+        dict.fromkeys(
+            state
+            + tuple(
+                bit
+                for bit in scratch
+                if bit != stream_temp and bit not in reserved_cache_wires
+            )
+            + (layout.carry_bit,)
+        )
+    )
+
+    for bit_index, node_index in enumerate(schedule.words[round_index]):
+        emit_node_xor(
+            circuit,
+            schedule.dag,
+            node_index,
+            nonce,
+            stream_temp,
+            stream_borrowed,
+            cached_nodes=active,
+        )
+        _emit_conditional_increment(
+            circuit,
+            target,
+            bit_index,
+            stream_temp,
+            stream_borrowed,
+        )
+        emit_node_xor(
+            circuit,
+            schedule.dag,
+            node_index,
+            nonce,
+            stream_temp,
+            stream_borrowed,
+            cached_nodes=active,
+        )
+
+    for node_index in reversed(ordered_nodes):
+        cache_wire = active.pop(node_index)
+        reserved = set(active.values())
+        borrowed = tuple(
+            dict.fromkeys(
+                state
+                + tuple(
+                    bit
+                    for bit in scratch
+                    if bit != cache_wire and bit not in reserved
+                )
+                + (layout.carry_bit,)
+            )
+        )
+        emit_node_xor(
+            circuit,
+            schedule.dag,
+            node_index,
+            nonce,
+            cache_wire,
+            borrowed,
+            cached_nodes=active,
+        )
+
+    return selected
