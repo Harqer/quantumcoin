@@ -11,8 +11,6 @@ _FIXED_LAYOUT_TRANSMONS = {
 }
 _COHERENT_LAYOUT_TRANSMONS = {
     "coherent107": 107,
-    "coherent171": 171,
-    "coherent182": 182,
 }
 _LAYOUT_TRANSMONS = {
     **_FIXED_LAYOUT_TRANSMONS,
@@ -27,24 +25,21 @@ _STATE_PADDING_SLOTS = tuple(
 
 @dataclass(frozen=True)
 class D8Layout:
-    """Map exact SHA state/workspace bits onto d=8 transmon carriers.
+    """Map exact SHA logical basis bits onto d=8 carrier labels.
 
-    Fixed-message profiles map 289 logical level-bits:
-      256 state + 32 scratch + 1 carry.
+    The mapping is a semantic binary labeling of each eight-state carrier:
+    three logical basis bits identify |0>..|7>. It does not assume a specific
+    backend instruction or pulse implementation.
 
-    coherent107 is the width-optimized target:
-      256 state + 32 nonce + 32 scratch + 1 carry = 321 level-bits.
+    Fixed-message profiles map:
+      256 state + 32 scratch + 1 carry = 289 logical basis bits.
 
-    coherent171 materializes seven 32-bit schedule pebbles but has no separate
-    arithmetic word. It is a capacity/reference layout, not the executable
-    full-word lowering.
+    coherent107 maps:
+      256 state + 32 coherent nonce + 32 scratch + 1 carry = 321 bits.
 
-    coherent182 is the executable full-word reference:
-      256 state + 32 nonce + 7*32 schedule + 32 arithmetic scratch + 1 carry
-      = 545 mapped level-bits in 182 d=8 carriers (546 level-bit capacity).
-
-    All state words remain aligned to 11 transmons/word. Their eight unused
-    third levels are reclaimed by packed/coherent workspaces where applicable.
+    Carrier-local reversible logic may later fuse into exact 8x8 permutations.
+    Cross-carrier operations remain explicit until a backend supplies a legal
+    implementation.
     """
 
     profile: str = "aligned100"
@@ -62,7 +57,7 @@ class D8Layout:
 
     @property
     def is_coherent_nonce(self) -> bool:
-        return self.profile in _COHERENT_LAYOUT_TRANSMONS
+        return self.profile == "coherent107"
 
     @property
     def total_transmons(self) -> int:
@@ -74,8 +69,8 @@ class D8Layout:
 
     @property
     def carry_bit(self) -> int:
-        if self.is_coherent_nonce:
-            # nonce bits 30 and 31 occupy levels 0 and 1 of transmon 98.
+        if self.profile == "coherent107":
+            # nonce bits 30 and 31 use levels 0 and 1 of carrier 98.
             return 98 * 3 + 2
         if self.profile == "aligned100":
             return 99 * 3
@@ -101,7 +96,7 @@ class D8Layout:
         return self._state_word_bit(slot, bit)
 
     def nonce_bit(self, bit: int) -> int:
-        if not self.is_coherent_nonce:
+        if self.profile != "coherent107":
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
@@ -109,47 +104,6 @@ class D8Layout:
             raise ValueError("nonce bit out of range")
         transmon = 88 + bit // 3
         return transmon * 3 + bit % 3
-
-    def _coherent_workspace_bit(self, flat: int) -> int:
-        if self.profile == "coherent171":
-            if not 0 <= flat < 224:
-                raise ValueError("coherent171 workspace index out of range")
-            # 216 contiguous bits + all eight state padding levels.
-            if flat < 216:
-                transmon = 99 + flat // 3
-                return transmon * 3 + flat % 3
-            return _STATE_PADDING_SLOTS[flat - 216]
-
-        if self.profile == "coherent182":
-            if not 0 <= flat < 256:
-                raise ValueError("coherent182 workspace index out of range")
-            # 249 contiguous bits in transmons 99..181 + seven state padding
-            # levels. One final state padding level remains deliberately unused.
-            if flat < 249:
-                transmon = 99 + flat // 3
-                return transmon * 3 + flat % 3
-            return _STATE_PADDING_SLOTS[flat - 249]
-
-        raise ValueError(
-            f"layout {self.profile!r} has no full-word coherent workspace"
-        )
-
-    def schedule_pebble_bit(self, pebble: int, bit: int) -> int:
-        """Map one of seven full 32-bit coherent schedule pebbles."""
-        if not 0 <= pebble < 7:
-            raise ValueError("schedule pebble index must be in 0..6")
-        if not 0 <= bit < 32:
-            raise ValueError("schedule pebble bit out of range")
-
-        if self.profile in {"coherent171", "coherent182"}:
-            return self._coherent_workspace_bit(pebble * 32 + bit)
-
-        if self.profile == "coherent107" and pebble == 0:
-            return self.scratch_bit(bit)
-
-        raise ValueError(
-            f"layout {self.profile!r} does not expose full schedule pebble {pebble}"
-        )
 
     def scratch_bit(self, bit: int) -> int:
         if not 0 <= bit < 32:
@@ -161,14 +115,6 @@ class D8Layout:
                 return transmon * 3 + bit % 3
             return _STATE_PADDING_SLOTS[bit - 24]
 
-        if self.profile == "coherent171":
-            # Pebble zero doubles as scratch only when the schedule is clean.
-            return self._coherent_workspace_bit(bit)
-
-        if self.profile == "coherent182":
-            # Word seven is a dedicated arithmetic/constant/sigma workspace.
-            return self._coherent_workspace_bit(7 * 32 + bit)
-
         if self.profile in {"aligned100", "packed99"}:
             transmon = 88 + bit // 3
             return transmon * 3 + bit % 3
@@ -179,7 +125,7 @@ class D8Layout:
                 return transmon * 3 + bit % 3
             return _STATE_PADDING_SLOTS[bit - 30]
 
-        # packed97: 27 ordinary scratch bits + five borrowed padding levels.
+        # packed97: 27 ordinary scratch bits + five reclaimed state padding bits.
         if bit < 27:
             transmon = 88 + bit // 3
             return transmon * 3 + bit % 3
@@ -199,35 +145,18 @@ class D8Layout:
             for slot in range(self.state_words)
             for bit in range(32)
         )
+        scratch = tuple(self.scratch_bit(bit) for bit in range(32))
         carry = (self.carry_bit,)
 
-        if not self.is_coherent_nonce:
-            scratch = tuple(self.scratch_bit(bit) for bit in range(32))
+        if self.profile != "coherent107":
             return state + scratch + carry
 
         nonce = tuple(self.nonce_bit(bit) for bit in range(32))
-
-        if self.profile in {"coherent171", "coherent182"}:
-            pebbles = tuple(
-                self.schedule_pebble_bit(pebble, bit)
-                for pebble in range(7)
-                for bit in range(32)
-            )
-            if self.profile == "coherent171":
-                return state + nonce + pebbles + carry
-            scratch = tuple(self.scratch_bit(bit) for bit in range(32))
-            return state + nonce + pebbles + scratch + carry
-
-        scratch = tuple(self.scratch_bit(bit) for bit in range(32))
         return state + nonce + scratch + carry
 
     def _validate_mapping(self) -> None:
         mapped = self.mapped_bits()
-        expected = {
-            "coherent107": 321,
-            "coherent171": 513,
-            "coherent182": 545,
-        }.get(self.profile, 289)
+        expected = 321 if self.profile == "coherent107" else 289
 
         if len(mapped) != expected:
             raise AssertionError(
@@ -240,7 +169,7 @@ class D8Layout:
         if min(mapped) < 0 or max(mapped) >= self.logical_bit_capacity:
             raise ValueError(
                 f"{self.profile} uses a level-bit outside "
-                f"{self.total_transmons} transmons"
+                f"{self.total_transmons} carriers"
             )
 
     def empty_state(self) -> list[int]:
@@ -256,7 +185,7 @@ class D8Layout:
         return sum(bits[self.word_bit(slot, i)] << i for i in range(32))
 
     def set_nonce(self, bits: list[int], value: int) -> None:
-        if not self.is_coherent_nonce:
+        if self.profile != "coherent107":
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
@@ -266,7 +195,7 @@ class D8Layout:
             bits[self.nonce_bit(i)] = (value >> i) & 1
 
     def get_nonce(self, bits: list[int]) -> int:
-        if not self.is_coherent_nonce:
+        if self.profile != "coherent107":
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
@@ -275,22 +204,13 @@ class D8Layout:
     def assert_clean_workspace(self, bits: list[int]) -> None:
         if any(bits[self.scratch_bit(i)] for i in range(32)):
             raise AssertionError("scratch word not restored to zero")
-        if self.profile in {"coherent171", "coherent182"}:
-            if any(
-                bits[self.schedule_pebble_bit(pebble, bit)]
-                for pebble in range(7)
-                for bit in range(32)
-            ):
-                raise AssertionError("coherent schedule pebbles not restored to zero")
         if bits[self.carry_bit] != 0:
             raise AssertionError("carry ancilla not restored to zero")
 
 
 def available_layout_profiles() -> tuple[str, ...]:
-    """Profiles for the fixed-classical-message compiler."""
     return tuple(_FIXED_LAYOUT_TRANSMONS)
 
 
 def available_coherent_layout_profiles() -> tuple[str, ...]:
-    """Profiles that include a persistent coherent 32-bit nonce register."""
     return tuple(_COHERENT_LAYOUT_TRANSMONS)
