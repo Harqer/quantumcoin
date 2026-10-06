@@ -44,14 +44,17 @@ class CoherentSchedulePlan:
     word_pebbles: tuple[int, ...]
     max_word_pebbles: int
     first_multiword_round: int | None
-    limb_bits: int
-    limb_pebble_bits: int
-    spare_scratch_bits: int
+    scratch_bits: int
     schedule_arithmetic: str
     dag_node_count: int
     dag_and_nodes: int
     dag_xor_nodes: int
     dag_max_depth: int
+
+    @property
+    def full_word_materialization_legal(self) -> bool:
+        return self.max_word_pebbles * 32 <= self.scratch_bits
+
 
 
 def expand_schedule(words16: tuple[int, ...]) -> tuple[int, ...]:
@@ -259,17 +262,6 @@ def plan_coherent_schedule(
         None,
     )
 
-    # Word-level partition candidate only. The exact bit-level dependency DAG
-    # must still prove that cross-limb sigma references and carry propagation
-    # fit the same scratch budget before this candidate is used for hardware
-    # lowering.
-    limb_bits = scratch_bits // max_pebbles
-    if limb_bits < 1:
-        raise RuntimeError(
-            "scratch budget cannot host even one bit for every live pebble"
-        )
-
-    limb_pebble_bits = limb_bits * max_pebbles
     return CoherentSchedulePlan(
         nonce_word_index=nonce_word_index,
         dynamic_words=tuple(
@@ -278,9 +270,7 @@ def plan_coherent_schedule(
         word_pebbles=pebbles,
         max_word_pebbles=max_pebbles,
         first_multiword_round=first_multiword,
-        limb_bits=limb_bits,
-        limb_pebble_bits=limb_pebble_bits,
-        spare_scratch_bits=scratch_bits - limb_pebble_bits,
+        scratch_bits=scratch_bits,
         schedule_arithmetic=selected_dag.arithmetic,
         dag_node_count=selected_dag.stats.node_count,
         dag_and_nodes=selected_dag.stats.and_nodes,
@@ -303,55 +293,3 @@ def bitcoin_second_block_template() -> tuple[int, ...]:
         words[index] = 0
     words[15] = 80 * 8
     return tuple(words)
-
-
-
-@dataclass(frozen=True)
-class CoherentLimbWorkspace:
-    """Deterministic allocation of schedule pebbles into coherent107 scratch.
-
-    The allocator does not create new logical storage. It partitions the single
-    32-bit scratch word according to the word-level limb candidate selected by
-    plan_coherent_schedule(). This is a deterministic candidate allocation, not
-    a completed reversible-lowering proof; coherent_dag.py supplies the exact
-    cross-limb dependency graph that the next pebbling pass must satisfy.
-    """
-
-    layout: D8Layout
-    plan: CoherentSchedulePlan
-
-    def __post_init__(self) -> None:
-        if self.layout.profile != "coherent107":
-            raise ValueError(
-                "coherent limb workspace is only the coherent107 optimization candidate"
-            )
-        if self.plan.limb_pebble_bits > 32:
-            raise ValueError("limb pebble allocation exceeds 32 scratch bits")
-
-    def pebble_bits(self, pebble: int) -> tuple[int, ...]:
-        if not 0 <= pebble < self.plan.max_word_pebbles:
-            raise ValueError("pebble index out of range")
-        start = pebble * self.plan.limb_bits
-        return tuple(
-            self.layout.scratch_bit(start + offset)
-            for offset in range(self.plan.limb_bits)
-        )
-
-    @property
-    def spare_bits(self) -> tuple[int, ...]:
-        return tuple(
-            self.layout.scratch_bit(index)
-            for index in range(self.plan.limb_pebble_bits, 32)
-        )
-
-    @property
-    def carry_bit(self) -> int:
-        return self.layout.carry_bit
-
-    def allocated_bits(self) -> tuple[int, ...]:
-        pebbles = tuple(
-            bit
-            for pebble in range(self.plan.max_word_pebbles)
-            for bit in self.pebble_bits(pebble)
-        )
-        return pebbles + self.spare_bits + (self.carry_bit,)
