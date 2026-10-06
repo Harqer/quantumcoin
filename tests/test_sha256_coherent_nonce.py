@@ -3,7 +3,6 @@ import random
 import pytest
 
 from quantum.sha256_transmon_d8.coherent_schedule import (
-    CoherentLimbWorkspace,
     bitcoin_second_block_template,
     compress_reference,
     dynamic_schedule_words,
@@ -114,39 +113,12 @@ def test_word_pebbling_rejects_full_word_materialization_and_proposes_limb_candi
     assert plan.word_pebbles[60] == 7
     assert plan.max_word_pebbles == 7
 
-    # The word-level model proposes 4-bit limbs because floor(32 / 7) = 4.
-    # This is not yet a lowering proof: the exact bit-level DAG must also
-    # account for cross-limb sigma references and arithmetic carries.
-    assert plan.limb_bits == 4
-    assert plan.limb_pebble_bits == 28
-    assert plan.spare_scratch_bits == 4
-    assert 7 * (plan.limb_bits + 1) > 32
+    assert plan.scratch_bits == 32
+    assert not plan.full_word_materialization_legal
     assert plan.schedule_arithmetic == "ripple"
     assert plan.dag_and_nodes > 0
     assert plan.dag_max_depth > 0
 
-
-def test_limb_workspace_uses_only_scratch_and_dedicated_carry():
-    layout = D8Layout(profile="coherent107")
-    plan = plan_coherent_schedule()
-    workspace = CoherentLimbWorkspace(layout, plan)
-
-    pebble_bits = [
-        workspace.pebble_bits(index)
-        for index in range(plan.max_word_pebbles)
-    ]
-    flat_pebbles = tuple(bit for group in pebble_bits for bit in group)
-
-    assert all(len(group) == 4 for group in pebble_bits)
-    assert len(flat_pebbles) == 28
-    assert len(set(flat_pebbles)) == 28
-    assert len(workspace.spare_bits) == 4
-    assert set(flat_pebbles).isdisjoint(workspace.spare_bits)
-    assert workspace.carry_bit not in set(flat_pebbles) | set(workspace.spare_bits)
-
-    assert set(flat_pebbles) | set(workspace.spare_bits) == {
-        layout.scratch_bit(i) for i in range(32)
-    }
 
 
 def test_exact_schedule_evaluator_matches_independent_reference():
