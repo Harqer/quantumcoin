@@ -297,19 +297,27 @@ Retain an intermediate only when measured reuse cost beats recomputation.
 Otherwise erase it immediately after its final consumer and reuse the same
 workspace.
 
-The existing seven-role word-pebble frontier is a dependency/liveness model,
-not seven physical stored words. The 28+4 scratch partition remains a candidate
-schedule for those live roles:
+The existing seven-role word-pebble frontier is diagnostic only. The executable
+coherent path does not materialize those words. Instead, each dynamic W[t]
+contribution is streamed directly into the live SHA accumulator:
 
 ```text
-7 abstract roles x 4 bits = 28
-local helpers             =  4
-                           ----
-workspace                 = 32 bits
+compute one W[t] bit -> controlled +2^i -> uncompute bit -> reuse scratch
 ```
 
-Exact lowering must preserve cross-slice sigma dependencies and arithmetic
-carry semantics; no wider fallback layout is part of the target architecture.
+The exact Boolean schedule DAG uses the 256 live SHA state bits, the other
+scratch bits, and carry only as dirty borrowed workspace; each oracle invocation
+restores every borrowed bit before returning. The selected prefix DAG requires
+at most 269 dirty bits for a streamed output bit, while coherent107 exposes 288
+compatible dirty bits during that oracle. No persistent schedule register is
+allocated.
+
+Seventeen nonce-independent rounds keep compile-time K[t]+W[t] fusion. Only the
+47 nonce-dependent rounds use streamed schedule-add macros.
+
+Transient DAG checkpoints may occupy otherwise-free scratch bits within one
+streamed W[t] macro. They are computed once, reused, and uncomputed before the
+macro exits; they never become persistent schedule storage.
 
 ### Exact carrier-level fusion
 
@@ -365,7 +373,7 @@ The verification path:
 6. runs the complete inverse circuit;
 7. verifies H0 restoration;
 8. verifies scratch=0 and carry=0;
-9. reports the direct d=8 pulse-target inventory.
+9. verifies exact carrier-local permutation fusion and workspace-liveness metrics.
 
 For `abc` the required digest is:
 
