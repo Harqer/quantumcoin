@@ -14,6 +14,8 @@ from .coherent_dag import (
     CoherentScheduleDag,
     ScheduleDagStats,
     build_schedule_dag,
+    build_schedule_dag_candidates,
+    select_schedule_dag,
 )
 from .coherent_pebble import (
     LimbStreamingCandidate,
@@ -42,18 +44,6 @@ from .coherent_schedule import (
     evaluate_schedule,
     plan_coherent_schedule,
 )
-from .luna_lowering import (
-    CheckpointCandidate,
-    LoweringPlan,
-    LoweringWeights,
-    Round16LoweringProblem,
-    build_luna_model,
-    build_round16_lowering_problem,
-    plan_from_sample,
-    solve_exact_locally,
-    solve_with_luna,
-    validate_checkpoint_selection,
-)
 from .layout import (
     D8Layout,
     available_coherent_layout_profiles,
@@ -70,16 +60,6 @@ __all__ = [
     "LocalPermutation8",
     "CrossCarrierGate",
     "CarrierProgram",
-    "CheckpointCandidate",
-    "LoweringPlan",
-    "LoweringWeights",
-    "Round16LoweringProblem",
-    "build_luna_model",
-    "build_round16_lowering_problem",
-    "plan_from_sample",
-    "solve_exact_locally",
-    "solve_with_luna",
-    "validate_checkpoint_selection",
     "CoherentLimbWorkspace",
     "LimbStreamingCandidate",
     "PebbleAction",
@@ -94,6 +74,8 @@ __all__ = [
     "available_coherent_layout_profiles",
     "available_layout_profiles",
     "build_schedule_dag",
+    "select_schedule_dag",
+    "build_schedule_dag_candidates",
     "compile_single_block_sha256",
     "compress_reference",
     "evaluate_schedule",
