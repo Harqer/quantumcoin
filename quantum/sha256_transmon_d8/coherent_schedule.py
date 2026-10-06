@@ -46,6 +46,7 @@ class CoherentSchedulePlan:
     dag_and_nodes: int
     dag_xor_nodes: int
     dag_max_depth: int
+    dag_max_and_depth: int
 
     @property
     def full_word_materialization_legal(self) -> bool:
@@ -272,6 +273,7 @@ def plan_coherent_schedule(
         dag_and_nodes=selected_dag.stats.and_nodes,
         dag_xor_nodes=selected_dag.stats.xor_nodes,
         dag_max_depth=selected_dag.stats.max_depth,
+        dag_max_and_depth=selected_dag.stats.max_and_depth,
     )
 
 
