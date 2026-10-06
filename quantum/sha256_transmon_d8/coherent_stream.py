@@ -88,6 +88,195 @@ def streamed_word_add_gate_count(
         for bit_index, node_index in enumerate(schedule.words[round_index])
     )
 
+
+@dataclass(frozen=True)
+class StreamCheckpointPlan:
+    round_index: int
+    cached_nodes: tuple[int, ...]
+    projected_gate_count: int
+    max_effective_dirty_bits: int
+    available_dirty_bits: int
+
+    @property
+    def width_safe(self) -> bool:
+        return self.max_effective_dirty_bits <= self.available_dirty_bits
+
+
+def _oracle_cost_vector(
+    dag: BooleanDag,
+    cached_nodes: frozenset[int] = frozenset(),
+) -> tuple[int, ...]:
+    costs = [0] * len(dag.nodes)
+    for index, node in enumerate(dag.nodes):
+        if index in cached_nodes:
+            costs[index] = 1
+        elif node.kind == "const":
+            costs[index] = 1 if index == 1 else 0
+        elif node.kind == "nonce":
+            costs[index] = 1
+        elif node.kind == "xor":
+            costs[index] = sum(costs[parent] for parent in node.inputs)
+        elif node.kind == "and":
+            left, right = node.inputs
+            costs[index] = 2 * costs[left] + 2 * costs[right]
+        else:
+            raise ValueError(f"unsupported Boolean DAG node {node.kind!r}")
+    return tuple(costs)
+
+
+def _oracle_depth_vector(
+    dag: BooleanDag,
+    cached_nodes: frozenset[int] = frozenset(),
+) -> tuple[int, ...]:
+    depths = [0] * len(dag.nodes)
+    for index, node in enumerate(dag.nodes):
+        if index in cached_nodes or node.kind in {"const", "nonce"}:
+            continue
+        if node.kind == "xor":
+            depths[index] = max(
+                (depths[parent] for parent in node.inputs),
+                default=0,
+            )
+        elif node.kind == "and":
+            left, right = node.inputs
+            depths[index] = 1 + max(depths[left], depths[right])
+        else:
+            raise ValueError(f"unsupported Boolean DAG node {node.kind!r}")
+    return tuple(depths)
+
+
+def _word_node_demand(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+) -> tuple[int, ...]:
+    """Naive recursive invocation multiplicity for all 32 output bits."""
+    demand = [0] * len(schedule.dag.nodes)
+    for node in schedule.words[round_index]:
+        demand[node] += 1
+
+    for index in range(len(schedule.dag.nodes) - 1, -1, -1):
+        count = demand[index]
+        if not count:
+            continue
+        node = schedule.dag.nodes[index]
+        if node.kind == "xor":
+            for parent in node.inputs:
+                demand[parent] += count
+        elif node.kind == "and":
+            left, right = node.inputs
+            demand[left] += 2 * count
+            demand[right] += 2 * count
+    return tuple(demand)
+
+
+def _checkpoint_projected_cost(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    cached_nodes: tuple[int, ...],
+) -> tuple[int, int]:
+    """Return projected gates and max dirty depth for one cached-word stream."""
+    dag = schedule.dag
+    active: frozenset[int] = frozenset()
+    setup_cost = 0
+
+    # Cache nodes are materialized in topological order and erased in reverse.
+    for node_index in sorted(cached_nodes):
+        costs = _oracle_cost_vector(dag, active)
+        setup_cost += 2 * costs[node_index]
+        active = active | {node_index}
+
+    costs = _oracle_cost_vector(dag, active)
+    depths = _oracle_depth_vector(dag, active)
+    stream_cost = sum(
+        2 * costs[node_index] + conditional_increment_gate_count(32, bit_index)
+        for bit_index, node_index in enumerate(schedule.words[round_index])
+    )
+    max_depth = max(depths[node] for node in schedule.words[round_index])
+    return setup_cost + stream_cost, max_depth
+
+
+def plan_stream_checkpoints(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    *,
+    max_cache_bits: int = 31,
+    candidate_limit: int = 48,
+) -> StreamCheckpointPlan:
+    """Choose reusable DAG checkpoints under the existing 32-bit scratch budget.
+
+    One scratch bit remains the streaming target. Cached values occupy other
+    scratch bits only for this W[t] contribution and are uncomputed before the
+    next SHA term. Selection is deterministic and width constrained.
+    """
+    if not 0 <= round_index < 64:
+        raise ValueError("round_index must be in 0..63")
+    if not 0 <= max_cache_bits <= 31:
+        raise ValueError("max_cache_bits must be in 0..31")
+
+    dag = schedule.dag
+    naive_costs = _oracle_cost_vector(dag)
+    demand = _word_node_demand(schedule, round_index)
+
+    ranked = sorted(
+        (
+            index
+            for index, node in enumerate(dag.nodes)
+            if node.kind in {"xor", "and"}
+            and demand[index] > 1
+            and naive_costs[index] > 1
+        ),
+        key=lambda index: (
+            demand[index] * naive_costs[index],
+            dag.and_depth[index],
+            index,
+        ),
+        reverse=True,
+    )[:candidate_limit]
+
+    selected: tuple[int, ...] = ()
+    best_cost, best_depth = _checkpoint_projected_cost(
+        schedule,
+        round_index,
+        selected,
+    )
+
+    while len(selected) < max_cache_bits:
+        winner: tuple[int, int, int] | None = None
+        winner_nodes: tuple[int, ...] | None = None
+
+        for candidate in ranked:
+            if candidate in selected:
+                continue
+            trial = tuple(sorted(selected + (candidate,)))
+            projected, depth = _checkpoint_projected_cost(
+                schedule,
+                round_index,
+                trial,
+            )
+            available = 288 - len(trial)
+            if depth > available:
+                continue
+            score = (projected, depth, candidate)
+            if winner is None or score < winner:
+                winner = score
+                winner_nodes = trial
+
+        if winner is None or winner_nodes is None:
+            break
+        if winner[0] >= best_cost:
+            break
+
+        selected = winner_nodes
+        best_cost, best_depth = winner[0], winner[1]
+
+    return StreamCheckpointPlan(
+        round_index=round_index,
+        cached_nodes=selected,
+        projected_gate_count=best_cost,
+        max_effective_dirty_bits=best_depth,
+        available_dirty_bits=288 - len(selected),
+    )
+
 def _emit_mcx_dirty(
     circuit: ReversibleCircuit,
     controls: tuple[int, ...],
