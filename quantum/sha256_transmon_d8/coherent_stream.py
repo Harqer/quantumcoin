@@ -773,3 +773,110 @@ def emit_streamed_schedule_add_checkpointed(
         )
 
     return selected
+
+
+def _critical_checkpoint_candidates(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    *,
+    limit: int = 40,
+) -> tuple[int, ...]:
+    """Return deep, reusable nodes relevant to one streamed schedule word."""
+    dag = schedule.dag
+    demand = _word_node_demand(schedule, round_index)
+    outputs = set(schedule.words[round_index])
+
+    # A checkpoint matters for width only when it lies on a nonlinear path.
+    # Favor deep nodes that are actually reused by the word outputs.
+    ranked = sorted(
+        (
+            index
+            for index, node in enumerate(dag.nodes)
+            if node.kind in {"and", "xor"}
+            and demand[index] > 0
+            and dag.and_depth[index] > 0
+            and index not in outputs
+        ),
+        key=lambda index: (
+            dag.and_depth[index],
+            demand[index],
+            index,
+        ),
+        reverse=True,
+    )
+    return tuple(ranked[:limit])
+
+
+def plan_depth_cut_checkpoints(
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    *,
+    max_cache_bits: int = 2,
+    available_dirty_bits: int = 258,
+    candidate_limit: int = 40,
+) -> StreamCheckpointPlan:
+    """Search critical checkpoint sets for minimum effective dirty depth.
+
+    This is intended for very tight workspace targets where gate-count-greedy
+    checkpointing can miss a feasible depth cut. For max_cache_bits<=2 the
+    search is exhaustive over the selected critical candidate pool.
+    """
+    if not 0 <= round_index < 64:
+        raise ValueError("round_index must be in 0..63")
+    if max_cache_bits not in (0, 1, 2):
+        raise ValueError("depth-cut search currently supports 0, 1, or 2 caches")
+    if available_dirty_bits < 0:
+        raise ValueError("available_dirty_bits must be nonnegative")
+
+    candidates = _critical_checkpoint_candidates(
+        schedule,
+        round_index,
+        limit=candidate_limit,
+    )
+
+    trials: list[tuple[int, ...]] = [()]
+    if max_cache_bits >= 1:
+        trials.extend((node,) for node in candidates)
+    if max_cache_bits >= 2:
+        for left_index, left in enumerate(candidates):
+            for right in candidates[left_index + 1 :]:
+                trials.append(tuple(sorted((left, right))))
+
+    best: StreamCheckpointPlan | None = None
+    for cached in trials:
+        projected, depth = _checkpoint_projected_cost(
+            schedule,
+            round_index,
+            cached,
+        )
+        plan = StreamCheckpointPlan(
+            round_index=round_index,
+            cached_nodes=cached,
+            projected_gate_count=projected,
+            max_effective_dirty_bits=depth,
+            available_dirty_bits=available_dirty_bits - len(cached),
+        )
+        if best is None:
+            best = plan
+            continue
+
+        current_key = (
+            max(0, plan.max_effective_dirty_bits - plan.available_dirty_bits),
+            plan.max_effective_dirty_bits,
+            plan.projected_gate_count,
+            len(plan.cached_nodes),
+            plan.cached_nodes,
+        )
+        best_key = (
+            max(0, best.max_effective_dirty_bits - best.available_dirty_bits),
+            best.max_effective_dirty_bits,
+            best.projected_gate_count,
+            len(best.cached_nodes),
+            best.cached_nodes,
+        )
+        if current_key < best_key:
+            best = plan
+
+    if best is None:
+        raise RuntimeError("depth-cut checkpoint search produced no plan")
+    return best
