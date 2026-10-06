@@ -67,6 +67,8 @@ class CarrierProgram:
 
     operations: tuple[CarrierOperation, ...]
     source_gate_count: int
+    eliminated_local_identity_gates: int = 0
+    cancelled_cross_carrier_gates: int = 0
 
     @property
     def local_permutation_count(self) -> int:
@@ -136,20 +138,27 @@ def compile_carrier_program(
     local_gates: list[Gate] = []
     local_carrier: int | None = None
     local_start = 0
+    eliminated_local_identity_gates = 0
+    cancelled_cross_carrier_gates = 0
 
     def flush(stop: int) -> None:
         nonlocal local_gates, local_carrier, local_start
+        nonlocal eliminated_local_identity_gates
         if not local_gates:
             return
         assert local_carrier is not None
-        operations.append(
-            LocalPermutation8(
-                carrier=local_carrier,
-                mapping=exact_local_permutation(local_carrier, local_gates),
-                gate_start=local_start,
-                gate_stop=stop,
+        mapping = exact_local_permutation(local_carrier, local_gates)
+        if mapping == tuple(range(8)):
+            eliminated_local_identity_gates += len(local_gates)
+        else:
+            operations.append(
+                LocalPermutation8(
+                    carrier=local_carrier,
+                    mapping=mapping,
+                    gate_start=local_start,
+                    gate_stop=stop,
+                )
             )
-        )
         local_gates = []
         local_carrier = None
 
@@ -171,12 +180,22 @@ def compile_carrier_program(
             continue
 
         flush(index)
-        operations.append(CrossCarrierGate(gate=gate, gate_index=index))
+        if (
+            operations
+            and isinstance(operations[-1], CrossCarrierGate)
+            and operations[-1].gate == gate.inverse()
+        ):
+            operations.pop()
+            cancelled_cross_carrier_gates += 2
+        else:
+            operations.append(CrossCarrierGate(gate=gate, gate_index=index))
 
     flush(len(circuit.gates))
     return CarrierProgram(
         operations=tuple(operations),
         source_gate_count=len(circuit.gates),
+        eliminated_local_identity_gates=eliminated_local_identity_gates,
+        cancelled_cross_carrier_gates=cancelled_cross_carrier_gates,
     )
 
 
