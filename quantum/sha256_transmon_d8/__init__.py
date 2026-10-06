@@ -35,6 +35,12 @@ from .coherent_round16 import (
     plan_round_term,
     verify_round_term,
 )
+from .coherent_stream import (
+    StreamedWordAddReport,
+    emit_node_xor,
+    emit_streamed_schedule_add,
+    streamed_word_add_report,
+)
 from .coherent_schedule import (
     CoherentSchedulePlan,
     compress_reference,
@@ -55,6 +61,10 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
+    "streamed_word_add_report",
+    "emit_streamed_schedule_add",
+    "emit_node_xor",
+    "StreamedWordAddReport",
     "verify_carrier_program",
     "simulate_carrier_program",
     "exact_local_permutation",
