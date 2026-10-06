@@ -121,6 +121,9 @@ def test_word_pebbling_rejects_full_word_materialization_and_proposes_limb_candi
     assert plan.limb_pebble_bits == 28
     assert plan.spare_scratch_bits == 4
     assert 7 * (plan.limb_bits + 1) > 32
+    assert plan.schedule_arithmetic == "ripple"
+    assert plan.dag_and_nodes > 0
+    assert plan.dag_max_depth > 0
 
 
 def test_limb_workspace_uses_only_scratch_and_dedicated_carry():
