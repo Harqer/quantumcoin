@@ -17,9 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip pytest
-      - run: python -m pytest -q tests/test_sha256_*.py\n      - name: Report coherent schedule depth\n        run: python -c "from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template; from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag; d=select_schedule_dag(bitcoin_second_block_template(),3); print(d.arithmetic, d.stats)"
+      - run: python -m pip install --disable-pip-version-check pytest
+      - run: python -m pytest -q tests/test_sha256_*.py
+      - name: Report coherent schedule depth
+        run: >-
+          python -c "from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template;
+          from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag;
+          d=select_schedule_dag(bitcoin_second_block_template(),3);
+          print(d.arithmetic, d.stats)"
