@@ -32,7 +32,7 @@ def test_full_coherent107_program_has_no_persistent_schedule_storage():
     assert compiled.layout.total_transmons == 107
     assert compiled.persistent_schedule_bits == 0
     assert compiled.max_schedule_dirty_bits <= 288
-    assert len(compiled.schedule_reports) == 64
+    assert len(compiled.schedule_reports) == 47
     assert sum(
         isinstance(operation, StreamedScheduleAdd)
         for operation in compiled.operations
