@@ -235,6 +235,16 @@ class BooleanDag:
         s2, c2 = self.compress3(s1, c1, d)
         return self.add2(s2, c2)
 
+    def add4_ripple(
+        self,
+        a: tuple[int, ...],
+        b: tuple[int, ...],
+        c: tuple[int, ...],
+        d: tuple[int, ...],
+    ) -> tuple[int, ...]:
+        """Exact four-operand sum using three chained ripple additions."""
+        return self.add2(self.add2(self.add2(a, b), c), d)
+
     @cached_property
     def depth(self) -> tuple[int, ...]:
         depths = [0] * len(self.nodes)
@@ -275,6 +285,7 @@ class CoherentScheduleDag:
     dag: BooleanDag
     words: tuple[tuple[int, ...], ...]
     nonce_word_index: int
+    arithmetic: str = "carry_save"
 
     def __post_init__(self) -> None:
         if len(self.words) != 64 or any(len(word) != 32 for word in self.words):
@@ -328,6 +339,8 @@ class CoherentScheduleDag:
 def build_schedule_dag(
     fixed_words: tuple[int, ...],
     nonce_word_index: int = 3,
+    *,
+    arithmetic: str = "carry_save",
 ) -> CoherentScheduleDag:
     """Build the exact coherent SHA-256 W[0:64] dependency DAG.
 
@@ -346,6 +359,9 @@ def build_schedule_dag(
     if any(not 0 <= word < (1 << 32) for word in fixed_words):
         raise ValueError("every fixed word must fit 32 bits")
 
+    if arithmetic not in {"carry_save", "ripple"}:
+        raise ValueError("arithmetic must be 'carry_save' or 'ripple'")
+
     dag = BooleanDag()
     words: list[tuple[int, ...]] = []
 
@@ -355,9 +371,14 @@ def build_schedule_dag(
         else:
             words.append(dag.constant_word(fixed_words[t]))
 
+    add4 = (
+        dag.add4_carry_save
+        if arithmetic == "carry_save"
+        else dag.add4_ripple
+    )
     for t in range(16, 64):
         words.append(
-            dag.add4_carry_save(
+            add4(
                 dag.small_sigma1(words[t - 2]),
                 words[t - 7],
                 dag.small_sigma0(words[t - 15]),
@@ -369,4 +390,45 @@ def build_schedule_dag(
         dag=dag,
         words=tuple(words),
         nonce_word_index=nonce_word_index,
+        arithmetic=arithmetic,
+    )
+
+
+def build_schedule_dag_candidates(
+    fixed_words: tuple[int, ...],
+    nonce_word_index: int = 3,
+) -> tuple[CoherentScheduleDag, ...]:
+    """Construct every exact schedule-arithmetic candidate."""
+    return tuple(
+        build_schedule_dag(
+            fixed_words,
+            nonce_word_index,
+            arithmetic=arithmetic,
+        )
+        for arithmetic in ("carry_save", "ripple")
+    )
+
+
+def select_schedule_dag(
+    fixed_words: tuple[int, ...],
+    nonce_word_index: int = 3,
+) -> CoherentScheduleDag:
+    """Choose the exact schedule DAG with the best nonlinear/depth/size cost.
+
+    AND count is primary because it maps to nonlinear reversible work. Depth
+    breaks ties, followed by total semantic node count and XOR count.
+    """
+    candidates = build_schedule_dag_candidates(
+        fixed_words,
+        nonce_word_index,
+    )
+    return min(
+        candidates,
+        key=lambda candidate: (
+            candidate.stats.and_nodes,
+            candidate.stats.max_depth,
+            candidate.stats.node_count,
+            candidate.stats.xor_nodes,
+            candidate.arithmetic,
+        ),
     )
