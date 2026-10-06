@@ -31,5 +31,4 @@ jobs:
           d=select_schedule_dag(bitcoin_second_block_template(),3);
           counts=[streamed_word_add_gate_count(d,t) for t in d.stats.dynamic_schedule_words];
           print(d.arithmetic, d.stats);
-          print('streamed_max_gates', max(counts), 'digits', len(str(max(counts))));\
-          [(lambda cc: print('candidate', cc.arithmetic, 'and_depth', cc.stats.max_and_depth, 'nodes', cc.stats.node_count, 'max_gates_digits', len(str(max(streamed_word_add_gate_count(cc,t) for t in cc.stats.dynamic_schedule_words))), 'total_gates_digits', len(str(sum(streamed_word_add_gate_count(cc,t) for t in cc.stats.dynamic_schedule_words)))))(cc) for cc in build_schedule_dag_candidates(bitcoin_second_block_template(),3)]"
+          print('streamed_max_gates', max(counts), 'digits', len(str(max(counts)))); [(lambda cc: print('candidate', cc.arithmetic, 'and_depth', cc.stats.max_and_depth, 'nodes', cc.stats.node_count, 'max_gates_digits', len(str(max(streamed_word_add_gate_count(cc,t) for t in cc.stats.dynamic_schedule_words))), 'total_gates_digits', len(str(sum(streamed_word_add_gate_count(cc,t) for t in cc.stats.dynamic_schedule_words)))))(cc) for cc in build_schedule_dag_candidates(bitcoin_second_block_template(),3)]"
