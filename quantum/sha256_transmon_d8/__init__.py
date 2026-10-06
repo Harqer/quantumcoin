@@ -47,9 +47,13 @@ from .coherent_round16 import (
     verify_round_term,
 )
 from .coherent_stream import (
+    StreamCheckpointPlan,
     StreamedWordAddReport,
     emit_node_xor,
     emit_streamed_schedule_add,
+    emit_streamed_schedule_add_checkpointed,
+    plan_stream_checkpoints,
+    streamed_word_add_gate_count,
     streamed_word_add_report,
 )
 from .coherent_schedule import (
@@ -72,6 +76,10 @@ from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
     "BooleanDag",
+    "streamed_word_add_gate_count",
+    "plan_stream_checkpoints",
+    "emit_streamed_schedule_add_checkpointed",
+    "StreamCheckpointPlan",
     "verify_compiled_coherent_sha256",
     "simulate_coherent_operations",
     "lower_streamed_schedule_operation",
