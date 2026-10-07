@@ -112,6 +112,7 @@ def execute_complete_sha_program(
 ) -> str:
     """Use Rigetti QCS translation then submit exactly one complete SHA job."""
     try:
+        from qcs_sdk.client import QCSClient
         from qcs_sdk.qpu.api import submit
         from qcs_sdk.qpu.translation import (
             TranslationOptions,
@@ -123,7 +124,22 @@ def execute_complete_sha_program(
             "Rigetti qcs_sdk is not installed; install qcs-sdk-python"
         ) from exc
 
-    get_quilt_calibrations(CEPHEUS_QCS_PROCESSOR_ID)
+    try:
+        client = QCSClient.load_with_login()
+    except Exception as exc:
+        raise QCSRuntimeUnavailable(
+            "Rigetti QCS authentication failed; complete the browser login flow"
+        ) from exc
+
+    try:
+        get_quilt_calibrations(
+            CEPHEUS_QCS_PROCESSOR_ID,
+            client=client,
+        )
+    except Exception as exc:
+        raise QCSRuntimeUnavailable(
+            "Rigetti QCS authentication/calibration lookup failed"
+        ) from exc
 
     library_path = os.environ.get("SHA256_D8_PULSE_LIBRARY")
     if not library_path:
@@ -145,6 +161,7 @@ def execute_complete_sha_program(
         native_quil=lowered.source,
         num_shots=lowered.shots,
         quantum_processor_id=lowered.quantum_processor_id,
+        client=client,
         translation_options=options,
     )
 
@@ -153,4 +170,5 @@ def execute_complete_sha_program(
         program=translated.program,
         patch_values={},
         quantum_processor_id=lowered.quantum_processor_id,
+        client=client,
     )
