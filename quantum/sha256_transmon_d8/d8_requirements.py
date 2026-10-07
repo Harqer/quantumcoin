@@ -9,6 +9,7 @@ from .d8_calibration import D8CalibrationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
 from .d8_cross_synthesis import TwoCarrierPermutation64, exact_embedded_cx64
 from .d8_entangler import D8EntanglerSet
+from .d8_readout import D8ReadoutSet
 from .d8_two_body_decomposition import (
     EmbeddedCrossCx,
     LocalEmbeddedGate,
@@ -41,7 +42,8 @@ class D8BackendRequirementReport:
     missing_coherent_local_realizations: int
     missing_basis_cx_realizations: int
     missing_coherent_cx_realizations: int
-    readout_characterized: bool
+    readout_physical_carriers: tuple[int, ...]
+    missing_readout_carriers: tuple[int, ...]
     gaps: tuple[str, ...]
 
     @property
@@ -68,7 +70,8 @@ def analyze_backend_requirements(
     d8_calibrations: D8CalibrationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
-    readout_characterized: bool = False,
+    d8_readout: D8ReadoutSet | None = None,
+    readout_logical_carriers: tuple[int, ...] = (),
 ) -> D8BackendRequirementReport:
     """Analyze every physical requirement of the complete SHA carrier program."""
     local_ops = [
@@ -169,6 +172,16 @@ def analyze_backend_requirements(
                     except (KeyError, RuntimeError):
                         missing_basis_cx.add(key)
 
+    readout_physical = tuple(
+        sorted({placement.physical(carrier) for carrier in readout_logical_carriers})
+    )
+    missing_readout = tuple(
+        physical
+        for physical in readout_physical
+        if d8_readout is None
+        or not d8_readout.covers((physical,))
+    )
+
     gaps: list[str] = []
     if missing_local:
         gaps.append(
@@ -195,10 +208,11 @@ def analyze_backend_requirements(
             f"{len(missing_coherent_cx)} unique phase-coherent embedded CX64 "
             "physical realizations are uncharacterized"
         )
-    if not readout_characterized:
+    if missing_readout:
         gaps.append(
-            "final 8-state computational-basis readout/decoder is not characterized; "
-            "Braket capture_v0 alone exposes a bit result, not validated d=8 discrimination"
+            "final 8-state computational-basis readout/decoder is uncharacterized "
+            f"on {len(missing_readout)} digest carriers; Braket capture_v0 alone "
+            "exposes a bit result, not validated d=8 discrimination"
         )
 
     return D8BackendRequirementReport(
@@ -221,7 +235,8 @@ def analyze_backend_requirements(
         missing_coherent_local_realizations=len(missing_coherent_local),
         missing_basis_cx_realizations=len(missing_basis_cx),
         missing_coherent_cx_realizations=len(missing_coherent_cx),
-        readout_characterized=readout_characterized,
+        readout_physical_carriers=readout_physical,
+        missing_readout_carriers=missing_readout,
         gaps=tuple(gaps),
     )
 
@@ -247,7 +262,8 @@ def format_backend_requirement_report(report: D8BackendRequirementReport) -> str
         f"missing_coherent_local_realizations={report.missing_coherent_local_realizations}",
         f"missing_basis_cx_realizations={report.missing_basis_cx_realizations}",
         f"missing_coherent_cx_realizations={report.missing_coherent_cx_realizations}",
-        f"readout_characterized={str(report.readout_characterized).lower()}",
+        f"readout_physical_carriers={len(report.readout_physical_carriers)}",
+        f"missing_readout_carriers={len(report.missing_readout_carriers)}",
     ]
     lines.extend(f"gap: {gap}" for gap in report.gaps)
     return "; ".join(lines)
