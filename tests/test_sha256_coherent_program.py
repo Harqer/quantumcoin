@@ -2,7 +2,11 @@ import random
 
 from quantum.sha256_transmon_d8.coherent_program import (
     CircuitBlock,
+    DirtyConstantAdd,
+    StreamedChAdd,
+    StreamedMajAdd,
     StreamedScheduleAdd,
+    StreamedSigmaAdd,
     coherent_initial_state,
     compile_coherent_nonce_sha256,
     simulate_coherent_operations,
@@ -40,15 +44,34 @@ def test_full_coherent107_program_has_no_persistent_schedule_storage():
     assert sum(
         isinstance(operation, CircuitBlock)
         for operation in compiled.operations
-    ) == 112
+    ) == 64
+    assert sum(
+        isinstance(operation, StreamedSigmaAdd)
+        for operation in compiled.operations
+    ) == 128
+    assert sum(
+        isinstance(operation, StreamedChAdd)
+        for operation in compiled.operations
+    ) == 64
+    assert sum(
+        isinstance(operation, StreamedMajAdd)
+        for operation in compiled.operations
+    ) == 64
+    assert sum(
+        isinstance(operation, DirtyConstantAdd)
+        for operation in compiled.operations
+    ) == 72
 
 
-def test_full_coherent107_matches_reference_and_inverse():
+def test_compact_default_matches_reference_and_inverse():
     compiled = compile_coherent_nonce_sha256(
         H0,
         _fixed_words(),
         nonce_word_index=3,
     )
+
+    assert compiled.layout.profile == "coherent97"
+    assert compiled.layout.total_transmons == 97
 
     for nonce in (0, 1, 0x12345678, 0xFFFFFFFF):
         verify_compiled_coherent_sha256(compiled, nonce)
