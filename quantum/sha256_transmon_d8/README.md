@@ -381,27 +381,34 @@ For `abc` the required digest is:
 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 ```
 
-## Live Rigetti preflight
+## Live Rigetti preflight through Amazon Braket
 
-The runtime intentionally does not hard-code a Cepheus topology. Once QCS
-credentials are configured:
+The runtime uses the Amazon Braket device as the source of truth for Cepheus
+topology, frames, and native pulse calibrations. No direct QCS or pyQuil
+authentication path is used.
 
 ```python
 from quantum.sha256_transmon_d8.rigetti_runtime import (
     load_live_target,
     preflight_current_hardware,
 )
-
-qc, target = load_live_target("YOUR_QPU_NAME")
 from quantum.sha256_transmon_d8.layout import D8Layout
 
+device, target = load_live_target()
 layout = D8Layout(profile="packed97")
 print(preflight_current_hardware(target, layout=layout))
+print(len(device.frames))
+print(len(device.gate_calibrations))
 ```
 
-This fetches the live qubit list, coupler topology, and Quil-T calibration
-program. Current QCS data is the placement/calibration source of truth.
+`AwsDevice.frames` exposes the predeclared hardware frames available to
+OpenPulse programs. `AwsDevice.gate_calibrations` exposes the latest
+provider-calibrated native pulse sequences and can be refreshed with
+`device.refresh_gate_calibrations()`.
 
-Backend lowering must use only operations exposed and validated by the selected
-Rigetti target. Higher-dimensional carrier fusion remains an exact compiler IR;
-it does not imply unsupported hardware instructions.
+Backend lowering must use only operations and pulse controls exposed and
+validated by the live Braket device. The currently observed Cepheus surface
+includes native qubit RX/RZ/CZ calibrations and `charge_tx_f12` frames, but
+those do not by themselves establish calibrated f23..f67 transitions or an
+exact d=8 cross-carrier entangler. Higher-dimensional carrier fusion remains an
+exact compiler IR; it does not imply unsupported hardware instructions.
