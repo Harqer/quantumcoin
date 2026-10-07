@@ -6,6 +6,8 @@ from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
 from .d8_braket_calibration import local_swap_word_openpulse
 from .d8_calibration import D8CalibrationSet
+from .d8_cross_synthesis import exact_embedded_cx64
+from .d8_entangler import D8EntanglerSet
 from .d8_local_synthesis import synthesize_local_permutation8
 
 
@@ -92,15 +94,40 @@ def _require_exact_live_realization(operation, placement: CarrierPlacement, devi
             ) from exc
 
     if isinstance(operation, CrossCarrierGate):
-        physical = tuple(placement.physical(c) for c in operation.carriers)
-        raise D8LoweringUnavailable(
-            "AWS Braket exposes a calibrated native qubit CZ pulse on Cepheus, but "
-            "that calibration does not establish the required action over the full "
-            f"d=8 x d=8 space for source_gate={operation.gate.kind}, "
-            f"source_qubits={operation.gate.qubits}, logical_carriers="
-            f"{operation.carriers}, physical={physical}; "
-            + _describe_live_calibration_surface(device)
-        )
+        if operation.gate.kind != "CX":
+            physical = tuple(placement.physical(c) for c in operation.carriers)
+            raise D8LoweringUnavailable(
+                f"exact d=8 cross-carrier synthesis is currently implemented for CX, "
+                f"not source_gate={operation.gate.kind}; source_qubits="
+                f"{operation.gate.qubits}, logical_carriers={operation.carriers}, "
+                f"physical={physical}"
+            )
+
+        embedded = exact_embedded_cx64(operation)
+        physical = tuple(placement.physical(c) for c in embedded.carriers)
+        if d8_entanglers is None:
+            raise D8LoweringUnavailable(
+                "exact embedded CX64 target is derived, but no experimentally "
+                "characterized realization was supplied: "
+                f"control=carrier{embedded.control_carrier}.bit{embedded.control_level_bit}, "
+                f"target=carrier{embedded.target_carrier}.bit{embedded.target_level_bit}, "
+                f"logical_carriers={embedded.carriers}, physical={physical}; "
+                + _describe_live_calibration_surface(device)
+            )
+
+        try:
+            calibration = d8_entanglers.require(
+                physical,
+                embedded.permutation,
+            )
+        except (KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(
+                "exact embedded CX64 target has no matching characterized pulse: "
+                f"control=carrier{embedded.control_carrier}.bit{embedded.control_level_bit}, "
+                f"target=carrier{embedded.target_carrier}.bit{embedded.target_level_bit}, "
+                f"logical_carriers={embedded.carriers}, physical={physical}; {exc}"
+            ) from exc
+        return calibration.openpulse_body
 
     raise TypeError(f"unsupported carrier operation {type(operation)!r}")
 
@@ -112,6 +139,7 @@ def lower_complete_sha_program(
     device,
     shots: int,
     d8_calibrations: D8CalibrationSet | None = None,
+    d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
     """Lower the full carrier program using only live AWS Braket calibrations."""
     if shots <= 0:
@@ -126,6 +154,7 @@ def lower_complete_sha_program(
                     placement,
                     device,
                     d8_calibrations,
+                    d8_entanglers,
                 )
             )
         except D8LoweringUnavailable as exc:
@@ -149,6 +178,7 @@ def prepare_complete_sha_program(
     device,
     shots: int = 10,
     d8_calibrations: D8CalibrationSet | None = None,
+    d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
     """Prepare one complete AWS Braket OpenPulse program from live device calibrations."""
     return lower_complete_sha_program(
@@ -157,6 +187,7 @@ def prepare_complete_sha_program(
         device=device,
         shots=shots,
         d8_calibrations=d8_calibrations,
+        d8_entanglers=d8_entanglers,
     )
 
 
