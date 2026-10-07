@@ -615,15 +615,14 @@ def emit_streamed_schedule_add(
     target = tuple(layout.word_bit(target_slot, bit) for bit in range(32))
     state = _state_bits(layout)
 
+    temp = scratch[0]
     for bit_index, node_index in enumerate(schedule.words[round_index]):
-        temp = scratch[bit_index]
-        borrowed = tuple(
-            dict.fromkeys(
-                state
-                + tuple(bit for bit in scratch if bit != temp)
-                + (layout.carry_bit,)
-            )
+        borrowed_items = state + tuple(
+            bit for bit in scratch if bit != temp
         )
+        if layout.carry_bit != temp:
+            borrowed_items += (layout.carry_bit,)
+        borrowed = tuple(dict.fromkeys(borrowed_items))
 
         emit_node_xor(
             circuit,
@@ -700,17 +699,17 @@ def emit_streamed_schedule_add_checkpointed(
     for node_index in ordered_nodes:
         cache_wire = cache_wires[node_index]
         reserved = set(active.values())
-        borrowed = tuple(
-            dict.fromkeys(
-                state
-                + tuple(
-                    bit
-                    for bit in scratch
-                    if bit != cache_wire and bit not in reserved
-                )
-                + (layout.carry_bit,)
-            )
+        borrowed_items = state + tuple(
+            bit
+            for bit in scratch
+            if bit != cache_wire and bit not in reserved
         )
+        if (
+            layout.carry_bit != cache_wire
+            and layout.carry_bit not in reserved
+        ):
+            borrowed_items += (layout.carry_bit,)
+        borrowed = tuple(dict.fromkeys(borrowed_items))
         emit_node_xor(
             circuit,
             schedule.dag,
@@ -723,17 +722,17 @@ def emit_streamed_schedule_add_checkpointed(
         active[node_index] = cache_wire
 
     reserved_cache_wires = set(active.values())
-    stream_borrowed = tuple(
-        dict.fromkeys(
-            state
-            + tuple(
-                bit
-                for bit in scratch
-                if bit != stream_temp and bit not in reserved_cache_wires
-            )
-            + (layout.carry_bit,)
-        )
+    stream_borrowed_items = state + tuple(
+        bit
+        for bit in scratch
+        if bit != stream_temp and bit not in reserved_cache_wires
     )
+    if (
+        layout.carry_bit != stream_temp
+        and layout.carry_bit not in reserved_cache_wires
+    ):
+        stream_borrowed_items += (layout.carry_bit,)
+    stream_borrowed = tuple(dict.fromkeys(stream_borrowed_items))
 
     for bit_index, node_index in enumerate(schedule.words[round_index]):
         emit_node_xor(
