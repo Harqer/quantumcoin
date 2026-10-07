@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
-from .cepheus_mapping import CarrierPlacement
+from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
 
 
 class D8LoweringUnavailable(RuntimeError):
@@ -39,11 +39,7 @@ def _native_gate_names(device) -> set[str]:
 
 def _describe_live_calibration_surface(device) -> str:
     frames = _frame_names(device)
-    live = set(
-        __import__("quantum.sha256_transmon_d8.cepheus_mapping", fromlist=["snapshot_from_device_capabilities"])
-        .snapshot_from_device_capabilities(device.properties.json())
-        .nodes
-    )
+    live = set(snapshot_from_device_capabilities(device.properties.json()).nodes)
     f12_live = sum(
         f"Transmon_{node}_charge_tx_f12" in frames
         for node in live
