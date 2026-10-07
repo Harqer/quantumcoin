@@ -9,6 +9,7 @@ from .d8_calibration import D8CalibrationSet
 from .d8_cross_synthesis import exact_embedded_cx64
 from .d8_entangler import D8EntanglerSet
 from .d8_local_synthesis import synthesize_local_permutation8
+from .d8_requirements import require_braket_action_size
 
 
 class D8LoweringUnavailable(RuntimeError):
@@ -174,6 +175,7 @@ def lower_complete_sha_program(
 
     pulse_body = "\n".join(body)
     source = "OPENQASM 3.0;\ncal {\n" + pulse_body + "\n}\n"
+    require_braket_action_size(source)
     return LoweredCepheusProgram(source=source, shots=shots)
 
 
