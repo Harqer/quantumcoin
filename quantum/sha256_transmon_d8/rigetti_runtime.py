@@ -3,36 +3,35 @@ from __future__ import annotations
 from dataclasses import dataclass
 from collections import deque
 
+from .cepheus_mapping import CEPHEUS_ARN, snapshot_from_device_capabilities
 from .layout import D8Layout
 
 
 @dataclass(frozen=True)
 class LiveRigettiTarget:
+    arn: str
     name: str
     physical_qubits: tuple[int, ...]
     edges: tuple[tuple[int, int], ...]
-    calibration_program: object
+    frame_count: int
+    gate_calibration_count: int
 
 
-def load_live_target(qpu_name: str) -> tuple[object, LiveRigettiTarget]:
-    """Load the current QCS topology and Quil-T calibrations.
+def load_live_target(device_arn: str = CEPHEUS_ARN) -> tuple[object, LiveRigettiTarget]:
+    """Load live Rigetti topology and pulse calibrations through Amazon Braket."""
+    from braket.aws import AwsDevice
 
-    Nothing about Cepheus IDs, missing devices, native edges, or pulse
-    calibrations is hard-coded. QCS remains the source of truth.
-    """
-    from pyquil import get_qc
+    device = AwsDevice(device_arn)
+    snapshot = snapshot_from_device_capabilities(device.properties.json())
+    edges = tuple(sorted(tuple(sorted(edge)) for edge in snapshot.edges))
 
-    qc = get_qc(qpu_name)
-    qubits = tuple(sorted(qc.qubits()))
-    graph = qc.qubit_topology()
-    edges = tuple(sorted(tuple(sorted(edge)) for edge in graph.edges()))
-    calibrations = qc.compiler.get_calibration_program(force_refresh=True)
-
-    return qc, LiveRigettiTarget(
-        name=qpu_name,
-        physical_qubits=qubits,
+    return device, LiveRigettiTarget(
+        arn=device_arn,
+        name=device.name,
+        physical_qubits=tuple(sorted(snapshot.nodes)),
         edges=edges,
-        calibration_program=calibrations,
+        frame_count=len(device.frames),
+        gate_calibration_count=len(device.gate_calibrations.pulse_sequences),
     )
 
 
@@ -73,7 +72,7 @@ def preflight_current_hardware(
     target: LiveRigettiTarget,
     layout: D8Layout | None = None,
 ) -> dict:
-    """Reject a target that cannot host the selected exact d=8 layout."""
+    """Reject a Braket target that cannot host the selected exact d=8 layout."""
     layout = layout or D8Layout()
     required = layout.total_transmons
     component = _largest_component(target)
@@ -90,6 +89,7 @@ def preflight_current_hardware(
         )
 
     return {
+        "device_arn": target.arn,
         "qpu": target.name,
         "layout_profile": layout.profile,
         "available_transmons": len(target.physical_qubits),
@@ -97,9 +97,11 @@ def preflight_current_hardware(
         "required_transmons": required,
         "spare_transmons": len(target.physical_qubits) - required,
         "edge_count": len(target.edges),
+        "frame_count": target.frame_count,
+        "gate_calibration_count": target.gate_calibration_count,
     }
 
 
-def compile_quilt_fresh(qc, program):
-    """Use the documented Quil-T execution path and fresh QPU settings."""
-    return qc.compiler.native_quil_to_executable(program)
+def refresh_live_calibrations(device) -> None:
+    """Refresh provider calibrations using the documented Braket SDK API."""
+    device.refresh_gate_calibrations()
