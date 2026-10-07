@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
+from .d8_braket_calibration import local_swap_word_openpulse
+from .d8_calibration import D8CalibrationSet
+from .d8_local_synthesis import synthesize_local_permutation8
 
 
 class D8LoweringUnavailable(RuntimeError):
@@ -52,7 +55,7 @@ def _describe_live_calibration_surface(device) -> str:
     )
 
 
-def _require_exact_live_realization(operation, placement: CarrierPlacement, device) -> str:
+def _require_exact_live_realization(operation, placement: CarrierPlacement, device, d8_calibrations: D8CalibrationSet | None) -> str:
     """Return exact OpenPulse for an operation only when AWS exposes enough calibration data.
 
     The current Braket Cepheus surface exposes calibrated native qubit RX/RZ/CZ
