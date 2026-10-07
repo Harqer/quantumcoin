@@ -60,13 +60,14 @@ f34 scan: |0> -> |1> -> |2> -> |3> -> probe f34
 ...
 ```
 
-The current Braket `capture_v0` interface is qubit-oriented. Therefore the
-software refuses to claim that a higher-level spectroscopy point is measurable
-unless an explicit multilevel readout/mapping characterization is supplied.
+The current documented Braket `capture_v0` workflow returns a bit-valued
+qubit measurement. A metadata identifier does not turn that into multilevel
+readout. Therefore the software refuses to emit a measurable `f12+`
+spectroscopy sequence until there is a concrete validated readout or state-
+mapping implementation that Braket can actually execute.
 
 The non-submitting planner may still print the frequency grid for any requested
-transition. It emits executable midpoint OpenPulse only when the preparation and
-readout prerequisites are satisfied.
+higher transition, but it does not label those scan points executable.
 
 ## Non-submitting spectroscopy planner
 
@@ -119,3 +120,20 @@ required local and cross-carrier physical operations are validated, the backend
 must assemble the complete 64-round SHA program first and submit exactly one
 Braket task. No per-round measurement, reset, reload, or host synchronization is
 allowed.
+
+
+## Fixed-basis versus coherent calibration
+
+The current fixed-message SHA execution starts in one computational-basis state
+and uses a reversible classical circuit. For that path, a physical primitive may
+carry state-dependent phases as long as its computational-basis permutation is
+verified and leakage is controlled; only the occupied basis trajectory matters.
+
+This is not sufficient for the H/T/Tdg + CX decomposition used to synthesize a
+three-wire Toffoli from one- and two-carrier controls. Those intermediate gates
+create superpositions, so the corresponding local and two-carrier realizations
+must be phase-coherent and characterized as unitaries, not merely as population
+transfers.
+
+The coherent-nonce SHA path likewise requires coherent unitary characterization
+throughout.
