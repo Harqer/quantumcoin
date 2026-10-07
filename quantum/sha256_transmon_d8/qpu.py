@@ -121,7 +121,6 @@ def run_qpu_sha256(message: bytes) -> str:
             f"Cepheus is not online: {device.status}"
         )
 
-    device.refresh_gate_calibrations()
     capabilities = device.properties.json()
     compiled, carrier_program, placement, snapshot = _prepare_hardware_program(
         message, capabilities
