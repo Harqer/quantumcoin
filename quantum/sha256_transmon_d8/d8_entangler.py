@@ -19,8 +19,6 @@ class D8EntanglerCalibration:
         a, b = self.physical_carriers
         if a == b:
             raise ValueError("d=8 entangler requires two distinct carriers")
-        if self.physical_carriers != tuple(sorted(self.physical_carriers)):
-            raise ValueError("physical carrier order must be sorted")
         if len(self.target_permutation) != 64 or set(self.target_permutation) != set(range(64)):
             raise ValueError("target_permutation must be a permutation of 0..63")
         if not self.openpulse_body.strip():
@@ -34,7 +32,7 @@ class D8EntanglerCalibration:
         permutation: TwoCarrierPermutation64,
     ) -> bool:
         return (
-            self.physical_carriers == tuple(sorted(physical_carriers))
+            self.physical_carriers == physical_carriers
             and self.target_permutation == permutation.mapping
         )
 
@@ -58,7 +56,7 @@ class D8EntanglerSet:
         if not matches:
             raise KeyError(
                 "no characterized d=8 two-carrier realization for "
-                f"physical_carriers={tuple(sorted(physical_carriers))}"
+                f"physical_carriers={physical_carriers}"
             )
         if len(matches) != 1:
             raise RuntimeError("ambiguous d=8 entangler calibration")
