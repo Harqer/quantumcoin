@@ -94,9 +94,11 @@ def _require_exact_live_realization(operation, placement: CarrierPlacement, devi
     if isinstance(operation, CrossCarrierGate):
         physical = tuple(placement.physical(c) for c in operation.carriers)
         raise D8LoweringUnavailable(
-            "AWS Braket exposes native CZ pulse calibrations for Cepheus, but those "
-            f"do not establish an exact d=8 cross-carrier realization for logical "
-            f"carriers={operation.carriers}, physical={physical}; "
+            "AWS Braket exposes a calibrated native qubit CZ pulse on Cepheus, but "
+            "that calibration does not establish the required action over the full "
+            f"d=8 x d=8 space for source_gate={operation.gate.kind}, "
+            f"source_qubits={operation.gate.qubits}, logical_carriers="
+            f"{operation.carriers}, physical={physical}; "
             + _describe_live_calibration_surface(device)
         )
 
