@@ -57,7 +57,13 @@ def _describe_live_calibration_surface(device) -> str:
     )
 
 
-def _require_exact_live_realization(operation, placement: CarrierPlacement, device, d8_calibrations: D8CalibrationSet | None) -> str:
+def _require_exact_live_realization(
+    operation,
+    placement: CarrierPlacement,
+    device,
+    d8_calibrations: D8CalibrationSet | None,
+    d8_entanglers: D8EntanglerSet | None,
+) -> str:
     """Return exact OpenPulse for an operation only when AWS exposes enough calibration data.
 
     The current Braket Cepheus surface exposes calibrated native qubit RX/RZ/CZ
