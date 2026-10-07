@@ -1,76 +1,156 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Mapping
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement
+
+CEPHEUS_QCS_PROCESSOR_ID = "Cepheus-1-108Q"
 
 
 class D8LoweringUnavailable(RuntimeError):
     pass
 
 
+class QCSRuntimeUnavailable(RuntimeError):
+    pass
+
+
 @dataclass(frozen=True)
 class LoweredCepheusProgram:
-    """Physical program ready for one complete QPU submission."""
+    """One complete native Quil-T program for a single SHA execution task."""
+
     source: str
     shots: int
+    quantum_processor_id: str = CEPHEUS_QCS_PROCESSOR_ID
+
+
+def _operation_key(operation, placement: CarrierPlacement) -> str:
+    if isinstance(operation, LocalPermutation8):
+        physical = placement.physical(operation.carrier)
+        permutation = ",".join(str(value) for value in operation.mapping)
+        return f"local:{physical}:{permutation}"
+
+    if isinstance(operation, CrossCarrierGate):
+        physical = tuple(placement.physical(c) for c in operation.carriers)
+        qubits = ",".join(str(q) for q in operation.gate.qubits)
+        carriers = ",".join(str(c) for c in physical)
+        return f"cross:{operation.gate.kind}:{qubits}:{carriers}"
+
+    raise TypeError(f"unsupported carrier operation {type(operation)!r}")
+
+
+def _load_exact_pulse_library(path: str | os.PathLike[str]) -> dict[str, str]:
+    """Load exact calibrated Quil-T realizations keyed by carrier operation."""
+    import json
+
+    payload = json.loads(Path(path).read_text())
+    if not isinstance(payload, dict):
+        raise ValueError("d=8 pulse library must be a JSON object")
+
+    result: dict[str, str] = {}
+    for key, value in payload.items():
+        if not isinstance(key, str) or not isinstance(value, str) or not value.strip():
+            raise ValueError("d=8 pulse library entries must be non-empty strings")
+        result[key] = value.rstrip()
+    return result
 
 
 def lower_complete_sha_program(
     carrier_program: CarrierProgram,
     placement: CarrierPlacement,
-    native_calibrations: Mapping[str, object],
     *,
+    pulse_library: Mapping[str, str],
     shots: int,
 ) -> LoweredCepheusProgram:
-    """Lower the already-complete SHA carrier program to one physical program.
-
-    No segmentation is allowed here. Every carrier operation must have an exact
-    hardware realization before a source program is returned.
-    """
+    """Lower the complete carrier program to one native Quil-T program."""
     if shots <= 0:
         raise ValueError("shots must be positive")
 
-    # The current live native bundle exposes qubit RX/RZ/CZ calibrations only.
-    # Those are not silently treated as d=8 carrier primitives. Fail at the
-    # exact unsupported operation instead of falling back or splitting the job.
-    for index, operation in enumerate(carrier_program.operations):
-        if isinstance(operation, LocalPermutation8):
-            raise D8LoweringUnavailable(
-                "exact local d=8 permutation has no calibrated Cepheus pulse "
-                f"realization at carrier operation {index} "
-                f"(logical carrier {operation.carrier}, "
-                f"physical carrier {placement.physical(operation.carrier)})"
-            )
-        if isinstance(operation, CrossCarrierGate):
-            physical = tuple(placement.physical(c) for c in operation.carriers)
-            raise D8LoweringUnavailable(
-                "exact cross-carrier d=8 gate has no calibrated Cepheus "
-                f"realization at carrier operation {index}; "
-                f"logical carriers={operation.carriers}, physical={physical}"
-            )
-        raise TypeError(f"unsupported carrier operation {type(operation)!r}")
+    body: list[str] = []
+    missing: list[str] = []
 
-    raise D8LoweringUnavailable(
-        "carrier program unexpectedly contained no executable SHA operations"
+    for operation in carrier_program.operations:
+        key = _operation_key(operation, placement)
+        quil_t = pulse_library.get(key)
+        if quil_t is None:
+            missing.append(key)
+            continue
+        body.append(quil_t)
+
+    if missing:
+        raise D8LoweringUnavailable(
+            "QCS lowering is available, but the exact calibrated Quil-T pulse "
+            f"library is missing {len(missing)} carrier operation realization(s); "
+            f"first missing key: {missing[0]}"
+        )
+
+    if not body:
+        raise D8LoweringUnavailable(
+            "complete SHA program lowered to no Quil-T instructions"
+        )
+
+    source = "\n".join(body) + "\n"
+    upper = source.upper()
+    for forbidden in ("MEASURE", "RESET"):
+        if forbidden in upper:
+            raise D8LoweringUnavailable(
+                f"intermediate {forbidden} is forbidden in the continuous SHA program"
+            )
+
+    return LoweredCepheusProgram(source=source, shots=shots)
+
+
+def execute_complete_sha_program(
+    carrier_program: CarrierProgram,
+    placement: CarrierPlacement,
+    *,
+    shots: int = 10,
+) -> str:
+    """Use Rigetti QCS translation then submit exactly one complete SHA job."""
+    try:
+        from qcs_sdk.qpu.api import submit
+        from qcs_sdk.qpu.translation import (
+            TranslationOptions,
+            get_quilt_calibrations,
+            translate,
+        )
+    except ImportError as exc:
+        raise QCSRuntimeUnavailable(
+            "Rigetti qcs_sdk is not installed; install qcs-sdk-python"
+        ) from exc
+
+    get_quilt_calibrations(CEPHEUS_QCS_PROCESSOR_ID)
+
+    library_path = os.environ.get("SHA256_D8_PULSE_LIBRARY")
+    if not library_path:
+        raise D8LoweringUnavailable(
+            "Rigetti QCS is reachable, but SHA256_D8_PULSE_LIBRARY is not set to "
+            "an exact measured d=8 Quil-T pulse library; no QPU task was submitted"
+        )
+
+    pulse_library = _load_exact_pulse_library(library_path)
+    lowered = lower_complete_sha_program(
+        carrier_program,
+        placement,
+        pulse_library=pulse_library,
+        shots=shots,
     )
 
+    options = TranslationOptions.v2(prepend_default_calibrations=True)
+    translated = translate(
+        native_quil=lowered.source,
+        num_shots=lowered.shots,
+        quantum_processor_id=lowered.quantum_processor_id,
+        translation_options=options,
+    )
 
-def submit_complete_sha_program(
-    *,
-    client,
-    device_arn: str,
-    lowered: LoweredCepheusProgram,
-    output_s3_bucket: str,
-    output_s3_prefix: str,
-):
-    """Submit exactly one already-lowered complete SHA program to Braket."""
-    return client.create_quantum_task(
-        action=lowered.source,
-        deviceArn=device_arn,
-        shots=lowered.shots,
-        outputS3Bucket=output_s3_bucket,
-        outputS3KeyPrefix=output_s3_prefix,
+    # One submit call only. Shots repeat the entire translated SHA program.
+    return submit(
+        program=translated.program,
+        patch_values={},
+        quantum_processor_id=lowered.quantum_processor_id,
     )
