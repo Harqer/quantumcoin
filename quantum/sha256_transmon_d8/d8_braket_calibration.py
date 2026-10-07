@@ -19,7 +19,6 @@ class SpectroscopyPlan:
     amplitude: float
     width_fraction: float = 0.25
     zero_at_edges: bool = True
-    multilevel_readout_characterization_id: str | None = None
 
     def __post_init__(self) -> None:
         if not 0 <= self.lower_level < 7:
@@ -78,22 +77,14 @@ def build_spectroscopy_sequence(
     *,
     preparation_calibrations: D8CalibrationSet | None = None,
 ):
-    """Build one spectroscopy point without submitting it.
+    """Build one documented Braket spectroscopy point without submitting it.
 
-    For transitions above f01, the transmon must first be prepared in the lower
-    level. Interpreting capture_v0 above the qubit subspace additionally requires
-    an explicitly characterized multilevel readout/mapping.
+    The published Braket Rigetti workflow characterizes the |0><->|1| subspace
+    using capture_v0. Higher-level transition scans need state preparation plus
+    a validated measurement mapping/classifier that Braket does not currently
+    document for Cepheus, so this function refuses to label f12+ scans executable.
     """
     require_braket_frequency_retuning(device)
-
-    from braket.pulse import GaussianWaveform, PulseSequence
-
-    drive = device.frames[f"Transmon_{plan.physical_carrier}_charge_tx"]
-    readout = device.frames[f"Transmon_{plan.physical_carrier}_readout_rx"]
-    original_frequency = float(drive.frequency)
-    original_phase = float(drive.phase)
-
-    sequence = PulseSequence()
 
     if plan.lower_level > 0:
         if preparation_calibrations is None:
@@ -101,29 +92,28 @@ def build_spectroscopy_sequence(
                 f"transition f{plan.lower_level}{plan.lower_level + 1} requires "
                 f"measured preparation pulses for |0> through |{plan.lower_level}>"
             )
-        if not plan.multilevel_readout_characterization_id:
-            raise RuntimeError(
-                f"transition f{plan.lower_level}{plan.lower_level + 1} requires "
-                "validated multilevel readout/mapping before capture_v0 can be interpreted"
-            )
-        for lower in range(plan.lower_level):
-            sequence = _append_transition_pi(
-                sequence,
-                drive,
-                preparation_calibrations.require_transition(
-                    plan.physical_carrier,
-                    lower,
-                ),
-            )
+        raise RuntimeError(
+            f"transition f{plan.lower_level}{plan.lower_level + 1} cannot be "
+            "measured by this backend with documented Braket capture_v0 alone; "
+            "a concrete validated multilevel readout or state-mapping implementation "
+            "is required"
+        )
 
+    from braket.pulse import GaussianWaveform, PulseSequence
+
+    drive = device.frames[f"Transmon_{plan.physical_carrier}_charge_tx"]
+    readout = device.frames[f"Transmon_{plan.physical_carrier}_readout_rx"]
+    original_frequency = float(drive.frequency)
+    original_phase = float(drive.phase)
     probe = GaussianWaveform(
         plan.pulse_duration_s,
         plan.pulse_duration_s * plan.width_fraction,
         plan.amplitude,
         plan.zero_at_edges,
     )
-    sequence = (
-        sequence
+
+    return (
+        PulseSequence()
         .set_frequency(drive, frequency_hz)
         .set_phase(drive, 0.0)
         .play(drive, probe)
@@ -131,7 +121,6 @@ def build_spectroscopy_sequence(
         .set_phase(drive, original_phase)
         .capture_v0(readout)
     )
-    return sequence
 
 
 def transition_swap_openpulse(
