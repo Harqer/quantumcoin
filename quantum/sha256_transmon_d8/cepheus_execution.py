@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-import json
-import os
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Mapping
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement
@@ -26,73 +22,92 @@ class LoweredCepheusProgram:
     shots: int
 
 
-def _operation_key(operation, placement: CarrierPlacement) -> str:
+def _frame_names(device) -> set[str]:
+    return set(device.frames)
+
+
+def _has_frame(device, physical: int, suffix: str) -> bool:
+    return f"Transmon_{physical}_{suffix}" in _frame_names(device)
+
+
+def _native_gate_names(device) -> set[str]:
+    names: set[str] = set()
+    for gate, _qubits in device.gate_calibrations.pulse_sequences:
+        names.add(gate.name)
+    return names
+
+
+def _describe_live_calibration_surface(device) -> str:
+    frames = _frame_names(device)
+    return (
+        f"frames={len(frames)}, native_calibrations="
+        f"{len(device.gate_calibrations.pulse_sequences)}, "
+        f"native_gates={sorted(_native_gate_names(device))}, "
+        f"f12_frames={sum(name.endswith('_charge_tx_f12') for name in frames)}"
+    )
+
+
+def _require_exact_live_realization(operation, placement: CarrierPlacement, device) -> str:
+    """Return exact OpenPulse for an operation only when AWS exposes enough calibration data.
+
+    The current Braket Cepheus surface exposes calibrated native qubit RX/RZ/CZ
+    sequences plus charge_tx_f12 frames. That is not sufficient evidence for an
+    arbitrary 8-level local permutation or an 8x8 cross-carrier entangler.
+    """
     if isinstance(operation, LocalPermutation8):
         physical = placement.physical(operation.carrier)
-        permutation = ",".join(str(value) for value in operation.mapping)
-        return f"local:{physical}:{permutation}"
+        if not _has_frame(device, physical, "charge_tx"):
+            raise D8LoweringUnavailable(
+                f"Cepheus exposes no charge_tx frame for physical carrier {physical}"
+            )
+        if not _has_frame(device, physical, "charge_tx_f12"):
+            raise D8LoweringUnavailable(
+                f"Cepheus exposes no charge_tx_f12 frame for physical carrier {physical}"
+            )
+        raise D8LoweringUnavailable(
+            "AWS Braket exposes calibrated qubit control and f12 access for physical "
+            f"carrier {physical}, but not calibrated f23..f67 transitions required to "
+            "prove an exact arbitrary d=8 local permutation; "
+            + _describe_live_calibration_surface(device)
+        )
 
     if isinstance(operation, CrossCarrierGate):
         physical = tuple(placement.physical(c) for c in operation.carriers)
-        qubits = ",".join(str(q) for q in operation.gate.qubits)
-        carriers = ",".join(str(c) for c in physical)
-        return f"cross:{operation.gate.kind}:{qubits}:{carriers}"
+        raise D8LoweringUnavailable(
+            "AWS Braket exposes native CZ pulse calibrations for Cepheus, but those "
+            f"do not establish an exact d=8 cross-carrier realization for logical "
+            f"carriers={operation.carriers}, physical={physical}; "
+            + _describe_live_calibration_surface(device)
+        )
 
     raise TypeError(f"unsupported carrier operation {type(operation)!r}")
-
-
-def _load_exact_openpulse_library(path: str | os.PathLike[str]) -> dict[str, str]:
-    """Load exact calibrated Braket OpenPulse bodies keyed by carrier operation."""
-    payload = json.loads(Path(path).read_text())
-    if not isinstance(payload, dict):
-        raise ValueError("d=8 OpenPulse library must be a JSON object")
-
-    result: dict[str, str] = {}
-    for key, value in payload.items():
-        if not isinstance(key, str) or not isinstance(value, str) or not value.strip():
-            raise ValueError("d=8 OpenPulse library entries must be non-empty strings")
-        result[key] = value.rstrip()
-    return result
 
 
 def lower_complete_sha_program(
     carrier_program: CarrierProgram,
     placement: CarrierPlacement,
     *,
-    pulse_library: Mapping[str, str],
+    device,
     shots: int,
 ) -> LoweredCepheusProgram:
-    """Lower the full carrier program into one Braket OpenQASM/OpenPulse program."""
+    """Lower the full carrier program using only live AWS Braket calibrations."""
     if shots <= 0:
         raise ValueError("shots must be positive")
 
     body: list[str] = []
-    missing: list[str] = []
-
-    for operation in carrier_program.operations:
-        key = _operation_key(operation, placement)
-        pulse_body = pulse_library.get(key)
-        if pulse_body is None:
-            missing.append(key)
-            continue
-        body.append(pulse_body)
-
-    if missing:
-        raise D8LoweringUnavailable(
-            "Amazon Braket OpenPulse lowering is available, but the exact calibrated "
-            f"d=8 pulse library is missing {len(missing)} carrier realization(s); "
-            f"first missing key: {missing[0]}"
-        )
+    for index, operation in enumerate(carrier_program.operations):
+        try:
+            body.append(_require_exact_live_realization(operation, placement, device))
+        except D8LoweringUnavailable as exc:
+            raise D8LoweringUnavailable(
+                f"carrier operation {index} cannot be exactly lowered from the live "
+                f"Cepheus Braket calibration surface: {exc}"
+            ) from exc
 
     if not body:
         raise D8LoweringUnavailable("complete SHA program lowered to no pulse instructions")
 
     pulse_body = "\n".join(body)
-    if "RESET" in pulse_body.upper():
-        raise D8LoweringUnavailable(
-            "intermediate RESET is forbidden in the continuous SHA program"
-        )
-
     source = "OPENQASM 3.0;\ncal {\n" + pulse_body + "\n}\n"
     return LoweredCepheusProgram(source=source, shots=shots)
 
@@ -101,35 +116,26 @@ def prepare_complete_sha_program(
     carrier_program: CarrierProgram,
     placement: CarrierPlacement,
     *,
+    device,
     shots: int = 10,
 ) -> LoweredCepheusProgram:
-    """Prepare one complete AWS Braket OpenPulse program without submitting it."""
-    library_path = os.environ.get("SHA256_D8_OPENPULSE_LIBRARY")
-    if not library_path:
-        raise D8LoweringUnavailable(
-            "SHA256_D8_OPENPULSE_LIBRARY is not set to an exact calibrated "
-            "Cepheus OpenPulse library"
-        )
-
-    pulse_library = _load_exact_openpulse_library(library_path)
+    """Prepare one complete AWS Braket OpenPulse program from live device calibrations."""
     return lower_complete_sha_program(
         carrier_program,
         placement,
-        pulse_library=pulse_library,
+        device=device,
         shots=shots,
     )
 
 
-def submit_complete_sha_program(*, device_arn: str, lowered: LoweredCepheusProgram):
+def submit_complete_sha_program(*, device, lowered: LoweredCepheusProgram):
     """Submit exactly one already-complete OpenPulse program through Amazon Braket."""
     try:
-        from braket.aws import AwsDevice
         from braket.ir.openqasm import Program
     except ImportError as exc:
         raise BraketRuntimeUnavailable(
             "amazon-braket-sdk is required for OpenPulse execution"
         ) from exc
 
-    device = AwsDevice(device_arn)
     program = Program(source=lowered.source)
     return device.run(program, shots=lowered.shots)
