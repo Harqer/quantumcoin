@@ -228,7 +228,39 @@ def select_connected_physical_nodes(
     if count <= 0 or count > len(snapshot.nodes):
         raise ValueError("requested carrier count exceeds live physical nodes")
 
-    selected = set(snapshot.nodes)
+    eligible = set(snapshot.nodes) & set(snapshot.f01_nodes) & set(snapshot.f12_nodes)
+    if count > len(eligible):
+        raise ValueError(
+            f"requested {count} carriers but only {len(eligible)} live nodes expose "
+            "both f01 and f12 predefined drive frames"
+        )
+
+    selected = set(eligible)
+    if not _connected(selected, snapshot.adjacency):
+        # A disconnected eligible set may still contain a sufficiently large
+        # connected component; pruning below must start from one component.
+        components: list[set[int]] = []
+        unseen = set(selected)
+        while unseen:
+            seed = next(iter(unseen))
+            component = {seed}
+            queue = deque((seed,))
+            unseen.remove(seed)
+            while queue:
+                node = queue.popleft()
+                for neighbor in snapshot.adjacency.get(node, ()):
+                    if neighbor in unseen and neighbor in eligible:
+                        unseen.remove(neighbor)
+                        component.add(neighbor)
+                        queue.append(neighbor)
+            components.append(component)
+        selected = max(components, key=len)
+        if len(selected) < count:
+            raise RuntimeError(
+                "no connected f01/f12-capable Cepheus component is large enough "
+                f"for {count} carriers"
+            )
+
     removal_count = len(selected) - count
 
     for _ in range(removal_count):
