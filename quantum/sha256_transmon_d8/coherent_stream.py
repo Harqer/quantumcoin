@@ -766,17 +766,17 @@ def emit_streamed_schedule_add_checkpointed(
     for node_index in reversed(ordered_nodes):
         cache_wire = active.pop(node_index)
         reserved = set(active.values())
-        borrowed = tuple(
-            dict.fromkeys(
-                state
-                + tuple(
-                    bit
-                    for bit in scratch
-                    if bit != cache_wire and bit not in reserved
-                )
-                + (layout.carry_bit,)
-            )
+        borrowed_items = state + tuple(
+            bit
+            for bit in scratch
+            if bit != cache_wire and bit not in reserved
         )
+        if (
+            layout.carry_bit != cache_wire
+            and layout.carry_bit not in reserved
+        ):
+            borrowed_items += (layout.carry_bit,)
+        borrowed = tuple(dict.fromkeys(borrowed_items))
         emit_node_xor(
             circuit,
             schedule.dag,
