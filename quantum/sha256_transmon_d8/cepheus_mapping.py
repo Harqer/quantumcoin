@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from collections import deque
 from dataclasses import dataclass
 from itertools import combinations
@@ -55,16 +57,125 @@ class CarrierPlacement:
         return self.logical_to_physical[logical_carrier]
 
 
+def snapshot_from_device_capabilities(
+    device_capabilities: str | Mapping[str, object],
+) -> CepheusSnapshot:
+    """Parse the live Braket GetDevice.deviceCapabilities payload.
+
+    The parser intentionally consumes only published topology, standardized
+    fidelities, and predefined f01/f12 drive frames. It makes no inference
+    about unpublished higher transitions.
+    """
+    caps = (
+        json.loads(device_capabilities)
+        if isinstance(device_capabilities, str)
+        else dict(device_capabilities)
+    )
+
+    paradigm = caps.get("paradigm")
+    pulse = caps.get("pulse")
+    standardized = caps.get("standardized")
+    if not isinstance(paradigm, Mapping):
+        raise ValueError("device capabilities missing paradigm")
+    if not isinstance(pulse, Mapping):
+        raise ValueError("device capabilities missing pulse properties")
+    if not isinstance(standardized, Mapping):
+        raise ValueError("device capabilities missing standardized calibration data")
+
+    connectivity = paradigm.get("connectivity")
+    if not isinstance(connectivity, Mapping):
+        raise ValueError("device capabilities missing connectivity")
+    raw_graph = connectivity.get("connectivityGraph")
+    if not isinstance(raw_graph, Mapping):
+        raise ValueError("device capabilities missing connectivityGraph")
+
+    adjacency: dict[int, tuple[int, ...]] = {}
+    for raw_node, raw_neighbors in raw_graph.items():
+        if not isinstance(raw_neighbors, Sequence) or isinstance(raw_neighbors, (str, bytes)):
+            raise ValueError("invalid connectivityGraph neighbor list")
+        adjacency[int(raw_node)] = tuple(sorted(int(n) for n in raw_neighbors))
+    nodes = tuple(sorted(adjacency))
+
+    one_qubit: dict[int, PhysicalQubitQuality] = {}
+    raw_one = standardized.get("oneQubitProperties")
+    if isinstance(raw_one, Mapping):
+        for raw_node, props in raw_one.items():
+            if not isinstance(props, Mapping):
+                continue
+            one = 0.0
+            readout = 0.0
+            fidelities = props.get("oneQubitFidelity")
+            if isinstance(fidelities, Sequence):
+                for item in fidelities:
+                    if not isinstance(item, Mapping):
+                        continue
+                    kind = item.get("fidelityType")
+                    name = kind.get("name") if isinstance(kind, Mapping) else None
+                    value = item.get("fidelity")
+                    if not isinstance(value, (int, float)):
+                        continue
+                    if name == "RANDOMIZED_BENCHMARKING":
+                        one = float(value)
+                    elif name == "READOUT":
+                        readout = float(value)
+            one_qubit[int(raw_node)] = PhysicalQubitQuality(one, readout)
+
+    cz_fidelity: dict[tuple[int, int], float] = {}
+    raw_two = standardized.get("twoQubitProperties")
+    if isinstance(raw_two, Mapping):
+        for raw_edge, props in raw_two.items():
+            if not isinstance(raw_edge, str) or "-" not in raw_edge:
+                continue
+            if not isinstance(props, Mapping):
+                continue
+            a_text, b_text = raw_edge.split("-", 1)
+            edge = tuple(sorted((int(a_text), int(b_text))))
+            values = props.get("twoQubitGateFidelity")
+            if not isinstance(values, Sequence):
+                continue
+            for item in values:
+                if not isinstance(item, Mapping):
+                    continue
+                if item.get("gateName") != "CZ":
+                    continue
+                value = item.get("fidelity")
+                if isinstance(value, (int, float)):
+                    cz_fidelity[edge] = float(value)
+                    break
+
+    frames = pulse.get("frames")
+    if not isinstance(frames, Mapping):
+        raise ValueError("device pulse properties missing predefined frames")
+    f01_nodes: set[int] = set()
+    f12_nodes: set[int] = set()
+    for name in frames:
+        if not isinstance(name, str):
+            continue
+        match = re.fullmatch(r"Transmon_(\d+)_charge_tx", name)
+        if match:
+            f01_nodes.add(int(match.group(1)))
+            continue
+        match = re.fullmatch(r"Transmon_(\d+)_charge_tx_f12", name)
+        if match:
+            f12_nodes.add(int(match.group(1)))
+
+    snapshot = CepheusSnapshot(
+        nodes=nodes,
+        adjacency=adjacency,
+        one_qubit=one_qubit,
+        cz_fidelity=cz_fidelity,
+        f01_nodes=frozenset(f01_nodes),
+        f12_nodes=frozenset(f12_nodes),
+    )
+    snapshot.validate()
+    return snapshot
+
+
 def logical_interaction_weights(
     circuit: ReversibleCircuit,
     layout: D8Layout,
 ) -> dict[tuple[int, int], float]:
-    """Count exact cross-carrier pressure before hardware decomposition.
-
-    A reversible IR node touching k carriers contributes its primitive-equivalent
-    cost to every carrier pair in its support. Single-carrier work is excluded:
-    it does not constrain placement.
-    """
+    """Count exact cross-carrier pressure before hardware decomposition."""
     circuit.validate()
     weights: dict[tuple[int, int], float] = {}
 
@@ -122,14 +233,12 @@ def select_connected_physical_nodes(
 
     for _ in range(removal_count):
         candidates = sorted(selected, key=lambda n: (_node_quality(snapshot, n), n))
-        removed = False
         for node in candidates:
             trial = selected - {node}
             if _connected(trial, snapshot.adjacency):
                 selected = trial
-                removed = True
                 break
-        if not removed:
+        else:
             raise RuntimeError("cannot select requested connected Cepheus subset")
 
     return tuple(sorted(selected))
@@ -228,7 +337,6 @@ def place_carriers(
 
     placement = [assignment[i] for i in range(count)]
 
-    # Deterministic pair-swap refinement.
     current = _placement_cost(placement, weights, distances)
     for _ in range(3):
         improved = False
@@ -255,11 +363,11 @@ def assert_pulse_prerequisites(
     snapshot: CepheusSnapshot,
     placement: CarrierPlacement,
 ) -> None:
-    """Check only capabilities explicitly observable from the device snapshot.
+    """Require the pulse capabilities the live device explicitly publishes.
 
-    f12 proves an exposed 1<->2 transition for qutrit-level control. It does not
-    prove calibrated access to levels 3..7, so this function deliberately does
-    not label the placement d=8-executable.
+    f12 proves exposed 1<->2 control. It does not prove calibrated access to
+    levels 3..7, so this check deliberately does not label the placement
+    d=8-executable.
     """
     selected = set(placement.selected_physical_nodes)
     missing_f01 = selected - snapshot.f01_nodes
