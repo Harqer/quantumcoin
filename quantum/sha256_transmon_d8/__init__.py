@@ -9,6 +9,17 @@ from .carrier_ir import (
     simulate_carrier_program,
     verify_carrier_program,
 )
+from .cepheus_mapping import (
+    CEPHEUS_ARN,
+    CarrierPlacement,
+    CepheusSnapshot,
+    PhysicalQubitQuality,
+    assert_pulse_prerequisites,
+    logical_interaction_weights,
+    place_carriers,
+    select_connected_physical_nodes,
+    snapshot_from_device_capabilities,
+)
 from .coherent_dag import (
     BooleanDag,
     CoherentScheduleDag,
@@ -80,6 +91,15 @@ from .workspace_liveness import (
 from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
 
 __all__ = [
+    "CEPHEUS_ARN",
+    "CarrierPlacement",
+    "CepheusSnapshot",
+    "PhysicalQubitQuality",
+    "assert_pulse_prerequisites",
+    "logical_interaction_weights",
+    "place_carriers",
+    "select_connected_physical_nodes",
+    "snapshot_from_device_capabilities",
     "BooleanDag",
     "streamed_word_add_gate_count",
     "plan_stream_checkpoints",
