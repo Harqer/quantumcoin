@@ -72,12 +72,24 @@ def _require_exact_live_realization(operation, placement: CarrierPlacement, devi
             raise D8LoweringUnavailable(
                 f"Cepheus exposes no charge_tx_f12 frame for physical carrier {physical}"
             )
-        raise D8LoweringUnavailable(
-            "AWS Braket exposes calibrated qubit control and f12 access for physical "
-            f"carrier {physical}, but not calibrated f23..f67 transitions required to "
-            "prove an exact arbitrary d=8 local permutation; "
-            + _describe_live_calibration_surface(device)
-        )
+        if d8_calibrations is None:
+            raise D8LoweringUnavailable(
+                "local d=8 synthesis is available, but a complete measured transition "
+                f"calibration set is required for physical carrier {physical}; "
+                + _describe_live_calibration_surface(device)
+            )
+        swaps = synthesize_local_permutation8(operation)
+        try:
+            return local_swap_word_openpulse(
+                device,
+                physical,
+                swaps,
+                d8_calibrations,
+            )
+        except (KeyError, RuntimeError, ValueError) as exc:
+            raise D8LoweringUnavailable(
+                f"d=8 transition calibration is incomplete for physical carrier {physical}: {exc}"
+            ) from exc
 
     if isinstance(operation, CrossCarrierGate):
         physical = tuple(placement.physical(c) for c in operation.carriers)
