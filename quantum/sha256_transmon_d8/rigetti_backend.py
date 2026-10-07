@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .cepheus_mapping import CEPHEUS_ARN, snapshot_from_device_capabilities
+from .d8_requirements import BRAKET_TASK_ACTION_MAX_BYTES
 
 
 class D8HardwareUnavailable(RuntimeError):
@@ -18,8 +19,13 @@ class RigettiD8CapabilityReport:
     native_operations: tuple[str, ...]
     frame_count: int
     native_calibration_count: int
+    supports_dynamic_frames: bool
+    supports_set_frequency: bool
+    supports_shift_frequency: bool
+    task_action_max_bytes: int
     local_d8_control_ready: bool
     cross_carrier_d8_entangler_ready: bool
+    multilevel_readout_ready: bool
     executable: bool
     reasons: tuple[str, ...]
 
@@ -31,22 +37,26 @@ def _native_operation_names(device) -> tuple[str, ...]:
 
 
 def inspect_d8_hardware(device) -> RigettiD8CapabilityReport:
-    """Inspect the live Braket Cepheus pulse/calibration surface for exact d=8 support."""
+    """Inspect only capabilities Braket currently publishes for live Cepheus."""
     snapshot = snapshot_from_device_capabilities(device.properties.json())
     native = _native_operation_names(device)
     frames = set(device.frames)
+    pulse = device.properties.pulse
+    functions = getattr(pulse, "supportedFunctions", {}) or {}
     reasons: list[str] = []
 
-    f12_count = sum(name.endswith("_charge_tx_f12") for name in frames)
+    live = set(snapshot.nodes)
+    f01_count = len(snapshot.f01_nodes & live)
+    f12_count = len(snapshot.f12_nodes & live)
     local_ready = False
-    if f12_count < len(snapshot.nodes):
+    if f01_count != len(live) or f12_count != len(live):
         reasons.append(
-            "not every live carrier exposes an f12 drive frame through Braket"
+            "not every live carrier exposes both f01 and f12 predefined drive frames"
         )
     else:
         reasons.append(
-            "Braket exposes charge_tx and charge_tx_f12 frames, but no calibrated "
-            "f23..f67 transition set or equivalent validated SU(8) realization"
+            "Braket publishes f01/f12 access but not a provider-validated d=8 local "
+            "gate set or calibrated f23..f67 transition set"
         )
 
     cross_ready = False
@@ -54,21 +64,32 @@ def inspect_d8_hardware(device) -> RigettiD8CapabilityReport:
         reasons.append("no native CZ pulse calibration is exposed by Braket")
     else:
         reasons.append(
-            "Braket exposes native qubit CZ pulse calibrations, but their action on "
-            "the full 8x8 multilevel carrier space is not characterized"
+            "native CZ is characterized as a qubit gate; its action over the full "
+            "d=8 x d=8 product space is not provider-characterized"
         )
 
-    executable = local_ready and cross_ready
+    multilevel_readout_ready = False
+    reasons.append(
+        "Braket's published capture_v0/readout surface does not establish 8-state "
+        "single-shot discrimination for Cepheus"
+    )
+
+    executable = local_ready and cross_ready and multilevel_readout_ready
     return RigettiD8CapabilityReport(
         device_arn=CEPHEUS_ARN,
         live_carriers=len(snapshot.nodes),
-        f01_carriers=len(snapshot.f01_nodes & set(snapshot.nodes)),
-        f12_carriers=len(snapshot.f12_nodes & set(snapshot.nodes)),
+        f01_carriers=f01_count,
+        f12_carriers=f12_count,
         native_operations=native,
         frame_count=len(frames),
         native_calibration_count=len(device.gate_calibrations.pulse_sequences),
+        supports_dynamic_frames=bool(getattr(pulse, "supportsDynamicFrames", False)),
+        supports_set_frequency="set_frequency" in functions,
+        supports_shift_frequency="shift_frequency" in functions,
+        task_action_max_bytes=BRAKET_TASK_ACTION_MAX_BYTES,
         local_d8_control_ready=local_ready,
         cross_carrier_d8_entangler_ready=cross_ready,
+        multilevel_readout_ready=multilevel_readout_ready,
         executable=executable,
         reasons=tuple(reasons),
     )
@@ -79,6 +100,6 @@ def require_d8_hardware(report: RigettiD8CapabilityReport) -> None:
         return
     detail = "; ".join(report.reasons)
     raise D8HardwareUnavailable(
-        "Cepheus does not currently expose the complete calibrated d=8 backend "
+        "Cepheus does not currently expose the complete characterized d=8 backend "
         f"required by the SHA compiler through Amazon Braket: {detail}"
     )
