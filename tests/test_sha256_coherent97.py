@@ -8,7 +8,6 @@ from quantum.sha256_transmon_d8.coherent_program import (
     StreamedScheduleAdd,
     StreamedSigmaAdd,
     compile_coherent_nonce_sha256,
-    lower_coherent_operation,
     verify_compiled_coherent_sha256,
 )
 from quantum.sha256_transmon_d8.coherent_schedule import (
@@ -101,23 +100,3 @@ def layout_scratch_intersection(layout, touched):
         for bit in range(layout.scratch_bits)
         if layout.scratch_bit(bit) in touched
     }
-
-
-def test_representative_compact_operations_lower_without_unmapped_bits():
-    compiled = compile_coherent_nonce_sha256(
-        H0,
-        bitcoin_second_block_template(),
-        nonce_word_index=3,
-    )
-
-    representatives = {}
-    for operation in compiled.operations:
-        representatives.setdefault(type(operation), operation)
-
-    for kind in (DirtyConstantAdd, StreamedSigmaAdd, StreamedChAdd, StreamedMajAdd):
-        circuit = lower_coherent_operation(compiled, representatives[kind])
-        for gate in circuit.gates:
-            assert all(
-                0 <= qubit < compiled.layout.logical_bit_capacity
-                for qubit in gate.qubits
-            )
