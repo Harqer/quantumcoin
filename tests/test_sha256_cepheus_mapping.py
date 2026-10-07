@@ -173,7 +173,5 @@ def test_pulse_prerequisite_rejects_missing_f12() -> None:
         f01_nodes=snapshot.f01_nodes,
         f12_nodes=frozenset(),
     )
-    placement = place_carriers(_tiny_circuit(), TinyLayout(), bad)
-
-    with pytest.raises(RuntimeError, match="f12"):
-        assert_pulse_prerequisites(bad, placement)
+    with pytest.raises(ValueError, match="f01 and f12"):
+        place_carriers(_tiny_circuit(), TinyLayout(), bad)
