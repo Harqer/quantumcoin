@@ -12,9 +12,9 @@ from .cepheus_mapping import (
 from .interactive import MAX_SINGLE_BLOCK_BYTES
 from .layout import D8Layout
 from .cepheus_execution import (
+    BraketRuntimeUnavailable,
     D8LoweringUnavailable,
-    QCSRuntimeUnavailable,
-    execute_complete_sha_program,
+    prepare_complete_sha_program,
 )
 from .sha256 import compile_single_block_sha256
 
@@ -124,19 +124,19 @@ def run_qpu_sha256(message: bytes) -> str:
     )
 
     try:
-        job_id = execute_complete_sha_program(
+        lowered = prepare_complete_sha_program(
             carrier_program,
             placement,
             shots=10,
         )
-    except (D8LoweringUnavailable, QCSRuntimeUnavailable) as exc:
+    except (D8LoweringUnavailable, BraketRuntimeUnavailable) as exc:
         raise CepheusExecutionUnavailable(
             f"{exc}; no QPU task was submitted"
         ) from exc
 
     raise CepheusExecutionUnavailable(
-        f"submitted complete SHA task {job_id}, but d=8 result decoding is not "
-        "implemented yet"
+        "complete AWS Braket OpenPulse SHA program is prepared, but final d=8 "
+        "readout/result decoding is not implemented; no QPU task was submitted"
     )
 
 
