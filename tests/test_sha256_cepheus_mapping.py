@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+
+import pytest
+
 from quantum.sha256_transmon_d8.cepheus_mapping import (
     CepheusSnapshot,
     PhysicalQubitQuality,
@@ -7,9 +11,18 @@ from quantum.sha256_transmon_d8.cepheus_mapping import (
     logical_interaction_weights,
     place_carriers,
     select_connected_physical_nodes,
+    snapshot_from_device_capabilities,
 )
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit
 from quantum.sha256_transmon_d8.layout import D8Layout
+
+
+class TinyLayout:
+    total_transmons = 4
+
+    @staticmethod
+    def transmon_of(bit: int) -> int:
+        return bit // 3
 
 
 def _snapshot() -> CepheusSnapshot:
@@ -46,6 +59,79 @@ def _snapshot() -> CepheusSnapshot:
     )
 
 
+def _tiny_circuit() -> ReversibleCircuit:
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 3)
+    circuit.cx(3, 6)
+    circuit.cx(6, 9)
+    return circuit
+
+
+def test_parse_live_capability_shape() -> None:
+    capabilities = {
+        "paradigm": {
+            "connectivity": {
+                "connectivityGraph": {
+                    "0": ["1"],
+                    "1": ["0"],
+                }
+            }
+        },
+        "pulse": {
+            "frames": {
+                "Transmon_0_charge_tx": {},
+                "Transmon_0_charge_tx_f12": {},
+                "Transmon_1_charge_tx": {},
+                "Transmon_1_charge_tx_f12": {},
+            }
+        },
+        "standardized": {
+            "oneQubitProperties": {
+                "0": {
+                    "oneQubitFidelity": [
+                        {
+                            "fidelityType": {"name": "RANDOMIZED_BENCHMARKING"},
+                            "fidelity": 0.999,
+                        },
+                        {
+                            "fidelityType": {"name": "READOUT"},
+                            "fidelity": 0.97,
+                        },
+                    ]
+                },
+                "1": {
+                    "oneQubitFidelity": [
+                        {
+                            "fidelityType": {"name": "RANDOMIZED_BENCHMARKING"},
+                            "fidelity": 0.998,
+                        },
+                        {
+                            "fidelityType": {"name": "READOUT"},
+                            "fidelity": 0.96,
+                        },
+                    ]
+                },
+            },
+            "twoQubitProperties": {
+                "0-1": {
+                    "twoQubitGateFidelity": [
+                        {"gateName": "CZ", "fidelity": 0.99}
+                    ]
+                }
+            },
+        },
+    }
+
+    snapshot = snapshot_from_device_capabilities(json.dumps(capabilities))
+
+    assert snapshot.nodes == (0, 1)
+    assert snapshot.adjacency == {0: (1,), 1: (0,)}
+    assert snapshot.one_qubit[0].one_qubit_fidelity == 0.999
+    assert snapshot.cz_fidelity[(0, 1)] == 0.99
+    assert snapshot.f01_nodes == frozenset({0, 1})
+    assert snapshot.f12_nodes == frozenset({0, 1})
+
+
 def test_interaction_weights_count_cross_carrier_only() -> None:
     layout = D8Layout(profile="packed97")
     circuit = ReversibleCircuit()
@@ -61,35 +147,20 @@ def test_interaction_weights_count_cross_carrier_only() -> None:
 
 
 def test_connected_subset_preserves_requested_size() -> None:
-    snapshot = _snapshot()
-    selected = select_connected_physical_nodes(snapshot, 4)
+    selected = select_connected_physical_nodes(_snapshot(), 4)
 
     assert len(selected) == 4
-    assert set(selected) <= set(snapshot.nodes)
+    assert set(selected) <= set(_snapshot().nodes)
 
 
 def test_place_carriers_is_complete_and_injective() -> None:
-    # Use a tiny synthetic layout-like object by reusing aligned100's circuit
-    # interaction on its first carriers, but request placement through an object
-    # exposing the needed total_transmons field.
-    class TinyLayout:
-        total_transmons = 4
-
-        @staticmethod
-        def transmon_of(bit: int) -> int:
-            return bit // 3
-
-    circuit = ReversibleCircuit()
-    circuit.cx(0, 3)
-    circuit.cx(3, 6)
-    circuit.cx(6, 9)
-
-    placement = place_carriers(circuit, TinyLayout(), _snapshot())
+    snapshot = _snapshot()
+    placement = place_carriers(_tiny_circuit(), TinyLayout(), snapshot)
 
     assert len(placement.logical_to_physical) == 4
     assert len(set(placement.logical_to_physical)) == 4
     assert set(placement.logical_to_physical) == set(placement.selected_physical_nodes)
-    assert_pulse_prerequisites(_snapshot(), placement)
+    assert_pulse_prerequisites(snapshot, placement)
 
 
 def test_pulse_prerequisite_rejects_missing_f12() -> None:
@@ -100,27 +171,9 @@ def test_pulse_prerequisite_rejects_missing_f12() -> None:
         one_qubit=snapshot.one_qubit,
         cz_fidelity=snapshot.cz_fidelity,
         f01_nodes=snapshot.f01_nodes,
-        f12_nodes=frozenset({0, 1, 2, 3, 4}),
+        f12_nodes=frozenset(),
     )
+    placement = place_carriers(_tiny_circuit(), TinyLayout(), bad)
 
-    class TinyLayout:
-        total_transmons = 4
-
-        @staticmethod
-        def transmon_of(bit: int) -> int:
-            return bit // 3
-
-    circuit = ReversibleCircuit()
-    circuit.cx(0, 3)
-    circuit.cx(3, 6)
-    circuit.cx(6, 9)
-    placement = place_carriers(circuit, TinyLayout(), bad)
-
-    # If the selected subset happens not to include node 5 this is still valid.
-    if 5 in placement.selected_physical_nodes:
-        try:
-            assert_pulse_prerequisites(bad, placement)
-        except RuntimeError as exc:
-            assert "f12" in str(exc)
-        else:
-            raise AssertionError("missing f12 frame was not rejected")
+    with pytest.raises(RuntimeError, match="f12"):
+        assert_pulse_prerequisites(bad, placement)
