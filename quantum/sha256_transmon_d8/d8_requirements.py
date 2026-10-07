@@ -7,7 +7,6 @@ from .carrier_ir import CarrierProgram, CrossCarrierGate
 from .cepheus_mapping import CarrierPlacement, CepheusSnapshot
 from .d8_calibration import D8CalibrationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
-from .d8_cross_synthesis import TwoCarrierPermutation64
 from .d8_entangler import D8EntanglerSet
 from .d8_readout import D8ReadoutSet
 from .d8_routing import (
@@ -15,6 +14,7 @@ from .d8_routing import (
     RoutedLocalEmbeddedGate,
     RoutedLocalPermutation,
     route_carrier_program,
+    routed_cx_permutation,
 )
 
 
@@ -51,20 +51,6 @@ class D8BackendRequirementReport:
     @property
     def executable(self) -> bool:
         return not self.gaps
-
-
-def _routed_cx_permutation(operation: RoutedEmbeddedCx) -> TwoCarrierPermutation64:
-    mapping: list[int] = []
-    for control_basis in range(8):
-        for target_basis in range(8):
-            mapped_target = target_basis
-            if (control_basis >> operation.control_level_bit) & 1:
-                mapped_target ^= 1 << operation.target_level_bit
-            mapping.append(control_basis * 8 + mapped_target)
-    return TwoCarrierPermutation64(
-        carriers=(0, 1),
-        mapping=tuple(mapping),
-    )
 
 
 def analyze_backend_requirements(
@@ -138,7 +124,7 @@ def analyze_backend_requirements(
 
     for operation in routed_cx:
         physical = (operation.physical_control, operation.physical_target)
-        permutation = _routed_cx_permutation(operation)
+        permutation = routed_cx_permutation(operation)
         key = (physical, permutation.mapping)
 
         if operation.coherent_required:
