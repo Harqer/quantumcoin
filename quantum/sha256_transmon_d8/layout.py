@@ -10,6 +10,7 @@ _FIXED_LAYOUT_TRANSMONS = {
     "packed97": 97,
 }
 _COHERENT_LAYOUT_TRANSMONS = {
+    "coherent97": 97,
     "coherent107": 107,
 }
 _LAYOUT_TRANSMONS = {
@@ -34,7 +35,12 @@ class D8Layout:
     Fixed-message profiles map:
       256 state + 32 scratch + 1 carry = 289 logical basis bits.
 
-    coherent107 maps:
+    coherent97 maps the persistent state and nonce densely:
+      256 state + 32 coherent nonce + 3 reusable workspace bits = 291 bits.
+    One workspace bit is also the carry lease; its lifetime never overlaps a
+    streamed temporary/cache lease.
+
+    coherent107 retains the older aligned reference mapping:
       256 state + 32 coherent nonce + 32 scratch + 1 carry = 321 bits.
 
     Carrier-local reversible logic may later fuse into exact 8x8 permutations.
@@ -57,7 +63,11 @@ class D8Layout:
 
     @property
     def is_coherent_nonce(self) -> bool:
-        return self.profile == "coherent107"
+        return self.profile in _COHERENT_LAYOUT_TRANSMONS
+
+    @property
+    def scratch_bits(self) -> int:
+        return 3 if self.profile == "coherent97" else 32
 
     @property
     def total_transmons(self) -> int:
@@ -69,6 +79,9 @@ class D8Layout:
 
     @property
     def carry_bit(self) -> int:
+        if self.profile == "coherent97":
+            # The third compact workspace level is leased as the carry bit.
+            return 290
         if self.profile == "coherent107":
             # nonce bits 30 and 31 use levels 0 and 1 of carrier 98.
             return 98 * 3 + 2
@@ -83,6 +96,8 @@ class D8Layout:
         return self.transmon_of(self.carry_bit)
 
     def _state_word_bit(self, slot: int, bit: int) -> int:
+        if self.profile == "coherent97":
+            return slot * 32 + bit
         transmon = slot * self.word_transmons + bit // 3
         return transmon * 3 + bit % 3
 
@@ -96,18 +111,23 @@ class D8Layout:
         return self._state_word_bit(slot, bit)
 
     def nonce_bit(self, bit: int) -> int:
-        if self.profile != "coherent107":
+        if not self.is_coherent_nonce:
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
         if not 0 <= bit < 32:
             raise ValueError("nonce bit out of range")
+        if self.profile == "coherent97":
+            return 256 + bit
         transmon = 88 + bit // 3
         return transmon * 3 + bit % 3
 
     def scratch_bit(self, bit: int) -> int:
-        if not 0 <= bit < 32:
+        if not 0 <= bit < self.scratch_bits:
             raise ValueError("scratch bit out of range")
+
+        if self.profile == "coherent97":
+            return 288 + bit
 
         if self.profile == "coherent107":
             if bit < 24:
@@ -145,18 +165,24 @@ class D8Layout:
             for slot in range(self.state_words)
             for bit in range(32)
         )
-        scratch = tuple(self.scratch_bit(bit) for bit in range(32))
+        scratch = tuple(self.scratch_bit(bit) for bit in range(self.scratch_bits))
         carry = (self.carry_bit,)
 
-        if self.profile != "coherent107":
+        if not self.is_coherent_nonce:
             return state + scratch + carry
 
         nonce = tuple(self.nonce_bit(bit) for bit in range(32))
+        if self.profile == "coherent97":
+            # carry_bit aliases scratch_bit(2) by lifetime contract.
+            return state + nonce + scratch
         return state + nonce + scratch + carry
 
     def _validate_mapping(self) -> None:
         mapped = self.mapped_bits()
-        expected = 321 if self.profile == "coherent107" else 289
+        expected = {
+            "coherent97": 291,
+            "coherent107": 321,
+        }.get(self.profile, 289)
 
         if len(mapped) != expected:
             raise AssertionError(
@@ -185,7 +211,7 @@ class D8Layout:
         return sum(bits[self.word_bit(slot, i)] << i for i in range(32))
 
     def set_nonce(self, bits: list[int], value: int) -> None:
-        if self.profile != "coherent107":
+        if not self.is_coherent_nonce:
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
@@ -195,15 +221,15 @@ class D8Layout:
             bits[self.nonce_bit(i)] = (value >> i) & 1
 
     def get_nonce(self, bits: list[int]) -> int:
-        if self.profile != "coherent107":
+        if not self.is_coherent_nonce:
             raise ValueError(
                 f"layout {self.profile!r} has no coherent nonce register"
             )
         return sum(bits[self.nonce_bit(i)] << i for i in range(32))
 
     def assert_clean_workspace(self, bits: list[int]) -> None:
-        if any(bits[self.scratch_bit(i)] for i in range(32)):
-            raise AssertionError("scratch word not restored to zero")
+        if any(bits[self.scratch_bit(i)] for i in range(self.scratch_bits)):
+            raise AssertionError("scratch workspace not restored to zero")
         if bits[self.carry_bit] != 0:
             raise AssertionError("carry ancilla not restored to zero")
 
