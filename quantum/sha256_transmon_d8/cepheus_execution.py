@@ -39,11 +39,20 @@ def _native_gate_names(device) -> set[str]:
 
 def _describe_live_calibration_surface(device) -> str:
     frames = _frame_names(device)
+    live = set(
+        __import__("quantum.sha256_transmon_d8.cepheus_mapping", fromlist=["snapshot_from_device_capabilities"])
+        .snapshot_from_device_capabilities(device.properties.json())
+        .nodes
+    )
+    f12_live = sum(
+        f"Transmon_{node}_charge_tx_f12" in frames
+        for node in live
+    )
     return (
         f"frames={len(frames)}, native_calibrations="
         f"{len(device.gate_calibrations.pulse_sequences)}, "
         f"native_gates={sorted(_native_gate_names(device))}, "
-        f"f12_frames={sum(name.endswith('_charge_tx_f12') for name in frames)}"
+        f"f12_live_carriers={f12_live}/{len(live)}"
     )
 
 
