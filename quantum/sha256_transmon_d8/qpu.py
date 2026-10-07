@@ -11,11 +11,10 @@ from .cepheus_mapping import (
 )
 from .interactive import MAX_SINGLE_BLOCK_BYTES
 from .layout import D8Layout
-from .rigetti_backend import fetch_native_gate_calibrations, inspect_d8_hardware
 from .cepheus_execution import (
     D8LoweringUnavailable,
-    lower_complete_sha_program,
-    submit_complete_sha_program,
+    QCSRuntimeUnavailable,
+    execute_complete_sha_program,
 )
 from .sha256 import compile_single_block_sha256
 
@@ -124,54 +123,19 @@ def run_qpu_sha256(message: bytes) -> str:
         message, capabilities
     )
 
-    pulse = __import__("json").loads(capabilities).get("pulse") or {}
-    calibration_ref = pulse.get("nativeGateCalibrationsRef")
-    if not calibration_ref:
-        raise CepheusExecutionUnavailable(
-            "Cepheus did not publish a native gate calibration reference"
-        )
-
-    calibrations = fetch_native_gate_calibrations(calibration_ref)
-    report = inspect_d8_hardware(capabilities, calibrations)
-
     try:
-        lowered = lower_complete_sha_program(
+        job_id = execute_complete_sha_program(
             carrier_program,
             placement,
-            calibrations,
             shots=10,
         )
-    except D8LoweringUnavailable as exc:
+    except (D8LoweringUnavailable, QCSRuntimeUnavailable) as exc:
         raise CepheusExecutionUnavailable(
             f"{exc}; no QPU task was submitted"
         ) from exc
 
-    import os
-
-    bucket = os.environ.get("SHA256_BRAKET_OUTPUT_BUCKET")
-    prefix = os.environ.get("SHA256_BRAKET_OUTPUT_PREFIX", "sha256-transmon-d8")
-    if not bucket:
-        raise CepheusExecutionUnavailable(
-            "exact physical program is ready but SHA256_BRAKET_OUTPUT_BUCKET "
-            "is not configured; no QPU task was submitted"
-        )
-
-    task = submit_complete_sha_program(
-        client=client,
-        device_arn=CEPHEUS_ARN,
-        lowered=lowered,
-        output_s3_bucket=bucket,
-        output_s3_prefix=prefix,
-    )
-
-    task_arn = task.get("quantumTaskArn")
-    if not task_arn:
-        raise CepheusExecutionUnavailable(
-            "Braket did not return a quantum task ARN"
-        )
-
     raise CepheusExecutionUnavailable(
-        f"submitted complete SHA task {task_arn}, but result decoding is not "
+        f"submitted complete SHA task {job_id}, but d=8 result decoding is not "
         "implemented yet"
     )
 
