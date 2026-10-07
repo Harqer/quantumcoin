@@ -102,6 +102,13 @@ def preflight_current_hardware(
     }
 
 
-def refresh_live_calibrations(device) -> None:
-    """Refresh provider calibrations using the documented Braket SDK API."""
-    device.refresh_gate_calibrations()
+def refresh_live_calibrations(device):
+    """Return a freshly downloaded provider GateCalibrations object.
+
+    AwsDevice.refresh_gate_calibrations() returns new calibration data; it does
+    not mutate the device's cached gate_calibrations property in place.
+    """
+    calibrations = device.refresh_gate_calibrations()
+    if calibrations is None:
+        raise RuntimeError("Braket returned no native gate calibrations")
+    return calibrations
