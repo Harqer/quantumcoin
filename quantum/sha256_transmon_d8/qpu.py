@@ -99,26 +99,25 @@ def run_qpu_sha256(message: bytes) -> str:
     _validate_message(message)
 
     try:
-        import boto3
+        from braket.aws import AwsDevice
     except ImportError as exc:
         raise CepheusExecutionUnavailable(
-            "boto3 is required to query the live Cepheus device"
+            "amazon-braket-sdk is required to query the live Cepheus device"
         ) from exc
 
     try:
-        client = boto3.client("braket", region_name="us-west-1")
-        response = client.get_device(deviceArn=CEPHEUS_ARN)
+        device = AwsDevice(CEPHEUS_ARN)
     except Exception as exc:
         raise CepheusExecutionUnavailable(
             "could not query the live Cepheus device; no QPU task was submitted"
         ) from exc
 
-    if response.get("deviceStatus") != "ONLINE":
+    if device.status != "ONLINE":
         raise CepheusExecutionUnavailable(
-            f"Cepheus is not online: {response.get('deviceStatus')}"
+            f"Cepheus is not online: {device.status}"
         )
 
-    capabilities = response["deviceCapabilities"]
+    capabilities = device.properties.json()
     compiled, carrier_program, placement = _prepare_hardware_program(
         message, capabilities
     )
@@ -127,6 +126,7 @@ def run_qpu_sha256(message: bytes) -> str:
         lowered = prepare_complete_sha_program(
             carrier_program,
             placement,
+            device=device,
             shots=10,
         )
     except (D8LoweringUnavailable, BraketRuntimeUnavailable) as exc:
