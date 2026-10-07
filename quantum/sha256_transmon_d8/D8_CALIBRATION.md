@@ -1,7 +1,8 @@
 # d=8 calibration path on Rigetti Cepheus through Amazon Braket
 
 This package treats each transmon as an eight-level carrier only after the
-required physical transitions have been measured and validated.
+required physical transitions and readout behavior have been measured and
+validated.
 
 ## Live Braket constraints
 
@@ -27,7 +28,7 @@ S01, S12, S23, S34, S45, S56, S67
 The decomposition is backend-neutral and contains no pulse assumptions.
 
 Each physical carrier becomes locally executable only after all seven adjacent
-transitions have measured calibrations:
+transitions have measured, provenance-tagged calibrations:
 
 ```text
 f01, f12, f23, f34, f45, f56, f67
@@ -38,42 +39,78 @@ For every transition the calibration model records:
 - transition frequency;
 - pi-pulse duration;
 - amplitude;
-- phase.
+- phase;
+- Gaussian width fraction / edge behavior;
+- characterization identifier.
 
 No extrapolated higher-transition value is accepted as a measured calibration.
 
-## Non-submitting spectroscopy planner
+## Higher-level spectroscopy
 
-Build and inspect a spectroscopy scan without launching a QPU task:
+Amazon Braket's Rigetti bring-up examples use shaped Gaussian drive pulses and
+`capture_v0` on the readout frame.
+
+A scan of `f23`, `f34`, and higher transitions cannot begin from `|0>`.
+The transmon must first be prepared in the lower state with already-characterized
+pi pulses:
+
+```text
+f23 scan: |0> -> |1> -> |2> -> probe f23
+f34 scan: |0> -> |1> -> |2> -> |3> -> probe f34
+...
+```
+
+The current Braket `capture_v0` interface is qubit-oriented. Therefore the
+software refuses to claim that a higher-level spectroscopy point is measurable
+unless an explicit multilevel readout/mapping characterization is supplied.
+
+The non-submitting planner may still print the frequency grid for any requested
+transition. It emits executable midpoint OpenPulse only when the preparation and
+readout prerequisites are satisfied.
+
+## Non-submitting spectroscopy planner
 
 ```bash
 python -m quantum.sha256_transmon_d8.plan_transition \
   --carrier 0 \
-  --lower-level 2 \
-  --center-frequency-hz <MEASURED_OR_EXPLICIT_SCAN_CENTER> \
+  --lower-level 0 \
+  --center-frequency-hz <SCAN_CENTER> \
   --span-hz <SCAN_WIDTH> \
   --points 21 \
   --pulse-duration-s <DURATION> \
   --amplitude <AMPLITUDE>
 ```
 
-The command prints the frequency grid and midpoint OpenPulse program and ends
-with:
+The command never calls `device.run()` and always reports:
 
 ```text
 submitted=false
 ```
 
-It never calls `device.run()`.
+## Cepheus two-carrier baseline
+
+Amazon's current Cepheus Bell-pair pulse notebook retrieves the native CZ pulse
+from:
+
+```python
+device.gate_calibrations.pulse_sequences[CZ(), QubitSet([a, b])]
+```
+
+The notebook's emitted OpenPulse program plays the provider-calibrated waveform
+on a predefined `flux_tx_cz` frame and applies phase corrections on the two
+`charge_tx` frames.
+
+That native CZ calibration is the correct Braket-demonstrated two-carrier
+baseline to inspect. It is still only characterized as a qubit gate; the code
+must not assume the same pulse implements the required operation over all 64
+states of the d=8 x d=8 product space.
 
 ## Cross-carrier boundary
 
-Local d=8 synthesis does not solve multilevel entanglement. A native qubit CZ is
-not automatically an exact operation over the full 8 x 8 two-transmon space.
-
-`D8EntanglerCalibration` therefore requires an explicit experimentally
-characterized realization. The SHA hardware path must continue to refuse
-cross-carrier lowering until such a realization is available.
+`D8EntanglerCalibration` must represent an explicitly characterized multilevel
+two-carrier realization. The SHA hardware path must continue to refuse
+`CrossCarrierGate` lowering until the required source gate has been validated
+over the relevant d=8 basis states.
 
 ## Execution invariant
 
