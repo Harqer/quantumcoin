@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
+from .carrier_ir import CarrierProgram
 from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
 from .d8_braket_calibration import local_swap_word_openpulse
 from .d8_calibration import D8CalibrationSet
-from .d8_cross_synthesis import exact_embedded_cx64
-from .d8_entangler import D8EntanglerSet
 from .d8_coherent_calibration import D8LocalCoherentSet
-from .d8_two_body_decomposition import (
-    EmbeddedCrossCx,
-    LocalEmbeddedGate,
-    decompose_cross_carrier_gate,
-)
-from .ir import Gate
+from .d8_entangler import D8EntanglerSet
 from .d8_local_synthesis import synthesize_local_permutation8
 from .d8_requirements import require_braket_action_size
+from .d8_routing import (
+    RoutedEmbeddedCx,
+    RoutedLocalEmbeddedGate,
+    RoutedLocalPermutation,
+    route_carrier_program,
+    routed_cx_permutation,
+)
 
 
 class D8LoweringUnavailable(RuntimeError):
@@ -29,23 +29,23 @@ class BraketRuntimeUnavailable(RuntimeError):
 
 @dataclass(frozen=True)
 class LoweredCepheusProgram:
-    """One complete OpenQASM 3/OpenPulse program for one Braket task."""
+    """One complete routed OpenQASM 3/OpenPulse program for one Braket task."""
 
     source: str
     shots: int
+    final_logical_to_physical: tuple[int, ...]
 
 
 def _frame_names(device) -> set[str]:
     return set(device.frames)
 
 
-def _has_frame(device, physical: int, suffix: str) -> bool:
-    return f"Transmon_{physical}_{suffix}" in _frame_names(device)
-
-
 def _native_gate_names(device) -> set[str]:
     names: set[str] = set()
-    for gate, _qubits in device.gate_calibrations.pulse_sequences:
+    calibrations = device.gate_calibrations
+    if calibrations is None:
+        return names
+    for gate, _qubits in calibrations.pulse_sequences:
         names.add(gate.name)
     return names
 
@@ -57,45 +57,36 @@ def _describe_live_calibration_surface(device) -> str:
         f"Transmon_{node}_charge_tx_f12" in frames
         for node in live
     )
+    calibrations = device.gate_calibrations
+    calibration_count = (
+        len(calibrations.pulse_sequences)
+        if calibrations is not None
+        else 0
+    )
     return (
-        f"frames={len(frames)}, native_calibrations="
-        f"{len(device.gate_calibrations.pulse_sequences)}, "
+        f"frames={len(frames)}, native_calibrations={calibration_count}, "
         f"native_gates={sorted(_native_gate_names(device))}, "
         f"f12_live_carriers={f12_live}/{len(live)}"
     )
 
 
-def _require_exact_live_realization(
+def _lower_routed_operation(
     operation,
-    placement: CarrierPlacement,
+    *,
     device,
     d8_calibrations: D8CalibrationSet | None,
     d8_coherent_locals: D8LocalCoherentSet | None,
     d8_entanglers: D8EntanglerSet | None,
 ) -> str:
-    """Return exact OpenPulse for an operation only when AWS exposes enough calibration data.
-
-    The current Braket Cepheus surface exposes calibrated native qubit RX/RZ/CZ
-    sequences plus charge_tx_f12 frames. That is not sufficient evidence for an
-    arbitrary 8-level local permutation or an 8x8 cross-carrier entangler.
-    """
-    if isinstance(operation, LocalPermutation8):
-        physical = placement.physical(operation.carrier)
-        if not _has_frame(device, physical, "charge_tx"):
-            raise D8LoweringUnavailable(
-                f"Cepheus exposes no charge_tx frame for physical carrier {physical}"
-            )
-        if not _has_frame(device, physical, "charge_tx_f12"):
-            raise D8LoweringUnavailable(
-                f"Cepheus exposes no charge_tx_f12 frame for physical carrier {physical}"
-            )
+    if isinstance(operation, RoutedLocalPermutation):
+        physical = operation.physical_carrier
         if d8_calibrations is None:
             raise D8LoweringUnavailable(
-                "local d=8 synthesis is available, but a complete measured transition "
-                f"calibration set is required for physical carrier {physical}; "
+                "missing basis-transfer d=8 local calibration for "
+                f"physical carrier {physical}; "
                 + _describe_live_calibration_surface(device)
             )
-        swaps = synthesize_local_permutation8(operation)
+        swaps = synthesize_local_permutation8(operation.operation)
         try:
             return local_swap_word_openpulse(
                 device,
@@ -105,66 +96,48 @@ def _require_exact_live_realization(
             )
         except (KeyError, RuntimeError, ValueError) as exc:
             raise D8LoweringUnavailable(
-                f"d=8 transition calibration is incomplete for physical carrier {physical}: {exc}"
+                f"incomplete basis-transfer calibration on physical carrier "
+                f"{physical}: {exc}"
             ) from exc
 
-    if isinstance(operation, CrossCarrierGate):
-        coherent_context = operation.gate.kind != "CX"
-        pulse_bodies: list[str] = []
-
-        for primitive in decompose_cross_carrier_gate(operation):
-            if isinstance(primitive, LocalEmbeddedGate):
-                if d8_coherent_locals is None:
-                    raise D8LoweringUnavailable(
-                        "coherent local calibration set is required for "
-                        f"source_gate={operation.gate.kind}, local_target="
-                        f"{primitive.kind}{primitive.level_bits} on logical "
-                        f"carrier={primitive.carrier}"
-                    )
-                physical = placement.physical(primitive.carrier)
-                try:
-                    calibration = d8_coherent_locals.require(physical, primitive)
-                except (KeyError, RuntimeError) as exc:
-                    raise D8LoweringUnavailable(str(exc)) from exc
-                pulse_bodies.append(calibration.openpulse_body)
-                continue
-
-            if not isinstance(primitive, EmbeddedCrossCx):
-                raise TypeError(type(primitive))
-
-            embedded_gate = Gate(
-                "CX",
-                (
-                    primitive.control_carrier * 3 + primitive.control_level_bit,
-                    primitive.target_carrier * 3 + primitive.target_level_bit,
-                ),
+    if isinstance(operation, RoutedLocalEmbeddedGate):
+        if d8_coherent_locals is None:
+            raise D8LoweringUnavailable(
+                "missing coherent local calibration for "
+                f"physical carrier {operation.physical_carrier}, "
+                f"target={operation.target.kind}{operation.target.level_bits}"
             )
-            embedded = exact_embedded_cx64(
-                CrossCarrierGate(embedded_gate, operation.gate_index)
+        try:
+            calibration = d8_coherent_locals.require(
+                operation.physical_carrier,
+                operation.target,
             )
-            physical = tuple(
-                placement.physical(carrier)
-                for carrier in embedded.carriers
+        except (KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(str(exc)) from exc
+        return calibration.openpulse_body
+
+    if isinstance(operation, RoutedEmbeddedCx):
+        physical = (operation.physical_control, operation.physical_target)
+        if d8_entanglers is None:
+            raise D8LoweringUnavailable(
+                "missing characterized embedded CX64 realization for "
+                f"physical={physical}, control_bit={operation.control_level_bit}, "
+                f"target_bit={operation.target_level_bit}, "
+                f"coherent={operation.coherent_required}, "
+                f"routing_generated={operation.routing_generated}"
             )
-            if d8_entanglers is None:
-                raise D8LoweringUnavailable(
-                    "exact embedded CX64 target is derived, but no experimentally "
-                    f"characterized realization was supplied for physical={physical}, "
-                    f"coherent={coherent_context}"
-                )
-            try:
-                calibration = d8_entanglers.require(
-                    physical,
-                    embedded.permutation,
-                    coherent=coherent_context,
-                )
-            except (KeyError, RuntimeError) as exc:
-                raise D8LoweringUnavailable(str(exc)) from exc
-            pulse_bodies.append(calibration.openpulse_body)
+        permutation = routed_cx_permutation(operation)
+        try:
+            calibration = d8_entanglers.require(
+                physical,
+                permutation,
+                coherent=operation.coherent_required,
+            )
+        except (KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(str(exc)) from exc
+        return calibration.openpulse_body
 
-        return "\n".join(pulse_bodies)
-
-    raise TypeError(f"unsupported carrier operation {type(operation)!r}")
+    raise TypeError(f"unsupported routed operation {type(operation)!r}")
 
 
 def lower_complete_sha_program(
@@ -177,36 +150,43 @@ def lower_complete_sha_program(
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
-    """Lower the full carrier program using only live AWS Braket calibrations."""
+    """Route and lower the complete SHA program before any Braket submission."""
     if shots <= 0:
         raise ValueError("shots must be positive")
 
+    snapshot = snapshot_from_device_capabilities(device.properties.json())
+    routed = route_carrier_program(carrier_program, placement, snapshot)
+
     body: list[str] = []
-    for index, operation in enumerate(carrier_program.operations):
+    for index, operation in enumerate(routed.operations):
         try:
             body.append(
-                _require_exact_live_realization(
+                _lower_routed_operation(
                     operation,
-                    placement,
-                    device,
-                    d8_calibrations,
-                    d8_coherent_locals,
-                    d8_entanglers,
+                    device=device,
+                    d8_calibrations=d8_calibrations,
+                    d8_coherent_locals=d8_coherent_locals,
+                    d8_entanglers=d8_entanglers,
                 )
             )
         except D8LoweringUnavailable as exc:
             raise D8LoweringUnavailable(
-                f"carrier operation {index} cannot be exactly lowered from the live "
-                f"Cepheus Braket calibration surface: {exc}"
+                f"routed operation {index} cannot be exactly lowered: {exc}"
             ) from exc
 
     if not body:
-        raise D8LoweringUnavailable("complete SHA program lowered to no pulse instructions")
+        raise D8LoweringUnavailable(
+            "complete SHA program lowered to no pulse instructions"
+        )
 
     pulse_body = "\n".join(body)
     source = "OPENQASM 3.0;\ncal {\n" + pulse_body + "\n}\n"
     require_braket_action_size(source)
-    return LoweredCepheusProgram(source=source, shots=shots)
+    return LoweredCepheusProgram(
+        source=source,
+        shots=shots,
+        final_logical_to_physical=routed.final_logical_to_physical,
+    )
 
 
 def prepare_complete_sha_program(
@@ -219,7 +199,7 @@ def prepare_complete_sha_program(
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
-    """Prepare one complete AWS Braket OpenPulse program from live device calibrations."""
+    """Prepare one complete routed Braket OpenPulse program without submitting it."""
     return lower_complete_sha_program(
         carrier_program,
         placement,
