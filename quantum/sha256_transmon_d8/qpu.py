@@ -10,6 +10,10 @@ from .cepheus_mapping import (
     snapshot_from_device_capabilities,
 )
 from .interactive import MAX_SINGLE_BLOCK_BYTES
+from .d8_requirements import (
+    analyze_backend_requirements,
+    format_backend_requirement_report,
+)
 from .layout import D8Layout
 from .cepheus_execution import (
     BraketRuntimeUnavailable,
@@ -83,7 +87,7 @@ def _prepare_hardware_program(message: bytes, device_capabilities: str):
     snapshot = snapshot_from_device_capabilities(device_capabilities)
     placement = place_carriers(compiled.circuit, layout, snapshot)
     assert_pulse_prerequisites(snapshot, placement)
-    return compiled, carrier_program, placement
+    return compiled, carrier_program, placement, snapshot
 
 
 def run_qpu_sha256(message: bytes) -> str:
@@ -117,10 +121,25 @@ def run_qpu_sha256(message: bytes) -> str:
             f"Cepheus is not online: {device.status}"
         )
 
+    device.refresh_gate_calibrations()
     capabilities = device.properties.json()
-    compiled, carrier_program, placement = _prepare_hardware_program(
+    compiled, carrier_program, placement, snapshot = _prepare_hardware_program(
         message, capabilities
     )
+
+    requirement_report = analyze_backend_requirements(
+        carrier_program,
+        placement,
+        snapshot,
+        d8_calibrations=None,
+        d8_entanglers=None,
+        readout_characterized=False,
+    )
+    if not requirement_report.executable:
+        raise CepheusExecutionUnavailable(
+            format_backend_requirement_report(requirement_report)
+            + "; no QPU task was submitted"
+        )
 
     try:
         lowered = prepare_complete_sha_program(
