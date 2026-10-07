@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement, CepheusSnapshot
+from .d8_cross_synthesis import TwoCarrierPermutation64
 from .d8_two_body_decomposition import (
     EmbeddedCrossCx,
     LocalEmbeddedGate,
@@ -205,4 +206,19 @@ def route_carrier_program(
         final_logical_to_physical=tuple(logical_to_physical),
         routing_swap_count=swap_count,
         routing_cx_count=swap_count * 9,
+    )
+
+
+def routed_cx_permutation(operation: RoutedEmbeddedCx) -> TwoCarrierPermutation64:
+    """Return the exact 64-state mapping in physical control,target order."""
+    mapping: list[int] = []
+    for control_basis in range(8):
+        for target_basis in range(8):
+            mapped_target = target_basis
+            if (control_basis >> operation.control_level_bit) & 1:
+                mapped_target ^= 1 << operation.target_level_bit
+            mapping.append(control_basis * 8 + mapped_target)
+    return TwoCarrierPermutation64(
+        carriers=(0, 1),
+        mapping=tuple(mapping),
     )
