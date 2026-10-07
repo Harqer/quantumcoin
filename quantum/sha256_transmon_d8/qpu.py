@@ -36,6 +36,37 @@ def classical_sha256(message: bytes) -> str:
     return hashlib.sha256(message).hexdigest()
 
 
+def assert_continuous_execution_invariant(compiled) -> None:
+    """Require one complete 64-round reversible program before submission.
+
+    This validates compiler structure only. Hardware submission is intentionally
+    separate and must consume this already-complete program as one task.
+    """
+    blocks = compiled.round16_blocks
+    if len(blocks) != 4:
+        raise AssertionError(f"expected four ROUND16 blocks, got {len(blocks)}")
+
+    expected_ranges = ((0, 16), (16, 32), (32, 48), (48, 64))
+    actual_ranges = tuple((block.round_start, block.round_stop) for block in blocks)
+    if actual_ranges != expected_ranges:
+        raise AssertionError(
+            f"SHA rounds are not a complete contiguous 0..63 program: {actual_ranges}"
+        )
+
+    for previous, current in zip(blocks, blocks[1:]):
+        if previous.gate_stop != current.gate_start:
+            raise AssertionError("ROUND16 gate spans are not contiguous")
+
+    # ReversibleCircuit has only reversible gate nodes; measurement/reset are
+    # not representable in this IR. Keep this explicit so a future IR extension
+    # cannot silently introduce a segmentation boundary.
+    forbidden = {"MEASURE", "RESET", "RELOAD", "HOST_SYNC"}
+    present = {gate.kind.upper() for gate in compiled.circuit.gates}
+    bad = sorted(forbidden & present)
+    if bad:
+        raise AssertionError(f"intermediate execution boundaries present: {bad}")
+
+
 def _prepare_hardware_program(message: bytes, device_capabilities: str):
     """Compile the exact SHA workload through carrier placement.
 
@@ -48,6 +79,7 @@ def _prepare_hardware_program(message: bytes, device_capabilities: str):
         layout=layout,
         boolean_strategy="low_multiplicative",
     )
+    assert_continuous_execution_invariant(compiled)
     carrier_program = compile_carrier_program(compiled.circuit, layout)
     snapshot = snapshot_from_device_capabilities(device_capabilities)
     placement = place_carriers(compiled.circuit, layout, snapshot)
