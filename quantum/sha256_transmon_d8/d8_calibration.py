@@ -6,14 +6,17 @@ from typing import Mapping
 
 @dataclass(frozen=True)
 class TransitionCalibration:
-    """Measured adjacent-level transition calibration for one transmon."""
+    """Measured adjacent-level pi-pulse calibration for one transmon."""
 
     physical_carrier: int
     lower_level: int
     frequency_hz: float
     pi_duration_s: float
     amplitude: float
+    characterization_id: str
     phase_rad: float = 0.0
+    width_fraction: float = 0.25
+    zero_at_edges: bool = True
 
     def __post_init__(self) -> None:
         if not 0 <= self.lower_level < 7:
@@ -22,6 +25,10 @@ class TransitionCalibration:
             raise ValueError("frequency_hz must be positive")
         if self.pi_duration_s <= 0:
             raise ValueError("pi_duration_s must be positive")
+        if not 0 < self.width_fraction <= 1:
+            raise ValueError("width_fraction must be in (0, 1]")
+        if not self.characterization_id.strip():
+            raise ValueError("characterization_id must be non-empty")
 
 
 @dataclass(frozen=True)
