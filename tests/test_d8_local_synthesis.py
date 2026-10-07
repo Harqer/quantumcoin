@@ -34,6 +34,7 @@ def test_complete_carrier_calibration_requires_all_seven_transitions() -> None:
             frequency_hz=5e9 - level * 2e8,
             pi_duration_s=40e-9,
             amplitude=0.1,
+            characterization_id=f"test-f{level}{level + 1}",
         )
         for level in range(7)
     }
