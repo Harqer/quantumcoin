@@ -8,6 +8,13 @@ from .d8_braket_calibration import local_swap_word_openpulse
 from .d8_calibration import D8CalibrationSet
 from .d8_cross_synthesis import exact_embedded_cx64
 from .d8_entangler import D8EntanglerSet
+from .d8_coherent_calibration import D8LocalCoherentSet
+from .d8_two_body_decomposition import (
+    EmbeddedCrossCx,
+    LocalEmbeddedGate,
+    decompose_cross_carrier_gate,
+)
+from .ir import Gate
 from .d8_local_synthesis import synthesize_local_permutation8
 from .d8_requirements import require_braket_action_size
 
@@ -63,6 +70,7 @@ def _require_exact_live_realization(
     placement: CarrierPlacement,
     device,
     d8_calibrations: D8CalibrationSet | None,
+    d8_coherent_locals: D8LocalCoherentSet | None,
     d8_entanglers: D8EntanglerSet | None,
 ) -> str:
     """Return exact OpenPulse for an operation only when AWS exposes enough calibration data.
@@ -101,40 +109,60 @@ def _require_exact_live_realization(
             ) from exc
 
     if isinstance(operation, CrossCarrierGate):
-        if operation.gate.kind != "CX":
-            physical = tuple(placement.physical(c) for c in operation.carriers)
-            raise D8LoweringUnavailable(
-                f"exact d=8 cross-carrier synthesis is currently implemented for CX, "
-                f"not source_gate={operation.gate.kind}; source_qubits="
-                f"{operation.gate.qubits}, logical_carriers={operation.carriers}, "
-                f"physical={physical}"
-            )
+        coherent_context = operation.gate.kind != "CX"
+        pulse_bodies: list[str] = []
 
-        embedded = exact_embedded_cx64(operation)
-        physical = tuple(placement.physical(c) for c in embedded.carriers)
-        if d8_entanglers is None:
-            raise D8LoweringUnavailable(
-                "exact embedded CX64 target is derived, but no experimentally "
-                "characterized realization was supplied: "
-                f"control=carrier{embedded.control_carrier}.bit{embedded.control_level_bit}, "
-                f"target=carrier{embedded.target_carrier}.bit{embedded.target_level_bit}, "
-                f"logical_carriers={embedded.carriers}, physical={physical}; "
-                + _describe_live_calibration_surface(device)
-            )
+        for primitive in decompose_cross_carrier_gate(operation):
+            if isinstance(primitive, LocalEmbeddedGate):
+                if d8_coherent_locals is None:
+                    raise D8LoweringUnavailable(
+                        "coherent local calibration set is required for "
+                        f"source_gate={operation.gate.kind}, local_target="
+                        f"{primitive.kind}{primitive.level_bits} on logical "
+                        f"carrier={primitive.carrier}"
+                    )
+                physical = placement.physical(primitive.carrier)
+                try:
+                    calibration = d8_coherent_locals.require(physical, primitive)
+                except (KeyError, RuntimeError) as exc:
+                    raise D8LoweringUnavailable(str(exc)) from exc
+                pulse_bodies.append(calibration.openpulse_body)
+                continue
 
-        try:
-            calibration = d8_entanglers.require(
-                physical,
-                embedded.permutation,
+            if not isinstance(primitive, EmbeddedCrossCx):
+                raise TypeError(type(primitive))
+
+            embedded_gate = Gate(
+                "CX",
+                (
+                    primitive.control_carrier * 3 + primitive.control_level_bit,
+                    primitive.target_carrier * 3 + primitive.target_level_bit,
+                ),
             )
-        except (KeyError, RuntimeError) as exc:
-            raise D8LoweringUnavailable(
-                "exact embedded CX64 target has no matching characterized pulse: "
-                f"control=carrier{embedded.control_carrier}.bit{embedded.control_level_bit}, "
-                f"target=carrier{embedded.target_carrier}.bit{embedded.target_level_bit}, "
-                f"logical_carriers={embedded.carriers}, physical={physical}; {exc}"
-            ) from exc
-        return calibration.openpulse_body
+            embedded = exact_embedded_cx64(
+                CrossCarrierGate(embedded_gate, operation.gate_index)
+            )
+            physical = tuple(
+                placement.physical(carrier)
+                for carrier in embedded.carriers
+            )
+            if d8_entanglers is None:
+                raise D8LoweringUnavailable(
+                    "exact embedded CX64 target is derived, but no experimentally "
+                    f"characterized realization was supplied for physical={physical}, "
+                    f"coherent={coherent_context}"
+                )
+            try:
+                calibration = d8_entanglers.require(
+                    physical,
+                    embedded.permutation,
+                    coherent=coherent_context,
+                )
+            except (KeyError, RuntimeError) as exc:
+                raise D8LoweringUnavailable(str(exc)) from exc
+            pulse_bodies.append(calibration.openpulse_body)
+
+        return "\n".join(pulse_bodies)
 
     raise TypeError(f"unsupported carrier operation {type(operation)!r}")
 
@@ -146,6 +174,7 @@ def lower_complete_sha_program(
     device,
     shots: int,
     d8_calibrations: D8CalibrationSet | None = None,
+    d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
     """Lower the full carrier program using only live AWS Braket calibrations."""
@@ -161,6 +190,7 @@ def lower_complete_sha_program(
                     placement,
                     device,
                     d8_calibrations,
+                    d8_coherent_locals,
                     d8_entanglers,
                 )
             )
@@ -186,6 +216,7 @@ def prepare_complete_sha_program(
     device,
     shots: int = 10,
     d8_calibrations: D8CalibrationSet | None = None,
+    d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
     """Prepare one complete AWS Braket OpenPulse program from live device calibrations."""
@@ -195,6 +226,7 @@ def prepare_complete_sha_program(
         device=device,
         shots=shots,
         d8_calibrations=d8_calibrations,
+        d8_coherent_locals=d8_coherent_locals,
         d8_entanglers=d8_entanglers,
     )
 
