@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
 
 from .carrier_ir import CrossCarrierGate
+from .ir import Gate, ReversibleCircuit, simulate
 from .layout import D8Layout
 
 
@@ -103,3 +105,85 @@ def permutation64_fingerprint(permutation: TwoCarrierPermutation64) -> str:
         if source != target
     )
     return ";".join(f"{source}>{target}" for source, target in moved)
+
+
+@dataclass(frozen=True)
+class MultiCarrierPermutation:
+    """Exact basis permutation over every d=8 carrier touched by one source gate."""
+
+    carriers: tuple[int, ...]
+    mapping: tuple[int, ...]
+
+    def __post_init__(self) -> None:
+        if len(self.carriers) < 2:
+            raise ValueError("cross-carrier permutation requires at least two carriers")
+        if tuple(sorted(self.carriers)) != self.carriers:
+            raise ValueError("carrier order must be sorted")
+        if len(set(self.carriers)) != len(self.carriers):
+            raise ValueError("carrier IDs must be unique")
+        dimension = 8 ** len(self.carriers)
+        if len(self.mapping) != dimension or set(self.mapping) != set(range(dimension)):
+            raise ValueError(
+                f"mapping must be a permutation of 0..{dimension - 1}"
+            )
+
+    @property
+    def dimension(self) -> int:
+        return len(self.mapping)
+
+    @property
+    def arity(self) -> int:
+        return len(self.carriers)
+
+    @property
+    def fingerprint(self) -> str:
+        width = max(1, (self.dimension - 1).bit_length() // 8 + 1)
+        payload = b"".join(value.to_bytes(width, "big") for value in self.mapping)
+        return sha256(payload).hexdigest()
+
+
+def _decode_basis(index: int, arity: int) -> list[int]:
+    bases = [0] * arity
+    for position in range(arity - 1, -1, -1):
+        bases[position] = index % 8
+        index //= 8
+    return bases
+
+
+def _encode_basis(bases: list[int]) -> int:
+    index = 0
+    for basis in bases:
+        index = index * 8 + basis
+    return index
+
+
+def exact_cross_carrier_permutation(
+    operation: CrossCarrierGate,
+) -> MultiCarrierPermutation:
+    """Derive the exact computational-basis action of any retained source gate."""
+    operation.gate.validate()
+    carriers = operation.carriers
+    carrier_position = {carrier: i for i, carrier in enumerate(carriers)}
+
+    remapped_qubits = tuple(
+        carrier_position[D8Layout.transmon_of(q)] * 3 + D8Layout.level_bit_of(q)
+        for q in operation.gate.qubits
+    )
+    compact = ReversibleCircuit()
+    compact.extend((Gate(operation.gate.kind, remapped_qubits),))
+    compact.validate()
+
+    mapping: list[int] = []
+    for index in range(8 ** len(carriers)):
+        bases = _decode_basis(index, len(carriers))
+        bits: list[int] = []
+        for basis in bases:
+            bits.extend((basis >> bit) & 1 for bit in range(3))
+        output = simulate(compact, bits)
+        out_bases = [
+            sum(output[position * 3 + bit] << bit for bit in range(3))
+            for position in range(len(carriers))
+        ]
+        mapping.append(_encode_basis(out_bases))
+
+    return MultiCarrierPermutation(carriers=carriers, mapping=tuple(mapping))
