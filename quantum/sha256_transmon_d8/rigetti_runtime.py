@@ -23,7 +23,7 @@ def load_live_target(device_arn: str = CEPHEUS_ARN) -> tuple[object, LiveRigetti
 
     device = AwsDevice(device_arn)
     snapshot = snapshot_from_device_capabilities(device.properties.json())
-    edges = tuple(sorted(tuple(sorted(edge)) for edge in snapshot.edges))
+    edges = tuple(sorted((node, neighbor) for node in snapshot.nodes for neighbor in snapshot.adjacency.get(node, ()) if node < neighbor))
 
     return device, LiveRigettiTarget(
         arn=device_arn,
