@@ -546,16 +546,23 @@ def streamed_word_add_report(
     schedule: CoherentScheduleDag,
     round_index: int,
 ) -> StreamedWordAddReport:
-    if layout.profile != "coherent107":
-        raise ValueError("streamed coherent lowering requires coherent107")
+    if not layout.is_coherent_nonce:
+        raise ValueError("streamed coherent lowering requires a coherent nonce layout")
     if not 0 <= round_index < 64:
         raise ValueError("round_index must be in 0..63")
 
-    scratch = tuple(layout.scratch_bit(bit) for bit in range(32))
-    # During one schedule-bit oracle, its target scratch bit is unavailable;
-    # all SHA state bits, the other 31 scratch bits, and carry are valid dirty
-    # workspace because each oracle invocation restores them locally.
-    available = len(_state_bits(layout)) + (len(scratch) - 1) + 1
+    scratch = tuple(
+        layout.scratch_bit(bit)
+        for bit in range(layout.scratch_bits)
+    )
+    # One scratch bit is the clean streamed target. All other workspace bits
+    # and SHA state bits may be borrowed dirty and are restored locally.
+    temp = scratch[0]
+    available_pool = set(_state_bits(layout))
+    available_pool.update(bit for bit in scratch if bit != temp)
+    if layout.carry_bit != temp:
+        available_pool.add(layout.carry_bit)
+    available = len(available_pool)
     required = max(
         schedule.dag.and_depth[node]
         for node in schedule.words[round_index]
@@ -565,7 +572,7 @@ def streamed_word_add_report(
         max_oracle_dirty_bits=required,
         available_dirty_bits=available,
         streamed_bits=32,
-        clean_scratch_bits=32,
+        clean_scratch_bits=1,
         persistent_schedule_bits=0,
     )
 
@@ -588,8 +595,8 @@ def emit_streamed_schedule_add(
     are restored inside each primitive invocation. Peak clean workspace remains
     the existing 32-bit scratch word plus the existing carry bit.
     """
-    if layout.profile != "coherent107":
-        raise ValueError("streamed coherent lowering requires coherent107")
+    if not layout.is_coherent_nonce:
+        raise ValueError("streamed coherent lowering requires a coherent nonce layout")
     if not 0 <= target_slot < layout.state_words:
         raise ValueError("target_slot must be a SHA state slot")
 
@@ -601,7 +608,10 @@ def emit_streamed_schedule_add(
         )
 
     nonce = tuple(layout.nonce_bit(bit) for bit in range(32))
-    scratch = tuple(layout.scratch_bit(bit) for bit in range(32))
+    scratch = tuple(
+        layout.scratch_bit(bit)
+        for bit in range(layout.scratch_bits)
+    )
     target = tuple(layout.word_bit(target_slot, bit) for bit in range(32))
     state = _state_bits(layout)
 
@@ -659,8 +669,8 @@ def emit_streamed_schedule_add_checkpointed(
       compute caches -> stream 32 output bits -> uncompute caches.
     No cached schedule value survives the macro boundary.
     """
-    if layout.profile != "coherent107":
-        raise ValueError("checkpointed coherent lowering requires coherent107")
+    if not layout.is_coherent_nonce:
+        raise ValueError("checkpointed coherent lowering requires a coherent nonce layout")
     if not 0 <= target_slot < layout.state_words:
         raise ValueError("target_slot must be a SHA state slot")
 
@@ -676,6 +686,10 @@ def emit_streamed_schedule_add_checkpointed(
     state = _state_bits(layout)
 
     ordered_nodes = tuple(sorted(selected.cached_nodes))
+    if len(ordered_nodes) >= len(scratch):
+        raise RuntimeError(
+            "checkpoint plan leaves no clean streamed temporary"
+        )
     cache_wires = {
         node_index: scratch[index]
         for index, node_index in enumerate(ordered_nodes)
