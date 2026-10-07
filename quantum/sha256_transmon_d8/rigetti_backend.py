@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from typing import Mapping, Sequence
-from urllib.request import urlopen
 
-from .cepheus_mapping import CEPHEUS_ARN, CepheusSnapshot, snapshot_from_device_capabilities
+from .cepheus_mapping import CEPHEUS_ARN, snapshot_from_device_capabilities
 
 
 class D8HardwareUnavailable(RuntimeError):
@@ -19,66 +16,46 @@ class RigettiD8CapabilityReport:
     f01_carriers: int
     f12_carriers: int
     native_operations: tuple[str, ...]
+    frame_count: int
+    native_calibration_count: int
     local_d8_control_ready: bool
     cross_carrier_d8_entangler_ready: bool
     executable: bool
     reasons: tuple[str, ...]
 
 
-def _native_operation_names(calibrations: Mapping[str, object]) -> tuple[str, ...]:
-    gates = calibrations.get("gates")
-    names: set[str] = set()
-    if isinstance(gates, Mapping):
-        for group in gates.values():
-            if isinstance(group, Mapping):
-                names.update(str(name) for name in group)
-    return tuple(sorted(names))
+def _native_operation_names(device) -> tuple[str, ...]:
+    return tuple(
+        sorted({gate.name.lower() for gate, _ in device.gate_calibrations.pulse_sequences})
+    )
 
 
-def fetch_native_gate_calibrations(ref: str) -> dict:
-    """Fetch the versioned native calibration snapshot published by Braket."""
-    with urlopen(ref, timeout=30) as response:  # nosec B310: trusted AWS URL from GetDevice
-        payload = json.load(response)
-    if not isinstance(payload, dict):
-        raise ValueError("native gate calibration payload must be a JSON object")
-    return payload
-
-
-def inspect_d8_hardware(
-    device_capabilities: str | Mapping[str, object],
-    native_calibrations: Mapping[str, object],
-) -> RigettiD8CapabilityReport:
-    """Decide whether the current 97-carrier d=8 compiler is physically runnable.
-
-    The compiler needs:
-      1. multilevel local control on every selected carrier;
-      2. a characterized multilevel cross-carrier entangling primitive.
-
-    f01/f12 frames establish qutrit-addressable local control, but do not by
-    themselves establish calibrated access through levels 0..7. Binary CZ
-    calibrations likewise do not establish their action on the full 8x8 carrier
-    product space.
-    """
-    snapshot = snapshot_from_device_capabilities(device_capabilities)
-    native = _native_operation_names(native_calibrations)
+def inspect_d8_hardware(device) -> RigettiD8CapabilityReport:
+    """Inspect the live Braket Cepheus pulse/calibration surface for exact d=8 support."""
+    snapshot = snapshot_from_device_capabilities(device.properties.json())
+    native = _native_operation_names(device)
+    frames = set(device.frames)
     reasons: list[str] = []
 
+    f12_count = sum(name.endswith("_charge_tx_f12") for name in frames)
     local_ready = False
-    if not snapshot.has_f12_on_every_live_node:
-        reasons.append("not every live carrier exposes an f12 drive frame")
+    if f12_count < len(snapshot.nodes):
+        reasons.append(
+            "not every live carrier exposes an f12 drive frame through Braket"
+        )
     else:
         reasons.append(
-            "live metadata exposes f01/f12 only; no calibrated f23..f67 local "
-            "transition set or equivalent validated SU(8) pulse library is published"
+            "Braket exposes charge_tx and charge_tx_f12 frames, but no calibrated "
+            "f23..f67 transition set or equivalent validated SU(8) realization"
         )
 
     cross_ready = False
     if "cz" not in native:
-        reasons.append("no native two-carrier entangler is published")
+        reasons.append("no native CZ pulse calibration is exposed by Braket")
     else:
         reasons.append(
-            "published CZ is calibrated as a qubit gate; its action on the full "
-            "8x8 multilevel carrier space is not characterized by the calibration bundle"
+            "Braket exposes native qubit CZ pulse calibrations, but their action on "
+            "the full 8x8 multilevel carrier space is not characterized"
         )
 
     executable = local_ready and cross_ready
@@ -88,6 +65,8 @@ def inspect_d8_hardware(
         f01_carriers=len(snapshot.f01_nodes & set(snapshot.nodes)),
         f12_carriers=len(snapshot.f12_nodes & set(snapshot.nodes)),
         native_operations=native,
+        frame_count=len(frames),
+        native_calibration_count=len(device.gate_calibrations.pulse_sequences),
         local_d8_control_ready=local_ready,
         cross_carrier_d8_entangler_ready=cross_ready,
         executable=executable,
@@ -101,5 +80,5 @@ def require_d8_hardware(report: RigettiD8CapabilityReport) -> None:
     detail = "; ".join(report.reasons)
     raise D8HardwareUnavailable(
         "Cepheus does not currently expose the complete calibrated d=8 backend "
-        f"required by the 97-carrier SHA compiler: {detail}"
+        f"required by the SHA compiler through Amazon Braket: {detail}"
     )
