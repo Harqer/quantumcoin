@@ -125,10 +125,10 @@ def execute_complete_sha_program(
         ) from exc
 
     try:
-        client = QCSClient.load_with_login()
+        client = QCSClient.load()
     except Exception as exc:
         raise QCSRuntimeUnavailable(
-            "Rigetti QCS authentication failed; complete the browser login flow"
+            "Rigetti QCS profile could not be loaded"
         ) from exc
 
     try:
@@ -137,8 +137,14 @@ def execute_complete_sha_program(
             client=client,
         )
     except Exception as exc:
+        detail = str(exc)
+        if "without credentials" in detail or "NoCredentials" in detail:
+            raise QCSRuntimeUnavailable(
+                "Rigetti QCS profile is present but has no valid OAuth credentials; "
+                "AWS login does not authenticate direct QCS access"
+            ) from exc
         raise QCSRuntimeUnavailable(
-            "Rigetti QCS authentication/calibration lookup failed"
+            f"Rigetti QCS calibration lookup failed: {detail}"
         ) from exc
 
     library_path = os.environ.get("SHA256_D8_PULSE_LIBRARY")
