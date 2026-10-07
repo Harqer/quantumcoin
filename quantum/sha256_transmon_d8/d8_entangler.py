@@ -14,6 +14,8 @@ class D8EntanglerCalibration:
     target_permutation: tuple[int, ...]
     openpulse_body: str
     characterization_id: str
+    basis_mapping_verified: bool = True
+    coherent_phase_characterized: bool = False
 
     def __post_init__(self) -> None:
         a, b = self.physical_carriers
@@ -25,6 +27,10 @@ class D8EntanglerCalibration:
             raise ValueError("openpulse_body must be non-empty")
         if not self.characterization_id.strip():
             raise ValueError("characterization_id must be non-empty")
+        if not self.basis_mapping_verified:
+            raise ValueError(
+                "d=8 entangler calibration must verify its target basis mapping"
+            )
 
     def matches(
         self,
@@ -47,16 +53,19 @@ class D8EntanglerSet:
         self,
         physical_carriers: tuple[int, int],
         permutation: TwoCarrierPermutation64,
+        *,
+        coherent: bool = False,
     ) -> D8EntanglerCalibration:
         matches = [
             calibration
             for calibration in self.calibrations
             if calibration.matches(physical_carriers, permutation)
+            and (not coherent or calibration.coherent_phase_characterized)
         ]
         if not matches:
             raise KeyError(
                 "no characterized d=8 two-carrier realization for "
-                f"physical_carriers={physical_carriers}"
+                f"physical_carriers={physical_carriers}, coherent={coherent}"
             )
         if len(matches) != 1:
             raise RuntimeError("ambiguous d=8 entangler calibration")
