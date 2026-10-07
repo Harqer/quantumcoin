@@ -5,25 +5,22 @@ from dataclasses import dataclass
 from .coherent_dag import CoherentScheduleDag, select_schedule_dag
 from .coherent_schedule import MASK32, compress_reference
 from .coherent_stream import (
+    StreamCheckpointPlan,
     StreamedWordAddReport,
     emit_streamed_schedule_add,
+    emit_streamed_schedule_add_checkpointed,
+    plan_depth_cut_checkpoints,
     streamed_word_add_report,
 )
 from .ir import ReversibleCircuit, simulate
 from .layout import D8Layout
-from .sha256 import (
-    K,
-    _add32,
-    _add_constant32,
-    _compute_add_uncompute,
-    _emit_round,
-    _scratch_xor_ch,
-    _scratch_xor_ch_low_multiplicative,
-    _scratch_xor_maj,
-    _scratch_xor_maj_low_multiplicative,
-    _scratch_xor_sigma,
-    _shift_roles,
+from .low_workspace_arithmetic import (
+    emit_ch_add_streamed,
+    emit_constant_add_dirty,
+    emit_maj_add_streamed,
+    emit_sigma_add_streamed,
 )
+from .sha256 import K, _add32, _shift_roles
 
 
 @dataclass(frozen=True)
@@ -40,6 +37,7 @@ class StreamedScheduleAdd:
     round_index: int
     target_slot: int
     direction: int = 1
+    checkpoint_plan: StreamCheckpointPlan | None = None
 
     def __post_init__(self) -> None:
         if not 0 <= self.round_index < 64:
@@ -54,10 +52,90 @@ class StreamedScheduleAdd:
             round_index=self.round_index,
             target_slot=self.target_slot,
             direction=-self.direction,
+            checkpoint_plan=self.checkpoint_plan,
         )
 
 
-CoherentOperation = CircuitBlock | StreamedScheduleAdd
+@dataclass(frozen=True)
+class StreamedSigmaAdd:
+    source_slot: int
+    target_slot: int
+    rotations: tuple[int, ...]
+    direction: int = 1
+
+    def inverse(self) -> "StreamedSigmaAdd":
+        return StreamedSigmaAdd(
+            self.source_slot,
+            self.target_slot,
+            self.rotations,
+            -self.direction,
+        )
+
+
+@dataclass(frozen=True)
+class StreamedChAdd:
+    x_slot: int
+    y_slot: int
+    z_slot: int
+    target_slot: int
+    direction: int = 1
+
+    def inverse(self) -> "StreamedChAdd":
+        return StreamedChAdd(
+            self.x_slot,
+            self.y_slot,
+            self.z_slot,
+            self.target_slot,
+            -self.direction,
+        )
+
+
+@dataclass(frozen=True)
+class StreamedMajAdd:
+    x_slot: int
+    y_slot: int
+    z_slot: int
+    target_slot: int
+    direction: int = 1
+
+    def inverse(self) -> "StreamedMajAdd":
+        return StreamedMajAdd(
+            self.x_slot,
+            self.y_slot,
+            self.z_slot,
+            self.target_slot,
+            -self.direction,
+        )
+
+
+@dataclass(frozen=True)
+class DirtyConstantAdd:
+    target_slot: int
+    value: int
+    direction: int = 1
+
+    def __post_init__(self) -> None:
+        if not 0 <= self.target_slot < 8:
+            raise ValueError("target_slot must be in 0..7")
+        if self.direction not in (-1, 1):
+            raise ValueError("direction must be +1 or -1")
+
+    def inverse(self) -> "DirtyConstantAdd":
+        return DirtyConstantAdd(
+            self.target_slot,
+            self.value,
+            -self.direction,
+        )
+
+
+CoherentOperation = (
+    CircuitBlock
+    | StreamedScheduleAdd
+    | StreamedSigmaAdd
+    | StreamedChAdd
+    | StreamedMajAdd
+    | DirtyConstantAdd
+)
 
 
 @dataclass(frozen=True)
@@ -94,88 +172,122 @@ class CompiledCoherentSha256:
         return tuple(operation.inverse() for operation in reversed(self.operations))
 
 
-def _round_prefix(
+def _word_bits(layout: D8Layout, slot: int) -> tuple[int, ...]:
+    return tuple(layout.word_bit(slot, bit) for bit in range(32))
+
+
+def _borrowed_pool(layout: D8Layout, temp: int) -> tuple[int, ...]:
+    return tuple(
+        bit
+        for bit in dict.fromkeys(layout.mapped_bits())
+        if bit != temp
+    )
+
+
+def _word_add_block(
     layout: D8Layout,
-    roles: dict[str, int],
-    boolean_strategy: str,
-) -> ReversibleCircuit:
+    source_slot: int,
+    target_slot: int,
+    label: str,
+) -> CircuitBlock:
     circuit = ReversibleCircuit()
-    h = roles["h"]
-
-    if boolean_strategy == "anf":
-        ch_compute = _scratch_xor_ch
-        ch_borrowed: tuple[int, ...] = ()
-    elif boolean_strategy == "low_multiplicative":
-        ch_compute = _scratch_xor_ch_low_multiplicative
-        ch_borrowed = (roles["g"],)
-    else:
-        raise ValueError(f"unknown boolean strategy {boolean_strategy!r}")
-
-    _compute_add_uncompute(
-        circuit,
-        lambda cc, e=roles["e"]: _scratch_xor_sigma(
-            cc, layout, e, (6, 11, 25)
-        ),
-        layout,
-        h,
-        region_kind="SIGMA1_ADD",
-    )
-    _compute_add_uncompute(
-        circuit,
-        lambda cc, e=roles["e"], f=roles["f"], g=roles["g"]: ch_compute(
-            cc, layout, e, f, g
-        ),
-        layout,
-        h,
-        region_kind="CH_ADD",
-        borrowed_slots=ch_borrowed,
-    )
+    _add32(circuit, layout, source_slot, target_slot)
     circuit.validate()
-    return circuit
+    return CircuitBlock(circuit, label)
 
 
-def _round_suffix(
+def _round_prefix_operations(
+    roles: dict[str, int],
+) -> tuple[CoherentOperation, ...]:
+    return (
+        StreamedSigmaAdd(
+            source_slot=roles["e"],
+            target_slot=roles["h"],
+            rotations=(6, 11, 25),
+        ),
+        StreamedChAdd(
+            x_slot=roles["e"],
+            y_slot=roles["f"],
+            z_slot=roles["g"],
+            target_slot=roles["h"],
+        ),
+    )
+
+
+def _round_suffix_operations(
     layout: D8Layout,
     roles: dict[str, int],
+    constant: int,
     round_index: int,
-    boolean_strategy: str,
-) -> ReversibleCircuit:
-    circuit = ReversibleCircuit()
-    h = roles["h"]
-
-    if boolean_strategy == "anf":
-        maj_compute = _scratch_xor_maj
-        maj_borrowed: tuple[int, ...] = ()
-    elif boolean_strategy == "low_multiplicative":
-        maj_compute = _scratch_xor_maj_low_multiplicative
-        maj_borrowed = (roles["b"], roles["c"])
-    else:
-        raise ValueError(f"unknown boolean strategy {boolean_strategy!r}")
-
-    _add_constant32(circuit, layout, h, K[round_index])
-    _add32(circuit, layout, h, roles["d"])
-
-    _compute_add_uncompute(
-        circuit,
-        lambda cc, a=roles["a"]: _scratch_xor_sigma(
-            cc, layout, a, (2, 13, 22)
+) -> tuple[CoherentOperation, ...]:
+    return (
+        DirtyConstantAdd(roles["h"], constant & MASK32),
+        _word_add_block(
+            layout,
+            roles["h"],
+            roles["d"],
+            f"ROUND_{round_index}_T1_TO_D",
         ),
-        layout,
-        h,
-        region_kind="SIGMA0_ADD",
-    )
-    _compute_add_uncompute(
-        circuit,
-        lambda cc, a=roles["a"], b=roles["b"], cslot=roles["c"]: maj_compute(
-            cc, layout, a, b, cslot
+        StreamedSigmaAdd(
+            source_slot=roles["a"],
+            target_slot=roles["h"],
+            rotations=(2, 13, 22),
         ),
-        layout,
-        h,
-        region_kind="MAJ_ADD",
-        borrowed_slots=maj_borrowed,
+        StreamedMajAdd(
+            x_slot=roles["a"],
+            y_slot=roles["b"],
+            z_slot=roles["c"],
+            target_slot=roles["h"],
+        ),
     )
-    circuit.validate()
-    return circuit
+
+
+def _schedule_operation(
+    layout: D8Layout,
+    schedule: CoherentScheduleDag,
+    round_index: int,
+    target_slot: int,
+) -> tuple[StreamedScheduleAdd, StreamedWordAddReport]:
+    report = streamed_word_add_report(layout, schedule, round_index)
+    if report.width_safe:
+        return StreamedScheduleAdd(round_index, target_slot), report
+
+    max_cache = min(2, layout.scratch_bits - 1)
+    if max_cache <= 0:
+        raise RuntimeError(
+            f"W[{round_index}] exceeds available dirty workspace and "
+            "no checkpoint bit is available"
+        )
+
+    plan = plan_depth_cut_checkpoints(
+        schedule,
+        round_index,
+        max_cache_bits=max_cache,
+        available_dirty_bits=report.available_dirty_bits,
+        candidate_limit=40,
+    )
+    if not plan.width_safe:
+        raise RuntimeError(
+            f"W[{round_index}] exceeds compact workspace after checkpointing: "
+            f"{plan.max_effective_dirty_bits} > {plan.available_dirty_bits}"
+        )
+
+    adjusted = StreamedWordAddReport(
+        round_index=round_index,
+        max_oracle_dirty_bits=plan.max_effective_dirty_bits,
+        available_dirty_bits=plan.available_dirty_bits,
+        streamed_bits=32,
+        clean_scratch_bits=len(plan.cached_nodes) + 1,
+        persistent_schedule_bits=0,
+    )
+    return (
+        StreamedScheduleAdd(
+            round_index,
+            target_slot,
+            checkpoint_plan=plan,
+        ),
+        adjusted,
+    )
 
 
 def compile_coherent_nonce_sha256(
@@ -186,16 +298,17 @@ def compile_coherent_nonce_sha256(
     layout: D8Layout | None = None,
     boolean_strategy: str = "low_multiplicative",
 ) -> CompiledCoherentSha256:
-    """Compile exact 64-round SHA-256 with one coherent 32-bit message word.
+    """Compile exact coherent-nonce SHA-256 with lifetime-shared workspace.
 
-    Dynamic schedule words are never materialized as persistent registers.
-    Each W[t] contribution is represented as a streamed schedule-add macro with
-    an exact X/CX/CCX decomposition. Scratch and carry are reusable across every
-    macro and ordinary SHA arithmetic block.
+    No schedule word, Sigma/Ch/Maj result, or constant-add scratch word is kept
+    live across semantic operations. Boolean words are streamed one bit at a
+    time through a clean temporary, consumed by the target addition, and
+    uncomputed immediately. The same compact workspace is then reused as the
+    Cuccaro carry lease or as transient schedule checkpoints.
     """
-    layout = layout or D8Layout(profile="coherent107")
-    if layout.profile != "coherent107":
-        raise ValueError("coherent nonce compilation requires coherent107")
+    layout = layout or D8Layout(profile="coherent97")
+    if not layout.is_coherent_nonce:
+        raise ValueError("coherent nonce compilation requires a coherent layout")
     if len(initial_state_words) != 8:
         raise ValueError("initial_state_words must contain eight words")
     if len(fixed_words) != 16:
@@ -217,55 +330,35 @@ def compile_coherent_nonce_sha256(
     reports: list[StreamedWordAddReport] = []
 
     for round_index in range(64):
-        if round_index not in dynamic_rounds:
-            # Preserve the strongest classical specialization wherever the
-            # coherent nonce provably cannot affect W[t].
-            static_round = ReversibleCircuit()
-            fused = (K[round_index] + fixed_schedule[round_index]) & MASK32
-            roles = _emit_round(
-                static_round,
+        operations.extend(_round_prefix_operations(roles))
+
+        if round_index in dynamic_rounds:
+            schedule_op, report = _schedule_operation(
+                layout,
+                schedule,
+                round_index,
+                roles["h"],
+            )
+            operations.append(schedule_op)
+            reports.append(report)
+            constant = K[round_index]
+        else:
+            constant = (
+                K[round_index] + fixed_schedule[round_index]
+            ) & MASK32
+
+        operations.extend(
+            _round_suffix_operations(
                 layout,
                 roles,
-                fused,
-                boolean_strategy,
-            )
-            static_round.validate()
-            operations.append(
-                CircuitBlock(static_round, f"ROUND_{round_index}_STATIC")
-            )
-            continue
-
-        prefix = _round_prefix(layout, roles, boolean_strategy)
-        operations.append(CircuitBlock(prefix, f"ROUND_{round_index}_PREFIX"))
-
-        report = streamed_word_add_report(layout, schedule, round_index)
-        if not report.width_safe:
-            raise RuntimeError(
-                f"W[{round_index}] exceeds coherent107 dirty workspace: "
-                f"{report.max_oracle_dirty_bits} > {report.available_dirty_bits}"
-            )
-        reports.append(report)
-        operations.append(
-            StreamedScheduleAdd(
-                round_index=round_index,
-                target_slot=roles["h"],
+                constant,
+                round_index,
             )
         )
-
-        suffix = _round_suffix(
-            layout,
-            roles,
-            round_index,
-            boolean_strategy,
-        )
-        operations.append(CircuitBlock(suffix, f"ROUND_{round_index}_SUFFIX"))
         roles = _shift_roles(roles)
 
-    feed_forward = ReversibleCircuit()
     for name, initial in zip("abcdefgh", initial_state_words):
-        _add_constant32(feed_forward, layout, roles[name], initial)
-    feed_forward.validate()
-    operations.append(CircuitBlock(feed_forward, "FEED_FORWARD"))
+        operations.append(DirtyConstantAdd(roles[name], initial))
 
     return CompiledCoherentSha256(
         operations=tuple(operations),
@@ -294,20 +387,83 @@ def coherent_initial_state(
     return state
 
 
-def _apply_schedule_macro(
+def _rotr(value: int, amount: int) -> int:
+    return (
+        (value >> amount) | (value << (32 - amount))
+    ) & MASK32
+
+
+def _apply_semantic_operation(
     compiled: CompiledCoherentSha256,
-    operation: StreamedScheduleAdd,
+    operation: CoherentOperation,
     state: list[int],
     schedule_words: tuple[int, ...],
 ) -> list[int]:
+    if isinstance(operation, CircuitBlock):
+        return simulate(operation.circuit, state)
+
     out = state[:]
-    schedule_word = schedule_words[operation.round_index]
-    current = compiled.layout.get_word(out, operation.target_slot)
-    updated = (
-        current + operation.direction * schedule_word
-    ) & MASK32
-    compiled.layout.set_word(out, operation.target_slot, updated)
-    return out
+    layout = compiled.layout
+
+    if isinstance(operation, StreamedScheduleAdd):
+        value = schedule_words[operation.round_index]
+        current = layout.get_word(out, operation.target_slot)
+        layout.set_word(
+            out,
+            operation.target_slot,
+            (current + operation.direction * value) & MASK32,
+        )
+        return out
+
+    if isinstance(operation, DirtyConstantAdd):
+        current = layout.get_word(out, operation.target_slot)
+        layout.set_word(
+            out,
+            operation.target_slot,
+            (current + operation.direction * operation.value) & MASK32,
+        )
+        return out
+
+    if isinstance(operation, StreamedSigmaAdd):
+        source = layout.get_word(out, operation.source_slot)
+        value = 0
+        for rotation in operation.rotations:
+            value ^= _rotr(source, rotation)
+        current = layout.get_word(out, operation.target_slot)
+        layout.set_word(
+            out,
+            operation.target_slot,
+            (current + operation.direction * value) & MASK32,
+        )
+        return out
+
+    if isinstance(operation, StreamedChAdd):
+        x = layout.get_word(out, operation.x_slot)
+        y = layout.get_word(out, operation.y_slot)
+        z = layout.get_word(out, operation.z_slot)
+        value = z ^ (x & y) ^ (x & z)
+        current = layout.get_word(out, operation.target_slot)
+        layout.set_word(
+            out,
+            operation.target_slot,
+            (current + operation.direction * value) & MASK32,
+        )
+        return out
+
+    if isinstance(operation, StreamedMajAdd):
+        x = layout.get_word(out, operation.x_slot)
+        y = layout.get_word(out, operation.y_slot)
+        z = layout.get_word(out, operation.z_slot)
+        value = (x & y) ^ (x & z) ^ (y & z)
+        current = layout.get_word(out, operation.target_slot)
+        layout.set_word(
+            out,
+            operation.target_slot,
+            (current + operation.direction * value) & MASK32,
+        )
+        return out
+
+    raise TypeError(f"unsupported coherent operation {type(operation)!r}")
 
 
 def simulate_coherent_operations(
@@ -318,9 +474,6 @@ def simulate_coherent_operations(
     selected = operations or compiled.operations
     out = state[:]
 
-    # The coherent nonce is preserved by contract, so the exact 64-word
-    # schedule is invariant for the whole forward or inverse execution. Compute
-    # it once and reuse it instead of reevaluating the DAG for every round.
     needs_schedule = any(
         isinstance(operation, StreamedScheduleAdd)
         for operation in selected
@@ -332,15 +485,12 @@ def simulate_coherent_operations(
     )
 
     for operation in selected:
-        if isinstance(operation, CircuitBlock):
-            out = simulate(operation.circuit, out)
-        else:
-            out = _apply_schedule_macro(
-                compiled,
-                operation,
-                out,
-                schedule_words,
-            )
+        out = _apply_semantic_operation(
+            compiled,
+            operation,
+            out,
+            schedule_words,
+        )
     return out
 
 
@@ -391,20 +541,84 @@ def verify_compiled_coherent_sha256(
     return actual
 
 
+def lower_coherent_operation(
+    compiled: CompiledCoherentSha256,
+    operation: CoherentOperation,
+) -> ReversibleCircuit:
+    """Lower one semantic operation to exact primitive reversible gates."""
+    if isinstance(operation, CircuitBlock):
+        return operation.circuit
+
+    layout = compiled.layout
+    temp = layout.scratch_bit(0)
+    borrowed = _borrowed_pool(layout, temp)
+    circuit = ReversibleCircuit()
+
+    if isinstance(operation, StreamedScheduleAdd):
+        if operation.checkpoint_plan is None:
+            emit_streamed_schedule_add(
+                circuit,
+                layout,
+                compiled.schedule,
+                operation.round_index,
+                operation.target_slot,
+            )
+        else:
+            emit_streamed_schedule_add_checkpointed(
+                circuit,
+                layout,
+                compiled.schedule,
+                operation.round_index,
+                operation.target_slot,
+                plan=operation.checkpoint_plan,
+            )
+    elif isinstance(operation, DirtyConstantAdd):
+        emit_constant_add_dirty(
+            circuit,
+            _word_bits(layout, operation.target_slot),
+            operation.value,
+            borrowed,
+        )
+    elif isinstance(operation, StreamedSigmaAdd):
+        emit_sigma_add_streamed(
+            circuit,
+            _word_bits(layout, operation.source_slot),
+            _word_bits(layout, operation.target_slot),
+            rotations=operation.rotations,
+            temp=temp,
+            borrowed=borrowed,
+        )
+    elif isinstance(operation, StreamedChAdd):
+        emit_ch_add_streamed(
+            circuit,
+            _word_bits(layout, operation.x_slot),
+            _word_bits(layout, operation.y_slot),
+            _word_bits(layout, operation.z_slot),
+            _word_bits(layout, operation.target_slot),
+            temp,
+            borrowed,
+        )
+    elif isinstance(operation, StreamedMajAdd):
+        emit_maj_add_streamed(
+            circuit,
+            _word_bits(layout, operation.x_slot),
+            _word_bits(layout, operation.y_slot),
+            _word_bits(layout, operation.z_slot),
+            _word_bits(layout, operation.target_slot),
+            temp,
+            borrowed,
+        )
+    else:
+        raise TypeError(f"unsupported coherent operation {type(operation)!r}")
+
+    circuit.validate()
+    if getattr(operation, "direction", 1) < 0:
+        return circuit.inverse()
+    return circuit
+
+
 def lower_streamed_schedule_operation(
     compiled: CompiledCoherentSha256,
     operation: StreamedScheduleAdd,
 ) -> ReversibleCircuit:
-    """Lower one streamed schedule macro to exact primitive reversible gates."""
-    circuit = ReversibleCircuit()
-    emit_streamed_schedule_add(
-        circuit,
-        compiled.layout,
-        compiled.schedule,
-        operation.round_index,
-        operation.target_slot,
-    )
-    circuit.validate()
-    if operation.direction < 0:
-        return circuit.inverse()
-    return circuit
+    return lower_coherent_operation(compiled, operation)
