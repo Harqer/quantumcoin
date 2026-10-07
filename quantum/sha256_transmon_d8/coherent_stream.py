@@ -587,13 +587,12 @@ def emit_streamed_schedule_add(
     """Add coherent W[t] directly into one SHA state word.
 
     No W[t] register is retained. For each bit i:
-      1. compute W[t][i] into scratch[i];
+      1. compute W[t][i] into one clean streamed temporary;
       2. apply a controlled +2**i to the target word;
-      3. uncompute scratch[i] to |0>.
+      3. uncompute the same temporary to |0>.
 
-    All other state/scratch/carry wires are only borrowed dirty workspace and
-    are restored inside each primitive invocation. Peak clean workspace remains
-    the existing 32-bit scratch word plus the existing carry bit.
+    All other state/workspace wires are borrowed dirty and restored inside each
+    primitive invocation. No schedule word persists across the operation.
     """
     if not layout.is_coherent_nonce:
         raise ValueError("streamed coherent lowering requires a coherent nonce layout")
@@ -604,7 +603,7 @@ def emit_streamed_schedule_add(
     if not report.width_safe:
         raise RuntimeError(
             f"W[{round_index}] needs {report.max_oracle_dirty_bits} dirty bits "
-            f"but coherent107 exposes {report.available_dirty_bits}"
+            f"but the selected coherent layout exposes {report.available_dirty_bits}"
         )
 
     nonce = tuple(layout.nonce_bit(bit) for bit in range(32))
@@ -677,10 +676,13 @@ def emit_streamed_schedule_add_checkpointed(
     if selected.round_index != round_index:
         raise ValueError("checkpoint plan round does not match requested round")
     if not selected.width_safe:
-        raise RuntimeError("checkpoint plan exceeds coherent107 dirty workspace")
+        raise RuntimeError("checkpoint plan exceeds selected coherent-layout dirty workspace")
 
     nonce = tuple(layout.nonce_bit(bit) for bit in range(32))
-    scratch = tuple(layout.scratch_bit(bit) for bit in range(32))
+    scratch = tuple(
+        layout.scratch_bit(bit)
+        for bit in range(layout.scratch_bits)
+    )
     target = tuple(layout.word_bit(target_slot, bit) for bit in range(32))
     state = _state_bits(layout)
 
