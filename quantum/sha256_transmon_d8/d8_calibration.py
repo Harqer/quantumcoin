@@ -14,6 +14,8 @@ class TransitionCalibration:
     pi_duration_s: float
     amplitude: float
     characterization_id: str
+    basis_swap_verified: bool
+    coherent_phase_characterized: bool = False
     phase_rad: float = 0.0
     width_fraction: float = 0.25
     zero_at_edges: bool = True
@@ -29,11 +31,22 @@ class TransitionCalibration:
             raise ValueError("width_fraction must be in (0, 1]")
         if not self.characterization_id.strip():
             raise ValueError("characterization_id must be non-empty")
+        if not self.basis_swap_verified:
+            raise ValueError(
+                "transition calibration must verify the intended adjacent-level "
+                "basis transfer before it can be used by fixed-message SHA"
+            )
 
 
 @dataclass(frozen=True)
 class D8CarrierCalibration:
-    """Complete measured |0>..|7> adjacent-transition model for one transmon."""
+    """Complete measured |0>..|7> adjacent-transition model for one transmon.
+
+    Fixed-message SHA requires verified computational-basis transfer and bounded
+    leakage, not phase-perfect SU(8), because the state follows one basis
+    trajectory. Coherent-superposition workloads additionally require phase
+    characterization for every transition used.
+    """
 
     physical_carrier: int
     transitions: Mapping[int, TransitionCalibration]
@@ -52,6 +65,13 @@ class D8CarrierCalibration:
                 raise ValueError("transition calibration carrier mismatch")
             if calibration.lower_level != level:
                 raise ValueError("transition calibration level mismatch")
+
+    @property
+    def coherent_ready(self) -> bool:
+        return all(
+            calibration.coherent_phase_characterized
+            for calibration in self.transitions.values()
+        )
 
 
 @dataclass(frozen=True)
