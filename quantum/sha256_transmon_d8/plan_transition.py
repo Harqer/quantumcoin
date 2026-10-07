@@ -41,7 +41,13 @@ def main() -> None:
         print(f"  {frequency:.12f}")
 
     midpoint = plan.frequencies_hz[len(plan.frequencies_hz) // 2]
-    sequence = build_spectroscopy_sequence(device, plan, midpoint)
+    try:
+        sequence = build_spectroscopy_sequence(device, plan, midpoint)
+    except RuntimeError as exc:
+        print(f"midpoint_openpulse_unavailable={exc}")
+        print("submitted=false")
+        return
+
     print("midpoint_openpulse=")
     print(sequence.to_ir())
     print("submitted=false")
