@@ -126,13 +126,26 @@ def run_qpu_sha256(message: bytes) -> str:
         message, capabilities
     )
 
+    digest_logical_carriers = tuple(
+        sorted(
+            {
+                compiled.layout.transmon_of(
+                    compiled.layout.word_bit(compiled.final_roles[name], bit)
+                )
+                for name in "abcdefgh"
+                for bit in range(32)
+            }
+        )
+    )
     requirement_report = analyze_backend_requirements(
         carrier_program,
         placement,
         snapshot,
         d8_calibrations=None,
+        d8_coherent_locals=None,
         d8_entanglers=None,
-        readout_characterized=False,
+        d8_readout=None,
+        readout_logical_carriers=digest_logical_carriers,
     )
     if not requirement_report.executable:
         raise CepheusExecutionUnavailable(
