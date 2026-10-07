@@ -109,6 +109,7 @@ def lower_complete_sha_program(
     *,
     device,
     shots: int,
+    d8_calibrations: D8CalibrationSet | None = None,
 ) -> LoweredCepheusProgram:
     """Lower the full carrier program using only live AWS Braket calibrations."""
     if shots <= 0:
@@ -117,7 +118,14 @@ def lower_complete_sha_program(
     body: list[str] = []
     for index, operation in enumerate(carrier_program.operations):
         try:
-            body.append(_require_exact_live_realization(operation, placement, device))
+            body.append(
+                _require_exact_live_realization(
+                    operation,
+                    placement,
+                    device,
+                    d8_calibrations,
+                )
+            )
         except D8LoweringUnavailable as exc:
             raise D8LoweringUnavailable(
                 f"carrier operation {index} cannot be exactly lowered from the live "
@@ -138,6 +146,7 @@ def prepare_complete_sha_program(
     *,
     device,
     shots: int = 10,
+    d8_calibrations: D8CalibrationSet | None = None,
 ) -> LoweredCepheusProgram:
     """Prepare one complete AWS Braket OpenPulse program from live device calibrations."""
     return lower_complete_sha_program(
@@ -145,6 +154,7 @@ def prepare_complete_sha_program(
         placement,
         device=device,
         shots=shots,
+        d8_calibrations=d8_calibrations,
     )
 
 
