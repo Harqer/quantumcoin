@@ -8,7 +8,7 @@ from .d8_local_synthesis import AdjacentLevelSwap
 
 @dataclass(frozen=True)
 class SpectroscopyPlan:
-    """Non-executing plan for one adjacent transmon transition scan."""
+    """Non-submitting plan for one adjacent transmon transition scan."""
 
     physical_carrier: int
     lower_level: int
@@ -17,6 +17,9 @@ class SpectroscopyPlan:
     points: int
     pulse_duration_s: float
     amplitude: float
+    width_fraction: float = 0.25
+    zero_at_edges: bool = True
+    multilevel_readout_characterization_id: str | None = None
 
     def __post_init__(self) -> None:
         if not 0 <= self.lower_level < 7:
@@ -29,6 +32,8 @@ class SpectroscopyPlan:
             raise ValueError("points must be at least 3")
         if self.pulse_duration_s <= 0:
             raise ValueError("pulse_duration_s must be positive")
+        if not 0 < self.width_fraction <= 1:
+            raise ValueError("width_fraction must be in (0, 1]")
 
     @property
     def frequencies_hz(self) -> tuple[float, ...]:
@@ -38,12 +43,8 @@ class SpectroscopyPlan:
 
 
 def require_braket_frequency_retuning(device) -> None:
-    """Require the live OpenPulse features used by d=8 characterization."""
-    pulse = device.properties.pulse
-    if getattr(pulse, "supportsDynamicFrames", None):
-        return
-
-    functions = getattr(pulse, "supportedFunctions", {}) or {}
+    """Require the live OpenPulse functions used by d=8 characterization."""
+    functions = getattr(device.properties.pulse, "supportedFunctions", {}) or {}
     required = {"set_frequency", "set_phase", "play", "capture_v0"}
     missing = sorted(required - set(functions))
     if missing:
@@ -53,28 +54,84 @@ def require_braket_frequency_retuning(device) -> None:
         )
 
 
-def build_spectroscopy_sequence(device, plan: SpectroscopyPlan, frequency_hz: float):
-    """Build but never submit one Braket PulseSequence spectroscopy point."""
+def _append_transition_pi(sequence, drive, calibration: TransitionCalibration):
+    from braket.pulse import GaussianWaveform
+
+    waveform = GaussianWaveform(
+        calibration.pi_duration_s,
+        calibration.pi_duration_s * calibration.width_fraction,
+        calibration.amplitude,
+        calibration.zero_at_edges,
+    )
+    return (
+        sequence
+        .set_frequency(drive, calibration.frequency_hz)
+        .set_phase(drive, calibration.phase_rad)
+        .play(drive, waveform)
+    )
+
+
+def build_spectroscopy_sequence(
+    device,
+    plan: SpectroscopyPlan,
+    frequency_hz: float,
+    *,
+    preparation_calibrations: D8CalibrationSet | None = None,
+):
+    """Build one spectroscopy point without submitting it.
+
+    For transitions above f01, the transmon must first be prepared in the lower
+    level. Interpreting capture_v0 above the qubit subspace additionally requires
+    an explicitly characterized multilevel readout/mapping.
+    """
     require_braket_frequency_retuning(device)
 
-    from braket.pulse import ConstantWaveform, PulseSequence
+    from braket.pulse import GaussianWaveform, PulseSequence
 
     drive = device.frames[f"Transmon_{plan.physical_carrier}_charge_tx"]
     readout = device.frames[f"Transmon_{plan.physical_carrier}_readout_rx"]
-
     original_frequency = float(drive.frequency)
     original_phase = float(drive.phase)
-    waveform = ConstantWaveform(plan.pulse_duration_s, complex(plan.amplitude, 0.0))
 
-    return (
-        PulseSequence()
+    sequence = PulseSequence()
+
+    if plan.lower_level > 0:
+        if preparation_calibrations is None:
+            raise RuntimeError(
+                f"transition f{plan.lower_level}{plan.lower_level + 1} requires "
+                f"measured preparation pulses for |0> through |{plan.lower_level}>"
+            )
+        if not plan.multilevel_readout_characterization_id:
+            raise RuntimeError(
+                f"transition f{plan.lower_level}{plan.lower_level + 1} requires "
+                "validated multilevel readout/mapping before capture_v0 can be interpreted"
+            )
+        for lower in range(plan.lower_level):
+            sequence = _append_transition_pi(
+                sequence,
+                drive,
+                preparation_calibrations.require_transition(
+                    plan.physical_carrier,
+                    lower,
+                ),
+            )
+
+    probe = GaussianWaveform(
+        plan.pulse_duration_s,
+        plan.pulse_duration_s * plan.width_fraction,
+        plan.amplitude,
+        plan.zero_at_edges,
+    )
+    sequence = (
+        sequence
         .set_frequency(drive, frequency_hz)
         .set_phase(drive, 0.0)
-        .play(drive, waveform)
+        .play(drive, probe)
         .set_frequency(drive, original_frequency)
         .set_phase(drive, original_phase)
         .capture_v0(readout)
     )
+    return sequence
 
 
 def transition_swap_openpulse(
@@ -83,7 +140,7 @@ def transition_swap_openpulse(
     *,
     waveform_name: str,
 ) -> str:
-    """Emit an exact measured pi-pulse body for one adjacent-level swap."""
+    """Emit the measured shaped pi pulse for one adjacent-level swap."""
     require_braket_frequency_retuning(device)
 
     physical = calibration.physical_carrier
@@ -93,12 +150,15 @@ def transition_swap_openpulse(
     original_phase = float(frame.phase)
 
     duration_ns = calibration.pi_duration_s * 1e9
+    width_ns = duration_ns * calibration.width_fraction
     amplitude = calibration.amplitude
     phase = calibration.phase_rad
+    zero = str(calibration.zero_at_edges).lower()
 
     return "\n".join(
         (
-            f"waveform {waveform_name} = constant({duration_ns:.12g}ns, {amplitude:.17g});",
+            f"waveform {waveform_name} = gaussian({duration_ns:.12g}ns, "
+            f"{width_ns:.12g}ns, {amplitude:.17g}, {zero});",
             f"set_frequency({frame_name}, {calibration.frequency_hz:.17g});",
             f"set_phase({frame_name}, {phase:.17g});",
             f"play({frame_name}, {waveform_name});",
