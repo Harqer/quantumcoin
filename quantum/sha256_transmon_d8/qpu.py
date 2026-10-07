@@ -74,8 +74,14 @@ def run_qpu_sha256(message: bytes) -> str:
             "boto3 is required to query the live Cepheus device"
         ) from exc
 
-    client = boto3.client("braket", region_name="us-west-1")
-    response = client.get_device(deviceArn=CEPHEUS_ARN)
+    try:
+        client = boto3.client("braket", region_name="us-west-1")
+        response = client.get_device(deviceArn=CEPHEUS_ARN)
+    except Exception as exc:
+        raise CepheusExecutionUnavailable(
+            "could not query the live Cepheus device; no QPU task was submitted"
+        ) from exc
+
     if response.get("deviceStatus") != "ONLINE":
         raise CepheusExecutionUnavailable(
             f"Cepheus is not online: {response.get('deviceStatus')}"
