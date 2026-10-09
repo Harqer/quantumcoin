@@ -22,6 +22,10 @@ class FusedPairOperation:
     def carriers(self) -> tuple[int, int]:
         return self.permutation.carriers
 
+    @property
+    def gate_count(self) -> int:
+        return self.gate_stop - self.gate_start
+
 
 @dataclass(frozen=True)
 class FusedCarrierProgram:
