@@ -8,6 +8,7 @@ import pytest
 
 from quantum.sha256_transmon_d8.checkpoint_quantum import (
     emit_checkpointed_streamed_word,
+    emit_phase_aware_checkpointed_word,
     prepare_checkpointed_word,
 )
 from quantum.sha256_transmon_d8.coherent_dag import select_schedule_dag
@@ -161,3 +162,140 @@ def test_checkpointed_budget_rejects_before_publishing_completion(checkpoint_cas
         emit_checkpointed_streamed_word(
             compiled, 0, lambda *_: None, max_total_gates=0
         )
+
+
+
+def _selected_cached_bit(compiled, plan):
+    """Select an actual W[18] output depending on the live cached DAG node."""
+    dag = compiled.schedule.dag
+    ancestor = plan.cached_nodes[0]
+
+    def depends_on(node):
+        pending = [node]
+        visited = set()
+        while pending:
+            index = pending.pop()
+            if index == ancestor:
+                return True
+            if index in visited:
+                continue
+            visited.add(index)
+            pending.extend(dag.nodes[index].inputs)
+        return False
+
+    bits = [
+        i for i, root in enumerate(compiled.schedule.words[18])
+        if depends_on(root)
+    ]
+    assert bits, "the selected checkpoint must influence a real SHA output"
+    return max(bits)
+
+
+def test_cached_bit_phase_aware_optimization_preserves_cache_lifetime(checkpoint_case):
+    pytest.importorskip("pyzx")
+    compiled, fixed, plan = checkpoint_case
+    layout = compiled.layout
+    selected_bit = _selected_cached_bit(compiled, plan)
+    cache_wire = layout.scratch_bit(0)
+    nonce = 0xBADC0DE1
+    state = layout.empty_state()
+    for slot in range(8):
+        layout.set_word(state, slot, (0x13579BDF + slot * 0x11111111) & 0xFFFFFFFF)
+    layout.set_nonce(state, nonce)
+    original = state[:]
+    forward_order = []
+    selected_phases = []
+
+    def consume(kind, identifier, fragment, quantum):
+        nonlocal state
+        forward_order.append((kind, identifier))
+        if kind != "BIT":
+            assert quantum is None, "cache setup/cleanup must not be optimized"
+        elif identifier == selected_bit:
+            assert quantum is not None
+            assert quantum.source_gate_count == len(fragment.gates)
+            assert quantum.logical_width == layout.logical_bit_capacity
+            assert quantum.operation_label == f"W[18]_CACHED_BIT[{selected_bit}]"
+            assert any(
+                cache_wire in gate.qubits for gate in fragment.gates
+            ), "selected BIT must actually consume the live checkpoint"
+            selected_phases.append(quantum.global_phase_rad)
+        else:
+            assert quantum is None
+        state = simulate(fragment, state)
+
+    report = emit_phase_aware_checkpointed_word(
+        compiled, 0, consume, selected_bits=(selected_bit,),
+        max_optimized_source_gates=8192,
+        max_optimized_total_gates=8192,
+        max_windows_per_bit=2, max_qubits=3, max_window_gates=8,
+    )
+    assert report.completed_bits == 32
+    assert report.selected_bits == (selected_bit,)
+    assert report.selected_source_gates > 0
+    assert report.source.cache_setups == report.source.cache_teardowns == 1
+    assert len(report.selected_candidate_digest) == 64
+    assert report.verified_global_phase_rad == pytest.approx(
+        sum(selected_phases), abs=1e-8
+    )
+    assert forward_order[0] == ("CACHE_SETUP", plan.cached_nodes[0])
+    assert forward_order[-1] == ("CACHE_CLEANUP", plan.cached_nodes[0])
+    assert forward_order[1:-1] == [("BIT", i) for i in range(32)]
+    expected = evaluate_schedule(fixed, 3, nonce)[18]
+    assert layout.get_word(state, 0) == (
+        layout.get_word(original, 0) + expected
+    ) & 0xFFFFFFFF
+    layout.assert_clean_workspace(state)
+
+    inverse = replace(compiled, operations=(compiled.operations[0].inverse(),))
+    inverse_order = []
+    def inverse_sink(kind, identifier, fragment, quantum):
+        nonlocal state
+        inverse_order.append((kind, identifier))
+        if kind != "BIT" or identifier != selected_bit:
+            assert quantum is None
+        state = simulate(fragment, state)
+
+    inverse_report = emit_phase_aware_checkpointed_word(
+        inverse, 0, inverse_sink, selected_bits=(selected_bit,),
+        max_optimized_source_gates=8192,
+        max_optimized_total_gates=8192,
+        max_windows_per_bit=2, max_qubits=3, max_window_gates=8,
+    )
+    assert inverse_report.selected_bits == (selected_bit,)
+    assert inverse_order[0] == ("CACHE_SETUP", plan.cached_nodes[0])
+    assert inverse_order[-1] == ("CACHE_CLEANUP", plan.cached_nodes[0])
+    assert inverse_order[1:-1] == [
+        ("BIT", i) for i in range(31, -1, -1)
+    ]
+    assert state == original
+
+
+def test_phase_aware_cached_word_rejects_invalid_and_overbudget_selections(
+    checkpoint_case,
+):
+    compiled, _, _ = checkpoint_case
+    for selected in ((31, 31), (-1,), (32,), (True,)):
+        with pytest.raises(ValueError, match="selected_bits"):
+            emit_phase_aware_checkpointed_word(
+                compiled, 0, lambda *_: None, selected_bits=selected
+            )
+    with pytest.raises(TypeError, match="selected_bits"):
+        emit_phase_aware_checkpointed_word(
+            compiled, 0, lambda *_: None, selected_bits=[31]
+        )
+    with pytest.raises(ValueError, match="max_optimized_source_gates"):
+        emit_phase_aware_checkpointed_word(
+            compiled, 0, lambda *_: None, max_optimized_source_gates=0
+        )
+    selected_bit = _selected_cached_bit(compiled, compiled.operations[0].checkpoint_plan)
+    seen = []
+    with pytest.raises(StreamedGateBudgetExceeded, match="phase-aware"):
+        emit_phase_aware_checkpointed_word(
+            compiled, 0,
+            lambda kind, i, *_: seen.append((kind, i)),
+            selected_bits=(selected_bit,), max_optimized_source_gates=1,
+        )
+    assert not any(
+        kind == "CACHE_CLEANUP" for kind, _ in seen
+    ), "a rejected partial schedule must not issue a completion cleanup"
