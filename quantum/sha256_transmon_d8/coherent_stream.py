@@ -553,6 +553,92 @@ def emit_node_xor(
     )
 
 
+def _emit_no_ancilla_add(
+    circuit: ReversibleCircuit,
+    source: tuple[int, ...],
+    target: tuple[int, ...],
+) -> None:
+    """Exact same-width reversible source-register addition, no clean ancilla.
+
+    Implements Takahashi/Kunihiro's 2005 linear-size reversible full adder
+    following Gidney's published reference implementation (2017),
+    src/dirty_period_finding/decompositions/addition_rules.py.
+
+    (source, target) -> (source, target + source mod 2**n) for ALL
+    arbitrary initial source/target basis states. The source register is
+    restored even though it acts as temporary carry workspace.
+    """
+    if len(source) != len(target) or not source:
+        raise ValueError("same-width adder requires nonempty equal registers")
+    if len(set(source + target)) != 2 * len(source):
+        raise ValueError("adder registers must not alias")
+    carry = source[-1]
+    low = source[:-1]
+    for q in reversed(low + target):
+        circuit.cx(carry, q)
+    for index in range(len(target) - 1):
+        circuit.cx(carry, target[index])
+        circuit.ccx(target[index], carry, source[index])
+        circuit.ccx(target[index], source[index], carry)
+    circuit.cx(carry, target[-1])
+    for index in range(len(target) - 2, -1, -1):
+        circuit.ccx(target[index], source[index], carry)
+        circuit.ccx(target[index], carry, source[index])
+        circuit.cx(source[index], target[index])
+    for q in low + target:
+        circuit.cx(carry, q)
+
+
+def _emit_full_dirty_controlled_increment(
+    circuit: ReversibleCircuit,
+    bits: tuple[int, ...],
+    start: int,
+    control: int,
+    borrowed: tuple[int, ...],
+) -> bool:
+    """Linear-size whole-suffix increment using arbitrary dirty registers.
+
+    The extended word (control, bits[start:]) is unconditionally incremented
+    and then its low control bit is inverted. This increments the original
+    word precisely iff control was 1, returning control unchanged.
+
+    For the unconditional increment, Gidney's two-subtraction identity is:
+        target -= dirty
+        dirty ^= ALL_ONES
+        target -= dirty
+        dirty ^= ALL_ONES
+    Since dirty + ~dirty == -1 mod 2**width, target ends as target + 1.
+    This is a full-register quantum permutation valid for arbitrary dirty
+    inputs; NO ancilla clean-state assumption, measurement, or reset.
+
+    Requires the same number of dirty source bits as extended word bits.
+    For short suffixes use the existing exact MCX controlled increment,
+    which has lower fixed overhead.
+    """
+    suffix = bits[start:]
+    if len(suffix) < 8:
+        return False
+    expanded = (control,) + suffix
+    forbidden = set(expanded)
+    compatible = tuple(dict.fromkeys(
+        q for q in borrowed if q not in forbidden
+    ))
+    if len(compatible) < len(expanded):
+        return False
+    dirty = compatible[:len(expanded)]
+    add = ReversibleCircuit()
+    _emit_no_ancilla_add(add, dirty, expanded)
+    subtract_gates = add.inverse().gates
+    circuit.extend(subtract_gates)
+    for q in dirty:
+        circuit.x(q)
+    circuit.extend(subtract_gates)
+    for q in dirty:
+        circuit.x(q)
+    circuit.x(control)
+    return True
+
+
 def _emit_conditional_increment(
     circuit: ReversibleCircuit,
     bits: tuple[int, ...],
@@ -565,6 +651,14 @@ def _emit_conditional_increment(
         raise ValueError("increment start out of range")
     if control in bits:
         raise ValueError("increment control cannot alias target word")
+
+    # Whole-register linear arithmetic wins for long suffixes with enough
+    # truly disjoint dirty registers; otherwise retain the previous exact
+    # descending-carry network and its scarce-ancilla fallback.
+    if _emit_full_dirty_controlled_increment(
+        circuit, bits, start, control, borrowed
+    ):
+        return
 
     for target_index in range(len(bits) - 1, start, -1):
         controls = (control,) + bits[start:target_index]
