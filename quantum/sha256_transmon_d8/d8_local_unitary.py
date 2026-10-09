@@ -21,6 +21,8 @@ class D8LocalPermutationCalibration:
     process_fidelity: float
     max_leakage: float
     characterized_at: str
+    duration_s: float
+    synchronization_verified: bool
     unitary_characterized: bool = True
 
     def __post_init__(self) -> None:
@@ -36,6 +38,12 @@ class D8LocalPermutationCalibration:
             raise ValueError("process_fidelity must be in [0, 1]")
         if not 0.0 <= self.max_leakage <= 1.0:
             raise ValueError("max_leakage must be in [0, 1]")
+        if self.duration_s <= 0:
+            raise ValueError("duration_s must be positive")
+        if not self.synchronization_verified:
+            raise ValueError(
+                "local d=8 pulse must have verified frame synchronization"
+            )
         if not self.unitary_characterized:
             raise ValueError(
                 "local d=8 permutation calibration must characterize the full unitary"
