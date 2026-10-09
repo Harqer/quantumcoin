@@ -154,6 +154,12 @@ identities; the digest is not a formal quantum-equivalence proof.
         max_fragment_gates=16384)
     assert report.completed_bits == 32
 
+A second `max_total_gates` CPU-work cap (default 2,000,000) prevents
+unbounded aggregate emissions, independent of the 16,384-gate per-bit
+memory guard. All supported `ReversibleCircuit` insertion APIs enforce the
+fragment cap. Exact region checks require contiguous compute/consume/uncompute
+gate coverage, and malformed fragment lifetimes are rejected.
+
 `consume` is an application-supplied CPU-only staging callback; partial
 emissions must be treated as uncommitted. A gate-budget overflow,
 unsafe checkpoint cache, invalid wire, or failing callback produces
