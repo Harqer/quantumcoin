@@ -13,10 +13,16 @@ class FusedPairOperation:
     permutation: TwoCarrierPermutation64
     gate_start: int
     gate_stop: int
+    absorbed_operation_count: int
+    absorbed_source_gate_count: int
 
     def __post_init__(self) -> None:
         if not 0 <= self.gate_start < self.gate_stop:
             raise ValueError("invalid fused source gate span")
+        if self.absorbed_operation_count <= 0:
+            raise ValueError("absorbed_operation_count must be positive")
+        if self.absorbed_source_gate_count <= 0:
+            raise ValueError("absorbed_source_gate_count must be positive")
 
     @property
     def carriers(self) -> tuple[int, int]:
@@ -33,6 +39,7 @@ class FusedCarrierProgram:
     source_gate_count: int
     eliminated_local_identity_gates: int = 0
     cancelled_cross_carrier_gates: int = 0
+    input_operation_count: int = 0
 
 
 def _compose(first: tuple[int, ...], second: tuple[int, ...]) -> tuple[int, ...]:
@@ -164,6 +171,15 @@ def fuse_two_carrier_regions(program: CarrierProgram) -> FusedCarrierProgram:
                 ),
                 gate_start=min(starts),
                 gate_stop=max(stops),
+                absorbed_operation_count=len(region),
+                absorbed_source_gate_count=sum(
+                    (
+                        op.gate_count
+                        if isinstance(op, LocalPermutation8)
+                        else 1
+                    )
+                    for op in region
+                ),
             )
         )
         i = j
@@ -173,4 +189,5 @@ def fuse_two_carrier_regions(program: CarrierProgram) -> FusedCarrierProgram:
         source_gate_count=program.source_gate_count,
         eliminated_local_identity_gates=program.eliminated_local_identity_gates,
         cancelled_cross_carrier_gates=program.cancelled_cross_carrier_gates,
+        input_operation_count=len(program.operations),
     )
