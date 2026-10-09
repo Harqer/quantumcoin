@@ -17,6 +17,7 @@ on:
       - "tests/test_sha256_streaming_quantum.py"
       - "tests/test_sha256_checkpoint_quantum.py"
       - "tests/test_sha256_logical_resource_accounting.py"
+      - "tests/test_sha256_arithmetic_ladders.py"
       - "tests/test_sha256_qldpc_resource.py"
       - ".github/workflows/quantum-optimizer.yml"
   pull_request:
@@ -27,6 +28,7 @@ on:
       - "tests/test_sha256_streaming_quantum.py"
       - "tests/test_sha256_checkpoint_quantum.py"
       - "tests/test_sha256_logical_resource_accounting.py"
+      - "tests/test_sha256_arithmetic_ladders.py"
       - "tests/test_sha256_qldpc_resource.py"
       - ".github/workflows/quantum-optimizer.yml"
   workflow_dispatch:
@@ -47,4 +49,4 @@ jobs:
       - name: Install official 2026 optimizer releases
         run: python -m pip install --disable-pip-version-check pytest numpy pyzx==0.10.7 pytket==2.18.5
       - name: Exact quantum optimization and Caltech syndrome schedule
-        run: python -m pytest -q --capture=tee-sys tests/test_sha256_zx_optimization.py tests/test_sha256_qldpc_resource.py tests/test_sha256_phase_aware_logical.py tests/test_sha256_streaming_quantum.py tests/test_sha256_checkpoint_quantum.py tests/test_sha256_logical_resource_accounting.py
+        run: python -m pytest -q --capture=tee-sys tests/test_sha256_zx_optimization.py tests/test_sha256_qldpc_resource.py tests/test_sha256_phase_aware_logical.py tests/test_sha256_streaming_quantum.py tests/test_sha256_checkpoint_quantum.py tests/test_sha256_logical_resource_accounting.py tests/test_sha256_arithmetic_ladders.py
