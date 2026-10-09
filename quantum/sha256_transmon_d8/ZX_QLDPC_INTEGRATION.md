@@ -173,3 +173,36 @@ are preserved by the exact primitive identities, not by measurement.
 
 Full-word logical PyZX optimization, separate checkpoint-cache
 lifetimes, and physical d=8/native CZ scheduling remain unimplemented.
+
+## Round 5 — bounded phase-aware 32-bit streamed optimization
+
+`streaming_quantum.emit_phase_aware_streamed_word` reuses the verified
+complete 32-bit emitter. It optimizes explicitly selected bit lifetimes
+using PyZX/pytket windows, preserves unselected original reversible
+fragments, and produces a cumulative phase-aware report only once all 32
+bit operations have been processed in exact forward/inverse order.
+
+    from quantum.sha256_transmon_d8.streaming_quantum import emit_phase_aware_streamed_word
+    report = emit_phase_aware_streamed_word(compiled, operation_index,
+        consume=cpu_staging_callback, selected_bits=(30, 31))
+    assert report.completed_bits == 32
+
+The callback receives (bit_index, original_reversible_fragment,
+verified_phase_aware_logical_block_or_None). `None` means the original
+fragment is kept unchanged. Accepted Clifford+T replacements retain
+independent complete-unitary evidence; `verified_global_phase_rad` is
+the sum of per-bit source-to-candidate phase scalars modulo 2*pi.
+OpenQASM 2 does not encode this scalar. It MUST be respected by a future
+controlled-operation compiler. The report also retains the all-bit
+source gate digest and the selected QASM content digest.
+
+A fragment emission cap and separate per-selected-bit / aggregate
+optimization gate budgets avoid large eager QASM expansions. On any
+error there is NO completed report; consumers must stage transactionally
+and discard previously staged prefixes. Nothing connects to QPU hardware.
+
+Passing the full SHA arithmetic test with selected bits 30 and 31
+does NOT establish safe unrestricted ZX optimization of all late dynamic
+schedule bits. Other bit selections and cache-sharing schedules remain
+bounded or fail closed. Full logical-resource depth and physical d=8
+mapping remain separate pending phases.
