@@ -76,6 +76,7 @@ def _lower_routed_operation(
     d8_local_permutations: D8LocalPermutationSet | None,
     d8_coherent_locals: D8LocalCoherentSet | None,
     d8_entanglers: D8EntanglerSet | None,
+    device_fingerprint: str,
 ) -> str:
     if isinstance(operation, RoutedLocalPermutation):
         physical = operation.physical_carrier
