@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .d8_cross_synthesis import TwoCarrierPermutation64
+from .ir import Gate, ReversibleCircuit, simulate
+from .layout import D8Layout
 
 
 @dataclass(frozen=True)
@@ -40,4 +42,14 @@ def _support(operation: object) -> tuple[int, ...]:
         return operation.carriers
     if isinstance(operation, CrossCarrierGate):
         return operation.carriers
+    raise TypeError("unsupported carrier operation")
+
+
+def _span(operation: object) -> tuple[int, int]:
+    if isinstance(operation, LocalPermutation8):
+        return operation.gate_start, operation.gate_stop
+    if isinstance(operation, FusedPairOperation):
+        return operation.gate_start, operation.gate_stop
+    if isinstance(operation, CrossCarrierGate):
+        return operation.gate_index, operation.gate_index + 1
     raise TypeError("unsupported carrier operation")
