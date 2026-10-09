@@ -168,7 +168,7 @@ def route_carrier_program(
         if not isinstance(operation, CrossCarrierGate):
             raise TypeError(type(operation))
 
-        coherent_context = operation.gate.kind != "CX"
+        coherent_context = True
         for primitive in decompose_cross_carrier_gate(operation):
             if isinstance(primitive, LocalEmbeddedGate):
                 routed.append(
