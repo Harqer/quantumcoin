@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from .carrier_ir import CarrierProgram, CrossCarrierGate, LocalPermutation8
 from .cepheus_mapping import CarrierPlacement, CepheusSnapshot
 from .d8_cross_synthesis import TwoCarrierPermutation64
+from .d8_pair_fusion import FusedCarrierProgram, FusedPairOperation
 from .d8_two_body_decomposition import (
     EmbeddedCrossCx,
     LocalEmbeddedGate,
@@ -27,6 +28,13 @@ class RoutedLocalEmbeddedGate:
 
 
 @dataclass(frozen=True)
+class RoutedPairPermutation:
+    permutation: TwoCarrierPermutation64
+    physical_carriers: tuple[int, int]
+    coherent_required: bool = True
+
+
+@dataclass(frozen=True)
 class RoutedEmbeddedCx:
     physical_control: int
     control_level_bit: int
@@ -39,6 +47,7 @@ class RoutedEmbeddedCx:
 RoutedOperation = (
     RoutedLocalPermutation
     | RoutedLocalEmbeddedGate
+    | RoutedPairPermutation
     | RoutedEmbeddedCx
 )
 
@@ -99,7 +108,7 @@ def _swap_carriers(
 
 
 def route_carrier_program(
-    program: CarrierProgram,
+    program: CarrierProgram | FusedCarrierProgram,
     placement: CarrierPlacement,
     snapshot: CepheusSnapshot,
 ) -> RoutedD8Program:
