@@ -139,3 +139,34 @@ def fuse_two_carrier_regions(program: CarrierProgram) -> FusedCarrierProgram:
             output.append(operations[i])
             i += 1
             continue
+
+
+        carriers = tuple(sorted(support))
+        mapping = tuple(range(64))
+        starts: list[int] = []
+        stops: list[int] = []
+
+        for operation in region:
+            mapping = _compose(mapping, _mapping_for_operation(operation, carriers))
+            start, stop = _span(operation)
+            starts.append(start)
+            stops.append(stop)
+
+        output.append(
+            FusedPairOperation(
+                permutation=TwoCarrierPermutation64(
+                    carriers=carriers,
+                    mapping=mapping,
+                ),
+                gate_start=min(starts),
+                gate_stop=max(stops),
+            )
+        )
+        i = j
+
+    return FusedCarrierProgram(
+        operations=tuple(output),
+        source_gate_count=program.source_gate_count,
+        eliminated_local_identity_gates=program.eliminated_local_identity_gates,
+        cancelled_cross_carrier_gates=program.cancelled_cross_carrier_gates,
+    )
