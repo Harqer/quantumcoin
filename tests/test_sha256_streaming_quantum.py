@@ -16,6 +16,8 @@ from quantum.sha256_transmon_d8.layout import D8Layout
 from quantum.sha256_transmon_d8.sha256 import H0
 from quantum.sha256_transmon_d8.streaming_quantum import (
     StreamedGateBudgetExceeded,
+    emit_complete_streamed_word,
+    plan_complete_streamed_word,
     iter_streamed_schedule_bits,
     lower_streamed_schedule_bit,
     optimize_streamed_schedule_bit,
@@ -152,3 +154,88 @@ def test_real_coherent_sha_stream_operation_is_selected_from_compiled_program(co
     assert layout.get_word(result, op.target_slot) == 0x92345678
     assert layout.get_nonce(result) == 0x80000000
     assert simulate(fragment.inverse(), result) == initial
+
+
+
+def test_complete_32_bit_stream_matches_exact_SHA_add_and_inverse(coherent107):
+    """Real coherent nonce W[3], all bits, sequential bounded memory."""
+    forward = _one_bit_op(coherent107)
+    inverse = _one_bit_op(coherent107, inverse=True)
+    layout = forward.layout
+    nonce = 0xC0FFEE01
+    old_word = 0x7FFFFFFE
+    rng = random.Random(0x5A256)
+    initial = layout.empty_state()
+    for slot in range(8):
+        layout.set_word(initial, slot, old_word if slot == 0
+                        else rng.getrandbits(32))
+    layout.set_nonce(initial, nonce)
+    for i in range(1, layout.scratch_bits):
+        initial[layout.scratch_bit(i)] = rng.getrandbits(1)
+    initial[layout.carry_bit] = rng.getrandbits(1)
+    state = initial[:]
+    seen = []
+
+    def consume(index, fragment):
+        nonlocal state
+        seen.append(index)
+        state = simulate(fragment, state)
+
+    certificate = emit_complete_streamed_word(
+        forward, 0, consume, max_fragment_gates=16384
+    )
+    assert certificate.completed_bits == 32
+    assert certificate.manifest.bit_order == tuple(range(32))
+    assert certificate.manifest.source_nodes == forward.schedule.words[3]
+    assert certificate.source_gate_count > 32
+    assert len(certificate.source_gate_digest) == 64
+    assert seen == list(range(32))
+    assert layout.get_word(state, 0) == (old_word + nonce) & 0xFFFFFFFF
+    assert layout.get_nonce(state) == nonce
+    assert all(
+        state[q] == initial[q]
+        for q in range(len(initial))
+        if q not in {layout.word_bit(0, i) for i in range(32)}
+    )
+
+    seen.clear()
+    inverse_certificate = emit_complete_streamed_word(
+        inverse, 0, consume, max_fragment_gates=16384
+    )
+    assert inverse_certificate.completed_bits == 32
+    assert inverse_certificate.manifest.bit_order == tuple(range(31, -1, -1))
+    assert seen == list(range(31, -1, -1))
+    assert state == initial
+    assert inverse_certificate.source_gate_count == certificate.source_gate_count
+
+
+def test_full_word_rejects_unfinished_prefix_and_unchecked_cache(coherent107):
+    compiled = _one_bit_op(coherent107)
+    manifest = plan_complete_streamed_word(compiled, 0)
+    assert manifest.direction == 1
+    assert len(manifest.source_nodes) == 32
+    assert manifest.logical_width == 321
+    with pytest.raises(ValueError, match="incorrectly ordered"):
+        replace(manifest, bit_order=(31,) * 32).validate()
+
+    seen = []
+    with pytest.raises(StreamedGateBudgetExceeded):
+        emit_complete_streamed_word(
+            compiled, 0, lambda bit, c: seen.append(bit),
+            max_fragment_gates=2,
+        )
+    assert seen == []
+    with pytest.raises(RuntimeError, match="sink crashed"):
+        emit_complete_streamed_word(
+            compiled, 0, lambda bit, c: (_ for _ in ()).throw(
+                RuntimeError("sink crashed")
+            ),
+        )
+
+    checkpointed = replace(
+        compiled, operations=(StreamedScheduleAdd(
+            18, 0, checkpoint_plan=coherent107.schedule_reports[0]
+        ),)
+    )
+    with pytest.raises(ValueError, match="checkpointed"):
+        plan_complete_streamed_word(checkpointed, 0)
