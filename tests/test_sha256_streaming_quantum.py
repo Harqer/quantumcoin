@@ -132,7 +132,7 @@ def test_real_coherent_sha_stream_operation_is_selected_from_compiled_program(co
         if isinstance(op, StreamedScheduleAdd)
     )
     op = coherent107.operations[index]
-    assert op.round_index >= 16
+    assert op.round_index == coherent107.nonce_word_index == 3
     assert op.checkpoint_plan is None
     # Real dependency DAG, original nonce/state wire indices, no synthetic SHA gates.
     fragment = lower_streamed_schedule_bit(
@@ -143,3 +143,12 @@ def test_real_coherent_sha_stream_operation_is_selected_from_compiled_program(co
         q < coherent107.layout.logical_bit_capacity
         for gate in fragment.gates for q in gate.qubits
     )
+    assert len(fragment.gates) == 3
+    layout = coherent107.layout
+    initial = layout.empty_state()
+    layout.set_nonce(initial, 0x80000000)
+    layout.set_word(initial, op.target_slot, 0x12345678)
+    result = simulate(fragment, initial)
+    assert layout.get_word(result, op.target_slot) == 0x92345678
+    assert layout.get_nonce(result) == 0x80000000
+    assert simulate(fragment.inverse(), result) == initial
