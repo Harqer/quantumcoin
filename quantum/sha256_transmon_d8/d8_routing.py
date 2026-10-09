@@ -174,6 +174,12 @@ def route_carrier_program(
             )
             continue
 
+        if isinstance(operation, FusedPairOperation):
+            logical_left, logical_right = operation.carriers
+            p_left, p_right = route_pair(logical_left, logical_right)
+            routed.append(RoutedPairPermutation(operation.permutation, (p_left, p_right), True))
+            continue
+
         if not isinstance(operation, CrossCarrierGate):
             raise TypeError(type(operation))
 
