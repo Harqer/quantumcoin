@@ -82,3 +82,32 @@ def _apply_gate_on_pair(
         sum(output[bit] << bit for bit in range(3)),
         sum(output[3 + bit] << bit for bit in range(3)),
     )
+
+
+def _mapping_for_operation(
+    operation: object,
+    carriers: tuple[int, int],
+) -> tuple[int, ...]:
+    mapping: list[int] = []
+    for left in range(8):
+        for right in range(8):
+            if isinstance(operation, LocalPermutation8):
+                if operation.carrier == carriers[0]:
+                    out_left, out_right = operation.mapping[left], right
+                elif operation.carrier == carriers[1]:
+                    out_left, out_right = left, operation.mapping[right]
+                else:
+                    raise ValueError("local operation is outside fused pair")
+            elif isinstance(operation, FusedPairOperation):
+                if operation.carriers != carriers:
+                    raise ValueError("fused pair carrier mismatch")
+                mapped = operation.permutation.mapping[left * 8 + right]
+                out_left, out_right = divmod(mapped, 8)
+            elif isinstance(operation, CrossCarrierGate):
+                out_left, out_right = _apply_gate_on_pair(
+                    operation.gate, carriers, left, right
+                )
+            else:
+                raise TypeError("unsupported carrier operation")
+            mapping.append(out_left * 8 + out_right)
+    return tuple(mapping)
