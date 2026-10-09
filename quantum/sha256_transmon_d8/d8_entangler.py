@@ -84,6 +84,7 @@ class D8EntanglerSet:
             for calibration in self.calibrations
             if calibration.matches(physical_carriers, permutation)
             and calibration.unitary_characterized
+            and calibration.quality_metadata_complete
         ]
         if not matches:
             raise KeyError(
