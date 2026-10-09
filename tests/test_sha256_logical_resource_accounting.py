@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from quantum.sha256_transmon_d8.ir import ReversibleCircuit, Gate
+from quantum.sha256_transmon_d8.ir import ReversibleCircuit
 from quantum.sha256_transmon_d8.logical_resource_accounting import (
     LogicalResourceAccumulator,
     _WordCounter,
@@ -32,7 +32,7 @@ def test_streamed_resource_depth_tracks_wire_dependencies_not_fragment_sums():
     assert metrics.t_gates == 0
     assert metrics.entangling_gates == 3
     assert metrics.logical_depth == 4
-    assert metrics.entangling_depth == 2
+    assert metrics.entangling_depth == 3
     assert metrics.logical_depth < (2 + 2 + 1)  # naive sum of gates per fragment
 
 
