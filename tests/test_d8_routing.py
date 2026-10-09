@@ -72,3 +72,31 @@ def test_route_uses_spare_node_and_tracks_final_mapping() -> None:
         final[0].physical_control
     ]
     assert routed.final_logical_to_physical != placement.logical_to_physical
+
+
+def test_route_preserves_fused_pair_permutation() -> None:
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 6)
+    fused = fuse_two_carrier_regions(
+        compile_carrier_program(circuit, D8Layout(profile="packed97"))
+    )
+    assert len(fused.operations) == 1
+    assert isinstance(fused.operations[0], FusedPairOperation)
+
+    placement = CarrierPlacement(
+        logical_to_physical=(0, 3, 2),
+        selected_physical_nodes=(0, 2, 3),
+        weighted_distance_cost=0.0,
+    )
+    snapshot = _snapshot()
+    routed = route_carrier_program(fused, placement, snapshot)
+
+    pair_ops = [
+        operation
+        for operation in routed.operations
+        if isinstance(operation, RoutedPairPermutation)
+    ]
+    assert len(pair_ops) == 1
+    assert pair_ops[0].permutation.mapping == fused.operations[0].permutation.mapping
+    left, right = pair_ops[0].physical_carriers
+    assert right in snapshot.adjacency[left]
