@@ -236,3 +236,42 @@ This iteration deliberately does NOT permit ZX fusion across cache setup
 and teardown, or hardware execution. A later round can optimize complete
 BIT fragments only, proving unitary equivalence on arbitrary states of
 the live cache wires and tracking every acquired global phase.
+
+## Round 7 — cache-aware ZX/pytket logical bit optimization
+
+`checkpoint_quantum.emit_phase_aware_checkpointed_word` wraps the
+unchanged exact checkpointed SHA emitter, preserving every cache setup,
+all 32 streamed bits and cache teardown in the source order. It accepts
+an explicit bounded set of BIT indices (default `(31,)`) to optimize as
+phase-aware Clifford+T logical sidecars. Cache setup and teardown stages
+always pass to the consumer unchanged and have no optimizer candidate.
+
+An optimized BIT is independently verified on the full complex state
+of every touched wire, including arbitrary live checkpoint values and
+borrowed dirty ancillas. The entire BIT reassembles source gate order
+around accepted local windows. Global phase scalars are accumulated
+modulo 2*pi across all selected bits; the candidate QASM does not itself
+store a global phase, so callers must honor the report scalar.
+
+    from quantum.sha256_transmon_d8.checkpoint_quantum import emit_phase_aware_checkpointed_word
+    report = emit_phase_aware_checkpointed_word(
+        compiled, operation_index, consume=cpu_transactional_staging_sink,
+        selected_bits=(31,), max_optimized_source_gates=4096)
+    assert report.completed_bits == 32
+
+The callback receives `(kind, identifier, original_fragment,
+verified_logical_candidate_or_None)`. Only selected BIT stages can
+have a candidate; all other stages are exact original fragments.
+Separate per-bit and aggregate source-gate optimization budgets prevent
+unbounded ZX graph/QASM expansion. Failure returns no completed report
+and any staged prefixes must be discarded by the consumer.
+
+The exact reference regression runs W[18] with a valid forced cache of
+its actual bit-31 Boolean DAG output. This produces a small, real
+cached-wire-dependent BIT[31] unitary without modifying the production
+cache-selection algorithm. The forward and inverse full-word arithmetic
+and exact workspace cleanup are checked. A different genuine ancestor
+may exceed the bounded optimization cap, which is correctly rejected.
+
+This is a logical sidecar, NOT a production d=8 pulse translator or
+physical qLDPC implementation. No gate is submitted to quantum hardware.
