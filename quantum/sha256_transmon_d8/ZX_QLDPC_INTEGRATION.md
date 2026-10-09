@@ -322,3 +322,47 @@ The next optimization research must target nontrivial larger verification
 windows, arithmetic decomposition and T-depth, but cannot claim gains
 until the whole-word physical critical path is measured and independent
 full-unitary preservation is demonstrated for every accepted rewrite.
+
+## Round 9 — whole-width SHA arithmetic resynthesis (2026-10-09)
+
+The exact source emitter coherent_stream._emit_mcx_dirty now uses the
+linear 4n-8-Toffoli borrowed-dirty ladder for n controls whenever n-2
+compatible dirty ancillas exist. For 32 controls this is 120 Toffolis
+instead of 976 from the previous recursive gate construction.
+All 32 conditional increments inside each streamed W[t] schedule word
+benefit, not just the previously tiny PyZX subwindows. If there are
+not enough compatible borrowed bits the old exact recursive path stays.
+No clean-ancilla assumption, measurement, reset or additional wires.
+
+Proof idea: perform the borrowed prefix AND ladder, toggle the target,
+uncompute, then perform the ladder without its first rung, toggle and
+uncompute. Unknown dirty-value dependencies cancel in pairs; only the
+product of the real control bits survives as an X on the target.
+All gates are X/CX/CCX exact basis permutations; this proves equality
+on all complex states by linearity, including entangled borrowed bits.
+
+Source: Khattar and Gidney, Rise of conditionally clean ancillae for
+efficient quantum circuit constructions, Quantum 9, 1752 (2025),
+DOI 10.22331/q-2025-05-21-1752, arXiv:2407.17966.
+
+Exhaustive n=3..6 controlled-unitary tests cover every basis input,
+including dirty registers. Wide n=32 tests and complete 32-bit controlled
+increment regressions cover real SHA operands and arbitrary dirty state.
+All W[3] and W[18] original forward/inverse tests remain active.
+Analytic projected costs remain conservative (not actual gate counts)
+because available borrowed workspace varies by oracle depth.
+
+Measured CPU logical Clifford+T resources, one 32-bit SHA W[t] operation:
+
+| Metric | W[3] old | W[3] new | Cached W[18] old | Cached W[18] new |
+|---|---:|---:|---:|---:|
+| Gates | 1,420,671 | 298,161 | 1,420,795 | 298,285 |
+| T/Tdg gates | 662,935 | 139,097 | 662,935 | 139,097 |
+| Entangling gates | 568,326 | 119,322 | 568,450 | 119,446 |
+| Logical depth | 763,019 | 178,703 | 763,138 | 178,822 |
+| Entangling critical depth | 379,055 | 89,444 | 379,177 | 89,566 |
+
+The approximately 79% gate savings and 76% entangling-depth savings
+come from the full arithmetic resynthesis, not from the selected ZX
+sidecar windows. These are qubit logical counts, not calibrated
+Rigetti d=8 pulses or full 64-round SHA resource figures.
