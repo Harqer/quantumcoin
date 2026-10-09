@@ -617,6 +617,74 @@ def lower_coherent_operation(
     return circuit
 
 
+
+@dataclass(frozen=True)
+class CoherentQuantumWindowPlan:
+    """Verified logical optimizations for ONE real coherent SHA circuit block.
+
+    A plan is an immutable sidecar to the exact reversible SHA operation; it is
+    not a native d=8 pulse program. The source operation remains unchanged until
+    a separate phase-aware physical lowering stage can consume every gate.
+    """
+
+    operation_index: int
+    operation_label: str
+    source_gate_count: int
+    windows: tuple[tuple["OptimizationWindow", "VerifiedCandidate"], ...]
+
+    @property
+    def accepted_windows(self) -> int:
+        return sum(candidate.accepted for _, candidate in self.windows)
+
+
+def optimize_coherent_quantum_block(
+    compiled: CompiledCoherentSha256,
+    operation_index: int,
+    *,
+    backend: str = "pyzx",
+    max_windows: int = 2,
+    max_qubits: int = 6,
+    max_gates: int = 128,
+) -> CoherentQuantumWindowPlan:
+    """Round 1: wire verified ZX optimization to an actual SHA semantic block.
+
+    Only existing CircuitBlock instances are eligible: streamed SHA operations
+    could expand into millions of gates and need separate streaming lowering.
+    Nothing is rewritten in CompiledCoherentSha256 or ReversibleCircuit.
+    """
+    from .zx_optimization import evaluate_reversible_circuit_windows
+
+    if not 0 <= operation_index < len(compiled.operations):
+        raise IndexError("coherent operation index is out of range")
+    operation = compiled.operations[operation_index]
+    if not isinstance(operation, CircuitBlock):
+        raise ValueError(
+            "Round 1 supports CircuitBlock only; streamed operations require "
+            "a bounded streaming quantum lowering stage"
+        )
+    source = lower_coherent_operation(compiled, operation)
+    windows = evaluate_reversible_circuit_windows(
+        source,
+        backend=backend,
+        max_windows=max_windows,
+        max_qubits=max_qubits,
+        max_gates=max_gates,
+    )
+    for window, verified in windows:
+        if window.wire_labels != verified.wire_labels:
+            raise AssertionError("optimized quantum window changed SHA wire identity")
+        if verified.verification not in {
+            "full-unitary-numerical", "zx-reduction-affirmative"
+        }:
+            raise AssertionError("unverified quantum window cannot be admitted")
+    return CoherentQuantumWindowPlan(
+        operation_index=operation_index,
+        operation_label=operation.label,
+        source_gate_count=len(source.gates),
+        windows=windows,
+    )
+
+
 def lower_streamed_schedule_operation(
     compiled: CompiledCoherentSha256,
     operation: StreamedScheduleAdd,
