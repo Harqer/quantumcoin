@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram, CrossCarrierGate
 from .cepheus_mapping import CarrierPlacement, CepheusSnapshot
-from .d8_calibration import D8CalibrationSet
+from .d8_local_unitary import D8LocalPermutationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
 from .d8_entangler import D8EntanglerSet
 from .d8_readout import D8ReadoutSet
@@ -58,7 +58,7 @@ def analyze_backend_requirements(
     placement: CarrierPlacement,
     snapshot: CepheusSnapshot,
     *,
-    d8_calibrations: D8CalibrationSet | None = None,
+    d8_local_permutations: D8LocalPermutationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
     d8_readout: D8ReadoutSet | None = None,
@@ -94,11 +94,23 @@ def analyze_backend_requirements(
     local_physical = tuple(
         sorted({operation.physical_carrier for operation in routed_local_basis})
     )
-    missing_local = tuple(
-        physical
-        for physical in local_physical
-        if d8_calibrations is None or physical not in d8_calibrations.carriers
-    )
+    local_unique = {
+        (operation.physical_carrier, operation.operation.mapping)
+        for operation in routed_local_basis
+    }
+    missing_local_requirements = set()
+    for operation in routed_local_basis:
+        key = (operation.physical_carrier, operation.operation.mapping)
+        if d8_local_permutations is None:
+            missing_local_requirements.add(key)
+            continue
+        try:
+            d8_local_permutations.require(
+                operation.physical_carrier,
+                operation.operation,
+            )
+        except (KeyError, RuntimeError):
+            missing_local_requirements.add(key)
 
     coherent_local_unique: set[tuple[int, str, tuple[int, ...]]] = set()
     missing_coherent_local: set[tuple[int, str, tuple[int, ...]]] = set()
@@ -163,10 +175,10 @@ def analyze_backend_requirements(
     )
 
     gaps: list[str] = []
-    if missing_local:
+    if missing_local_requirements:
         gaps.append(
-            "missing basis-transfer d=8 local calibration on "
-            f"{len(missing_local)} routed physical carriers"
+            f"{len(missing_local_requirements)} unique unitary-characterized "
+            "local d=8 permutation realizations are missing"
         )
     if missing_coherent_local:
         gaps.append(
@@ -194,9 +206,7 @@ def analyze_backend_requirements(
         source_gate_count=program.source_gate_count,
         carrier_operation_count=len(program.operations),
         local_operation_count=len(routed_local_basis),
-        unique_local_permutations=len(
-            {operation.operation.mapping for operation in routed_local_basis}
-        ),
+        unique_local_permutations=len(local_unique),
         local_physical_carriers=local_physical,
         cross_operation_count=len(source_cross),
         cross_kind_counts=tuple(sorted(kind_counts.items())),
@@ -210,7 +220,7 @@ def analyze_backend_requirements(
         coherent_cx_operations=coherent_cx,
         unique_basis_cx_requirements=len(unique_basis),
         unique_coherent_cx_requirements=len(unique_coherent),
-        missing_local_calibration_carriers=missing_local,
+        missing_local_calibration_carriers=tuple(sorted({physical for physical, _ in missing_local_requirements})),
         missing_coherent_local_realizations=len(missing_coherent_local),
         missing_basis_cx_realizations=len(missing_basis),
         missing_coherent_cx_realizations=len(missing_coherent),
