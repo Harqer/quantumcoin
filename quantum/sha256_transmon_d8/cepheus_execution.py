@@ -4,11 +4,9 @@ from dataclasses import dataclass
 
 from .carrier_ir import CarrierProgram
 from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
-from .d8_braket_calibration import local_swap_word_openpulse
-from .d8_calibration import D8CalibrationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
+from .d8_local_unitary import D8LocalPermutationSet
 from .d8_entangler import D8EntanglerSet
-from .d8_local_synthesis import synthesize_local_permutation8
 from .d8_requirements import require_braket_action_size
 from .d8_routing import (
     RoutedEmbeddedCx,
@@ -74,31 +72,26 @@ def _lower_routed_operation(
     operation,
     *,
     device,
-    d8_calibrations: D8CalibrationSet | None,
+    d8_local_permutations: D8LocalPermutationSet | None,
     d8_coherent_locals: D8LocalCoherentSet | None,
     d8_entanglers: D8EntanglerSet | None,
 ) -> str:
     if isinstance(operation, RoutedLocalPermutation):
         physical = operation.physical_carrier
-        if d8_calibrations is None:
+        if d8_local_permutations is None:
             raise D8LoweringUnavailable(
-                "missing basis-transfer d=8 local calibration for "
+                "missing unitary-characterized d=8 local permutation for "
                 f"physical carrier {physical}; "
                 + _describe_live_calibration_surface(device)
             )
-        swaps = synthesize_local_permutation8(operation.operation)
         try:
-            return local_swap_word_openpulse(
-                device,
+            calibration = d8_local_permutations.require(
                 physical,
-                swaps,
-                d8_calibrations,
+                operation.operation,
             )
-        except (KeyError, RuntimeError, ValueError) as exc:
-            raise D8LoweringUnavailable(
-                f"incomplete basis-transfer calibration on physical carrier "
-                f"{physical}: {exc}"
-            ) from exc
+        except (KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(str(exc)) from exc
+        return calibration.openpulse_body
 
     if isinstance(operation, RoutedLocalEmbeddedGate):
         if d8_coherent_locals is None:
@@ -146,7 +139,7 @@ def lower_complete_sha_program(
     *,
     device,
     shots: int,
-    d8_calibrations: D8CalibrationSet | None = None,
+    d8_local_permutations: D8LocalPermutationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
@@ -164,7 +157,7 @@ def lower_complete_sha_program(
                 _lower_routed_operation(
                     operation,
                     device=device,
-                    d8_calibrations=d8_calibrations,
+                    d8_local_permutations=d8_local_permutations,
                     d8_coherent_locals=d8_coherent_locals,
                     d8_entanglers=d8_entanglers,
                 )
@@ -205,7 +198,7 @@ def prepare_complete_sha_program(
         placement,
         device=device,
         shots=shots,
-        d8_calibrations=d8_calibrations,
+        d8_local_permutations=d8_local_permutations,
         d8_coherent_locals=d8_coherent_locals,
         d8_entanglers=d8_entanglers,
     )
