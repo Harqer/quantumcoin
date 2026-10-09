@@ -1,4 +1,4 @@
-import random
+import pytest
 
 from quantum.sha256_transmon_d8.coherent_program import (
     CircuitBlock,
@@ -8,7 +8,6 @@ from quantum.sha256_transmon_d8.coherent_program import (
     StreamedScheduleAdd,
     StreamedSigmaAdd,
     compile_coherent_nonce_sha256,
-    verify_compiled_coherent_sha256,
 )
 from quantum.sha256_transmon_d8.coherent_schedule import (
     bitcoin_second_block_template,
@@ -44,35 +43,32 @@ def test_coherent97_packs_persistent_state_and_shared_workspace_exactly():
     assert nonce_bits.isdisjoint(workspace)
 
 
-def test_coherent97_semantic_program_matches_exact_sha_and_inverts():
+def test_coherent97_fails_closed_when_checkpointing_cannot_fit():
     fixed = list(bitcoin_second_block_template())
     fixed[0] = 0x01234567
     fixed[1] = 0x89ABCDEF
     fixed[2] = 0x13579BDF
 
-    compiled = compile_coherent_nonce_sha256(
-        H0,
-        tuple(fixed),
-        nonce_word_index=3,
-    )
-
-    assert compiled.layout.profile == "coherent97"
-    assert compiled.layout.total_transmons == 97
-    assert compiled.persistent_schedule_bits == 0
-    assert all(report.width_safe for report in compiled.schedule_reports)
-
-    rng = random.Random(0xD8_97)
-    for nonce in (0, 1, 0xFFFFFFFF, rng.randrange(1 << 32)):
-        verify_compiled_coherent_sha256(compiled, nonce)
+    # Mathematical packing does not imply this particular exact recursive
+    # schedule has enough borrowed space. Do not mark impossible plans safe.
+    with pytest.raises(RuntimeError, match=r"W\[60\] exceeds compact workspace"):
+        compile_coherent_nonce_sha256(
+            H0,
+            tuple(fixed),
+            nonce_word_index=3,
+            layout=D8Layout(profile="coherent97"),
+        )
 
 
-def test_coherent97_uses_only_lifetime_shared_semantic_operations():
+def test_supported_coherent107_uses_lifetime_shared_semantic_operations():
     compiled = compile_coherent_nonce_sha256(
         H0,
         bitcoin_second_block_template(),
         nonce_word_index=3,
+        layout=D8Layout(profile="coherent107"),
     )
 
+    assert all(report.width_safe for report in compiled.schedule_reports)
     assert any(isinstance(op, StreamedScheduleAdd) for op in compiled.operations)
     assert any(isinstance(op, StreamedSigmaAdd) for op in compiled.operations)
     assert any(isinstance(op, StreamedChAdd) for op in compiled.operations)
