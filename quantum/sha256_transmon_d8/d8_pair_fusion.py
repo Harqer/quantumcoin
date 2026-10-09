@@ -27,3 +27,7 @@ class FusedCarrierProgram:
     source_gate_count: int
     eliminated_local_identity_gates: int = 0
     cancelled_cross_carrier_gates: int = 0
+
+
+def _compose(first: tuple[int, ...], second: tuple[int, ...]) -> tuple[int, ...]:
+    return tuple(second[first[source]] for source in range(64))
