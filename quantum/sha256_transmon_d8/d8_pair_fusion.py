@@ -31,3 +31,13 @@ class FusedCarrierProgram:
 
 def _compose(first: tuple[int, ...], second: tuple[int, ...]) -> tuple[int, ...]:
     return tuple(second[first[source]] for source in range(64))
+
+
+def _support(operation: object) -> tuple[int, ...]:
+    if isinstance(operation, LocalPermutation8):
+        return (operation.carrier,)
+    if isinstance(operation, FusedPairOperation):
+        return operation.carriers
+    if isinstance(operation, CrossCarrierGate):
+        return operation.carriers
+    raise TypeError("unsupported carrier operation")
