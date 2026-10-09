@@ -37,7 +37,7 @@ def _dirty_mcx_gate_count(control_count: int) -> int:
 
 
 def dirty_oracle_gate_count(dag: BooleanDag, node_index: int) -> int:
-    """Exact primitive-node count emitted by emit_node_xor for one DAG node."""
+    """Analytic cost proxy for DAG selection; not a measured emitted count."""
     memo: dict[int, int] = {}
 
     def visit(index: int) -> int:
@@ -63,7 +63,11 @@ def dirty_oracle_gate_count(dag: BooleanDag, node_index: int) -> int:
 
 
 def conditional_increment_gate_count(width: int, start: int) -> int:
-    """Primitive-node count for a dirty-ancilla controlled +2**start."""
+    """Conservative recursive upper bound for controlled increments.
+
+    The actual emitter chooses the linear 4n-8 dirty-ancilla ladder when
+    enough borrowed workspace exists, so real emitted counts can be lower.
+    """
     if width <= 0:
         raise ValueError("width must be positive")
     if not 0 <= start < width:
@@ -79,7 +83,7 @@ def streamed_word_add_gate_count(
     schedule: CoherentScheduleDag,
     round_index: int,
 ) -> int:
-    """Exact eager-expansion gate count for one streamed W[t] addition."""
+    """Analytic projection for a streamed W[t] addition (not emitted count)."""
     if not 0 <= round_index < 64:
         raise ValueError("round_index must be in 0..63")
     return sum(
