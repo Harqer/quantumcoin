@@ -47,4 +47,4 @@ jobs:
       - name: Install official 2026 optimizer releases
         run: python -m pip install --disable-pip-version-check pytest numpy pyzx==0.10.7 pytket==2.18.5
       - name: Exact quantum optimization and Caltech syndrome schedule
-        run: python -m pytest -q tests/test_sha256_zx_optimization.py tests/test_sha256_qldpc_resource.py tests/test_sha256_phase_aware_logical.py tests/test_sha256_streaming_quantum.py tests/test_sha256_checkpoint_quantum.py tests/test_sha256_logical_resource_accounting.py
+        run: python -m pytest -q --capture=tee-sys tests/test_sha256_zx_optimization.py tests/test_sha256_qldpc_resource.py tests/test_sha256_phase_aware_logical.py tests/test_sha256_streaming_quantum.py tests/test_sha256_checkpoint_quantum.py tests/test_sha256_logical_resource_accounting.py
