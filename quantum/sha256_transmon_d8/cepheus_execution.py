@@ -13,6 +13,7 @@ from .d8_routing import (
     RoutedEmbeddedCx,
     RoutedLocalEmbeddedGate,
     RoutedLocalPermutation,
+    RoutedPairPermutation,
     route_carrier_program,
     routed_cx_permutation,
 )
@@ -107,6 +108,24 @@ def _lower_routed_operation(
             calibration = d8_coherent_locals.require(
                 operation.physical_carrier,
                 operation.target,
+                device_fingerprint=device_fingerprint,
+            )
+        except (KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(str(exc)) from exc
+        return calibration.openpulse_body
+
+    if isinstance(operation, RoutedPairPermutation):
+        physical = operation.physical_carriers
+        if d8_entanglers is None:
+            raise D8LoweringUnavailable(
+                "missing characterized fused d=8 pair realization for "
+                f"physical={physical}"
+            )
+        try:
+            calibration = d8_entanglers.require(
+                physical,
+                operation.permutation,
+                coherent=True,
                 device_fingerprint=device_fingerprint,
             )
         except (KeyError, RuntimeError) as exc:
