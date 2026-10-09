@@ -79,7 +79,7 @@ class D8ReadoutSet:
         self,
         physical_carriers: tuple[int, ...],
         *,
-        executable: bool = False,
+        executable: bool = True,
     ) -> bool:
         try:
             for physical in physical_carriers:
