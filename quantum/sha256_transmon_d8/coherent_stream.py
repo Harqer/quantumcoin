@@ -561,8 +561,10 @@ def _emit_no_ancilla_add(
     """Exact same-width reversible source-register addition, no clean ancilla.
 
     Implements Takahashi/Kunihiro's 2005 linear-size reversible full adder
-    following Gidney's published reference implementation (2017),
+    adapted from Gidney's published reference implementation (2017),
     src/dirty_period_finding/decompositions/addition_rules.py.
+    Original ProjectQ source copyright 2017 Google Inc., Apache-2.0:
+    https://github.com/Strilanc/PaperImpl-2017-DirtyPeriodFinding
 
     (source, target) -> (source, target + source mod 2**n) for ALL
     arbitrary initial source/target basis states. The source register is
