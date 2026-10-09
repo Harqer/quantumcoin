@@ -93,3 +93,48 @@ def test_real_sha_ir_window_partition_respects_regions_and_gate_coverage():
         )
         assert result[1][1].verification == "full-unitary-numerical"
 
+
+
+def test_coherent_sha_compiler_exposes_verified_optimization_of_real_arithmetic():
+    """Exercise actual 64-round compiler output, not a stand-alone toy circuit."""
+    pytest.importorskip("pyzx")
+    from quantum.sha256_transmon_d8.coherent_program import (
+        CircuitBlock,
+        compile_coherent_nonce_sha256,
+        optimize_coherent_quantum_block,
+    )
+    from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template
+    from quantum.sha256_transmon_d8.sha256 import H0
+
+    compiled = compile_coherent_nonce_sha256(
+        H0, bitcoin_second_block_template(), nonce_word_index=3
+    )
+    assert compiled.layout.total_transmons == 97
+    index = next(
+        i for i, operation in enumerate(compiled.operations)
+        if isinstance(operation, CircuitBlock)
+    )
+    operation = compiled.operations[index]
+    untouched = tuple(operation.circuit.gates)
+
+    plan = optimize_coherent_quantum_block(
+        compiled, index, backend="pyzx", max_qubits=3,
+        max_windows=2, max_gates=8
+    )
+
+    assert plan.operation_index == index
+    assert plan.operation_label == operation.label
+    assert plan.source_gate_count == len(untouched)
+    assert len(plan.windows) == 2
+    for window, candidate in plan.windows:
+        assert window.wire_labels == candidate.wire_labels
+        assert candidate.verification == "full-unitary-numerical"
+        assert candidate.selected_qasm
+    # The production reversible arithmetic and inverse remain unchanged.
+    assert tuple(operation.circuit.gates) == untouched
+    assert operation.circuit.inverse().inverse().gates == list(untouched)
+
+    with pytest.raises(ValueError, match="CircuitBlock only"):
+        optimize_coherent_quantum_block(compiled, 0)
+    with pytest.raises(IndexError):
+        optimize_coherent_quantum_block(compiled, len(compiled.operations))
