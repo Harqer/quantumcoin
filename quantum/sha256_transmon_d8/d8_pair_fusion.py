@@ -111,3 +111,31 @@ def _mapping_for_operation(
                 raise TypeError("unsupported carrier operation")
             mapping.append(out_left * 8 + out_right)
     return tuple(mapping)
+
+
+def fuse_two_carrier_regions(program: CarrierProgram) -> FusedCarrierProgram:
+    operations = tuple(program.operations)
+    output: list[object] = []
+    i = 0
+
+    while i < len(operations):
+        support = set(_support(operations[i]))
+        if len(support) > 2:
+            output.append(operations[i])
+            i += 1
+            continue
+
+        j = i + 1
+        while j < len(operations):
+            merged = support | set(_support(operations[j]))
+            if len(merged) > 2:
+                break
+            support = merged
+            j += 1
+
+        region = operations[i:j]
+        has_cross = any(isinstance(op, CrossCarrierGate) for op in region)
+        if len(support) != 2 or not has_cross:
+            output.append(operations[i])
+            i += 1
+            continue
