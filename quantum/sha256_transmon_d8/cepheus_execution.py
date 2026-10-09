@@ -90,6 +90,7 @@ def _lower_routed_operation(
             calibration = d8_local_permutations.require(
                 physical,
                 operation.operation,
+                device_fingerprint=device_fingerprint,
             )
         except (KeyError, RuntimeError) as exc:
             raise D8LoweringUnavailable(str(exc)) from exc
@@ -106,6 +107,7 @@ def _lower_routed_operation(
             calibration = d8_coherent_locals.require(
                 operation.physical_carrier,
                 operation.target,
+                device_fingerprint=device_fingerprint,
             )
         except (KeyError, RuntimeError) as exc:
             raise D8LoweringUnavailable(str(exc)) from exc
@@ -126,7 +128,8 @@ def _lower_routed_operation(
             calibration = d8_entanglers.require(
                 physical,
                 permutation,
-                coherent=operation.coherent_required,
+                coherent=True,
+                device_fingerprint=device_fingerprint,
             )
         except (KeyError, RuntimeError) as exc:
             raise D8LoweringUnavailable(str(exc)) from exc
@@ -151,6 +154,7 @@ def lower_complete_sha_program(
 
     snapshot = snapshot_from_device_capabilities(device.properties.json())
     routed = route_carrier_program(carrier_program, placement, snapshot)
+    device_fingerprint = device_calibration_fingerprint(device)
 
     body: list[str] = []
     for index, operation in enumerate(routed.operations):
@@ -162,6 +166,7 @@ def lower_complete_sha_program(
                     d8_local_permutations=d8_local_permutations,
                     d8_coherent_locals=d8_coherent_locals,
                     d8_entanglers=d8_entanglers,
+                    device_fingerprint=device_fingerprint,
                 )
             )
         except D8LoweringUnavailable as exc:
