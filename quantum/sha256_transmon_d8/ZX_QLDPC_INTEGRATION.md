@@ -61,3 +61,16 @@ For actual SHA ReversibleCircuit instances, partition_reversible_circuit respect
 ## Gates before production adoption
 
 Introduce a phase-aware quantum logical IR, validate entire forward/uncompute SHA, implement calibrated d=8 controls or fault-tolerant logical gates, include QCEC and native routing, and independently measure physical critical path, leakage, and complete-circuit success probability.
+
+## Round 1 completed wiring (logical compiler entry point)
+
+The actual 64-round coherent compiler now exposes
+`coherent_program.optimize_coherent_quantum_block(compiled, operation_index,
+backend="pyzx", max_windows=2)`. It uses the real
+`lower_coherent_operation` source and requires an existing `CircuitBlock`;
+large streamed Sigma/Ch/Maj/schedule operations deliberately fail closed.
+It returns verified, original-wire-indexed, immutable optimization *sidecars*.
+The underlying reversible SHA operation and its inverse are never mutated.
+The selected Clifford+T QASM remains a logical candidate, NOT a calibrated
+physical d=8 instruction sequence. Full-operation phase-aware splicing and
+native pulse scheduling are explicit subsequent integration rounds.
