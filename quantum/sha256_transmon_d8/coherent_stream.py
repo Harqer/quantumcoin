@@ -312,6 +312,46 @@ def _emit_mcx_dirty(
         circuit.ccx(controls[0], controls[1], target)
         return
 
+    # Whole-arithmetic-region optimization: exact borrowed-dirty Toffoli
+    # ladder, 4n-8 CCX gates for n controls with n-2 borrowed ancillas.
+    # This is the compute / uncompute / toggle-detection identity, not a
+    # clean-ancilla assumption. It restores *arbitrary* borrowed states and
+    # thus also preserves all their entanglement with external registers.
+    #
+    # A0: d0 ^= c0*c1
+    # Aj: dj ^= d(j-1)*c(j+1)
+    #   compute A0..A(n-3), toggle target by d_last*c_last,
+    #   undo A(n-3)..A0; replay A1..A(n-3), toggle again, undo.
+    # The two toggles cancel unknown dirty prefixes, leaving exactly
+    # target ^= product(controls). All borrowed d wires return unchanged.
+    #
+    # See Khattar & Gidney, "Rise of conditionally clean ancillae...",
+    # dirty-ancilla ladder (4n-8 Toffoli), arXiv:2407.17966.
+    available = tuple(dict.fromkeys(
+        bit for bit in borrowed if bit != target and bit not in controls
+    ))
+    if len(available) >= count - 2:
+        ancillas = available[:count - 2]
+
+        def rung(index: int) -> None:
+            left = controls[0] if index == 0 else ancillas[index - 1]
+            right = controls[index + 1]
+            circuit.ccx(left, right, ancillas[index])
+
+        for index in range(count - 2):
+            rung(index)
+        circuit.ccx(ancillas[-1], controls[-1], target)
+        for index in range(count - 3, -1, -1):
+            rung(index)
+        for index in range(1, count - 2):
+            rung(index)
+        circuit.ccx(ancillas[-1], controls[-1], target)
+        for index in range(count - 3, 0, -1):
+            rung(index)
+        return
+
+    # Scarce borrowed workspace: retain the original bounded recursive
+    # exact identity, rather than requiring extra clean physical carriers.
     dirty = next(
         (
             bit
