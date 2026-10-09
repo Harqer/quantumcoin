@@ -238,7 +238,8 @@ def iter_reversible_circuit_windows(
     max_gates: int = 128
 ):
     """Yield bounded windows lazily; do not materialize millions of SHA gates."""
-    circuit.validate()
+    for region in circuit.regions:
+        region.validate(len(circuit.gates))
     if max_qubits < 3 or max_gates < 1:
         raise ValueError("invalid optimization window limits")
     bounds = sorted({0, len(circuit.gates)} | circuit.region_boundaries())
@@ -246,7 +247,9 @@ def iter_reversible_circuit_windows(
         current_start = start
         wires: set[int] = set()
         for index in range(start, stop):
-            new_wires = set(circuit.gates[index].qubits)
+            gate = circuit.gates[index]
+            gate.validate()
+            new_wires = set(gate.qubits)
             if len(new_wires) > max_qubits:
                 raise ValueError("one gate exceeds configured window width")
             if index > current_start and (
