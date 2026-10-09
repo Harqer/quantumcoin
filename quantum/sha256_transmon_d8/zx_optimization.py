@@ -224,6 +224,73 @@ def optimize_window(
     )
 
 
+
+@dataclass(frozen=True)
+class OptimizationWindow:
+    """A contiguous, dependency-preserving slice of a real SHA circuit."""
+    start: int
+    stop: int
+    wire_labels: tuple[int, ...]
+
+
+def partition_reversible_circuit(
+    circuit: ReversibleCircuit, *, max_qubits: int = 6,
+    max_gates: int = 128
+) -> tuple[OptimizationWindow, ...]:
+    """Partition a genuine reversible circuit without crossing region leases.
+
+    Every input gate belongs to exactly one contiguous window. A window can
+    contain any live dirty SHA state: unitary verification never assumes |0>.
+    This is only a partition; no compiler gate or hardware pulse is changed.
+    """
+    circuit.validate()
+    if max_qubits < 3 or max_gates < 1:
+        raise ValueError("invalid optimization window limits")
+    bounds = sorted({0, len(circuit.gates)} | circuit.region_boundaries())
+    windows: list[OptimizationWindow] = []
+    for start, stop in zip(bounds, bounds[1:]):
+        current_start = start
+        wires: set[int] = set()
+        for index in range(start, stop):
+            new_wires = set(circuit.gates[index].qubits)
+            if len(new_wires) > max_qubits:
+                raise ValueError("one gate exceeds configured window width")
+            if index > current_start and (
+                len(wires | new_wires) > max_qubits
+                or index - current_start >= max_gates
+            ):
+                windows.append(
+                    OptimizationWindow(current_start, index, tuple(sorted(wires)))
+                )
+                current_start = index
+                wires = set()
+            wires.update(new_wires)
+        if current_start < stop:
+            windows.append(OptimizationWindow(
+                current_start, stop, tuple(sorted(wires))
+            ))
+    return tuple(windows)
+
+
+def evaluate_reversible_circuit_windows(
+    circuit: ReversibleCircuit, *, backend: str = "pyzx",
+    max_windows: int = 8, max_qubits: int = 6, max_gates: int = 128
+) -> tuple[tuple[OptimizationWindow, VerifiedCandidate], ...]:
+    """Evaluate REAL project SHA windows without modifying the source circuit."""
+    if max_windows < 1:
+        raise ValueError("max_windows must be positive")
+    windows = partition_reversible_circuit(
+        circuit, max_qubits=max_qubits, max_gates=max_gates
+    )
+    return tuple(
+        (window, optimize_window(
+            circuit.gates[window.start:window.stop],
+            backend=backend, max_qubits=max_qubits, max_gates=max_gates
+        ))
+        for window in windows[:max_windows]
+    )
+
+
 def optimize_reversible_region(
     circuit: ReversibleCircuit, region_index: int, **kwargs
 ) -> VerifiedCandidate:
