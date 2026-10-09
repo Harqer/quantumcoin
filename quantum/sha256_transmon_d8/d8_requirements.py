@@ -26,7 +26,9 @@ BRAKET_TASK_ACTION_MAX_BYTES = 5 * 1024 * 1024
 @dataclass(frozen=True)
 class D8BackendRequirementReport:
     source_gate_count: int
+    pre_fusion_carrier_operation_count: int
     carrier_operation_count: int
+    carrier_operation_reduction: int
     local_operation_count: int
     unique_local_permutations: int
     local_physical_carriers: tuple[int, ...]
@@ -249,13 +251,26 @@ def analyze_backend_requirements(
 
     return D8BackendRequirementReport(
         source_gate_count=program.source_gate_count,
+        pre_fusion_carrier_operation_count=(
+            program.input_operation_count
+            if isinstance(program, FusedCarrierProgram)
+            else len(program.operations)
+        ),
         carrier_operation_count=len(program.operations),
+        carrier_operation_reduction=(
+            (program.input_operation_count - len(program.operations))
+            if isinstance(program, FusedCarrierProgram)
+            else 0
+        ),
         local_operation_count=len(routed_local_basis),
         unique_local_permutations=len(local_unique),
         local_physical_carriers=local_physical,
         cross_operation_count=len(source_cross),
         fused_pair_operations=len(fused_source),
-        fused_pair_source_gates=sum(operation.gate_count for operation in fused_source),
+        fused_pair_source_gates=sum(
+            operation.absorbed_source_gate_count
+            for operation in fused_source
+        ),
         unique_fused_pair_requirements=len(unique_fused),
         missing_fused_pair_realizations=len(missing_fused),
         cross_kind_counts=tuple(sorted(kind_counts.items())),
@@ -283,7 +298,9 @@ def format_backend_requirement_report(report: D8BackendRequirementReport) -> str
     lines = [
         "complete d=8 backend preflight failed:",
         f"source_gates={report.source_gate_count}",
+        f"pre_fusion_carrier_operations={report.pre_fusion_carrier_operation_count}",
         f"carrier_operations={report.carrier_operation_count}",
+        f"carrier_operation_reduction={report.carrier_operation_reduction}",
         f"local_operations={report.local_operation_count}",
         f"unique_local_permutations={report.unique_local_permutations}",
         f"cross_operations={report.cross_operation_count}",
