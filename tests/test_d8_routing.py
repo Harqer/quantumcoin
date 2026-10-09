@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from quantum.sha256_transmon_d8.carrier_ir import CarrierProgram, CrossCarrierGate
+from quantum.sha256_transmon_d8.carrier_ir import CarrierProgram, CrossCarrierGate, compile_carrier_program
 from quantum.sha256_transmon_d8.cepheus_mapping import (
     CarrierPlacement,
     CepheusSnapshot,
     PhysicalQubitQuality,
 )
+from quantum.sha256_transmon_d8.d8_pair_fusion import FusedPairOperation, fuse_two_carrier_regions
 from quantum.sha256_transmon_d8.d8_routing import (
     RoutedEmbeddedCx,
+    RoutedPairPermutation,
     route_carrier_program,
 )
-from quantum.sha256_transmon_d8.ir import Gate
+from quantum.sha256_transmon_d8.ir import Gate, ReversibleCircuit
+from quantum.sha256_transmon_d8.layout import D8Layout
 
 
 def _snapshot() -> CepheusSnapshot:
