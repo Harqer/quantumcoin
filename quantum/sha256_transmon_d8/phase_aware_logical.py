@@ -154,6 +154,11 @@ def assemble_phase_aware_logical_block(
     for window, verified in windows:
         if not cursor <= window.start < window.stop <= len(source):
             raise ValueError("optimization windows overlap or exceed source circuit")
+        if any(window.start < boundary < window.stop
+               for boundary in circuit.region_boundaries()):
+            raise ValueError(
+                "optimized window crosses a semantic or dirty-workspace boundary"
+            )
         for index in range(cursor, window.start):
             append_original(index)
 
