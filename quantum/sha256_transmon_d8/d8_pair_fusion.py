@@ -53,3 +53,32 @@ def _span(operation: object) -> tuple[int, int]:
     if isinstance(operation, CrossCarrierGate):
         return operation.gate_index, operation.gate_index + 1
     raise TypeError("unsupported carrier operation")
+
+
+def _apply_gate_on_pair(
+    gate: Gate,
+    carriers: tuple[int, int],
+    left: int,
+    right: int,
+) -> tuple[int, int]:
+    bits = [0] * 6
+    for bit in range(3):
+        bits[bit] = (left >> bit) & 1
+        bits[3 + bit] = (right >> bit) & 1
+
+    remapped: list[int] = []
+    for qubit in gate.qubits:
+        carrier = D8Layout.transmon_of(qubit)
+        if carrier not in carriers:
+            raise ValueError("gate support escapes fused carrier pair")
+        offset = 0 if carrier == carriers[0] else 3
+        remapped.append(offset + D8Layout.level_bit_of(qubit))
+
+    circuit = ReversibleCircuit()
+    circuit.extend((Gate(gate.kind, tuple(remapped)),))
+    circuit.validate()
+    output = simulate(circuit, bits)
+    return (
+        sum(output[bit] << bit for bit in range(3)),
+        sum(output[3 + bit] << bit for bit in range(3)),
+    )
