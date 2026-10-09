@@ -17,6 +17,7 @@ class D8LocalCoherentCalibration:
     process_fidelity: float | None = None
     max_leakage: float | None = None
     characterized_at: str | None = None
+    device_calibration_fingerprint: str | None = None
     duration_s: float | None = None
     synchronization_verified: bool = False
     unitary_characterized: bool = True
@@ -52,6 +53,8 @@ class D8LocalCoherentCalibration:
             and self.process_fidelity is not None
             and self.max_leakage is not None
             and self.characterized_at is not None
+            and self.device_calibration_fingerprint is not None
+            and bool(self.device_calibration_fingerprint.strip())
             and self.duration_s is not None
             and self.synchronization_verified
         )
@@ -72,12 +75,18 @@ class D8LocalCoherentSet:
         self,
         physical_carrier: int,
         target: LocalEmbeddedGate,
+        *,
+        device_fingerprint: str | None = None,
     ) -> D8LocalCoherentCalibration:
         matches = [
             calibration
             for calibration in self.calibrations
             if calibration.matches(physical_carrier, target)
             and calibration.execution_ready
+            and (
+                device_fingerprint is None
+                or calibration.device_calibration_fingerprint == device_fingerprint
+            )
         ]
         if not matches:
             raise KeyError(
