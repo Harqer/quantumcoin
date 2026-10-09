@@ -183,13 +183,27 @@ def optimize_window(
         candidate_qasm = candidate.to_qasm()
     else:
         try:
-            from pytket.passes import CliffordSimp, ZXGraphlikeOptimisation
+            from pytket import OpType
+            from pytket.passes import (
+                AutoRebase, CliffordSimp, FullPeepholeOptimise,
+                ZXGraphlikeOptimisation,
+            )
             from pytket.qasm import circuit_from_qasm_str, circuit_to_qasm_str
         except ImportError as exc:
             raise RuntimeError("pytket must be installed for this backend") from exc
         tk = circuit_from_qasm_str(source)
-        CliffordSimp(allow_swaps=False).apply(tk)
+        # The official pytket ZX user guide explicitly requires rebasing to
+        # this supported set BEFORE graphlike extraction. Rebase again after
+        # resynthesis to avoid leaking TK1/other backend gates into OpenQASM.
+        zx_gates = {
+            OpType.Rx, OpType.Rz, OpType.X, OpType.Z,
+            OpType.H, OpType.CZ, OpType.CX,
+        }
+        AutoRebase(zx_gates).apply(tk)
         ZXGraphlikeOptimisation(allow_swaps=False).apply(tk)
+        CliffordSimp(allow_swaps=False).apply(tk)
+        FullPeepholeOptimise(allow_swaps=False).apply(tk)
+        AutoRebase(zx_gates).apply(tk)
         candidate_qasm = circuit_to_qasm_str(tk)
         candidate = zx.Circuit.from_qasm(candidate_qasm)
 
