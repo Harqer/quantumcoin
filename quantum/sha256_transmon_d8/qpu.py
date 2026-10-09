@@ -109,7 +109,8 @@ def run_qpu_sha256(message: bytes) -> str:
         from braket.aws import AwsDevice
     except ImportError as exc:
         raise CepheusExecutionUnavailable(
-            "amazon-braket-sdk is required to query the live Cepheus device"
+            "amazon-braket-sdk is required to query the live Cepheus device; "
+            "no QPU task was submitted"
         ) from exc
 
     try:
