@@ -134,3 +134,36 @@ can be preserved, rather than producing a semantically invalid fragment.
 Further work: streamed per-bit composition with a complete coverage
 certificate, formal independent SHA schedule equivalence, native d=8
 pulse lowering and qLDPC logical gates.
+
+## Round 4: complete 32-bit schedule streaming (CPU-only)
+
+`streaming_quantum.plan_complete_streamed_word` validates full W[t]
+coverage (32 source DAG nodes, exact bit order, target, direction,
+scratch aliasing and dirty-width feasibility) BEFORE emitting gates.
+
+`streaming_quantum.emit_complete_streamed_word` then feeds every exact
+bit-lifetime gate fragment to a consumer one at a time and returns a
+`CompleteStreamedWordReport` only after all 32 contributions have been
+processed successfully. This report records the actual primitive
+gate count and a reproducibility SHA-256 digest over emitted gate
+identities; the digest is not a formal quantum-equivalence proof.
+
+    from quantum.sha256_transmon_d8.streaming_quantum import emit_complete_streamed_word
+    report = emit_complete_streamed_word(compiled, operation_index,
+        consume=lambda bit_index, fragment: verify_or_stage(bit_index, fragment),
+        max_fragment_gates=16384)
+    assert report.completed_bits == 32
+
+`consume` is an application-supplied CPU-only staging callback; partial
+emissions must be treated as uncommitted. A gate-budget overflow,
+unsafe checkpoint cache, invalid wire, or failing callback produces
+NO completion report. This does not connect to the QPU runtime.
+
+Forward bits execute in order 0..31. The exact inverse executes
+individual inverse bit circuits in order 31..0. The full W[3] nonce
+add / inverse is verified against standard 32-bit modular arithmetic
+with arbitrary dirty borrowed basis states. Entangled dirty states
+are preserved by the exact primitive identities, not by measurement.
+
+Full-word logical PyZX optimization, separate checkpoint-cache
+lifetimes, and physical d=8/native CZ scheduling remain unimplemented.
