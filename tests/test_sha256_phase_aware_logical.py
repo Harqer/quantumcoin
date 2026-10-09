@@ -72,6 +72,22 @@ def test_phase_aware_assembly_rejects_stale_and_overlapping_regions():
         )
 
 
+
+def test_phase_aware_assembler_never_crosses_dirty_lease_boundary():
+    pytest.importorskip("pyzx")
+    source = ReversibleCircuit()
+    source.x(0)
+    source.cx(0, 1)
+    source.cx(0, 1)
+    source.add_region("BORROWED_DIRTY_LEASE", 1, 3)
+
+    candidate = optimize_window(source.gates[:2], max_qubits=2)
+    window = OptimizationWindow(0, 2, (0, 1))
+    with pytest.raises(ValueError, match="semantic or dirty-workspace boundary"):
+        assemble_phase_aware_logical_block(
+            source, ((window, candidate),), logical_width=3
+        )
+
 def test_round_two_builds_genuine_full_sha_arithmetic_logical_block():
     pytest.importorskip("pyzx")
     from quantum.sha256_transmon_d8.coherent_program import (
