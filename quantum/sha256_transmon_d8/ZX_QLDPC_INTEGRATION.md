@@ -106,3 +106,31 @@ Round 1 full SHA suite: 113 passed, 4 skipped. Round 1 focused suite: 13
 passed. The compact coherent97 profile remains an explicitly checked but
 currently unsupported full coherent SHA schedule due to its dirty-width
 deficit; it is not silently mapped to additional ancillas.
+
+## Round 3: bounded quantum lowering of one streamed W[t] bit
+
+The streaming_quantum.py path consumes a real coherent compiler's
+StreamedScheduleAdd operation and lowers one bit's complete reversible
+lifetime: compute W[t][i] into scratch, controlled add +2**i, uncompute.
+It uses the existing Boolean DAG and exact dirty-ancilla emitters, never
+copies a model-only or stub circuit. A gate-count guard triggers WHILE
+emitting X/CX/CCX so a deep late-round W[t] bit cannot exhaust RAM.
+
+    from quantum.sha256_transmon_d8.streaming_quantum import optimize_streamed_schedule_bit
+    bit_plan = optimize_streamed_schedule_bit(
+        compiled, operation_index, 31, max_source_gates=2048,
+        max_windows=2, max_qubits=6
+    )
+    print(bit_plan.logical_block.before, bit_plan.logical_block.after)
+
+Each emitted fragment has explicit compute/consume/uncompute region
+boundaries. Bounded PyZX/pytket windows cannot cross these boundaries.
+Complete logical Clifford+T assembly retains unchanged gates and tracks
+any global phase. Forward/inverse bit ordering is explicit.
+An individual bit fragment is NOT a full streamed W[t] add or complete
+64-round SHA program and cannot be submitted to Rigetti hardware.
+Checkpointed schedules are rejected until their entire cache lifetime
+can be preserved, rather than producing a semantically invalid fragment.
+Further work: streamed per-bit composition with a complete coverage
+certificate, formal independent SHA schedule equivalence, native d=8
+pulse lowering and qLDPC logical gates.
