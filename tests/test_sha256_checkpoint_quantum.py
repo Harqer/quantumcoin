@@ -326,3 +326,4 @@ def test_cached_word_streaming_resource_depth_and_phase(checkpoint_case):
     assert report.entangling_depth_savings == (
         report.reference.entangling_depth - report.optimized.entangling_depth
     )
+    print(f"RESOURCE_W18_CHECKPOINTED {report!r}")
