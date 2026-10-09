@@ -8,11 +8,13 @@ from .cepheus_mapping import CarrierPlacement, CepheusSnapshot
 from .d8_local_unitary import D8LocalPermutationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
 from .d8_entangler import D8EntanglerSet
+from .d8_pair_fusion import FusedCarrierProgram, FusedPairOperation
 from .d8_readout import D8ReadoutSet
 from .d8_routing import (
     RoutedEmbeddedCx,
     RoutedLocalEmbeddedGate,
     RoutedLocalPermutation,
+    RoutedPairPermutation,
     route_carrier_program,
     routed_cx_permutation,
 )
@@ -29,6 +31,10 @@ class D8BackendRequirementReport:
     unique_local_permutations: int
     local_physical_carriers: tuple[int, ...]
     cross_operation_count: int
+    fused_pair_operations: int
+    fused_pair_source_gates: int
+    unique_fused_pair_requirements: int
+    missing_fused_pair_realizations: int
     cross_kind_counts: tuple[tuple[str, int], ...]
     cross_arity_counts: tuple[tuple[int, int], ...]
     routed_operation_count: int
@@ -54,7 +60,7 @@ class D8BackendRequirementReport:
 
 
 def analyze_backend_requirements(
-    program: CarrierProgram,
+    program: CarrierProgram | FusedCarrierProgram,
     placement: CarrierPlacement,
     snapshot: CepheusSnapshot,
     *,
