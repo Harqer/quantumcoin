@@ -47,6 +47,9 @@ class D8EntanglerCalibration:
             self.process_fidelity is not None
             and self.max_leakage is not None
             and self.characterized_at is not None
+            and self.duration_s is not None
+            and self.duration_s > 0
+            and self.synchronization_verified
         )
 
     def matches(
