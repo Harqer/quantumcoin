@@ -275,3 +275,50 @@ may exceed the bounded optimization cap, which is correctly rejected.
 
 This is a logical sidecar, NOT a production d=8 pulse translator or
 physical qLDPC implementation. No gate is submitted to quantum hardware.
+
+## Round 8 — measured logical Clifford+T resources (2026-10-09)
+
+`logical_resource_accounting.py` derives exact project X/CX/CCX/MAJ/UMA
+Clifford+T operations incrementally from each original emitted fragment.
+Only independently verified selected QASM sidecars are substituted.
+The tracker preserves gate dependencies across fragment boundaries with
+O(logical-wire-count) live state and does NOT sum fragment depths.
+
+Per-wire ASAP logical depth counts each logical gate as one tick. Weighted
+entangling depth counts each logical CX/CZ/SWAP/CCX as one and
+non-entangling gates as zero while preserving wire dependencies.
+The figures are NOT native d=8 pulse layers, noise-adjusted Rigetti
+durations, or qLDPC fault-tolerant cycles. Primitive CCX is expanded to
+the repository's exact no-ancilla Clifford+T decomposition.
+
+GitHub verified optimizer CI: 38 tests passed, CPU-only, using pinned
+PyZX 0.10.7 and pytket 2.18.5. The logged reproducible measurements:
+
+| Scenario | Before gates | After gates | Before T | After T | Before entangling depth | After depth |
+|---|---:|---:|---:|---:|---:|---:|
+| Real W[3], select bits (30,31) | 1,420,671 | 1,420,671 | 662,935 | 662,935 | 379,055 | 379,055 |
+| Real W[18], forced real W[18][31] checkpoint, select bit (31) | 1,420,795 | 1,420,794 | 662,935 | 662,935 | 379,177 | 379,173 |
+
+Full logical depth: W[3] 763,019 before/after; W[18] 763,138
+before versus 763,134 after. The checkpoint case removes one
+entangling CX but NO T gates and reduces the weighted entangling
+critical path by four logical entangling levels.
+
+These measurements show **no substantive improvement yet**. They are
+single streamed schedule-word operations, not the entire coherent 64-round
+SHA program. The W[18] forced-cache regression exercises a valid source
+DAG cache lifetime but does not represent the cost planner's automatic
+production choice (which selects zero caches for W[18]).
+
+Entry points:
+
+    from quantum.sha256_transmon_d8.logical_resource_accounting import (
+        measure_streamed_word_resources, measure_checkpointed_word_resources)
+    w3 = measure_streamed_word_resources(program, index, selected_bits=(30,31))
+    cached = measure_checkpointed_word_resources(cached_program, index,
+        selected_bits=(31,))
+
+The next optimization research must target nontrivial larger verification
+windows, arithmetic decomposition and T-depth, but cannot claim gains
+until the whole-word physical critical path is measured and independent
+full-unitary preservation is demonstrated for every accepted rewrite.
