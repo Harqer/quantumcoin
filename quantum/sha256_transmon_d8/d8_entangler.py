@@ -16,6 +16,7 @@ class D8EntanglerCalibration:
     process_fidelity: float | None = None
     max_leakage: float | None = None
     characterized_at: str | None = None
+    device_calibration_fingerprint: str | None = None
     duration_s: float | None = None
     synchronization_verified: bool = False
     unitary_characterized: bool = True
@@ -47,6 +48,8 @@ class D8EntanglerCalibration:
             self.process_fidelity is not None
             and self.max_leakage is not None
             and self.characterized_at is not None
+            and self.device_calibration_fingerprint is not None
+            and bool(self.device_calibration_fingerprint.strip())
             and self.duration_s is not None
             and self.duration_s > 0
             and self.synchronization_verified
@@ -73,6 +76,7 @@ class D8EntanglerSet:
         permutation: TwoCarrierPermutation64,
         *,
         coherent: bool = True,
+        device_fingerprint: str | None = None,
     ) -> D8EntanglerCalibration:
         if not coherent:
             raise ValueError(
@@ -85,6 +89,10 @@ class D8EntanglerSet:
             if calibration.matches(physical_carriers, permutation)
             and calibration.unitary_characterized
             and calibration.quality_metadata_complete
+            and (
+                device_fingerprint is None
+                or calibration.device_calibration_fingerprint == device_fingerprint
+            )
         ]
         if not matches:
             raise KeyError(
