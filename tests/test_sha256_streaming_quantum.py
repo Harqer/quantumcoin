@@ -17,6 +17,7 @@ from quantum.sha256_transmon_d8.sha256 import H0
 from quantum.sha256_transmon_d8.streaming_quantum import (
     StreamedGateBudgetExceeded,
     emit_complete_streamed_word,
+    emit_phase_aware_streamed_word,
     plan_complete_streamed_word,
     iter_streamed_schedule_bits,
     lower_streamed_schedule_bit,
@@ -280,3 +281,102 @@ def test_bounded_circuit_guards_all_public_gate_insertion_routes():
         circuit.maj(0, 1, 2)
     with pytest.raises(StreamedGateBudgetExceeded):
         circuit.extend((Gate("CX", (0, 1)),))
+
+
+
+def test_full_streamed_word_phase_aware_sidecars_preserve_all_sha_arithmetic(coherent107):
+    """Selected ZX windows coexist with 30 untouched, correctly ordered bits."""
+    pytest.importorskip("pyzx")
+    compiled = _one_bit_op(coherent107)
+    layout = compiled.layout
+    initial = layout.empty_state()
+    nonce = 0xF00DC0DE
+    old_word = 0x8FFFAC01
+    layout.set_nonce(initial, nonce)
+    layout.set_word(initial, 0, old_word)
+    rng = random.Random(0xFEED31)
+    for slot in range(1, 8):
+        layout.set_word(initial, slot, rng.getrandbits(32))
+    # Unknown borrowed workspace can be nonzero; each bit returns it exactly.
+    for i in range(1, layout.scratch_bits):
+        initial[layout.scratch_bit(i)] = rng.getrandbits(1)
+    initial[layout.carry_bit] = rng.getrandbits(1)
+
+    state = initial[:]
+    visited = []
+    selected_phases = []
+    untouched = []
+
+    def stage(bit_index, fragment, logical_candidate):
+        nonlocal state
+        visited.append(bit_index)
+        state = simulate(fragment, state)
+        if logical_candidate is None:
+            untouched.append(bit_index)
+        else:
+            assert bit_index in (30, 31)
+            assert logical_candidate.operation_index == 0
+            assert logical_candidate.source_gate_count == len(fragment.gates)
+            assert logical_candidate.qasm.startswith("OPENQASM 2.0;")
+            assert logical_candidate.logical_width == 321
+            selected_phases.append(logical_candidate.global_phase_rad)
+
+    report = emit_phase_aware_streamed_word(
+        compiled, 0, stage, selected_bits=(30, 31),
+        max_fragment_gates=16384, max_optimized_source_gates=1024,
+        max_optimized_total_gates=2048, max_qubits=3, max_window_gates=8,
+    )
+    assert report.completed_bits == 32
+    assert visited == list(range(32))
+    assert untouched == list(range(30))
+    assert report.selected_bits == (30, 31)
+    assert report.selected_source_gates > 0
+    assert len(report.selected_candidate_digest) == 64
+    assert report.source.source_gate_count >= report.selected_source_gates
+    assert report.verified_global_phase_rad == pytest.approx(
+        sum(selected_phases), abs=1e-8
+    )
+    assert layout.get_word(state, 0) == (old_word + nonce) & 0xFFFFFFFF
+    assert layout.get_nonce(state) == nonce
+    assert all(
+        state[q] == initial[q]
+        for q in range(len(initial))
+        if q not in {layout.word_bit(0, i) for i in range(32)}
+    )
+
+    # A second full 32-bit inverse retains its own verified logical sidecars.
+    inverse = _one_bit_op(coherent107, inverse=True)
+    visited.clear()
+    inverse_report = emit_phase_aware_streamed_word(
+        inverse, 0, stage, selected_bits=(30, 31),
+        max_fragment_gates=16384, max_optimized_source_gates=1024,
+        max_optimized_total_gates=2048, max_qubits=3, max_window_gates=8,
+    )
+    assert inverse_report.completed_bits == 32
+    assert inverse_report.selected_bits == (31, 30)
+    assert visited == list(range(31, -1, -1))
+    assert state == initial
+
+
+def test_full_streamed_phase_aware_optimizer_rejects_invalid_or_oversize_selection(
+    coherent107,
+):
+    compiled = _one_bit_op(coherent107)
+    for invalid in ((31, 31), (-1,), (32,), ("31",)):
+        with pytest.raises(ValueError, match="selected_bits"):
+            emit_phase_aware_streamed_word(
+                compiled, 0, lambda *_: None, selected_bits=invalid,
+            )
+    with pytest.raises(ValueError, match="max_optimized_source_gates"):
+        emit_phase_aware_streamed_word(
+            compiled, 0, lambda *_: None, max_optimized_source_gates=0
+        )
+
+    visited = []
+    with pytest.raises(StreamedGateBudgetExceeded, match="phase-aware"):
+        emit_phase_aware_streamed_word(
+            compiled, 0, lambda bit, *_: visited.append(bit),
+            selected_bits=(31,), max_optimized_source_gates=2,
+        )
+    # An unsuccessful suffix never produces a full-operation report.
+    assert visited == list(range(31))
