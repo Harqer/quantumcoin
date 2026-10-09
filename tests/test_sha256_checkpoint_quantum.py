@@ -296,3 +296,33 @@ def test_phase_aware_cached_word_rejects_invalid_and_overbudget_selections(
     assert not any(
         kind == "CACHE_CLEANUP" for kind, _ in seen
     ), "a rejected partial schedule must not issue a completion cleanup"
+
+
+
+def test_cached_word_streaming_resource_depth_and_phase(checkpoint_case):
+    pytest.importorskip("pyzx")
+    from quantum.sha256_transmon_d8.logical_resource_accounting import (
+        measure_checkpointed_word_resources,
+    )
+
+    compiled, _, plan = checkpoint_case
+    report = measure_checkpointed_word_resources(
+        compiled, 0, selected_bits=(31,),
+        max_optimized_source_gates=8192,
+        max_optimized_total_gates=8192,
+        max_windows_per_bit=2, max_qubits=3, max_window_gates=8,
+    )
+    assert report.completed_bits == 32
+    assert report.total_stages == 32 + 2 * len(plan.cached_nodes)
+    assert report.selected_bits == (31,)
+    assert report.reference.logical_wires == 321
+    assert report.optimized.logical_wires == 321
+    assert report.reference.gates > 0
+    assert report.optimized.gates > 0
+    assert report.reference.t_gates > 0
+    assert report.reference.entangling_depth > 0
+    assert report.optimized.entangling_depth > 0
+    assert len(report.source_gate_digest) == 64
+    assert report.entangling_depth_savings == (
+        report.reference.entangling_depth - report.optimized.entangling_depth
+    )
