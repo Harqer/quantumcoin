@@ -13,9 +13,9 @@ class D8EntanglerCalibration:
     target_permutation: tuple[int, ...]
     openpulse_body: str
     characterization_id: str
-    process_fidelity: float
-    max_leakage: float
-    characterized_at: str
+    process_fidelity: float | None = None
+    max_leakage: float | None = None
+    characterized_at: str | None = None
     unitary_characterized: bool = True
 
     def __post_init__(self) -> None:
@@ -28,16 +28,24 @@ class D8EntanglerCalibration:
             raise ValueError("openpulse_body must be non-empty")
         if not self.characterization_id.strip():
             raise ValueError("characterization_id must be non-empty")
-        if not self.characterized_at.strip():
-            raise ValueError("characterized_at must be non-empty")
-        if not 0.0 <= self.process_fidelity <= 1.0:
+        if self.characterized_at is not None and not self.characterized_at.strip():
+            raise ValueError("characterized_at must be non-empty when supplied")
+        if self.process_fidelity is not None and not 0.0 <= self.process_fidelity <= 1.0:
             raise ValueError("process_fidelity must be in [0, 1]")
-        if not 0.0 <= self.max_leakage <= 1.0:
+        if self.max_leakage is not None and not 0.0 <= self.max_leakage <= 1.0:
             raise ValueError("max_leakage must be in [0, 1]")
         if not self.unitary_characterized:
             raise ValueError(
                 "d=8 entangler calibration must characterize the full target unitary"
             )
+
+    @property
+    def quality_metadata_complete(self) -> bool:
+        return (
+            self.process_fidelity is not None
+            and self.max_leakage is not None
+            and self.characterized_at is not None
+        )
 
     def matches(
         self,
