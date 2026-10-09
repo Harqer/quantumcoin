@@ -29,7 +29,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install test dependency
-        run: python -m pip install --disable-pip-version-check pytest
+        run: python -m pip install --disable-pip-version-check pytest numpy pyzx==0.10.7 pytket==2.18.5
 
       - name: Run SHA-256 regression suite
         run: python -m pytest -q tests/test_sha256_*.py
