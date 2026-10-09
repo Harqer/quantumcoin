@@ -225,6 +225,15 @@ def test_full_word_rejects_unfinished_prefix_and_unchecked_cache(coherent107):
             max_fragment_gates=2,
         )
     assert seen == []
+    with pytest.raises(StreamedGateBudgetExceeded, match="complete streamed word exceeded"):
+        emit_complete_streamed_word(
+            compiled, 0, lambda bit, c: seen.append(bit),
+            max_total_gates=100,
+        )
+    assert seen == []
+    with pytest.raises(ValueError, match="max_total_gates"):
+        emit_complete_streamed_word(compiled, 0, lambda bit, c: None,
+                                    max_total_gates=0)
     with pytest.raises(RuntimeError, match="sink crashed"):
         emit_complete_streamed_word(
             compiled, 0, lambda bit, c: (_ for _ in ()).throw(
@@ -239,3 +248,35 @@ def test_full_word_rejects_unfinished_prefix_and_unchecked_cache(coherent107):
     )
     with pytest.raises(ValueError, match="checkpointed"):
         plan_complete_streamed_word(checkpointed, 0)
+
+
+
+def test_real_late_dynamic_schedule_plan_is_complete_but_bounded(coherent107):
+    """The real late SHA Boolean DAG is accepted as a manifest, not unbounded gates."""
+    index = next(
+        i for i, op in enumerate(coherent107.operations)
+        if isinstance(op, StreamedScheduleAdd) and op.round_index >= 16
+    )
+    op = coherent107.operations[index]
+    assert op.checkpoint_plan is None
+    manifest = plan_complete_streamed_word(coherent107, index)
+    assert manifest.round_index == op.round_index
+    assert manifest.source_nodes == coherent107.schedule.words[op.round_index]
+    assert len(manifest.bit_order) == 32
+    with pytest.raises(StreamedGateBudgetExceeded):
+        emit_complete_streamed_word(
+            coherent107, index, lambda bit, circuit: None,
+            max_fragment_gates=1,
+        )
+
+
+def test_bounded_circuit_guards_all_public_gate_insertion_routes():
+    from quantum.sha256_transmon_d8.ir import Gate
+    from quantum.sha256_transmon_d8.streaming_quantum import _BoundedCircuit
+
+    circuit = _BoundedCircuit(1)
+    circuit.extend((Gate("X", (0,)),))
+    with pytest.raises(StreamedGateBudgetExceeded):
+        circuit.maj(0, 1, 2)
+    with pytest.raises(StreamedGateBudgetExceeded):
+        circuit.extend((Gate("CX", (0, 1)),))
