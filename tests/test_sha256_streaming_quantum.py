@@ -81,7 +81,10 @@ def test_inverse_streamed_contribution_and_lazy_bit_order(coherent107):
     fwd = lower_streamed_schedule_bit(forward, 0, 31)
     inv = lower_streamed_schedule_bit(inverse, 0, 31)
     assert inv.gates == fwd.inverse().gates
-    assert next(iter_streamed_schedule_bits(forward, 0))[0] == 0
+    # An early (+2**0) controlled increment is too expensive for a tiny
+    # budget; the lazy iterator must fail before materializing a partial bit.
+    with pytest.raises(StreamedGateBudgetExceeded):
+        next(iter_streamed_schedule_bits(forward, 0, max_source_gates=2))
     assert next(iter_streamed_schedule_bits(inverse, 0))[0] == 31
     with pytest.raises(ValueError, match="max_bits"):
         list(iter_streamed_schedule_bits(forward, 0, max_bits=33))
