@@ -366,3 +366,72 @@ The approximately 79% gate savings and 76% entangling-depth savings
 come from the full arithmetic resynthesis, not from the selected ZX
 sidecar windows. These are qubit logical counts, not calibrated
 Rigetti d=8 pulses or full 64-round SHA resource figures.
+
+## Round 10 — whole-register controlled increment, not independent MCX carries
+
+The production SHA emitter now offers a second, full-arithmetic implementation
+for each long controlled +2**start increment of an actual SHA state word.
+coherent_stream._emit_full_dirty_controlled_increment treats
+(control, state_word[start:]) as one register, applies a reversible
+unconditional increment to it, then flips its low control bit back.
+Consequently the state word increments iff the original control was 1.
+
+For an N-bit extended register R and an N-bit borrowed dirty register D,
+the exact unconditional increment construction is:
+
+    R -= D (mod 2**N)
+    D ^= (2**N - 1)
+    R -= D (mod 2**N)
+    D ^= (2**N - 1)
+
+Because D+~D = 2**N-1, the complete effect is R+=1 (mod 2**N),
+with D restored exactly, even for arbitrary entangled borrowed states.
+Each subtraction is the inverse of the no-clean-ancilla Takahashi-style
+same-width addition circuit. This is a linear-size whole-register
+arithmetic construction, NOT an approximation or a ZX rewrite.
+
+Source and attribution: Craig Gidney, Factoring with n+2 clean qubits
+and n-1 dirty qubits (2017), arXiv:1706.07884, Fig. 19.
+Source implementation: Strilanc/PaperImpl-2017-DirtyPeriodFinding,
+src/dirty_period_finding/decompositions/increment_rules.py and
+addition_rules.py, original copyright 2017 Google Inc., Apache-2.0.
+URL: https://github.com/Strilanc/PaperImpl-2017-DirtyPeriodFinding
+
+The optimized path requires at least (suffix_length + 1) distinct
+compatible dirty bits, excluding the control and all modified word bits.
+It is used only for suffixes of at least eight bits where its full
+Clifford+T cost beats repeated multi-controlled carry gates. If
+insufficient workspace exists, or the suffix is short, the existing
+exact descending-carry network remains the fallback.
+
+Independent tests exhaustively verify the Takahashi adder on all
+inputs up to four-bit registers, verify controlled increments for
+8, 9, 16, and 32-bit targets under random arbitrary dirty states,
+verify inverse and restoration, and compare 32-bit logical resources
+against the actual prior MCX-carry network. All tests run CPU-only.
+
+### CI measurements after the new whole-adder construction
+
+| Metric | Round 9 W[3] | Round 10 W[3] | Round 9 W[18] cached | Round 10 W[18] cached |
+|---|---:|---:|---:|---:|
+| Gates | 298,161 | 69,486 | 298,285 | 69,610 |
+| T/Tdg count | 139,097 | 29,022 | 139,097 | 29,022 |
+| Entangling gates | 119,322 | 31,097 | 119,446 | 31,221 |
+| Logical depth | 178,703 | 48,599 | 178,822 | 48,622 |
+| Entangling critical depth | 89,444 | 27,925 | 89,566 | 27,948 |
+
+Across a complete W[3] word, this is another 76.7% fewer logical
+gates, 79.1% fewer T gates, and 68.8% shorter entangling critical
+path versus the already improved Round 9 implementation.
+Relative to the earliest 1.42M-gate reference, Round 10 uses
+approximately 95.1% fewer logical Clifford+T gates for W[3].
+The full 32-bit controlled-increment suboperation alone moves
+from 27,916 to 4,297 logical gates and from 8,377 to 1,738
+entangling critical-path levels on the measured synthetic 32-bit
+operand with exactly the SHA gate semantics.
+
+These metrics are exact *logical circuit* gate/dependency measurements,
+not fault-tolerant cycle counts, calibrated d=8 gates or full SHA
+mining throughput estimates. Both source and optimized circuits
+act as exact basis permutations, so no unknown quantum phase is
+introduced by the arithmetic substitution.
