@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 
 from .carrier_ir import compile_carrier_program
+from .d8_pair_fusion import fuse_two_carrier_regions
 from .cepheus_mapping import (
     CEPHEUS_ARN,
     assert_pulse_prerequisites,
@@ -83,7 +84,9 @@ def _prepare_hardware_program(message: bytes, device_capabilities: str):
         boolean_strategy="low_multiplicative",
     )
     assert_continuous_execution_invariant(compiled)
-    carrier_program = compile_carrier_program(compiled.circuit, layout)
+    carrier_program = fuse_two_carrier_regions(
+        compile_carrier_program(compiled.circuit, layout)
+    )
     snapshot = snapshot_from_device_capabilities(device_capabilities)
     placement = place_carriers(compiled.circuit, layout, snapshot)
     assert_pulse_prerequisites(snapshot, placement)
