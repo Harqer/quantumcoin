@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from hashlib import sha256
 from itertools import islice
+from math import fsum, pi, remainder
 from typing import TYPE_CHECKING, Callable, Iterator
 
 from .coherent_stream import (
@@ -375,4 +376,142 @@ def emit_complete_streamed_word(
     return CompleteStreamedWordReport(
         manifest=manifest, completed_bits=finished,
         source_gate_count=total_gates, source_gate_digest=digest.hexdigest(),
+    )
+
+
+@dataclass(frozen=True)
+class PhaseAwareStreamedWordReport:
+    """Complete word certificate with bounded, independently verified windows.
+
+    The source report accounts for ALL 32 bits. Selected bit candidates are
+    logical QASM *sidecars*, not physical d=8 instructions or qLDPC gates.
+    """
+
+    source: CompleteStreamedWordReport
+    selected_bits: tuple[int, ...]
+    accepted_bits: tuple[int, ...]
+    accepted_windows: int
+    verified_global_phase_rad: float
+    selected_candidate_digest: str
+    selected_source_gates: int
+
+    @property
+    def completed_bits(self) -> int:
+        return self.source.completed_bits
+
+
+def emit_phase_aware_streamed_word(
+    compiled: "CompiledCoherentSha256",
+    operation_index: int,
+    consume: Callable[
+        [int, ReversibleCircuit, PhaseAwareQuantumBlock | None], None
+    ],
+    *,
+    backend: str = "pyzx",
+    selected_bits: tuple[int, ...] = (31,),
+    max_fragment_gates: int = 16384,
+    max_total_gates: int = 2_000_000,
+    max_optimized_source_gates: int = 1024,
+    max_optimized_total_gates: int = 8192,
+    max_windows_per_bit: int = 2,
+    max_qubits: int = 6,
+    max_window_gates: int = 128,
+) -> PhaseAwareStreamedWordReport:
+    """Complete W[t] sidecar, optimizing selected bit lifetimes in isolation.
+
+    Every bit is emitted through emit_complete_streamed_word (same exact SHA
+    reversible operations). Only explicitly selected bits are decomposed to
+    phase-aware Clifford+T QASM. All others remain original ReversibleCircuit
+    fragments, preventing eager 32-bit QASM materialization.
+
+    The caller stages output transactionally: failures return NO report and
+    all previously staged prefixes must be discarded. No QPU sink is provided.
+    """
+    if not callable(consume):
+        raise TypeError("consume must be a callable CPU-only staging sink")
+    if not isinstance(selected_bits, tuple):
+        raise TypeError("selected_bits must be a tuple")
+    if len(set(selected_bits)) != len(selected_bits) or any(
+        not isinstance(bit, int) or not 0 <= bit < 32
+        for bit in selected_bits
+    ):
+        raise ValueError("selected_bits must be unique integers in 0..31")
+    if not 1 <= max_optimized_source_gates <= 16384:
+        raise ValueError("max_optimized_source_gates must be in 1..16384")
+    if max_optimized_total_gates < 1:
+        raise ValueError("max_optimized_total_gates must be positive")
+    if max_windows_per_bit < 1 or not 1 <= max_qubits <= 6 or max_window_gates < 1:
+        raise ValueError("invalid bounded optimizer settings")
+
+    selected_set = frozenset(selected_bits)
+    selected_covered: list[int] = []
+    accepted: list[int] = []
+    phases: list[float] = []
+    accepted_windows = 0
+    selected_source_gates = 0
+    candidate_digest = sha256()
+
+    def stage(
+        bit_index: int, reversible_fragment: ReversibleCircuit
+    ) -> None:
+        nonlocal accepted_windows, selected_source_gates
+        verified: PhaseAwareQuantumBlock | None = None
+        if bit_index in selected_set:
+            gate_count = len(reversible_fragment.gates)
+            if gate_count > max_optimized_source_gates or (
+                selected_source_gates + gate_count > max_optimized_total_gates
+            ):
+                raise StreamedGateBudgetExceeded(
+                    "phase-aware streamed optimization exceeds its exact "
+                    "source-gate budget"
+                )
+            windows = evaluate_reversible_circuit_windows(
+                reversible_fragment,
+                backend=backend,
+                max_windows=max_windows_per_bit,
+                max_qubits=max_qubits,
+                max_gates=max_window_gates,
+            )
+            verified = assemble_phase_aware_logical_block(
+                reversible_fragment, windows,
+                logical_width=compiled.layout.logical_bit_capacity,
+                operation_index=operation_index,
+                operation_label=(
+                    f"W[{compiled.operations[operation_index].round_index}]"
+                    f"_BIT[{bit_index}]"
+                ),
+            )
+            if verified.source_gate_count != gate_count:
+                raise AssertionError("phase-aware streamed fragment lost gates")
+            selected_source_gates += gate_count
+            selected_covered.append(bit_index)
+            if verified.accepted_windows:
+                accepted.append(bit_index)
+            accepted_windows += verified.accepted_windows
+            phases.append(verified.global_phase_rad)
+            candidate_digest.update(
+                f"{bit_index}:".encode("ascii")
+                + sha256(verified.qasm.encode("utf-8")).digest()
+                + verified.global_phase_rad.hex().encode("ascii")
+            )
+        consume(bit_index, reversible_fragment, verified)
+
+    source = emit_complete_streamed_word(
+        compiled, operation_index, stage,
+        max_fragment_gates=max_fragment_gates,
+        max_total_gates=max_total_gates,
+    )
+    if frozenset(selected_covered) != selected_set:
+        raise AssertionError("selected streamed optimizer bits were not covered")
+    if source.completed_bits != 32:
+        raise AssertionError("phase-aware plan lacks full 32-bit coverage")
+    return PhaseAwareStreamedWordReport(
+        source=source,
+        selected_bits=tuple(b for b in source.manifest.bit_order
+                            if b in selected_set),
+        accepted_bits=tuple(accepted),
+        accepted_windows=accepted_windows,
+        verified_global_phase_rad=remainder(fsum(phases), 2 * pi),
+        selected_candidate_digest=candidate_digest.hexdigest(),
+        selected_source_gates=selected_source_gates,
     )
