@@ -210,7 +210,7 @@ def lower_complete_sha_program(
 
 
 def prepare_complete_sha_program(
-    carrier_program: CarrierProgram,
+    carrier_program: CarrierProgram | FusedCarrierProgram,
     placement: CarrierPlacement,
     *,
     device,
