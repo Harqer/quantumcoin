@@ -59,13 +59,13 @@ def analyze_backend_requirements(
     snapshot: CepheusSnapshot,
     *,
     d8_local_permutations: D8LocalPermutationSet | None = None,
+    d8_calibrations: object | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
     d8_readout: D8ReadoutSet | None = None,
     readout_logical_carriers: tuple[int, ...] = (),
 ) -> D8BackendRequirementReport:
-    """Analyze every physical requirement after complete topology routing."""
-    routed = route_carrier_program(program, placement, snapshot)
+    """Analyze every physical requirement after complete topology routing.\n\n    d8_calibrations is retained only for compatibility with older callers.\n    Adjacent-transition spectroscopy data never satisfies an executable local\n    permutation requirement; only d8_local_permutations does.\n    """\n    routed = route_carrier_program(program, placement, snapshot)
 
     source_cross = [
         operation
