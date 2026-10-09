@@ -21,6 +21,7 @@ class D8LocalPermutationCalibration:
     process_fidelity: float
     max_leakage: float
     characterized_at: str
+    device_calibration_fingerprint: str
     duration_s: float
     synchronization_verified: bool
     unitary_characterized: bool = True
@@ -34,6 +35,8 @@ class D8LocalPermutationCalibration:
             raise ValueError("characterization_id must be non-empty")
         if not self.characterized_at.strip():
             raise ValueError("characterized_at must be non-empty")
+        if not self.device_calibration_fingerprint.strip():
+            raise ValueError("device_calibration_fingerprint must be non-empty")
         if not 0.0 <= self.process_fidelity <= 1.0:
             raise ValueError("process_fidelity must be in [0, 1]")
         if not 0.0 <= self.max_leakage <= 1.0:
@@ -68,11 +71,17 @@ class D8LocalPermutationSet:
         self,
         physical_carrier: int,
         operation: LocalPermutation8,
+        *,
+        device_fingerprint: str | None = None,
     ) -> D8LocalPermutationCalibration:
         matches = [
             calibration
             for calibration in self.calibrations
             if calibration.matches(physical_carrier, operation)
+            and (
+                device_fingerprint is None
+                or calibration.device_calibration_fingerprint == device_fingerprint
+            )
         ]
         if not matches:
             raise KeyError(
