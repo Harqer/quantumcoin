@@ -97,6 +97,11 @@ def analyze_backend_requirements(
         for operation in routed.operations
         if isinstance(operation, RoutedLocalEmbeddedGate)
     ]
+    routed_pairs = [
+        operation
+        for operation in routed.operations
+        if isinstance(operation, RoutedPairPermutation)
+    ]
     routed_cx = [
         operation
         for operation in routed.operations
@@ -138,6 +143,29 @@ def analyze_backend_requirements(
                 d8_coherent_locals.require(physical, target)
             except (KeyError, RuntimeError):
                 missing_coherent_local.add(key)
+
+    fused_source = [
+        operation
+        for operation in program.operations
+        if isinstance(operation, FusedPairOperation)
+    ]
+    unique_fused: set[tuple[tuple[int, int], tuple[int, ...]]] = set()
+    missing_fused: set[tuple[tuple[int, int], tuple[int, ...]]] = set()
+    for operation in routed_pairs:
+        physical = operation.physical_carriers
+        key = (physical, operation.permutation.mapping)
+        unique_fused.add(key)
+        if d8_entanglers is None:
+            missing_fused.add(key)
+        else:
+            try:
+                d8_entanglers.require(
+                    physical,
+                    operation.permutation,
+                    coherent=True,
+                )
+            except (KeyError, RuntimeError):
+                missing_fused.add(key)
 
     direct_basis_cx = 0
     coherent_cx = 0
@@ -197,6 +225,11 @@ def analyze_backend_requirements(
             f"{len(missing_coherent_local)} unique coherent local H/T/Tdg/CX "
             "realizations are uncharacterized"
         )
+    if missing_fused:
+        gaps.append(
+            f"{len(missing_fused)} unique fused two-carrier unitary "
+            "realizations are uncharacterized"
+        )
     if missing_basis:
         gaps.append(
             f"{len(missing_basis)} unique basis-only embedded CX64 physical "
@@ -221,6 +254,10 @@ def analyze_backend_requirements(
         unique_local_permutations=len(local_unique),
         local_physical_carriers=local_physical,
         cross_operation_count=len(source_cross),
+        fused_pair_operations=len(fused_source),
+        fused_pair_source_gates=sum(operation.gate_count for operation in fused_source),
+        unique_fused_pair_requirements=len(unique_fused),
+        missing_fused_pair_realizations=len(missing_fused),
         cross_kind_counts=tuple(sorted(kind_counts.items())),
         cross_arity_counts=tuple(sorted(arity_counts.items())),
         routed_operation_count=len(routed.operations),
@@ -250,6 +287,10 @@ def format_backend_requirement_report(report: D8BackendRequirementReport) -> str
         f"local_operations={report.local_operation_count}",
         f"unique_local_permutations={report.unique_local_permutations}",
         f"cross_operations={report.cross_operation_count}",
+        f"fused_pair_operations={report.fused_pair_operations}",
+        f"fused_pair_source_gates={report.fused_pair_source_gates}",
+        f"unique_fused_pair_requirements={report.unique_fused_pair_requirements}",
+        f"missing_fused_pair_realizations={report.missing_fused_pair_realizations}",
         f"cross_kind_counts={dict(report.cross_kind_counts)}",
         f"cross_arity_counts={dict(report.cross_arity_counts)}",
         f"routed_operations={report.routed_operation_count}",
