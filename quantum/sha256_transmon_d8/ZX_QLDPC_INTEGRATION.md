@@ -34,6 +34,8 @@ License: references/CALTECH_YARN_LICENSE
 
 Use optimize_reversible_region for existing compiler semantic regions. Windows exceeding max_qubits/max_gates fail closed. Candidate.selected_qasm is a verified LOGICAL circuit, not a Rigetti pulse job.
 
+For actual SHA ReversibleCircuit instances, partition_reversible_circuit respects all SemanticRegion boundaries and covers every gate exactly once. evaluate_reversible_circuit_windows runs at most max_windows of those exact subcircuits, each with a verified unitary and before/after gate-depth metrics. These APIs evaluate candidate logical optimizations; production d=8 lowering is deliberately not changed.
+
 ## Reproducible Caltech resource accounting
 
     from quantum.sha256_transmon_d8.qldpc_resource import inspect_hook_free_schedule, minimum_mitten_footprint
