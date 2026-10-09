@@ -16,6 +16,8 @@ class D8EntanglerCalibration:
     process_fidelity: float | None = None
     max_leakage: float | None = None
     characterized_at: str | None = None
+    duration_s: float | None = None
+    synchronization_verified: bool = False
     unitary_characterized: bool = True
 
     def __post_init__(self) -> None:
