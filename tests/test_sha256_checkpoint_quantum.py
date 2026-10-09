@@ -19,7 +19,7 @@ from quantum.sha256_transmon_d8.coherent_schedule import (
     bitcoin_second_block_template, evaluate_schedule
 )
 from quantum.sha256_transmon_d8.coherent_stream import (
-    StreamCheckpointPlan, _checkpoint_projected_cost, _word_node_demand,
+    StreamCheckpointPlan, _checkpoint_projected_cost,
     emit_streamed_schedule_add_checkpointed, streamed_word_add_report,
 )
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
@@ -33,17 +33,14 @@ def checkpoint_case():
     fixed = bitcoin_second_block_template()
     layout = D8Layout(profile="coherent107")
     schedule = select_schedule_dag(fixed, 3)
-    # W[18]'s cost-greedy planner legitimately selects zero caches. Choose
-    # one real ancestor DAG node deliberately to test the cross-bit lifetime,
-    # without inventing a synthetic SHA schedule or changing production policy.
-    demand = _word_node_demand(schedule, 18)
-    ancestors = [
-        index for index, node in enumerate(schedule.dag.nodes)
-        if demand[index] > 0 and node.kind in {"xor", "and"}
-        and schedule.dag.and_depth[index] <= 2
-    ]
-    assert ancestors
-    selected = (ancestors[0],)
+    # W[18]'s cost planner selects zero caches. Force caching of the REAL
+    # computed DAG node for W[18][31] to make the full live-cache lifetime
+    # test affordable. Its BIT[31] then reads a live cached quantum register
+    # through the exact source emitter, with no invented SHA arithmetic.
+    # This changes only a test fixture, never production cache selection.
+    last_output = schedule.words[18][31]
+    assert schedule.dag.nodes[last_output].kind in {"xor", "and"}
+    selected = (last_output,)
     projected, depth = _checkpoint_projected_cost(schedule, 18, selected)
     available = streamed_word_add_report(layout, schedule, 18).available_dirty_bits - 1
     assert depth <= available
@@ -166,7 +163,7 @@ def test_checkpointed_budget_rejects_before_publishing_completion(checkpoint_cas
 
 
 def _selected_cached_bit(compiled, plan):
-    """Select an actual W[18] output depending on the live cached DAG node."""
+    """Select the actual W[18] output computed into the live cache wire."""
     dag = compiled.schedule.dag
     ancestor = plan.cached_nodes[0]
 
