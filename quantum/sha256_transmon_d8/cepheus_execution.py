@@ -188,7 +188,7 @@ def prepare_complete_sha_program(
     *,
     device,
     shots: int = 10,
-    d8_calibrations: D8CalibrationSet | None = None,
+    d8_local_permutations: D8LocalPermutationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
 ) -> LoweredCepheusProgram:
