@@ -107,11 +107,12 @@ def test_complete_w3_stream_resource_accounting_against_real_sha():
     assert report.reference.t_gates > 0
     assert report.reference.logical_depth > 0
     assert report.optimized.logical_depth > 0
-    # Protect the whole 32-bit SHA carry-region gain against regression back
-    # to the former recursive dirty-MCX decomposition (>1.4M logical gates).
-    assert report.reference.gates < 350_000
-    assert report.reference.t_gates < 150_000
-    assert report.reference.entangling_depth < 100_000
+    # Protect the whole-register subtraction/addition rewrite from
+    # regression to the previous 298k-gate ladder-based carry network.
+    # These are full W[3] source-circuit counts, not isolated gate probes.
+    assert report.reference.gates < 80_000
+    assert report.reference.t_gates < 35_000
+    assert report.reference.entangling_depth < 30_000
     assert report.reference.entangling_depth > 0
     assert report.optimized.entangling_depth > 0
     assert report.gate_savings == (
