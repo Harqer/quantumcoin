@@ -233,21 +233,15 @@ class OptimizationWindow:
     wire_labels: tuple[int, ...]
 
 
-def partition_reversible_circuit(
+def iter_reversible_circuit_windows(
     circuit: ReversibleCircuit, *, max_qubits: int = 6,
     max_gates: int = 128
-) -> tuple[OptimizationWindow, ...]:
-    """Partition a genuine reversible circuit without crossing region leases.
-
-    Every input gate belongs to exactly one contiguous window. A window can
-    contain any live dirty SHA state: unitary verification never assumes |0>.
-    This is only a partition; no compiler gate or hardware pulse is changed.
-    """
+):
+    """Yield bounded windows lazily; do not materialize millions of SHA gates."""
     circuit.validate()
     if max_qubits < 3 or max_gates < 1:
         raise ValueError("invalid optimization window limits")
     bounds = sorted({0, len(circuit.gates)} | circuit.region_boundaries())
-    windows: list[OptimizationWindow] = []
     for start, stop in zip(bounds, bounds[1:]):
         current_start = start
         wires: set[int] = set()
@@ -259,35 +253,49 @@ def partition_reversible_circuit(
                 len(wires | new_wires) > max_qubits
                 or index - current_start >= max_gates
             ):
-                windows.append(
-                    OptimizationWindow(current_start, index, tuple(sorted(wires)))
+                yield OptimizationWindow(
+                    current_start, index, tuple(sorted(wires))
                 )
                 current_start = index
                 wires = set()
             wires.update(new_wires)
         if current_start < stop:
-            windows.append(OptimizationWindow(
+            yield OptimizationWindow(
                 current_start, stop, tuple(sorted(wires))
-            ))
-    return tuple(windows)
+            )
+
+
+def partition_reversible_circuit(
+    circuit: ReversibleCircuit, *, max_qubits: int = 6,
+    max_gates: int = 128
+) -> tuple[OptimizationWindow, ...]:
+    """Materialize an explicit partition when complete coverage is required."""
+    return tuple(iter_reversible_circuit_windows(
+        circuit, max_qubits=max_qubits, max_gates=max_gates
+    ))
 
 
 def evaluate_reversible_circuit_windows(
     circuit: ReversibleCircuit, *, backend: str = "pyzx",
     max_windows: int = 8, max_qubits: int = 6, max_gates: int = 128
 ) -> tuple[tuple[OptimizationWindow, VerifiedCandidate], ...]:
-    """Evaluate REAL project SHA windows without modifying the source circuit."""
+    """Evaluate first bounded windows without scanning the complete SHA circuit."""
+    from itertools import islice
+
     if max_windows < 1:
         raise ValueError("max_windows must be positive")
-    windows = partition_reversible_circuit(
-        circuit, max_qubits=max_qubits, max_gates=max_gates
+    windows = islice(
+        iter_reversible_circuit_windows(
+            circuit, max_qubits=max_qubits, max_gates=max_gates
+        ),
+        max_windows
     )
     return tuple(
         (window, optimize_window(
             circuit.gates[window.start:window.stop],
             backend=backend, max_qubits=max_qubits, max_gates=max_gates
         ))
-        for window in windows[:max_windows]
+        for window in windows
     )
 
 
