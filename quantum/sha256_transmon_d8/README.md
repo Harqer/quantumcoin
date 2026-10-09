@@ -213,6 +213,22 @@ The ROUND16 and arithmetic optimizations do not increase logical workspace.
 
 ## Coherent 32-bit nonce path
 
+**October 2026 validation:** `coherent107` is the default coherent-nonce
+profile for the current exact streamed Boolean-oracle lowering. The
+`coherent97` carrier arrangement is a valid 291-binary-label packing model,
+but the currently implemented two-checkpoint depth-cut algorithm cannot
+compile the entire 64-round nonce-dependent schedule within its available
+258 dirty workspace bits. The optimized prefix DAG requires up to 269 dirty
+bits before checkpointing; known late-round checkpoint candidates still
+exceed the 258-bit limit. Explicit `coherent97` compilation fails closed rather
+than allocating undocumented ancillas or claiming safe hardware execution.
+
+The `coherent107` default is **a temporary software width-safe reference**,
+not evidence of calibrated d=8 execution on all 107 Cepheus qubits. Recovering
+the 97-carrier target requires a separately verified, genuinely lower-space
+Boolean-oracle construction; no test asserts it is presently executable.
+
+
 The coherent-input compiler is being lowered separately from the fixed-message
 compiler so a 107-transmon width claim cannot accidentally reuse classical
 W[t] constants.

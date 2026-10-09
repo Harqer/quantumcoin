@@ -63,15 +63,15 @@ def test_full_coherent107_program_has_no_persistent_schedule_storage():
     ) == 72
 
 
-def test_compact_default_matches_reference_and_inverse():
+def test_supported_default_matches_reference_and_inverse():
     compiled = compile_coherent_nonce_sha256(
         H0,
         _fixed_words(),
         nonce_word_index=3,
     )
 
-    assert compiled.layout.profile == "coherent97"
-    assert compiled.layout.total_transmons == 97
+    assert compiled.layout.profile == "coherent107"
+    assert compiled.layout.total_transmons == 107
 
     for nonce in (0, 1, 0x12345678, 0xFFFFFFFF):
         verify_compiled_coherent_sha256(compiled, nonce)

@@ -37,7 +37,7 @@ def _dirty_mcx_gate_count(control_count: int) -> int:
 
 
 def dirty_oracle_gate_count(dag: BooleanDag, node_index: int) -> int:
-    """Exact primitive-node count emitted by emit_node_xor for one DAG node."""
+    """Analytic cost proxy for DAG selection; not a measured emitted count."""
     memo: dict[int, int] = {}
 
     def visit(index: int) -> int:
@@ -63,7 +63,11 @@ def dirty_oracle_gate_count(dag: BooleanDag, node_index: int) -> int:
 
 
 def conditional_increment_gate_count(width: int, start: int) -> int:
-    """Primitive-node count for a dirty-ancilla controlled +2**start."""
+    """Conservative recursive upper bound for controlled increments.
+
+    The actual emitter chooses the linear 4n-8 dirty-ancilla ladder when
+    enough borrowed workspace exists, so real emitted counts can be lower.
+    """
     if width <= 0:
         raise ValueError("width must be positive")
     if not 0 <= start < width:
@@ -79,7 +83,7 @@ def streamed_word_add_gate_count(
     schedule: CoherentScheduleDag,
     round_index: int,
 ) -> int:
-    """Exact eager-expansion gate count for one streamed W[t] addition."""
+    """Analytic projection for a streamed W[t] addition (not emitted count)."""
     if not 0 <= round_index < 64:
         raise ValueError("round_index must be in 0..63")
     return sum(
@@ -312,6 +316,46 @@ def _emit_mcx_dirty(
         circuit.ccx(controls[0], controls[1], target)
         return
 
+    # Whole-arithmetic-region optimization: exact borrowed-dirty Toffoli
+    # ladder, 4n-8 CCX gates for n controls with n-2 borrowed ancillas.
+    # This is the compute / uncompute / toggle-detection identity, not a
+    # clean-ancilla assumption. It restores *arbitrary* borrowed states and
+    # thus also preserves all their entanglement with external registers.
+    #
+    # A0: d0 ^= c0*c1
+    # Aj: dj ^= d(j-1)*c(j+1)
+    #   compute A0..A(n-3), toggle target by d_last*c_last,
+    #   undo A(n-3)..A0; replay A1..A(n-3), toggle again, undo.
+    # The two toggles cancel unknown dirty prefixes, leaving exactly
+    # target ^= product(controls). All borrowed d wires return unchanged.
+    #
+    # See Khattar & Gidney, "Rise of conditionally clean ancillae...",
+    # dirty-ancilla ladder (4n-8 Toffoli), arXiv:2407.17966.
+    available = tuple(dict.fromkeys(
+        bit for bit in borrowed if bit != target and bit not in controls
+    ))
+    if len(available) >= count - 2:
+        ancillas = available[:count - 2]
+
+        def rung(index: int) -> None:
+            left = controls[0] if index == 0 else ancillas[index - 1]
+            right = controls[index + 1]
+            circuit.ccx(left, right, ancillas[index])
+
+        for index in range(count - 2):
+            rung(index)
+        circuit.ccx(ancillas[-1], controls[-1], target)
+        for index in range(count - 3, -1, -1):
+            rung(index)
+        for index in range(1, count - 2):
+            rung(index)
+        circuit.ccx(ancillas[-1], controls[-1], target)
+        for index in range(count - 3, 0, -1):
+            rung(index)
+        return
+
+    # Scarce borrowed workspace: retain the original bounded recursive
+    # exact identity, rather than requiring extra clean physical carriers.
     dirty = next(
         (
             bit
@@ -509,6 +553,94 @@ def emit_node_xor(
     )
 
 
+def _emit_no_ancilla_add(
+    circuit: ReversibleCircuit,
+    source: tuple[int, ...],
+    target: tuple[int, ...],
+) -> None:
+    """Exact same-width reversible source-register addition, no clean ancilla.
+
+    Implements Takahashi/Kunihiro's 2005 linear-size reversible full adder
+    adapted from Gidney's published reference implementation (2017),
+    src/dirty_period_finding/decompositions/addition_rules.py.
+    Original ProjectQ source copyright 2017 Google Inc., Apache-2.0:
+    https://github.com/Strilanc/PaperImpl-2017-DirtyPeriodFinding
+
+    (source, target) -> (source, target + source mod 2**n) for ALL
+    arbitrary initial source/target basis states. The source register is
+    restored even though it acts as temporary carry workspace.
+    """
+    if len(source) != len(target) or not source:
+        raise ValueError("same-width adder requires nonempty equal registers")
+    if len(set(source + target)) != 2 * len(source):
+        raise ValueError("adder registers must not alias")
+    carry = source[-1]
+    low = source[:-1]
+    for q in reversed(low + target):
+        circuit.cx(carry, q)
+    for index in range(len(target) - 1):
+        circuit.cx(carry, target[index])
+        circuit.ccx(target[index], carry, source[index])
+        circuit.ccx(target[index], source[index], carry)
+    circuit.cx(carry, target[-1])
+    for index in range(len(target) - 2, -1, -1):
+        circuit.ccx(target[index], source[index], carry)
+        circuit.ccx(target[index], carry, source[index])
+        circuit.cx(source[index], target[index])
+    for q in low + target:
+        circuit.cx(carry, q)
+
+
+def _emit_full_dirty_controlled_increment(
+    circuit: ReversibleCircuit,
+    bits: tuple[int, ...],
+    start: int,
+    control: int,
+    borrowed: tuple[int, ...],
+) -> bool:
+    """Linear-size whole-suffix increment using arbitrary dirty registers.
+
+    The extended word (control, bits[start:]) is unconditionally incremented
+    and then its low control bit is inverted. This increments the original
+    word precisely iff control was 1, returning control unchanged.
+
+    For the unconditional increment, Gidney's two-subtraction identity is:
+        target -= dirty
+        dirty ^= ALL_ONES
+        target -= dirty
+        dirty ^= ALL_ONES
+    Since dirty + ~dirty == -1 mod 2**width, target ends as target + 1.
+    This is a full-register quantum permutation valid for arbitrary dirty
+    inputs; NO ancilla clean-state assumption, measurement, or reset.
+
+    Requires the same number of dirty source bits as extended word bits.
+    For short suffixes use the existing exact MCX controlled increment,
+    which has lower fixed overhead.
+    """
+    suffix = bits[start:]
+    if len(suffix) < 8:
+        return False
+    expanded = (control,) + suffix
+    forbidden = set(expanded)
+    compatible = tuple(dict.fromkeys(
+        q for q in borrowed if q not in forbidden
+    ))
+    if len(compatible) < len(expanded):
+        return False
+    dirty = compatible[:len(expanded)]
+    add = ReversibleCircuit()
+    _emit_no_ancilla_add(add, dirty, expanded)
+    subtract_gates = add.inverse().gates
+    circuit.extend(subtract_gates)
+    for q in dirty:
+        circuit.x(q)
+    circuit.extend(subtract_gates)
+    for q in dirty:
+        circuit.x(q)
+    circuit.x(control)
+    return True
+
+
 def _emit_conditional_increment(
     circuit: ReversibleCircuit,
     bits: tuple[int, ...],
@@ -521,6 +653,14 @@ def _emit_conditional_increment(
         raise ValueError("increment start out of range")
     if control in bits:
         raise ValueError("increment control cannot alias target word")
+
+    # Whole-register linear arithmetic wins for long suffixes with enough
+    # truly disjoint dirty registers; otherwise retain the previous exact
+    # descending-carry network and its scarce-ancilla fallback.
+    if _emit_full_dirty_controlled_increment(
+        circuit, bits, start, control, borrowed
+    ):
+        return
 
     for target_index in range(len(bits) - 1, start, -1):
         controls = (control,) + bits[start:target_index]
