@@ -141,7 +141,7 @@ def run_qpu_sha256(message: bytes) -> str:
         carrier_program,
         placement,
         snapshot,
-        d8_calibrations=None,
+        d8_local_permutations=None,
         d8_coherent_locals=None,
         d8_entanglers=None,
         d8_readout=None,
