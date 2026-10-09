@@ -306,7 +306,10 @@ def compile_coherent_nonce_sha256(
     uncomputed immediately. The same compact workspace is then reused as the
     Cuccaro carry lease or as transient schedule checkpoints.
     """
-    layout = layout or D8Layout(profile="coherent97")
+    # coherent97 remains a packing experiment: the current exact streamed
+    # Boolean oracle exceeds its 258-bit dirty-workspace budget in late rounds.
+    # Default to the smallest profile whose emitted schedule is width-safe.
+    layout = layout if layout is not None else D8Layout(profile="coherent107")
     if not layout.is_coherent_nonce:
         raise ValueError("coherent nonce compilation requires a coherent layout")
     if len(initial_state_words) != 8:
