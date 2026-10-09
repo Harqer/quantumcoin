@@ -104,12 +104,16 @@ def test_coherent_sha_compiler_exposes_verified_optimization_of_real_arithmetic(
         optimize_coherent_quantum_block,
     )
     from quantum.sha256_transmon_d8.coherent_schedule import bitcoin_second_block_template
+    from quantum.sha256_transmon_d8.layout import D8Layout
     from quantum.sha256_transmon_d8.sha256 import H0
 
+    # A genuine 64-round coherent compiler result; unlike coherent97 this
+    # profile needs no expensive schedule-checkpoint search in this test.
     compiled = compile_coherent_nonce_sha256(
-        H0, bitcoin_second_block_template(), nonce_word_index=3
+        H0, bitcoin_second_block_template(), nonce_word_index=3,
+        layout=D8Layout(profile="coherent107"),
     )
-    assert compiled.layout.total_transmons == 97
+    assert compiled.layout.total_transmons == 107
     index = next(
         i for i, operation in enumerate(compiled.operations)
         if isinstance(operation, CircuitBlock)
