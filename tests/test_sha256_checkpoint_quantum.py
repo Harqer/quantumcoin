@@ -18,7 +18,8 @@ from quantum.sha256_transmon_d8.coherent_schedule import (
     bitcoin_second_block_template, evaluate_schedule
 )
 from quantum.sha256_transmon_d8.coherent_stream import (
-    emit_streamed_schedule_add_checkpointed, plan_stream_checkpoints
+    StreamCheckpointPlan, _checkpoint_projected_cost, _word_node_demand,
+    emit_streamed_schedule_add_checkpointed, streamed_word_add_report,
 )
 from quantum.sha256_transmon_d8.ir import ReversibleCircuit, simulate
 from quantum.sha256_transmon_d8.layout import D8Layout
@@ -31,8 +32,24 @@ def checkpoint_case():
     fixed = bitcoin_second_block_template()
     layout = D8Layout(profile="coherent107")
     schedule = select_schedule_dag(fixed, 3)
-    plan = plan_stream_checkpoints(
-        schedule, 18, max_cache_bits=4, candidate_limit=12,
+    # W[18]'s cost-greedy planner legitimately selects zero caches. Choose
+    # one real ancestor DAG node deliberately to test the cross-bit lifetime,
+    # without inventing a synthetic SHA schedule or changing production policy.
+    demand = _word_node_demand(schedule, 18)
+    ancestors = [
+        index for index, node in enumerate(schedule.dag.nodes)
+        if demand[index] > 0 and node.kind in {"xor", "and"}
+        and schedule.dag.and_depth[index] <= 2
+    ]
+    assert ancestors
+    selected = (ancestors[0],)
+    projected, depth = _checkpoint_projected_cost(schedule, 18, selected)
+    available = streamed_word_add_report(layout, schedule, 18).available_dirty_bits - 1
+    assert depth <= available
+    plan = StreamCheckpointPlan(
+        round_index=18, cached_nodes=selected,
+        projected_gate_count=projected, max_effective_dirty_bits=depth,
+        available_dirty_bits=available,
     )
     compiled = compile_coherent_nonce_sha256(
         H0, fixed, nonce_word_index=3, layout=layout,
