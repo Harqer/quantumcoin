@@ -7,7 +7,7 @@ from .d8_cross_synthesis import TwoCarrierPermutation64
 
 @dataclass(frozen=True)
 class D8EntanglerCalibration:
-    """Characterized unitary realization of one exact two-carrier CX64 target."""
+    """Characterized unitary realization of one exact two-carrier d=8 target."""
 
     physical_carriers: tuple[int, int]
     target_permutation: tuple[int, ...]
