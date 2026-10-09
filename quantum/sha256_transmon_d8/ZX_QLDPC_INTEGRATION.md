@@ -206,3 +206,33 @@ does NOT establish safe unrestricted ZX optimization of all late dynamic
 schedule bits. Other bit selections and cache-sharing schedules remain
 bounded or fail closed. Full logical-resource depth and physical d=8
 mapping remain separate pending phases.
+
+## Round 6: checkpointed streamed SHA cache-lifetime lowering
+
+`checkpoint_quantum.py` introduces `prepare_checkpointed_word` and
+`emit_checkpointed_streamed_word`. Unlike independent bit windows, a cached
+DAG node stays live across all 32 bits. The reference lifecycle is:
+
+    CACHE_SETUP (cached nodes in DAG topological order)
+    BIT 0 .. BIT 31 (or inverse bits 31 .. 0)
+    CACHE_CLEANUP (cached nodes in reverse order)
+
+The adapter rechecks the exact source DAG, node topology, dirty workspace
+budget, projected gate count, scratch/non-aliasing, and operation identity.
+It emits one bounded reversible fragment per stage with an aggregate gate
+budget; the consumer receives an explicit stage kind and node/bit index.
+Only after the complete cleanup does it produce a 32-bit gate digest
+and source count. No additional measurement, reset, or quantum cleanup
+is performed beyond the reference reversible implementation.
+
+Tests compare the entire emitted gate sequence one-for-one against
+`emit_streamed_schedule_add_checkpointed` on the actual W[18] SHA schedule,
+and verify original nonce, scratch, and SHA arithmetic after forward and
+inverse execution. Because the cost-based planner chooses zero caches for
+W[18], the lifetime test deliberately caches a real low-depth W[18] DAG
+ancestor; this does not modify the production caching policy.
+
+This iteration deliberately does NOT permit ZX fusion across cache setup
+and teardown, or hardware execution. A later round can optimize complete
+BIT fragments only, proving unitary equivalence on arbitrary states of
+the live cache wires and tracking every acquired global phase.
