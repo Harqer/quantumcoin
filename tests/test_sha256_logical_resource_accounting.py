@@ -114,3 +114,4 @@ def test_complete_w3_stream_resource_accounting_against_real_sha():
     )
     assert len(report.source_gate_digest) == 64
     assert -3.142 <= report.global_phase_rad <= 3.142
+    print(f"RESOURCE_W3 {report!r}")
