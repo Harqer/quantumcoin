@@ -1,21 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
 
 from .d8_cross_synthesis import TwoCarrierPermutation64
 
 
 @dataclass(frozen=True)
 class D8EntanglerCalibration:
-    """Experimentally characterized realization of one exact 64-state permutation."""
+    """Characterized unitary realization of one exact two-carrier CX64 target."""
 
     physical_carriers: tuple[int, int]
     target_permutation: tuple[int, ...]
     openpulse_body: str
     characterization_id: str
-    basis_mapping_verified: bool = True
-    coherent_phase_characterized: bool = False
+    process_fidelity: float
+    max_leakage: float
+    characterized_at: str
+    unitary_characterized: bool = True
 
     def __post_init__(self) -> None:
         a, b = self.physical_carriers
@@ -27,9 +28,15 @@ class D8EntanglerCalibration:
             raise ValueError("openpulse_body must be non-empty")
         if not self.characterization_id.strip():
             raise ValueError("characterization_id must be non-empty")
-        if not self.basis_mapping_verified:
+        if not self.characterized_at.strip():
+            raise ValueError("characterized_at must be non-empty")
+        if not 0.0 <= self.process_fidelity <= 1.0:
+            raise ValueError("process_fidelity must be in [0, 1]")
+        if not 0.0 <= self.max_leakage <= 1.0:
+            raise ValueError("max_leakage must be in [0, 1]")
+        if not self.unitary_characterized:
             raise ValueError(
-                "d=8 entangler calibration must verify its target basis mapping"
+                "d=8 entangler calibration must characterize the full target unitary"
             )
 
     def matches(
@@ -45,8 +52,6 @@ class D8EntanglerCalibration:
 
 @dataclass(frozen=True)
 class D8EntanglerSet:
-    """Lookup set for exact characterized two-carrier permutations."""
-
     calibrations: tuple[D8EntanglerCalibration, ...] = ()
 
     def require(
@@ -54,18 +59,23 @@ class D8EntanglerSet:
         physical_carriers: tuple[int, int],
         permutation: TwoCarrierPermutation64,
         *,
-        coherent: bool = False,
+        coherent: bool = True,
     ) -> D8EntanglerCalibration:
+        if not coherent:
+            raise ValueError(
+                "basis-only entangler acceptance is disabled; exact SHA lowering "
+                "requires the intended two-carrier unitary up to global phase"
+            )
         matches = [
             calibration
             for calibration in self.calibrations
             if calibration.matches(physical_carriers, permutation)
-            and (not coherent or calibration.coherent_phase_characterized)
+            and calibration.unitary_characterized
         ]
         if not matches:
             raise KeyError(
-                "no characterized d=8 two-carrier realization for "
-                f"physical_carriers={physical_carriers}, coherent={coherent}"
+                "no unitary-characterized d=8 two-carrier realization for "
+                f"physical_carriers={physical_carriers}"
             )
         if len(matches) != 1:
             raise RuntimeError("ambiguous d=8 entangler calibration")
