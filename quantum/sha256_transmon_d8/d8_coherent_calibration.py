@@ -14,6 +14,11 @@ class D8LocalCoherentCalibration:
     level_bits: tuple[int, ...]
     openpulse_body: str
     characterization_id: str
+    process_fidelity: float | None = None
+    max_leakage: float | None = None
+    characterized_at: str | None = None
+    duration_s: float | None = None
+    synchronization_verified: bool = False
     unitary_characterized: bool = True
 
     def __post_init__(self) -> None:
@@ -27,10 +32,29 @@ class D8LocalCoherentCalibration:
             raise ValueError("openpulse_body must be non-empty")
         if not self.characterization_id.strip():
             raise ValueError("characterization_id must be non-empty")
+        if self.process_fidelity is not None and not 0.0 <= self.process_fidelity <= 1.0:
+            raise ValueError("process_fidelity must be in [0, 1]")
+        if self.max_leakage is not None and not 0.0 <= self.max_leakage <= 1.0:
+            raise ValueError("max_leakage must be in [0, 1]")
+        if self.characterized_at is not None and not self.characterized_at.strip():
+            raise ValueError("characterized_at must be non-empty when supplied")
+        if self.duration_s is not None and self.duration_s <= 0:
+            raise ValueError("duration_s must be positive when supplied")
         if not self.unitary_characterized:
             raise ValueError(
                 "coherent local calibration must characterize the target unitary"
             )
+
+    @property
+    def execution_ready(self) -> bool:
+        return (
+            self.unitary_characterized
+            and self.process_fidelity is not None
+            and self.max_leakage is not None
+            and self.characterized_at is not None
+            and self.duration_s is not None
+            and self.synchronization_verified
+        )
 
     def matches(self, physical_carrier: int, target: LocalEmbeddedGate) -> bool:
         return (
@@ -53,6 +77,7 @@ class D8LocalCoherentSet:
             calibration
             for calibration in self.calibrations
             if calibration.matches(physical_carrier, target)
+            and calibration.execution_ready
         ]
         if not matches:
             raise KeyError(
