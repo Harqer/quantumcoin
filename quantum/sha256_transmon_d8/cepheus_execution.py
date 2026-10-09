@@ -7,6 +7,7 @@ from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
 from .d8_coherent_calibration import D8LocalCoherentSet
 from .d8_local_unitary import D8LocalPermutationSet
 from .d8_entangler import D8EntanglerSet
+from .d8_device_fingerprint import device_calibration_fingerprint
 from .d8_requirements import require_braket_action_size
 from .d8_routing import (
     RoutedEmbeddedCx,
