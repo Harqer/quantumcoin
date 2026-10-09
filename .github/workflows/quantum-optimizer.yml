@@ -31,6 +31,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Inspect unencoded coherent97 arithmetic width
+        run: python -m quantum.sha256_transmon_d8.coherent97_feasibility
       - name: Install official 2026 optimizer releases
         run: python -m pip install --disable-pip-version-check pytest numpy pyzx==0.10.7 pytket==2.18.5
       - name: Exact quantum optimization and Caltech syndrome schedule
