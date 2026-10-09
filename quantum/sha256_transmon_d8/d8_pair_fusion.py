@@ -30,7 +30,7 @@ class FusedPairOperation:
 
     @property
     def gate_count(self) -> int:
-        return self.gate_stop - self.gate_start
+        return self.absorbed_source_gate_count
 
 
 @dataclass(frozen=True)
