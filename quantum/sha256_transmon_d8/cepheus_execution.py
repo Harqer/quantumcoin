@@ -159,7 +159,7 @@ def _lower_routed_operation(
 
 
 def lower_complete_sha_program(
-    carrier_program: CarrierProgram,
+    carrier_program: CarrierProgram | FusedCarrierProgram,
     placement: CarrierPlacement,
     *,
     device,
