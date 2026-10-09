@@ -60,6 +60,29 @@ class _BoundedCircuit(ReversibleCircuit):
         self._check_next()
         super().ccx(c0, c1, target)
 
+    def extend(self, gates) -> None:
+        # An iterable may be enormous; consume and check one gate at a time.
+        for gate in gates:
+            self._check_next()
+            gate.validate()
+            super().extend((gate,))
+
+    def maj(self, a: int, b: int, carry: int) -> None:
+        self._check_next()
+        super().maj(a, b, carry)
+
+    def uma(self, a: int, b: int, carry: int) -> None:
+        self._check_next()
+        super().uma(a, b, carry)
+
+    def maj_inv(self, a: int, b: int, carry: int) -> None:
+        self._check_next()
+        super().maj_inv(a, b, carry)
+
+    def uma_inv(self, a: int, b: int, carry: int) -> None:
+        self._check_next()
+        super().uma_inv(a, b, carry)
+
 
 @dataclass(frozen=True)
 class StreamedBitQuantumPlan:
@@ -286,6 +309,7 @@ def emit_complete_streamed_word(
     consume: Callable[[int, ReversibleCircuit], None],
     *,
     max_fragment_gates: int = 16384,
+    max_total_gates: int = 2_000_000,
 ) -> CompleteStreamedWordReport:
     """Emit all 32 exact SHA bit lifetimes, keeping only one fragment live.
 
@@ -298,6 +322,8 @@ def emit_complete_streamed_word(
     """
     if not callable(consume):
         raise TypeError("consume must be callable")
+    if max_total_gates < 1:
+        raise ValueError("max_total_gates must be positive")
     manifest = plan_complete_streamed_word(compiled, operation_index)
     digest = sha256()
     total_gates = 0
@@ -318,13 +344,21 @@ def emit_complete_streamed_word(
         )
         # Constant zero oracle output can have empty compute/uncompute; the
         # independent schedule witness still verifies bit order and coverage.
-        if ordered_regions != tuple(
-            name for name in expected
-            if any(region.kind == name for region in circuit.regions)
+        if "STREAM_BIT_CONSUME" not in ordered_regions or ordered_regions != tuple(
+            name for name in expected if name in ordered_regions
         ):
             raise AssertionError("streaming bit lease order was corrupted")
         if not circuit.gates:
             raise AssertionError("streaming bit contains no arithmetic")
+        regions = sorted(circuit.regions, key=lambda r: r.start)
+        if regions[0].start != 0 or regions[-1].stop != len(circuit.gates):
+            raise AssertionError("streaming bit leaves gates outside lease regions")
+        if any(a.stop != b.start for a, b in zip(regions, regions[1:])):
+            raise AssertionError("streaming bit lease coverage is not contiguous")
+        if total_gates + len(circuit.gates) > max_total_gates:
+            raise StreamedGateBudgetExceeded(
+                f"complete streamed word exceeded {max_total_gates} source gates"
+            )
         for gate in circuit.gates:
             if any(not 0 <= q < manifest.logical_width for q in gate.qubits):
                 raise ValueError("streaming fragment escaped its logical register")
