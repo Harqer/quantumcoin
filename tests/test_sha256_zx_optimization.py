@@ -11,6 +11,8 @@ from quantum.sha256_transmon_d8.zx_optimization import (
     measure_qasm,
     optimize_reversible_region,
     optimize_window,
+    partition_reversible_circuit,
+    evaluate_reversible_circuit_windows,
 )
 
 
@@ -72,3 +74,22 @@ def test_exact_to_ffoli_qasm_optimizer_is_unitary_equivalent(backend):
         assert result.verification == "full-unitary-numerical"
         assert result.selected_qasm
         assert not result.accepted or result.after.depth_cost < result.before.depth_cost
+
+
+def test_real_sha_ir_window_partition_respects_regions_and_gate_coverage():
+    circuit = ReversibleCircuit()
+    circuit.x(20)
+    circuit.maj(0, 1, 2)
+    circuit.maj_inv(0, 1, 2)
+    circuit.add_region("DIRTY_WORKSPACE_LEASE", 1, 3)
+    circuit.cx(0, 2)
+    windows = partition_reversible_circuit(circuit, max_qubits=3, max_gates=2)
+    assert [(w.start, w.stop) for w in windows] == [(0, 1), (1, 3), (3, 4)]
+    assert windows[1].wire_labels == (0, 1, 2)
+    assert sum(w.stop - w.start for w in windows) == len(circuit.gates)
+    if importlib.util.find_spec("pyzx") is not None:
+        result = evaluate_reversible_circuit_windows(
+            circuit, max_qubits=3, max_gates=2, max_windows=2
+        )
+        assert result[1][1].verification == "full-unitary-numerical"
+
