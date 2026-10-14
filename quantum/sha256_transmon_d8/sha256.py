@@ -427,6 +427,8 @@ def _emit_round(
     roles: dict[str, int],
     round_constant: int,
     boolean_strategy: str,
+    *,
+    schedule_source_slot: int | None = None,
 ) -> dict[str, int]:
     """Emit one exact in-place SHA-256 round.
 
@@ -468,6 +470,16 @@ def _emit_round(
         region_kind="CH_ADD",
         borrowed_slots=ch_borrowed,
     )
+    if schedule_source_slot is not None:
+        # Unlike the fixed-message specialization, the schedule word can be a
+        # coherent input. Add it reversibly; neither it nor carry is consumed.
+        _add32(
+            c,
+            layout,
+            schedule_source_slot,
+            h,
+            region_kind="COHERENT_W_ADD",
+        )
     _add_constant32(c, layout, h, round_constant)
 
     # old d becomes new e; h still holds T1.
