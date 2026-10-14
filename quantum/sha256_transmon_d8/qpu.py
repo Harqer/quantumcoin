@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .d8_local_unitary import D8LocalPermutationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
@@ -183,7 +183,8 @@ def prepare_full_sha256_shot(
         raise CepheusExecutionUnavailable(
             "complete digest capture is not verified; no QPU task was submitted"
         )
-    return lowered
+    # Only the public full SHA compiler can certify ROUND16 × 4 continuity.
+    return replace(lowered, full_sha_rounds_verified=True)
 
 
 def run_qpu_sha256(
