@@ -87,6 +87,6 @@ def test_full_reversible_sha_oracle_computes_copies_and_uncomputes():
 
 def test_padded_single_block_contract_matches_sha_spec():
     assert len(pad_sha256_single_block(b"")) == 64
-    assert pad_sha256_single_block(b"abc")[:4] == b"abc\\x80"
+    assert pad_sha256_single_block(b"abc")[:4] == b"abc\x80"
     assert pad_sha256_single_block(b"abc")[-8:] == (24).to_bytes(8, "big")
     assert all(word >= 0 for word in H0)
