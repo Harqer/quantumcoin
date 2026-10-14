@@ -306,7 +306,10 @@ def compile_coherent_nonce_sha256(
     uncomputed immediately. The same compact workspace is then reused as the
     Cuccaro carry lease or as transient schedule checkpoints.
     """
-    layout = layout or D8Layout(profile="coherent97")
+    # The compact coherent97 schedule presently fails the checked dirty-workspace
+    # budget in late SHA rounds. Use the width-verified reference until a
+    # reversible checkpoint/recomputation plan proves the compact path.
+    layout = layout or D8Layout(profile="coherent107")
     if not layout.is_coherent_nonce:
         raise ValueError("coherent nonce compilation requires a coherent layout")
     if len(initial_state_words) != 8:
