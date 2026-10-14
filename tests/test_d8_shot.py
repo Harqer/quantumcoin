@@ -150,7 +150,7 @@ def test_readout_rejects_hidden_extra_capture():
         **{
             **first.__dict__,
             "openpulse_body": first.openpulse_body
-                              + "\\nignored = capture_v0(extra_frame);",
+                              + "\nignored = capture_v0(extra_frame);",
         }
     )
     with pytest.raises(D8ShotDecodeError, match="exactly three output bits"):
