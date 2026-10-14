@@ -225,7 +225,7 @@ def lower_complete_sha_program(
     # The independent pulse frame clocks require separately verified full-task
     # synchronization; textual ordering alone cannot certify pulse timing.
     for index, gate_body in enumerate(body):
-        if re.search(r"\\b(?:capture_v0|measure|reset|host_sync)\\s*\\(", gate_body, re.I):
+        if re.search(r"\b(?:capture_v0|measure|reset|host_sync)\s*\(", gate_body, re.I):
             raise D8LoweringUnavailable(
                 f"intermediate measurement/reset in pulse operation {index}"
             )
