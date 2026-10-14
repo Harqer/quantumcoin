@@ -174,6 +174,7 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
         source="OPENQASM 3.0;",
         shots=1,
         final_logical_to_physical=(0,),
+        full_sha_rounds_verified=True,
     )
     with pytest.raises(D8LoweringUnavailable, match="no verified"):
         submit_complete_sha_program(
@@ -190,6 +191,7 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
             readout_physical_carriers=(0,),
             readout_pulse_bodies=("capture",),
         ),
+        full_sha_rounds_verified=True,
     )
     with pytest.raises(D8LoweringUnavailable, match="user approval"):
         submit_complete_sha_program(device=device, lowered=complete)
@@ -212,6 +214,16 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
             lowered=complete,
             approval=unapproved,
         )
+
+
+def test_partial_sha_program_can_never_reach_paid_submission():
+    incomplete = LoweredCepheusProgram(
+        source="OPENQASM 3.0;",
+        shots=1,
+        final_logical_to_physical=(0,),
+    )
+    with pytest.raises(D8LoweringUnavailable, match="64-round"):
+        submit_complete_sha_program(device=object(), lowered=incomplete)
 
 
 def test_full_shot_approval_rejects_cost_and_coherence_violations():
