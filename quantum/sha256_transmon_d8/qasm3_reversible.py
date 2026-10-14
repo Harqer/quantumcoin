@@ -51,6 +51,8 @@ def iter_sha256_qasm3(
     layout = compiled.layout
     yield "OPENQASM 3.0;\n"
     yield f"qubit[{layout.logical_bit_capacity}] q;\n"
+    if measure_digest:
+        yield "bit[256] digest;\n"
 
     if prepare_message is not None:
         padded = pad_sha256_single_block(prepare_message)
@@ -69,7 +71,6 @@ def iter_sha256_qasm3(
             yield command + "\n"
 
     if measure_digest:
-        yield "bit[256] digest;\n"
         for word in range(8):
             for bit in range(32):
                 wire = layout.digest_bit(word, bit)
