@@ -65,7 +65,7 @@ def test_fixed_and_coherent_profile_catalogs_are_separate():
         "packed98",
         "packed97",
     )
-    assert available_coherent_layout_profiles() == ("coherent107",)
+    assert available_coherent_layout_profiles() == ("coherent97", "coherent107")
 
 
 def test_coherent_nonce_round_trip_and_workspace_contract():
