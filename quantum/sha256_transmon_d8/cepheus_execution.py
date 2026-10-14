@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
+from typing import Mapping
+
+from .d8_readout import D8ReadoutSet
+from .d8_shot import D8DigestCapturePlan, build_digest_capture_plan
+from .layout import D8Layout
 
 from .carrier_ir import CarrierProgram
 from .cepheus_mapping import CarrierPlacement, snapshot_from_device_capabilities
@@ -35,6 +41,12 @@ class LoweredCepheusProgram:
     source: str
     shots: int
     final_logical_to_physical: tuple[int, ...]
+    capture_plan: D8DigestCapturePlan | None = None
+    device_fingerprint: str = ""
+
+    @property
+    def source_sha256(self) -> str:
+        return sha256(self.source.encode("utf-8")).hexdigest()
 
 
 def _frame_names(device) -> set[str]:
@@ -167,6 +179,9 @@ def lower_complete_sha_program(
     d8_local_permutations: D8LocalPermutationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
+    d8_readout: D8ReadoutSet | None = None,
+    layout: D8Layout | None = None,
+    final_roles: Mapping[str, int] | None = None,
 ) -> LoweredCepheusProgram:
     """Route and lower the complete SHA program before any Braket submission."""
     if shots <= 0:
@@ -199,13 +214,39 @@ def lower_complete_sha_program(
             "complete SHA program lowered to no pulse instructions"
         )
 
-    pulse_body = "\n".join(body)
-    source = "OPENQASM 3.0;\ncal {\n" + pulse_body + "\n}\n"
+    # Exact SHA readout is possible only with calibrated three-bit capture
+    # bodies verified against the ordering of real Braket result bitstrings.
+    capture_plan = None
+    readout_declaration = ""
+    if any(value is not None for value in (d8_readout, layout, final_roles)):
+        if d8_readout is None or layout is None or final_roles is None:
+            raise D8LoweringUnavailable(
+                "a complete shot requires d8_readout, layout and final_roles together"
+            )
+        try:
+            capture_plan = build_digest_capture_plan(
+                layout,
+                final_roles,
+                routed.final_logical_to_physical,
+                d8_readout,
+                device_fingerprint=device_fingerprint,
+            )
+        except (ValueError, KeyError, RuntimeError) as exc:
+            raise D8LoweringUnavailable(
+                f"complete d=8 digest readout is not executable: {exc}"
+            ) from exc
+        readout_declaration = f"bit[{capture_plan.result_width}] result_bits;\\n"
+        body.extend(capture_plan.readout_pulse_bodies)
+
+    pulse_body = "\\n".join(body)
+    source = "OPENQASM 3.0;\\ncal {\\n" + readout_declaration + pulse_body + "\\n}\\n"
     require_braket_action_size(source)
     return LoweredCepheusProgram(
         source=source,
         shots=shots,
         final_logical_to_physical=routed.final_logical_to_physical,
+        capture_plan=capture_plan,
+        device_fingerprint=device_fingerprint,
     )
 
 
@@ -218,6 +259,9 @@ def prepare_complete_sha_program(
     d8_local_permutations: D8LocalPermutationSet | None = None,
     d8_coherent_locals: D8LocalCoherentSet | None = None,
     d8_entanglers: D8EntanglerSet | None = None,
+    d8_readout: D8ReadoutSet | None = None,
+    layout: D8Layout | None = None,
+    final_roles: Mapping[str, int] | None = None,
 ) -> LoweredCepheusProgram:
     """Prepare one complete routed Braket OpenPulse program without submitting it."""
     return lower_complete_sha_program(
@@ -228,11 +272,42 @@ def prepare_complete_sha_program(
         d8_local_permutations=d8_local_permutations,
         d8_coherent_locals=d8_coherent_locals,
         d8_entanglers=d8_entanglers,
+        d8_readout=d8_readout,
+        layout=layout,
+        final_roles=final_roles,
     )
 
 
-def submit_complete_sha_program(*, device, lowered: LoweredCepheusProgram):
-    """Submit exactly one already-complete OpenPulse program through Amazon Braket."""
+def submit_complete_sha_program(
+    *, device, lowered: LoweredCepheusProgram,
+    approved_program_sha256: str | None = None,
+    authorized_shots: int | None = None,
+):
+    """Submit exactly one verified full digest program with explicit approval.
+
+    A hash is not itself cost approval: the caller must separately obtain a
+    current device price quote and user approval for that exact program/shot
+    count before passing these arguments. No probe or partial task is allowed.
+    """
+    if lowered.capture_plan is None:
+        raise D8LoweringUnavailable(
+            "no verified d=8 final capture plan; QPU task not submitted"
+        )
+    if (
+        approved_program_sha256 != lowered.source_sha256
+        or authorized_shots != lowered.shots
+    ):
+        raise D8LoweringUnavailable(
+            "exact source SHA-256 and shot count have not been approved; "
+            "QPU task not submitted"
+        )
+    if getattr(device, "status", None) != "ONLINE":
+        raise BraketRuntimeUnavailable("device is not online; QPU task not submitted")
+    if device_calibration_fingerprint(device) != lowered.device_fingerprint:
+        raise D8LoweringUnavailable(
+            "live device calibration fingerprint changed; QPU task not submitted"
+        )
+    require_braket_action_size(lowered.source)
     try:
         from braket.ir.openqasm import Program
     except ImportError as exc:
