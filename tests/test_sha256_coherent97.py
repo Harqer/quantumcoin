@@ -56,7 +56,7 @@ def test_coherent97_fails_closed_when_late_schedule_exceeds_workspace():
     # oracles: checkpointing still needs more than the 258 borrowable bits.
     # Do not mark a merely semantic SHA evaluation as a legal hardware-width
     # implementation.
-    with pytest.raises(RuntimeError, match=r"W\\[\\d+\\] exceeds compact workspace"):
+    with pytest.raises(RuntimeError, match=r"W\[\d+\] exceeds compact workspace"):
         compile_coherent_nonce_sha256(
             H0,
             tuple(fixed),
