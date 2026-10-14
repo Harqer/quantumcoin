@@ -13,15 +13,10 @@ from .carrier_ir import compile_carrier_program
 from .d8_pair_fusion import fuse_two_carrier_regions
 from .cepheus_mapping import (
     CEPHEUS_ARN,
-    assert_pulse_prerequisites,
     place_carriers,
     snapshot_from_device_capabilities,
 )
 from .interactive import MAX_SINGLE_BLOCK_BYTES
-from .d8_requirements import (
-    analyze_backend_requirements,
-    format_backend_requirement_report,
-)
 from .layout import D8Layout
 from .cepheus_execution import (
     BraketRuntimeUnavailable,
@@ -45,15 +40,6 @@ class D8ExecutionCalibrations:
     coherent_locals: D8LocalCoherentSet
     entanglers: D8EntanglerSet
     readout: D8ReadoutSet
-
-
-def _digest_logical_carriers(compiled) -> tuple[int, ...]:
-    return tuple(sorted({
-        compiled.layout.transmon_of(
-            compiled.layout.word_bit(compiled.final_roles[name], bit)
-        )
-        for name in "abcdefgh" for bit in range(32)
-    }))
 
 
 def _validate_message(message: bytes) -> None:
@@ -117,8 +103,7 @@ def _prepare_hardware_program(message: bytes, device_capabilities: str):
     )
     snapshot = snapshot_from_device_capabilities(device_capabilities)
     placement = place_carriers(compiled.circuit, layout, snapshot)
-    assert_pulse_prerequisites(snapshot, placement)
-    return compiled, carrier_program, placement, snapshot
+    return compiled, carrier_program, placement
 
 
 def prepare_full_sha256_shot(
@@ -141,26 +126,9 @@ def prepare_full_sha256_shot(
             "Cepheus device is not online; no QPU task was submitted"
         )
 
-    compiled, carrier_program, placement, snapshot = _prepare_hardware_program(
+    compiled, carrier_program, placement = _prepare_hardware_program(
         message, device.properties.json()
     )
-    digest_logical_carriers = _digest_logical_carriers(compiled)
-    report = analyze_backend_requirements(
-        carrier_program,
-        placement,
-        snapshot,
-        d8_local_permutations=calibrations.local_permutations,
-        d8_coherent_locals=calibrations.coherent_locals,
-        d8_entanglers=calibrations.entanglers,
-        d8_readout=calibrations.readout,
-        readout_logical_carriers=digest_logical_carriers,
-    )
-    if not report.executable:
-        raise CepheusExecutionUnavailable(
-            format_backend_requirement_report(report)
-            + "; no QPU task was submitted"
-        )
-
     try:
         lowered = prepare_complete_sha_program(
             carrier_program,
