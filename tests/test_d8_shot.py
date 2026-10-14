@@ -1,5 +1,6 @@
 """Deterministic protocol tests; synthetic captures are never QPU calibrations."""
 import pytest
+from decimal import Decimal
 
 from quantum.sha256_transmon_d8.cepheus_execution import (
     D8LoweringUnavailable,
@@ -13,6 +14,7 @@ from quantum.sha256_transmon_d8.d8_readout import (
 from quantum.sha256_transmon_d8.d8_shot import (
     D8DigestCapturePlan,
     D8ShotDecodeError,
+    D8ShotApproval,
     build_digest_capture_plan,
 )
 from quantum.sha256_transmon_d8.layout import D8Layout
@@ -157,8 +159,6 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
         submit_complete_sha_program(
             device=device,
             lowered=incomplete,
-            approved_program_sha256=incomplete.source_sha256,
-            authorized_shots=1,
         )
     complete = LoweredCepheusProgram(
         source="OPENQASM 3.0;",
@@ -171,5 +171,54 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
             readout_pulse_bodies=("capture",),
         ),
     )
-    with pytest.raises(D8LoweringUnavailable, match="have not been approved"):
+    with pytest.raises(D8LoweringUnavailable, match="user approval"):
         submit_complete_sha_program(device=device, lowered=complete)
+
+    unapproved = D8ShotApproval(
+        device_arn="test:rigetti:cepheus",
+        source_sha256=complete.source_sha256,
+        shots=1,
+        quoted_cost_usd=Decimal("1.00"),
+        approved_cost_limit_usd=Decimal("1.00"),
+        verified_program_duration_s=1e-6,
+        measured_coherence_budget_s=2e-6,
+        characterization_evidence_id="synthetic-test-record",
+        user_approved=False,
+    )
+    with pytest.raises(D8LoweringUnavailable, match="not authorized"):
+        submit_complete_sha_program(
+            device=device,
+            lowered=complete,
+            approval=unapproved,
+        )
+
+
+def test_full_shot_approval_rejects_cost_and_coherence_violations():
+    approval = D8ShotApproval(
+        device_arn="test:rigetti:cepheus",
+        source_sha256="a" * 64,
+        shots=1,
+        quoted_cost_usd=Decimal("5.00"),
+        approved_cost_limit_usd=Decimal("4.00"),
+        verified_program_duration_s=1e-6,
+        measured_coherence_budget_s=2e-6,
+        characterization_evidence_id="synthetic-test-record",
+        user_approved=True,
+    )
+    with pytest.raises(D8ShotDecodeError, match="price"):
+        approval.verify(device_arn="test:rigetti:cepheus",
+                        source_sha256="a" * 64, shots=1)
+
+    # The executable source digest, exact shot count and device must be
+    # separately approved; consent for another job is never transferable.
+    with pytest.raises(D8ShotDecodeError, match="exact source"):
+        approval.verify(device_arn="other-device",
+                        source_sha256="a" * 64, shots=1)
+
+    coherence_violation = D8ShotApproval(
+        **{**approval.__dict__, "approved_cost_limit_usd": Decimal("5.00"),
+           "verified_program_duration_s": 3e-6}
+    )
+    with pytest.raises(D8ShotDecodeError, match="coherence"):
+        coherence_violation.verify(device_arn="test:rigetti:cepheus",
+                                   source_sha256="a" * 64, shots=1)
