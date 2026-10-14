@@ -142,6 +142,26 @@ def test_readout_rejects_duplicate_capture_register_assignments():
         )
 
 
+def test_readout_rejects_hidden_extra_capture():
+    layout = D8Layout(profile="packed97")
+    readouts = _readout_set(layout)
+    first = readouts.calibrations[0]
+    bad = D8ReadoutCalibration(
+        **{
+            **first.__dict__,
+            "openpulse_body": first.openpulse_body
+                              + "\\nignored = capture_v0(extra_frame);",
+        }
+    )
+    with pytest.raises(D8ShotDecodeError, match="exactly three output bits"):
+        build_digest_capture_plan(
+            layout, dict(zip("abcdefgh", range(8))),
+            tuple(range(layout.total_transmons)),
+            D8ReadoutSet((bad,) + readouts.calibrations[1:]),
+            device_fingerprint="synthetic-test-surface",
+        )
+
+
 def test_paid_submission_requires_complete_capture_and_exact_approval():
     class NonSubmittingDevice:
         status = "ONLINE"
@@ -183,6 +203,7 @@ def test_paid_submission_requires_complete_capture_and_exact_approval():
         verified_program_duration_s=1e-6,
         measured_coherence_budget_s=2e-6,
         characterization_evidence_id="synthetic-test-record",
+        whole_program_synchronization_verified=True,
         user_approved=False,
     )
     with pytest.raises(D8LoweringUnavailable, match="not authorized"):
@@ -203,6 +224,7 @@ def test_full_shot_approval_rejects_cost_and_coherence_violations():
         verified_program_duration_s=1e-6,
         measured_coherence_budget_s=2e-6,
         characterization_evidence_id="synthetic-test-record",
+        whole_program_synchronization_verified=True,
         user_approved=True,
     )
     with pytest.raises(D8ShotDecodeError, match="price"):
