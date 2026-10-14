@@ -7,11 +7,11 @@ operations; hardware with insufficient logical width cannot execute it.
 """
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterator
 from pathlib import Path
 
 from .d8_two_body_decomposition import _expand_macro
-from .ir import Gate, ReversibleCircuit
+from .ir import Gate
 from .reversible_block import CompiledReversibleBlockSha256, pad_sha256_single_block
 from .sha256 import H0
 
@@ -91,5 +91,6 @@ def write_sha256_qasm3(
             prepare_message=prepare_message,
             measure_digest=measure_digest,
         ):
-            size += output.write(piece.encode("utf-8").decode("utf-8"))
+            output.write(piece)
+            size += len(piece.encode("utf-8"))
     return size
