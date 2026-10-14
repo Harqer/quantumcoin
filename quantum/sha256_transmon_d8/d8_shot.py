@@ -41,11 +41,13 @@ class D8ShotApproval:
     verified_program_duration_s: float
     measured_coherence_budget_s: float
     characterization_evidence_id: str
+    whole_program_synchronization_verified: bool
     user_approved: bool
 
     def verify(self, *, device_arn: str, source_sha256: str, shots: int) -> None:
         if (
             not self.user_approved
+            or not self.whole_program_synchronization_verified
             or not self.characterization_evidence_id.strip()
             or self.device_arn != device_arn
             or self.source_sha256 != source_sha256
@@ -169,6 +171,10 @@ def build_digest_capture_plan(
         assigned = tuple(int(value) for value in _CAPTURE_PATTERN.findall(
             calibration.openpulse_body or ""
         ))
+        if len(re.findall(r"\\bcapture_v0\\s*\\(", calibration.openpulse_body or "")) != 3:
+            raise D8ShotDecodeError(
+                f"physical carrier {physical} must capture exactly three output bits"
+            )
         if sorted(assigned) != sorted(calibration.capture_indices):
             raise D8ShotDecodeError(
                 f"physical carrier {physical} must assign exactly three verified "
