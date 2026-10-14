@@ -171,7 +171,7 @@ def build_digest_capture_plan(
         assigned = tuple(int(value) for value in _CAPTURE_PATTERN.findall(
             calibration.openpulse_body or ""
         ))
-        if len(re.findall(r"\\bcapture_v0\\s*\\(", calibration.openpulse_body or "")) != 3:
+        if len(re.findall(r"\bcapture_v0\s*\(", calibration.openpulse_body or "")) != 3:
             raise D8ShotDecodeError(
                 f"physical carrier {physical} must capture exactly three output bits"
             )
