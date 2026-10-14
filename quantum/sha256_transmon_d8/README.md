@@ -271,6 +271,18 @@ DAG inside the single coherent107 workspace and clean each temporary immediately
 after its last use.
 
 
+### Compact coherent97 is an experimental width target
+
+The 97-carrier mapping is exact as a layout, but the current Boolean-DAG
+streaming/checkpoint implementation cannot certify its full SHA schedule:
+late nonce-dependent rounds require up to 265 dirty workspace bits with
+only 258 available. The compiler **rejects** these schedules rather than
+underreporting their width or returning a semantic-only execution as proof.
+The default coherent-nonce compiler uses the `coherent107` reference profile
+until an exact reversible lowering fits all 64 rounds, proves cleanup, and
+passes inverse verification. This does not change the independent fixed-message
+`packed97` path.
+
 ### coherent107 optimization target
 
 The coherent target remains exactly:
@@ -380,6 +392,56 @@ For `abc` the required digest is:
 ```text
 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 ```
+
+## Full-shot execution boundary (software implemented, hardware not characterized)
+
+The full fixed-message SHA path now has an explicit one-task protocol:
+
+1. Compile **all 64 rounds** and the exact feed-forward into the fixed-message
+   `packed97` reversible circuit. No reduced-round or host-resumed segments.
+2. Route all d=8 carrier operations and require unitary-characterized local,
+   coherent-local, and two-carrier calibrations against the **current** Braket
+   device fingerprint. Exact pairing and bit orientation are mandatory.
+3. Require an experimentally verified, ordered **three-bit Braket capture**
+   implementation for **every physical carrier containing SHA digest bits**.
+   The readout body must assign exactly the specified three
+   `result_bits[i] = capture_v0(...)` outputs. Merely declaring an 8x8
+   assignment matrix or calling a capture a d=8 readout is insufficient.
+4. Append the readout only after every reversible SHA operation in one
+   OpenQASM/OpenPulse `cal` block. Check the **entire action** against
+   Braket's 5 MB limit before submission.
+5. Bind authorization to the SHA-256 of the exact action and the requested
+   shot count, the specific device, a current independently verified cost
+   quote and approved spending limit, and evidence that the fully scheduled
+   pulse program fits a measured coherence budget. Recheck device fingerprint
+   immediately before `device.run(..., shots=...)`.
+6. Decode **only real Braket measurement_counts**, require the declared
+   result-bit ordering and exact number of shots, and reject ambiguous
+   digests. `hashlib` is comparison evidence, never a QPU fallback.
+
+The implementation is exposed via:
+- `qpu.prepare_full_sha256_shot(message, device=..., calibrations=..., shots=1)`
+  for non-submitting preflight and exact program generation;
+- `qpu.run_qpu_sha256(message, calibrations=..., approval=..., shots=1)`
+  for the guarded submission and measured result path;
+- `d8_shot.D8ShotApproval` for source-bound user approval and price /
+  characterized duration evidence.
+
+**Current status: not QPU executable.** No actual, device-characterized
+eight-level carrier library, 64-state two-carrier realizations, and fully
+validated eight-state final extraction are available to this program. The
+connected gate-model QPU API supports QASM/PyQuil but does not establish those
+multilevel operations. No calibration is synthesized or claimed by this
+implementation, and no paid task is submitted merely by running the tests.
+The large pulse action and whole-program runtime may independently fail the
+Braket action limit or coherence feasibility checks even when individual gates
+are characterized.
+
+Primary provider references:
+- https://docs.aws.amazon.com/braket/latest/developerguide/braket-pulse-control.html
+- https://docs.aws.amazon.com/braket/latest/developerguide/braket-hello-pulse.html
+- https://docs.aws.amazon.com/braket/latest/developerguide/braket-openqasm-create-submit-task.html
+- https://docs.aws.amazon.com/braket/latest/developerguide/braket-quotas.html
 
 ## Live Rigetti preflight through Amazon Braket
 

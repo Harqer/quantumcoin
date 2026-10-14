@@ -51,7 +51,14 @@ def test_entangler_lookup_preserves_physical_orientation() -> None:
         physical_carriers=(83, 38),
         target_permutation=embedded.permutation.mapping,
         openpulse_body="play(example_frame, example_waveform);",
-        characterization_id="test-cx64-83-38",
+        characterization_id="synthetic-test-only-cx64-83-38",
+        # Synthetic fixture for matching/metadata semantics, not hardware data.
+        process_fidelity=1.0,
+        max_leakage=0.0,
+        characterized_at="2026-10-13T00:00:00Z",
+        device_calibration_fingerprint="synthetic-test-fingerprint",
+        duration_s=1e-9,
+        synchronization_verified=True,
     )
     entanglers = D8EntanglerSet((calibration,))
 
@@ -63,3 +70,17 @@ def test_entangler_lookup_preserves_physical_orientation() -> None:
         pass
     else:
         raise AssertionError("reversed physical orientation must not match")
+
+    # Metadata-incomplete calibrations must never satisfy an executable lookup.
+    incomplete = D8EntanglerCalibration(
+        physical_carriers=(83, 38),
+        target_permutation=embedded.permutation.mapping,
+        openpulse_body="play(example_frame, example_waveform);",
+        characterization_id="synthetic-incomplete-fixture",
+    )
+    try:
+        D8EntanglerSet((incomplete,)).require((83, 38), embedded.permutation)
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("uncharacterized entangler must fail closed")

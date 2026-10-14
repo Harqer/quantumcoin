@@ -20,6 +20,12 @@ class D8ReadoutCalibration:
     output_bit_count: int = 0
     braket_result_verified: bool = False
     characterized_at: str | None = None
+    # Index positions in Braket's verified per-shot measurement bitstring.
+    # A valid readout must write each of these with capture_v0 into result_bits.
+    capture_indices: tuple[int, int, int] | None = None
+    device_calibration_fingerprint: str | None = None
+    duration_s: float | None = None
+    synchronization_verified: bool = False
 
     def __post_init__(self) -> None:
         if len(self.assignment_matrix) != 8:
@@ -39,13 +45,28 @@ class D8ReadoutCalibration:
             raise ValueError("openpulse_body must be non-empty when supplied")
         if self.characterized_at is not None and not self.characterized_at.strip():
             raise ValueError("characterized_at must be non-empty when supplied")
+        if self.capture_indices is not None and (
+            len(self.capture_indices) != 3
+            or len(set(self.capture_indices)) != 3
+            or any(not isinstance(index, int) or index < 0 for index in self.capture_indices)
+        ):
+            raise ValueError("capture_indices must identify three distinct nonnegative result bits")
+        if self.duration_s is not None and self.duration_s <= 0:
+            raise ValueError("readout duration must be positive")
+        if self.device_calibration_fingerprint is not None and not self.device_calibration_fingerprint.strip():
+            raise ValueError("readout device fingerprint must be non-empty")
 
     @property
     def braket_executable(self) -> bool:
         return (
             self.openpulse_body is not None
-            and self.output_bit_count >= 3
+            and self.output_bit_count == 3
+            and self.capture_indices is not None
             and self.braket_result_verified
+            and self.characterized_at is not None
+            and self.device_calibration_fingerprint is not None
+            and self.duration_s is not None
+            and self.synchronization_verified
         )
 
 
@@ -58,12 +79,17 @@ class D8ReadoutSet:
         physical_carrier: int,
         *,
         executable: bool = False,
+        device_fingerprint: str | None = None,
     ) -> D8ReadoutCalibration:
         matches = [
             calibration
             for calibration in self.calibrations
             if calibration.physical_carrier == physical_carrier
             and (not executable or calibration.braket_executable)
+            and (
+                device_fingerprint is None
+                or calibration.device_calibration_fingerprint == device_fingerprint
+            )
         ]
         if not matches:
             qualifier = " Braket-executable" if executable else ""

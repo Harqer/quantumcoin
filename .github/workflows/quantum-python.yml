@@ -3,16 +3,24 @@ name: Quantum Python CI
 permissions:
   contents: read
 
+# Only the latest SHA/d8 audit of each branch or PR matters. Superseded
+# runs waste runner time and can surface stale failures during remediation.
+concurrency:
+  group: quantum-python-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     paths:
       - "quantum/**"
       - "tests/test_sha256_*.py"
+      - "tests/test_d8_*.py"
       - ".github/workflows/quantum-python.yml"
   pull_request:
     paths:
       - "quantum/**"
       - "tests/test_sha256_*.py"
+      - "tests/test_d8_*.py"
       - ".github/workflows/quantum-python.yml"
   workflow_dispatch:
 
@@ -31,8 +39,8 @@ jobs:
       - name: Install test dependency
         run: python -m pip install --disable-pip-version-check pytest
 
-      - name: Run SHA-256 regression suite
-        run: python -m pytest -q tests/test_sha256_*.py
+      - name: Run SHA-256 and d8 regression suites
+        run: python -m pytest -q tests/test_sha256_*.py tests/test_d8_*.py
 
       - name: Report coherent schedule metrics
         run: >-

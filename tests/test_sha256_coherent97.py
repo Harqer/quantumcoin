@@ -44,33 +44,33 @@ def test_coherent97_packs_persistent_state_and_shared_workspace_exactly():
     assert nonce_bits.isdisjoint(workspace)
 
 
-def test_coherent97_semantic_program_matches_exact_sha_and_inverts():
+def test_coherent97_fails_closed_when_late_schedule_exceeds_workspace():
+    import pytest
+
     fixed = list(bitcoin_second_block_template())
     fixed[0] = 0x01234567
     fixed[1] = 0x89ABCDEF
     fixed[2] = 0x13579BDF
 
-    compiled = compile_coherent_nonce_sha256(
-        H0,
-        tuple(fixed),
-        nonce_word_index=3,
-    )
-
-    assert compiled.layout.profile == "coherent97"
-    assert compiled.layout.total_transmons == 97
-    assert compiled.persistent_schedule_bits == 0
-    assert all(report.width_safe for report in compiled.schedule_reports)
-
-    rng = random.Random(0xD8_97)
-    for nonce in (0, 1, 0xFFFFFFFF, rng.randrange(1 << 32)):
-        verify_compiled_coherent_sha256(compiled, nonce)
+    # The three-bit scratch layout cannot currently lower the late schedule
+    # oracles: checkpointing still needs more than the 258 borrowable bits.
+    # Do not mark a merely semantic SHA evaluation as a legal hardware-width
+    # implementation.
+    with pytest.raises(RuntimeError, match=r"W\[\d+\] exceeds compact workspace"):
+        compile_coherent_nonce_sha256(
+            H0,
+            tuple(fixed),
+            nonce_word_index=3,
+            layout=D8Layout(profile="coherent97"),
+        )
 
 
-def test_coherent97_uses_only_lifetime_shared_semantic_operations():
+def test_coherent107_uses_only_lifetime_shared_semantic_operations():
     compiled = compile_coherent_nonce_sha256(
         H0,
         bitcoin_second_block_template(),
         nonce_word_index=3,
+        layout=D8Layout(profile="coherent107"),
     )
 
     assert any(isinstance(op, StreamedScheduleAdd) for op in compiled.operations)

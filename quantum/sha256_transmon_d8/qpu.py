@@ -1,6 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass, replace
+
+from .d8_local_unitary import D8LocalPermutationSet
+from .d8_coherent_calibration import D8LocalCoherentSet
+from .d8_entangler import D8EntanglerSet
+from .d8_readout import D8ReadoutSet
+from .d8_shot import D8ShotDecodeError, D8ShotApproval
 
 from .carrier_ir import compile_carrier_program
 from .d8_pair_fusion import fuse_two_carrier_regions
@@ -20,12 +27,33 @@ from .cepheus_execution import (
     BraketRuntimeUnavailable,
     D8LoweringUnavailable,
     prepare_complete_sha_program,
+    submit_complete_sha_program,
+    LoweredCepheusProgram,
 )
 from .sha256 import compile_single_block_sha256
 
 
 class CepheusExecutionUnavailable(RuntimeError):
     pass
+
+
+@dataclass(frozen=True)
+class D8ExecutionCalibrations:
+    """Provider-characterized gates and Braket-verifiable multilevel readout."""
+
+    local_permutations: D8LocalPermutationSet
+    coherent_locals: D8LocalCoherentSet
+    entanglers: D8EntanglerSet
+    readout: D8ReadoutSet
+
+
+def _digest_logical_carriers(compiled) -> tuple[int, ...]:
+    return tuple(sorted({
+        compiled.layout.transmon_of(
+            compiled.layout.word_bit(compiled.final_roles[name], bit)
+        )
+        for name in "abcdefgh" for bit in range(32)
+    }))
 
 
 def _validate_message(message: bytes) -> None:
@@ -93,23 +121,97 @@ def _prepare_hardware_program(message: bytes, device_capabilities: str):
     return compiled, carrier_program, placement, snapshot
 
 
-def run_qpu_sha256(message: bytes) -> str:
-    """Execute the complete exact SHA-256 workload on Cepheus.
+def prepare_full_sha256_shot(
+    message: bytes,
+    *,
+    device,
+    calibrations: D8ExecutionCalibrations,
+    shots: int = 1,
+) -> LoweredCepheusProgram:
+    """Prepare one exact 64-round QPU action with validated output capture.
 
-    This function may return only a digest decoded from QPU measurements. It
-    never substitutes hashlib, the semantic simulator, a reduced-round circuit,
-    or a placement dry run.
-
-    Submission remains disabled unless the live device calibration bundle proves
-    the complete d=8 backend contract required by the 97-carrier compiler.
+    Never submits a job. A clean preflight proves only software readiness for
+    the currently characterized device, not acceptable error or duration.
     """
     _validate_message(message)
+    if not 1 <= shots <= 50_000:
+        raise ValueError("Rigetti Braket QPU shots must be in 1..50000")
+    if getattr(device, "status", None) != "ONLINE":
+        raise CepheusExecutionUnavailable(
+            "Cepheus device is not online; no QPU task was submitted"
+        )
 
+    compiled, carrier_program, placement, snapshot = _prepare_hardware_program(
+        message, device.properties.json()
+    )
+    digest_logical_carriers = _digest_logical_carriers(compiled)
+    report = analyze_backend_requirements(
+        carrier_program,
+        placement,
+        snapshot,
+        d8_local_permutations=calibrations.local_permutations,
+        d8_coherent_locals=calibrations.coherent_locals,
+        d8_entanglers=calibrations.entanglers,
+        d8_readout=calibrations.readout,
+        readout_logical_carriers=digest_logical_carriers,
+    )
+    if not report.executable:
+        raise CepheusExecutionUnavailable(
+            format_backend_requirement_report(report)
+            + "; no QPU task was submitted"
+        )
+
+    try:
+        lowered = prepare_complete_sha_program(
+            carrier_program,
+            placement,
+            device=device,
+            shots=shots,
+            d8_local_permutations=calibrations.local_permutations,
+            d8_coherent_locals=calibrations.coherent_locals,
+            d8_entanglers=calibrations.entanglers,
+            d8_readout=calibrations.readout,
+            layout=compiled.layout,
+            final_roles=compiled.final_roles,
+        )
+    except (D8LoweringUnavailable, BraketRuntimeUnavailable) as exc:
+        raise CepheusExecutionUnavailable(
+            f"{exc}; no QPU task was submitted"
+        ) from exc
+
+    if lowered.capture_plan is None:
+        raise CepheusExecutionUnavailable(
+            "complete digest capture is not verified; no QPU task was submitted"
+        )
+    # Only the public full SHA compiler can certify ROUND16 × 4 continuity.
+    return replace(lowered, full_sha_rounds_verified=True)
+
+
+def run_qpu_sha256(
+    message: bytes,
+    *,
+    calibrations: D8ExecutionCalibrations | None = None,
+    approval: D8ShotApproval | None = None,
+    shots: int = 1,
+) -> str:
+    """Return only a digest derived from an actual full-length QPU shot.
+
+    Calibration data and source-specific paid-task authorization must be
+    provided explicitly. No implicit calibration, backend fallback, shortened
+    SHA round count, or fabricated result is accepted.
+    """
+    _validate_message(message)
+    if calibrations is None:
+        raise CepheusExecutionUnavailable(
+            "verified d=8 gate and readout calibration bundle is required; "
+            "no QPU task was submitted"
+        )
     try:
         from braket.aws import AwsDevice
     except ImportError as exc:
         raise CepheusExecutionUnavailable(
-            "amazon-braket-sdk is required to query the live Cepheus device"
+            "amazon-braket-sdk is required to query the live Cepheus device; "
+            "no QPU task was submitted"
         ) from exc
 
     try:
@@ -119,60 +221,33 @@ def run_qpu_sha256(message: bytes) -> str:
             "could not query the live Cepheus device; no QPU task was submitted"
         ) from exc
 
-    if device.status != "ONLINE":
-        raise CepheusExecutionUnavailable(
-            f"Cepheus is not online: {device.status}"
-        )
-
-    capabilities = device.properties.json()
-    compiled, carrier_program, placement, snapshot = _prepare_hardware_program(
-        message, capabilities
+    prepared = prepare_full_sha256_shot(
+        message, device=device, calibrations=calibrations, shots=shots
     )
-
-    digest_logical_carriers = tuple(
-        sorted(
-            {
-                compiled.layout.transmon_of(
-                    compiled.layout.word_bit(compiled.final_roles[name], bit)
-                )
-                for name in "abcdefgh"
-                for bit in range(32)
-            }
-        )
-    )
-    requirement_report = analyze_backend_requirements(
-        carrier_program,
-        placement,
-        snapshot,
-        d8_local_permutations=None,
-        d8_coherent_locals=None,
-        d8_entanglers=None,
-        d8_readout=None,
-        readout_logical_carriers=digest_logical_carriers,
-    )
-    if not requirement_report.executable:
-        raise CepheusExecutionUnavailable(
-            format_backend_requirement_report(requirement_report)
-            + "; no QPU task was submitted"
-        )
-
     try:
-        lowered = prepare_complete_sha_program(
-            carrier_program,
-            placement,
+        task = submit_complete_sha_program(
             device=device,
-            shots=10,
+            lowered=prepared,
+            approval=approval,
         )
     except (D8LoweringUnavailable, BraketRuntimeUnavailable) as exc:
+        raise CepheusExecutionUnavailable(str(exc)) from exc
+
+    # The only accepted source of output bits is the actual provider task.
+    result = task.result()
+    if result is None or getattr(result, "measurement_counts", None) is None:
         raise CepheusExecutionUnavailable(
-            f"{exc}; no QPU task was submitted"
+            "Braket task produced no decodable verified capture results"
+        )
+    assert prepared.capture_plan is not None
+    try:
+        return prepared.capture_plan.decode_counts(
+            result.measurement_counts, shots
+        )
+    except D8ShotDecodeError as exc:
+        raise CepheusExecutionUnavailable(
+            f"Braket d=8 readout does not encode one unambiguous SHA digest: {exc}"
         ) from exc
-
-    raise CepheusExecutionUnavailable(
-        "complete AWS Braket OpenPulse SHA program is prepared, but final d=8 "
-        "readout/result decoding is not implemented; no QPU task was submitted"
-    )
-
 
 def main() -> None:
     text = input("SHA-256 input (UTF-8, max 55 bytes): ")

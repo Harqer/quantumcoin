@@ -78,7 +78,15 @@ def test_backend_preflight_reports_all_gap_classes_together() -> None:
     assert report.decomposed_local_coherent_operations > 0
     assert report.routing_swap_count > 0
     assert report.routing_cx_count == report.routing_swap_count * 9
-    assert report.missing_basis_cx_realizations > 0
+    # The routed backend requires phase-coherent unitaries, including SWAP CXs.
+    # The old basis-only acceptance path is intentionally disabled.
+    assert report.direct_basis_cx_operations == 0
+    assert report.missing_basis_cx_realizations == 0
     assert report.missing_coherent_cx_realizations > 0
     assert len(report.missing_readout_carriers) == 3
-    assert len(report.gaps) >= 4
+    # There are three distinct executable requirements in this scenario:
+    # coherent local gates, coherent cross-carrier operations, and readout.
+    assert len(report.gaps) == 3
+    assert any("coherent local" in gap for gap in report.gaps)
+    assert any("phase-coherent embedded CX64" in gap for gap in report.gaps)
+    assert any("readout" in gap for gap in report.gaps)
