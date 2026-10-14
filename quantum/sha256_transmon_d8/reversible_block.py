@@ -231,8 +231,8 @@ def pad_sha256_single_block(message: bytes) -> bytes:
     """Standard SHA-256 padding, only for messages contained in one block."""
     if len(message) > 55:
         raise ValueError("one-block SHA-256 requires <=55 message bytes")
-    padded = message + b"\\x80"
-    padded += b"\\x00" * (56 - len(padded))
+    padded = message + b"\x80"
+    padded += b"\x00" * (56 - len(padded))
     padded += (len(message) * 8).to_bytes(8, "big")
     return padded
 
