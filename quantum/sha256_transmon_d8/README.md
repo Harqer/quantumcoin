@@ -271,6 +271,18 @@ DAG inside the single coherent107 workspace and clean each temporary immediately
 after its last use.
 
 
+### Compact coherent97 is an experimental width target
+
+The 97-carrier mapping is exact as a layout, but the current Boolean-DAG
+streaming/checkpoint implementation cannot certify its full SHA schedule:
+late nonce-dependent rounds require up to 265 dirty workspace bits with
+only 258 available. The compiler **rejects** these schedules rather than
+underreporting their width or returning a semantic-only execution as proof.
+The default coherent-nonce compiler uses the `coherent107` reference profile
+until an exact reversible lowering fits all 64 rounds, proves cleanup, and
+passes inverse verification. This does not change the independent fixed-message
+`packed97` path.
+
 ### coherent107 optimization target
 
 The coherent target remains exactly:
