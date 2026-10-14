@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Mapping
+import re
 
 from .d8_readout import D8ReadoutSet
 from .d8_shot import (
@@ -218,6 +219,16 @@ def lower_complete_sha_program(
         raise D8LoweringUnavailable(
             "complete SHA program lowered to no pulse instructions"
         )
+
+    # Reversible SHA gates must execute without any intermediate measurement,
+    # reset, or result capture. Readout is appended only after the final gate.
+    # The independent pulse frame clocks require separately verified full-task
+    # synchronization; textual ordering alone cannot certify pulse timing.
+    for index, gate_body in enumerate(body):
+        if re.search(r"\\b(?:capture_v0|measure|reset|host_sync)\\s*\\(", gate_body, re.I):
+            raise D8LoweringUnavailable(
+                f"intermediate measurement/reset in pulse operation {index}"
+            )
 
     # Exact SHA readout is possible only with calibrated three-bit capture
     # bodies verified against the ordering of real Braket result bitstrings.
