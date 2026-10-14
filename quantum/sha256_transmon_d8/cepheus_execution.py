@@ -49,6 +49,7 @@ class LoweredCepheusProgram:
     final_logical_to_physical: tuple[int, ...]
     capture_plan: D8DigestCapturePlan | None = None
     device_fingerprint: str = ""
+    full_sha_rounds_verified: bool = False
 
     @property
     def source_sha256(self) -> str:
@@ -304,6 +305,10 @@ def submit_complete_sha_program(
     current device price quote and user approval for that exact program/shot
     count before passing these arguments. No probe or partial task is allowed.
     """
+    if not lowered.full_sha_rounds_verified:
+        raise D8LoweringUnavailable(
+            "64-round SHA continuity is not certified; QPU task not submitted"
+        )
     if lowered.capture_plan is None:
         raise D8LoweringUnavailable(
             "no verified d=8 final capture plan; QPU task not submitted"
