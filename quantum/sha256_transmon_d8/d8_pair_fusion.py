@@ -163,6 +163,13 @@ def fuse_two_carrier_regions(program: CarrierProgram) -> FusedCarrierProgram:
             starts.append(start)
             stops.append(stop)
 
+        # A reversible region with the identity map needs no physical
+        # two-carrier operation or characterized entangler calibration.
+        # The 64-state truth table proves this over the entire pair space.
+        if mapping == tuple(range(64)):
+            i = j
+            continue
+
         output.append(
             FusedPairOperation(
                 permutation=TwoCarrierPermutation64(
