@@ -1,3 +1,45 @@
+## Coherent 512-bit reversible SHA-256 oracle
+
+The general-message implementation is in `reversible_block.py`. Unlike the
+fixed-message `packed97` circuit, this is an actual *coherent input* algorithm:
+16 rolling 32-bit schedule registers are updated reversibly by the exact
+small-sigma recurrence. Each W[t] is added into the full 64-round compression
+without a classical message-schedule lookup. The complete
+**compute → XOR digest → uncompute** oracle returns the original message,
+state, scratch and carry and places the SHA digest into a separate 256-bit
+output register. No intermediate measurement or reset is used.
+
+```python
+from quantum.sha256_transmon_d8.reversible_block import (
+    compile_reversible_block_sha256,
+    initial_reversible_state,
+    pad_sha256_single_block,
+    digest_xor_from_state,
+)
+from quantum.sha256_transmon_d8.ir import simulate
+from quantum.sha256_transmon_d8.qasm3_reversible import write_sha256_qasm3
+
+program = compile_reversible_block_sha256()
+original = initial_reversible_state(program, pad_sha256_single_block(b"abc"))
+result = simulate(program.circuit, original)
+print(digest_xor_from_state(program, result).hex())
+write_sha256_qasm3(program, "sha256_coherent.qasm", prepare_message=b"abc")
+```
+
+The QASM3 exporter streams **all** primitive X/CNOT/Toffoli gates and the
+final 256 output measurements; it does not replace the schedule or the hash
+with host-side `hashlib`. Omit `prepare_message` to preserve a coherent
+message register supplied by the caller. QASM backend support is decided by
+the actual target compiler.
+
+**Resource tradeoff:** this clean oracle uses 1,057 logical qubits
+(256 SHA state + 512 message + 32 shared scratch + 256 digest output +
+1 carry), or 353 idealized d=8 carriers. It is **not** a physically runnable
+107-qubit Cepheus job. The existing fixed-message and nonce-only compact
+profiles remain separate; neither is evidence that a fully coherent 512-bit
+message fits in 97 carriers. This implementation supports one SHA block;
+multi-block coherent chaining requires a separate stateful construction.
+
 # Exact reversible SHA-256 on d=8 transmons
 
 This package implements the current-hardware reversible SHA contract for Rigetti
