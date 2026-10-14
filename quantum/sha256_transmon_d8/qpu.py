@@ -7,7 +7,7 @@ from .d8_local_unitary import D8LocalPermutationSet
 from .d8_coherent_calibration import D8LocalCoherentSet
 from .d8_entangler import D8EntanglerSet
 from .d8_readout import D8ReadoutSet
-from .d8_shot import D8ShotDecodeError
+from .d8_shot import D8ShotDecodeError, D8ShotApproval
 
 from .carrier_ir import compile_carrier_program
 from .d8_pair_fusion import fuse_two_carrier_regions
@@ -190,8 +190,7 @@ def run_qpu_sha256(
     message: bytes,
     *,
     calibrations: D8ExecutionCalibrations | None = None,
-    approved_program_sha256: str | None = None,
-    authorized_shots: int | None = None,
+    approval: D8ShotApproval | None = None,
     shots: int = 1,
 ) -> str:
     """Return only a digest derived from an actual full-length QPU shot.
@@ -228,8 +227,7 @@ def run_qpu_sha256(
         task = submit_complete_sha_program(
             device=device,
             lowered=prepared,
-            approved_program_sha256=approved_program_sha256,
-            authorized_shots=authorized_shots,
+            approval=approval,
         )
     except (D8LoweringUnavailable, BraketRuntimeUnavailable) as exc:
         raise CepheusExecutionUnavailable(str(exc)) from exc
