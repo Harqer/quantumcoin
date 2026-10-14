@@ -5,7 +5,12 @@ from hashlib import sha256
 from typing import Mapping
 
 from .d8_readout import D8ReadoutSet
-from .d8_shot import D8DigestCapturePlan, build_digest_capture_plan
+from .d8_shot import (
+    D8DigestCapturePlan,
+    D8ShotApproval,
+    D8ShotDecodeError,
+    build_digest_capture_plan,
+)
 from .layout import D8Layout
 
 from .carrier_ir import CarrierProgram
@@ -280,8 +285,7 @@ def prepare_complete_sha_program(
 
 def submit_complete_sha_program(
     *, device, lowered: LoweredCepheusProgram,
-    approved_program_sha256: str | None = None,
-    authorized_shots: int | None = None,
+    approval: D8ShotApproval | None = None,
 ):
     """Submit exactly one verified full digest program with explicit approval.
 
@@ -293,14 +297,21 @@ def submit_complete_sha_program(
         raise D8LoweringUnavailable(
             "no verified d=8 final capture plan; QPU task not submitted"
         )
-    if (
-        approved_program_sha256 != lowered.source_sha256
-        or authorized_shots != lowered.shots
-    ):
+    if approval is None:
         raise D8LoweringUnavailable(
-            "exact source SHA-256 and shot count have not been approved; "
-            "QPU task not submitted"
+            "verified current cost, schedule and source-specific user approval "
+            "are required; QPU task not submitted"
         )
+    try:
+        approval.verify(
+            device_arn=getattr(device, "arn", ""),
+            source_sha256=lowered.source_sha256,
+            shots=lowered.shots,
+        )
+    except (ValueError, D8ShotDecodeError) as exc:
+        raise D8LoweringUnavailable(
+            f"paid SHA shot not authorized: {exc}; QPU task not submitted"
+        ) from exc
     if getattr(device, "status", None) != "ONLINE":
         raise BraketRuntimeUnavailable("device is not online; QPU task not submitted")
     if device_calibration_fingerprint(device) != lowered.device_fingerprint:
