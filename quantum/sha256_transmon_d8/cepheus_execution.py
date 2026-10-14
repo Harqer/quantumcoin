@@ -235,11 +235,11 @@ def lower_complete_sha_program(
             raise D8LoweringUnavailable(
                 f"complete d=8 digest readout is not executable: {exc}"
             ) from exc
-        readout_declaration = f"bit[{capture_plan.result_width}] result_bits;\\n"
+        readout_declaration = f"bit[{capture_plan.result_width}] result_bits;\n"
         body.extend(capture_plan.readout_pulse_bodies)
 
-    pulse_body = "\\n".join(body)
-    source = "OPENQASM 3.0;\\ncal {\\n" + readout_declaration + pulse_body + "\\n}\\n"
+    pulse_body = "\n".join(body)
+    source = "OPENQASM 3.0;\ncal {\n" + readout_declaration + pulse_body + "\n}\n"
     require_braket_action_size(source)
     return LoweredCepheusProgram(
         source=source,
