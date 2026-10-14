@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from decimal import Decimal
 from collections.abc import Mapping
 import re
 
@@ -22,6 +23,54 @@ class D8ShotDecodeError(RuntimeError):
 _CAPTURE_PATTERN = re.compile(
     r"\bresult_bits\s*\[\s*(\d+)\s*\]\s*=\s*capture_v0\s*\("
 )
+
+
+@dataclass(frozen=True)
+class D8ShotApproval:
+    """Application-side explicit, source-bound authorization for a paid task.
+
+    Only independently verified real calibration, duration, price, and an
+    informed user approval may populate this record. This is not an AWS token.
+    """
+
+    device_arn: str
+    source_sha256: str
+    shots: int
+    quoted_cost_usd: Decimal
+    approved_cost_limit_usd: Decimal
+    verified_program_duration_s: float
+    measured_coherence_budget_s: float
+    characterization_evidence_id: str
+    user_approved: bool
+
+    def verify(self, *, device_arn: str, source_sha256: str, shots: int) -> None:
+        if (
+            not self.user_approved
+            or not self.characterization_evidence_id.strip()
+            or self.device_arn != device_arn
+            or self.source_sha256 != source_sha256
+            or self.shots != shots
+        ):
+            raise D8ShotDecodeError(
+                "exact source, device, shot count and user approval are required"
+            )
+        quote = Decimal(self.quoted_cost_usd)
+        limit = Decimal(self.approved_cost_limit_usd)
+        if (
+            not quote.is_finite()
+            or not limit.is_finite()
+            or quote <= 0
+            or limit < quote
+        ):
+            raise D8ShotDecodeError("verified current price exceeds approved spending limit")
+        if (
+            not 0 < self.verified_program_duration_s
+            <= self.measured_coherence_budget_s
+        ):
+            raise D8ShotDecodeError(
+                "full routed pulse schedule is not verified within the measured "
+                "coherence budget"
+            )
 
 
 @dataclass(frozen=True)
