@@ -1,0 +1,89 @@
+name: SHA QLDPC native compilation
+
+permissions:
+  contents: read
+
+# Runs the actual IBM Rust compiler and the published bicycle_numerics
+# implementation, NOT an emulated/guessed QLDPC instruction set.
+on:
+  push:
+    paths:
+      - "quantum/sha256_transmon_d8/bicycle_native_benchmark.py"
+      - "quantum/sha256_transmon_d8/qldpc_lowering.py"
+      - "tests/test_sha256_bicycle_native.py"
+      - ".github/workflows/quantum-bicycle-native.yml"
+  pull_request:
+    paths:
+      - "quantum/sha256_transmon_d8/bicycle_native_benchmark.py"
+      - "quantum/sha256_transmon_d8/qldpc_lowering.py"
+      - "tests/test_sha256_bicycle_native.py"
+      - ".github/workflows/quantum-bicycle-native.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sha-bicycle-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-isa-and-numerics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Fetch pinned IBM Bicycle Architecture Compiler
+        run: |
+          git clone --filter=blob:none https://github.com/qiskit-community/bicycle-architecture-compiler.git /tmp/bicycle-upstream
+          cd /tmp/bicycle-upstream
+          git checkout --detach d3a0037c78fb9d0719978efbd60d294392594bb2
+          test "$(git rev-parse HEAD)" = "d3a0037c78fb9d0719978efbd60d294392594bb2"
+
+      - name: Compile actual upstream Rust binaries
+        working-directory: /tmp/bicycle-upstream
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup override set 1.90.0
+          cargo build --release --locked -p bicycle_compiler -p bicycle_numerics
+
+      - name: Generate native Gross Clifford measurement table
+        working-directory: /tmp/bicycle-upstream
+        run: |
+          mkdir -p data
+          target/release/bicycle_compiler gross generate data/table_gross
+          test -s data/table_gross
+
+      - name: Real SHA-derived QLDPC native compilation and IBM numerics
+        run: |
+          python -m quantum.sha256_transmon_d8.bicycle_native_benchmark \
+            --message-hex 616263 \
+            --output-directory /tmp/sha-bicycle-native \
+            --prefix-gates 1 \
+            --compiler /tmp/bicycle-upstream/target/release/bicycle_compiler \
+            --numerics /tmp/bicycle-upstream/target/release/bicycle_numerics \
+            --measurement-table /tmp/bicycle-upstream/data/table_gross \
+            --code gross --model gross_1e-4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("/tmp/sha-bicycle-native/sha_bicycle.report.json").read_text())
+          assert r["mode"] == "sha_gate_prefix_only"
+          assert r["sha_gate_prefix_count"] == 1
+          assert r["native_isa_lines"] > 0
+          assert r["native_isa_operation_types"]
+          assert r["native_numerics_last_row"]
+          print("verified-real-compiler",r["pbc_sha256"],r["isa_sha256"])
+          PY
+
+      - name: Publish native ISA and numerics evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha-qldpc-native-evidence
+          path: /tmp/sha-bicycle-native/
+          if-no-files-found: warn
+          retention-days: 14
