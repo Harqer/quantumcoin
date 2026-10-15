@@ -174,11 +174,29 @@ def _add_bits(
     if set(source_bits) & set(target_bits):
         raise ValueError("source and target bits must be disjoint")
 
+    width = len(source_bits)
+    if width == 1:
+        # Modulo 2: only the low sum bit is observed, no outgoing carry.
+        # MAJ(cin, b, a); UMA(cin, b, a) is exactly b ^= cin ^ a,
+        # for arbitrary carry/input states, including superpositions.
+        c.cx(carry, target_bits[0])
+        c.cx(source_bits[0], target_bits[0])
+        return
+
     _maj(c, carry, target_bits[0], source_bits[0])
-    for i in range(len(source_bits) - 1):
+    for i in range(width - 2):
         _maj(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
 
-    for i in range(len(source_bits) - 2, -1, -1):
+    # The highest-bit carry-out is discarded by modulo-2**width SHA
+    # arithmetic. Do not compute a nonlinear carry only to uncompute it:
+    # MAJ(a,b,c); UMA(a,b,c) == CX(a,b); CX(c,b) *exactly*, with
+    # a and c restored on every computational basis state and linearly
+    # on arbitrary superpositions. Save two Toffoli and two CNOT gates
+    # per full-width addition without borrowing more qubits.
+    c.cx(source_bits[width - 2], target_bits[width - 1])
+    c.cx(source_bits[width - 1], target_bits[width - 1])
+
+    for i in range(width - 3, -1, -1):
         _uma(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
     _uma(c, carry, target_bits[0], source_bits[0])
 
@@ -376,10 +394,15 @@ def _add_constant32(
     # Primitive Cuccaro reference form is intentional here: the semantic
     # constant-propagation pass operates only on X/CX/CCX basis-state logic.
     _maj_primitives(reference, carry, b[0], a[0])
-    for i in range(31):
+    for i in range(30):
         _maj_primitives(reference, a[i], b[i + 1], a[i + 1])
 
-    for i in range(30, -1, -1):
+    # Same exact modulo-adder top-carry elimination before constant
+    # propagation. No redundant top carry is ever synthesized.
+    reference.cx(a[30], b[31])
+    reference.cx(a[31], b[31])
+
+    for i in range(29, -1, -1):
         _uma_primitives(reference, a[i], b[i + 1], a[i + 1])
     _uma_primitives(reference, carry, b[0], a[0])
 
