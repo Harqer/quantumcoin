@@ -25,6 +25,7 @@ from .reversible_multiblock import pad_sha256_message
 def write_sha_bicycle_program(
     compiled: Any, destination: str | Path, *,
     prefix_gates: int | None = None, prepare_message: bytes | None = None,
+    selected_gate_kind: str | None = None,
 ) -> tuple[int, int, int]:
     """Stream PBC gates with optional, EXPLICITLY LIMITED SHA gate prefix.
 
@@ -34,12 +35,26 @@ def write_sha_bicycle_program(
     """
     if prefix_gates is not None and prefix_gates < 1:
         raise ValueError("prefix_gates must be positive or None")
+    if selected_gate_kind is not None and prefix_gates is not None:
+        raise ValueError("choose a SHA gate prefix OR a selected SHA gate")
+    if selected_gate_kind is not None and selected_gate_kind not in (
+        "X", "CX", "CCX", "MAJ", "UMA", "MAJ_INV", "UMA_INV",
+    ):
+        raise ValueError("unsupported SHA gate kind")
     from .qldpc_lowering import rotations_for_gate, _basis_prep_wires
     from .ir import Gate
     import itertools
     width = compiled.layout.logical_bit_capacity
     gates = compiled.circuit.gates
-    selected = gates if prefix_gates is None else itertools.islice(gates, prefix_gates)
+    if selected_gate_kind is not None:
+        found = next((gate for gate in gates if gate.kind == selected_gate_kind), None)
+        if found is None:
+            raise ValueError(f"compiled SHA does not contain {selected_gate_kind}")
+        selected = (found,)
+        selected_count = 1
+    else:
+        selected = gates if prefix_gates is None else itertools.islice(gates, prefix_gates)
+        selected_count = len(gates) if prefix_gates is None else min(len(gates), prefix_gates)
     count = 0
     size = 0
     dest = Path(destination)
@@ -58,7 +73,7 @@ def write_sha_bicycle_program(
         for gate in selected:
             for op in rotations_for_gate(gate):
                 write(op.instruction(width))
-    return count, size, len(gates) if prefix_gates is None else min(len(gates), prefix_gates)
+    return count, size, selected_count
 
 
 def _digest(path: Path) -> str:
@@ -144,6 +159,7 @@ def run_bicycle_native_benchmark(
     model: str = "gross_1e-4",
     measurement_table: str | None = None,
     include_message_preparation: bool = False,
+    selected_gate_kind: str | None = None,
 ) -> dict[str, Any]:
     """Produce a provenance-bound native ISA/numerics report for real SHA gates.
 
@@ -171,6 +187,7 @@ def run_bicycle_native_benchmark(
     count, size, covered = write_sha_bicycle_program(
         compiled, pbc, prefix_gates=prefix_gates,
         prepare_message=message if include_message_preparation else None,
+        selected_gate_kind=selected_gate_kind,
     )
     compiled.compile_encoded_isa(
         str(pbc), str(isa), executable=compiler,
@@ -193,7 +210,12 @@ def run_bicycle_native_benchmark(
     report = {
         "sha_message_hex": message.hex(),
         "sha256_expected_digest": hashlib.sha256(message).hexdigest(),
-        "mode": "full_sha256" if prefix_gates is None else "sha_gate_prefix_only",
+        "mode": (
+            "sha_single_noncontiguous_gate_only" if selected_gate_kind is not None
+            else "full_sha256" if prefix_gates is None
+            else "sha_gate_prefix_only"
+        ),
+        "selected_sha_gate_kind": selected_gate_kind,
         "sha_gate_prefix_count": covered if prefix_gates is not None else None,
         "sha_total_reversible_gates": len(compiled.circuit.gates),
         "sha_total_pbc_rotations": inv.emitted_pauli_rotations,
@@ -225,6 +247,7 @@ def main() -> None:
     p.add_argument("--message-hex", default="616263")
     p.add_argument("--output-directory", required=True)
     p.add_argument("--prefix-gates", type=int, default=None)
+    p.add_argument("--selected-gate-kind", choices=("X", "CX", "CCX", "MAJ", "UMA"))
     p.add_argument("--compiler", required=True)
     p.add_argument("--numerics", required=True)
     p.add_argument("--measurement-table")
@@ -242,6 +265,7 @@ def main() -> None:
         model=args.model,
         measurement_table=args.measurement_table,
         include_message_preparation=args.prepare_message,
+        selected_gate_kind=args.selected_gate_kind,
     )
     print(json.dumps(report, indent=2, sort_keys=True))
 
