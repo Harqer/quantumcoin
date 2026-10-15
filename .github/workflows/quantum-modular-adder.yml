@@ -1,0 +1,106 @@
+name: SHA modular adder exact resource delta
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "quantum/sha256_transmon_d8/sha256.py"
+      - "tests/test_sha256_modular_adder.py"
+      - ".github/workflows/quantum-modular-adder.yml"
+  pull_request:
+    paths:
+      - "quantum/sha256_transmon_d8/sha256.py"
+      - "tests/test_sha256_modular_adder.py"
+      - ".github/workflows/quantum-modular-adder.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sha-modular-adder-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-arithmetic-and-resource-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Prove modulo arithmetic, carry restoration and constant specialization
+        run: python -m pytest -q tests/test_sha256_modular_adder.py
+
+      - name: Export baseline and new circuit resource reports
+        run: |
+          mkdir -p /tmp/sha-modular-adder
+          git worktree add --detach /tmp/sha-before 44ca66acebb3f9bad6d0dee93e708c3c020cfb60
+          (
+            cd /tmp/sha-before
+            python -m quantum.sha256_transmon_d8.resource_estimation \
+              --message-hex 616263 --qec-code gross \
+              --json-output /tmp/sha-modular-adder/before.json >/dev/null
+            python - <<'PY'
+          import json
+          from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
+          from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
+          msg=pad_sha256_message(b"abc")
+          p=compile_optimized_sha256(1,fixed_blocks={0:msg},qec_code="gross")
+          with open("/tmp/sha-modular-adder/before_pbc.json","w") as f:
+              json.dump({"pbc_rotations":p.encoded_rotation_inventory().emitted_pauli_rotations},f)
+          PY
+          )
+          python -m quantum.sha256_transmon_d8.resource_estimation \
+            --message-hex 616263 --qec-code gross \
+            --json-output /tmp/sha-modular-adder/after.json >/dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
+          from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
+          folder=Path("/tmp/sha-modular-adder")
+          old=json.loads((folder/"before.json").read_text())["logical"]
+          new=json.loads((folder/"after.json").read_text())["logical"]
+          padded=pad_sha256_message(b"abc")
+          program=compile_optimized_sha256(1,fixed_blocks={0:padded},qec_code="gross")
+          old_pbc=json.loads((folder/"before_pbc.json").read_text())["pbc_rotations"]
+          new_pbc=program.encoded_rotation_inventory().emitted_pauli_rotations
+          delta={
+              "reference_commit":"44ca66acebb3f9bad6d0dee93e708c3c020cfb60",
+              "logical_qubits_before":old["logical_qubits"],
+              "logical_qubits_after":new["logical_qubits"],
+              "primitive_gates_before":old["expanded_primitive_gates"],
+              "primitive_gates_after":new["expanded_primitive_gates"],
+              "toffoli_before":old["primitive_gate_counts"]["CCX"],
+              "toffoli_after":new["primitive_gate_counts"]["CCX"],
+              "seven_t_decomposition_before":old["exact_t_count_ancilla_free_ccx"],
+              "seven_t_decomposition_after":new["exact_t_count_ancilla_free_ccx"],
+              "pbc_rotations_before":old_pbc,
+              "pbc_rotations_after":new_pbc,
+              "clifford_t_asap_depth_before":old["clifford_t_asap_depth"],
+              "clifford_t_asap_depth_after":new["clifford_t_asap_depth"],
+          }
+          assert delta["logical_qubits_after"] == delta["logical_qubits_before"]
+          assert delta["primitive_gates_after"] < delta["primitive_gates_before"]
+          assert delta["toffoli_after"] < delta["toffoli_before"]
+          assert delta["seven_t_decomposition_after"] < delta["seven_t_decomposition_before"]
+          assert delta["pbc_rotations_after"] < delta["pbc_rotations_before"]
+          (folder/"delta.json").write_text(json.dumps(delta,indent=2)+"\n")
+          print(json.dumps(delta,indent=2))
+          PY
+
+      - name: Publish exact SHA arithmetic cost and reproducible comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha-modular-adder-before-after
+          path: /tmp/sha-modular-adder/
+          if-no-files-found: warn
+          retention-days: 14
