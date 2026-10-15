@@ -222,6 +222,10 @@ def report_optimized_sha_resources(
 ) -> dict[str, Any]:
     """One report for SHA logical cost and optional real Qualtran verification."""
     exact = count_exact_sha_resources(compiled)
+    capacity = None
+    if compiled.qec_code is not None:
+        from .qldpc_capacity import qldpc_capacity
+        capacity = qldpc_capacity(compiled, device_physical_qubits=108)
     report: dict[str, Any] = {
         "logical": asdict(exact),
         "qldpc": {
@@ -230,6 +234,15 @@ def report_optimized_sha_resources(
             "gross_modules_reserved": exact.gross_code_program_modules,
             "physical_qubits": None,
             "encoded_native_isa_ops": None,
+            "minimum_physical_data_qubits_for_code": (
+                capacity.physical_data_qubits if capacity is not None else None
+            ),
+            "published_gross_check_qubits": (
+                capacity.physical_syndrome_qubits if capacity is not None else None
+            ),
+            "selected_code_data_fits_108_qubit_device": (
+                capacity.data_capacity_fits_device if capacity is not None else None
+            ),
             "note": "Full native IBM bicycle_compiler run required for QLDPC physical operation inventory.",
         },
     }
