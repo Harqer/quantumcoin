@@ -89,6 +89,24 @@ from .workspace_liveness import (
     analyze_workspace_liveness,
 )
 from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
+from .optimized_multiblock import (
+    AncillaUsage,
+    CheckpointPlan,
+    CheckpointStep,
+    CompiledOptimizedSha256,
+    OptimizedShaLayout,
+    analyze_optimized_ancillas,
+    checkpoint_count,
+    compile_optimized_sha256,
+    initial_optimized_state,
+    optimized_digest_from_state,
+    plan_checkpoints,
+    simulate_optimized_sha256,
+)
+from .qasm3_reversible import (
+    iter_optimized_sha256_qasm3,
+    write_optimized_sha256_qasm3,
+)
 from .reversible_multiblock import (
     CompiledReversibleMultiSha256,
     ReversibleMultiBlockLayout,
@@ -104,6 +122,20 @@ from .qasm3_reversible import (
 )
 
 __all__ = [
+    "AncillaUsage",
+    "CheckpointPlan",
+    "CheckpointStep",
+    "CompiledOptimizedSha256",
+    "OptimizedShaLayout",
+    "analyze_optimized_ancillas",
+    "checkpoint_count",
+    "compile_optimized_sha256",
+    "initial_optimized_state",
+    "optimized_digest_from_state",
+    "plan_checkpoints",
+    "simulate_optimized_sha256",
+    "iter_optimized_sha256_qasm3",
+    "write_optimized_sha256_qasm3",
     "CompiledReversibleMultiSha256",
     "ReversibleMultiBlockLayout",
     "compile_reversible_multiblock_sha256",
