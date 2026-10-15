@@ -250,3 +250,18 @@ def test_qldpc_target_keeps_full_sha256_digest_and_clean_ancillas() -> None:
         a == b for i, (a, b) in enumerate(zip(original, final))
         if not digest_start <= i < digest_start + 256
     )
+
+
+def test_native_pbc_cost_inventory_is_actual_gate_accounting() -> None:
+    from quantum.sha256_transmon_d8.qldpc_lowering import bicycle_rotation_inventory
+    layout = OptimizedShaLayout((None,))
+    c = ReversibleCircuit()
+    c.x(0)
+    c.cx(0, 1)
+    c.ccx(0, 1, 2)
+    compiled = CompiledOptimizedSha256(layout, c, plan_checkpoints(1))
+    cost = bicycle_rotation_inventory(compiled)
+    assert cost.original_reversible_gates == 3
+    assert cost.emitted_pauli_rotations == 17
+    assert cost.ccx_equivalents == 1
+    assert cost.gross_data_modules == (layout.logical_bit_capacity + 10) // 11
