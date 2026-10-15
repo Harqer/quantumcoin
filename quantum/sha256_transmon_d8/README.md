@@ -1,3 +1,72 @@
+## Width-optimized coherent multi-block SHA-256 (optional compiler)
+
+`optimized_multiblock.py` adds **reversible Bennett-style checkpointing**,
+**whole-block constant specialization**, **actual borrowed dirty ancillas**
+for low-multiplicative Ch/Maj, and **cross-block lifetime reuse**. It does
+not replace the validated linear-history reference in
+`reversible_multiblock.py`.
+
+```python
+from quantum.sha256_transmon_d8 import (
+    compile_optimized_sha256, initial_optimized_state,
+    optimized_digest_from_state, pad_sha256_message,
+    write_optimized_sha256_qasm3, analyze_optimized_ancillas,
+)
+from quantum.sha256_transmon_d8.ir import simulate
+
+message = b"z" * 120  # three SHA-256 blocks
+padded = pad_sha256_message(message)
+# First 512-bit padded block is fully known; blocks 1 and 2 are coherent.
+program = compile_optimized_sha256(
+    len(padded)//64,
+    fixed_blocks={0: padded[:64]},
+)
+input_bits = initial_optimized_state(program, padded)
+output_bits = simulate(program.circuit, input_bits)
+print(optimized_digest_from_state(program, output_bits).hex())
+print(analyze_optimized_ancillas(program))
+write_optimized_sha256_qasm3(
+    program, "optimized_sha256.qasm", prepare_message=message,
+)
+```
+
+The checkpoint planner recursively computes, XOR-consumes, and uncomputes
+256-bit chaining states; intermediate states are kept in a pool of only
+`ceil(log2(B))` checkpoints for B message blocks, rather than allocating
+B+1 chain states. The first block's SHA IV is directly initialized in the
+shared 256-bit work register, removing another redundant 256-bit input
+register. Every stage reuses the **same** 256-bit work, 32-bit clean scratch
+and one clean carry. Ch borrows the live g word (32 dirty bits); Maj
+borrows live b and c words (64 dirty bits), restoring them via exact inverse
+operations. Semantic borrow regions survive into the final IR for audit.
+
+The independent compressed message blocks can be classified at compile
+time: a `None` entry is a 512-bit coherent input; a supplied exactly
+64-byte block is specialized into its SHA W[t] round constants, with
+**no input wires allocated for that block**. This does not replace quantum
+compression with `hashlib`. Partial known bits within a still-coherent
+block are **not** individually compacted by this pass.
+
+Width (logical qubits, not actual calibrated d=8 device support):
+
+```text
+reference linear history: 768*B + 801
+optimized: 512*D + 256*ceil(log2 B) + 545
+```
+
+D is the number of dynamic/coherent 512-bit blocks; B is the total block
+count. For fully coherent two-block SHA: 2,337 -> 1,825 logical qubits.
+For B=4 and only D=1 dynamic block: 3,873 -> 1,569 logical qubits.
+This trades **repeated 64-round compression invocations** for width:
+reversible pebbling lowers peak storage at the cost of extra gates and depth.
+For any arbitrary unknown coherent block, its quantum message bits cannot
+be optimized away as constants. All stage inputs, checkpoints and scratch
+are coherently restored after the final output XOR.
+
+**Physical scope:** the optimized logical circuit remains too large for the
+current 107-qubit Cepheus device. No uncharacterized multilevel pulse
+calibration is represented as executable.
+
 ## Coherent multi-block SHA-256 (complete 64 rounds per block)
 
 The `reversible_multiblock.py` implementation extends coherent SHA-256 to
