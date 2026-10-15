@@ -48,7 +48,11 @@ jobs:
         run: |
           rustup toolchain install 1.90.0 --profile minimal
           rustup override set 1.90.0
-          cargo build --release -p bicycle_compiler -p bicycle_numerics
+          # Current crates.io fixed@1.31 requires Rust 1.93; the
+          # pinned upstream Cargo.toml requests fixed>=1.29 and supports
+          # version 1.29.0. Pin transitive resolution reproducibly.
+          cargo update -p fixed --precise 1.29.0
+          cargo build --release --locked -p bicycle_compiler -p bicycle_numerics
           sha256sum Cargo.lock
 
       - name: Generate native Gross Clifford measurement table
