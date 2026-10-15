@@ -44,11 +44,16 @@ at the tested **v0.2.1** version (Rust 1.86+) using its README's
 `bicycle_compiler gross generate table_gross` procedures.
 The real command accepts line-delimited PBC operations and handles multiple
 11-program-logical-qubit code modules, GHZ joint measurements, and T
-injection. Gate-precise mappings: X -> one X-Pauli rotation, CX ->
-three commuting Clifford Pauli rotations, Toffoli -> seven commuting
-pi/4 Pauli rotations. All are exactly equivalent up to global phase,
+injection. Gate-precise mappings: X -> four pi/4 X-Pauli rotations, CX ->
+six pi/4 Pauli rotations (two each for three commuting Clifford terms),
+Toffoli -> seven commuting pi/4 Pauli rotations. All are exactly
+equivalent up to global phase,
 including on superpositions; the test suite checks phase-sensitive
-vectors rather than only reversible basis truth tables.
+vectors rather than only reversible basis truth tables. The deliberately
+conservative T-only rotations avoid the current upstream Rust
+`compile_rotation` path's unfinished Clifford-correction application.
+The PBC writer uses high-precision pi/4 decimal angles to match the
+upstream `I32F96::FRAC_PI_4` T-synthesis fast path.
 
 Every checkpoint is computed, used and uncomputed by the same reversible
 gate sequence. Physical **program-slot occupancy** is determined by the
