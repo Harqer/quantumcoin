@@ -175,3 +175,47 @@ def test_qldpc_output_uses_checkpointed_width_not_full_message_history() -> None
     assert usage.checkpoint_logical_qubits == 512
     assert usage.logical_qubits < 768 * 3 + 801
     assert usage.modules == math.ceil(usage.logical_qubits / 11)
+
+
+@pytest.mark.parametrize("n", (1, 2, 3, 4, 7, 16))
+def test_global_qldpc_checkpoint_lifetimes_are_clean_and_reused(n: int) -> None:
+    from quantum.sha256_transmon_d8.optimized_multiblock import (
+        CompiledOptimizedSha256, OptimizedShaLayout, plan_checkpoints,
+    )
+    from quantum.sha256_transmon_d8.qldpc_lowering import (
+        analyze_bicycle_register_lifetimes,
+    )
+    layout = OptimizedShaLayout(tuple(None for _ in range(n)))
+    compiled = CompiledOptimizedSha256(layout, ReversibleCircuit(), plan_checkpoints(n))
+    report = analyze_bicycle_register_lifetimes(compiled)
+    assert len(report.stages) == compiled.plan.compression_invocations
+    assert report.peak_live_checkpoints == compiled.plan.peak_live
+    assert report.peak_live_logical_bits <= report.logical_capacity
+    assert report.stages[-1].active_after == ()
+    assert report.module_capacity == (layout.logical_bit_capacity + 10) // 11
+    assert report.encoded_location(0) == (0, 0)
+    assert report.encoded_location(11) == (1, 0)
+    assert report.encoded_location(layout.logical_bit_capacity - 1)[0] < report.module_capacity
+    assert all(set(stage.active_after).issubset(set(range(compiled.plan.checkpoint_count)))
+               for stage in report.stages)
+
+
+def test_qldpc_is_integrated_with_existing_optimized_compiler(tmp_path: Path) -> None:
+    padded = pad_sha256_message(b"abc")
+    program = compile_optimized_sha256(
+        1, fixed_blocks={0: padded}, qec_code="gross",
+    )
+    assert program.qec_code == "gross"
+    assert program.encoded_register_usage().logical_qubits == 545
+    assert program.encoded_register_lifetimes().peak_live_checkpoints == 0
+    # This tiny prefix is streamed from the *real* compiled optimized SHA:
+    # the output is an actual Clifford+T equivalent PBC program, not a new
+    # hard-coded simulated SHA or a separate algorithm.
+    import itertools
+    from quantum.sha256_transmon_d8.qldpc_lowering import iter_bicycle_pbc
+    prefix = list(itertools.islice(iter_bicycle_pbc(program, measure_digest=False), 5))
+    assert len(prefix) == 5
+    assert all("Rotation" in operation for operation in prefix)
+    assert any("X" in op["Rotation"]["basis"] for op in prefix)
+    with pytest.raises(ValueError, match="qec_code"):
+        compile_optimized_sha256(1, qec_code="unknown")
