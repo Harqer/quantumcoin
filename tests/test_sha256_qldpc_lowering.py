@@ -232,3 +232,21 @@ def test_bicycle_native_t_angle_decimal_precision_and_no_clifford_fallback() -> 
             for record in instr
         )
         assert all(len(record["Rotation"]["angle"].lstrip("-")) > 28 for record in instr)
+
+
+def test_qldpc_target_keeps_full_sha256_digest_and_clean_ancillas() -> None:
+    import hashlib
+    from quantum.sha256_transmon_d8.optimized_multiblock import (
+        initial_optimized_state, optimized_digest_from_state,
+    )
+    msg = b"abc"
+    block = pad_sha256_message(msg)
+    compiled = compile_optimized_sha256(1, fixed_blocks={0: block}, qec_code="gross")
+    original = initial_optimized_state(compiled, block)
+    final = simulate(compiled.circuit, original)
+    assert optimized_digest_from_state(compiled, final) == hashlib.sha256(msg).digest()
+    digest_start = compiled.layout.digest_start_slot * 32
+    assert all(
+        a == b for i, (a, b) in enumerate(zip(original, final))
+        if not digest_start <= i < digest_start + 256
+    )
