@@ -89,6 +89,18 @@ from .workspace_liveness import (
     analyze_workspace_liveness,
 )
 from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
+from .qldpc_lowering import (
+    PauliRotation,
+    EncodedRegisterLease,
+    EncodedRegisterLifetime,
+    BicycleRegisterUsage,
+    analyze_bicycle_register_lifetimes,
+    bicycle_register_usage,
+    rotations_for_gate,
+    iter_bicycle_pbc,
+    write_bicycle_pbc,
+    compile_bicycle_isa,
+)
 from .optimized_multiblock import (
     AncillaUsage,
     CheckpointPlan,
@@ -122,6 +134,16 @@ from .qasm3_reversible import (
 )
 
 __all__ = [
+    "PauliRotation",
+    "EncodedRegisterLease",
+    "EncodedRegisterLifetime",
+    "BicycleRegisterUsage",
+    "analyze_bicycle_register_lifetimes",
+    "bicycle_register_usage",
+    "rotations_for_gate",
+    "iter_bicycle_pbc",
+    "write_bicycle_pbc",
+    "compile_bicycle_isa",
     "AncillaUsage",
     "CheckpointPlan",
     "CheckpointStep",
