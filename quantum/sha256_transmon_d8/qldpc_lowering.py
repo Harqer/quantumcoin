@@ -319,7 +319,10 @@ def iter_bicycle_pbc(
     n = compiled.layout.logical_bit_capacity
     if prepare_message is not None:
         for wire in _basis_prep_wires(compiled, prepare_message):
-            yield _rotation(((wire, "X"),), 1).instruction(n)
+            # Basis initialization must use the *same* exact native T-angle
+            # decomposition as the SHA circuit, not a raw pi rotation.
+            for rotation in rotations_for_gate(Gate("X", (wire,))):
+                yield rotation.instruction(n)
     for gate in compiled.circuit.gates:
         for rotation in rotations_for_gate(gate):
             yield rotation.instruction(n)
