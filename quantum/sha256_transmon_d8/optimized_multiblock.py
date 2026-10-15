@@ -376,6 +376,11 @@ class CompiledOptimizedSha256:
         from .qldpc_lowering import bicycle_register_usage
         return bicycle_register_usage(self)
 
+    def encoded_rotation_inventory(self):
+        """Count exact native-angle Pauli instructions for this SHA circuit."""
+        from .qldpc_lowering import bicycle_rotation_inventory
+        return bicycle_rotation_inventory(self)
+
     def write_encoded_pbc(
         self, path: str, *,
         prepare_message: bytes | None = None,
