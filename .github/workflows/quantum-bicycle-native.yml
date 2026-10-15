@@ -43,6 +43,16 @@ jobs:
           git checkout --detach d3a0037c78fb9d0719978efbd60d294392594bb2
           test "$(git rev-parse HEAD)" = "d3a0037c78fb9d0719978efbd60d294392594bb2"
 
+      - name: Restore native Rust build and Gross code table
+        uses: actions/cache@v4
+        with:
+          key: bicycle-d3a0037-rust190-fixed129-v1
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            /tmp/bicycle-upstream/target
+            /tmp/bicycle-upstream/data/table_gross
+
       - name: Compile actual upstream Rust binaries
         working-directory: /tmp/bicycle-upstream
         run: |
@@ -59,7 +69,9 @@ jobs:
         working-directory: /tmp/bicycle-upstream
         run: |
           mkdir -p data
-          target/release/bicycle_compiler gross generate data/table_gross
+          if ! test -s data/table_gross; then
+            target/release/bicycle_compiler gross generate data/table_gross
+          fi
           test -s data/table_gross
 
       - name: Real SHA-derived QLDPC native compilation and IBM numerics
@@ -81,7 +93,32 @@ jobs:
           assert r["native_isa_lines"] > 0
           assert r["native_isa_operation_types"]
           assert r["native_numerics_last_row"]
+          assert r["native_numerics_summary"]["input_pbc_instructions_accounted"] == 4
+          assert r["native_numerics_summary"]["physical_qubits"] is None
           print("verified-real-compiler",r["pbc_sha256"],r["isa_sha256"])
+          PY
+
+      - name: Compile a real nonlinear SHA Toffoli through native QLDPC ISA
+        run: |
+          python -m quantum.sha256_transmon_d8.bicycle_native_benchmark \
+            --message-hex 616263 \
+            --output-directory /tmp/sha-bicycle-native-ccx \
+            --selected-gate-kind CCX \
+            --compiler /tmp/bicycle-upstream/target/release/bicycle_compiler \
+            --numerics /tmp/bicycle-upstream/target/release/bicycle_numerics \
+            --measurement-table /tmp/bicycle-upstream/data/table_gross \
+            --code gross --model gross_1e-4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("/tmp/sha-bicycle-native-ccx/sha_bicycle.report.json").read_text())
+          assert r["mode"] == "sha_single_noncontiguous_gate_only"
+          assert r["selected_sha_gate_kind"] == "CCX"
+          assert r["pbc_emitted_operations"] == 7
+          assert r["native_isa_operation_types"].get("TGate") == 7
+          assert r["native_numerics_summary"]["input_pbc_instructions_accounted"] == 7
+          assert r["native_numerics_summary"]["physical_qubits"] is None
+          print("verified-sha-nonlinear-ccx-native-isa",r["isa_sha256"])
           PY
 
       - name: Publish native ISA and numerics evidence
@@ -89,6 +126,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sha-qldpc-native-evidence
-          path: /tmp/sha-bicycle-native/
+          path: |
+            /tmp/sha-bicycle-native/
+            /tmp/sha-bicycle-native-ccx/
           if-no-files-found: warn
           retention-days: 14
