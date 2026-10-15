@@ -225,6 +225,63 @@ def _xor_word(
         c.cx(layout.word_bit(source, bit), layout.word_bit(target, bit))
 
 
+def _extend_with_regions(destination: ReversibleCircuit, source: ReversibleCircuit) -> None:
+    """Preserve exact semantic/dirty-borrow lifetime annotations while reusing kernels."""
+    offset = len(destination.gates)
+    destination.extend(source.gates)
+    for region in source.regions:
+        destination.add_region(
+            region.kind, offset + region.start, offset + region.stop,
+            **dict(region.metadata),
+        )
+
+
+def analyze_optimized_ancillas(compiled: "CompiledOptimizedSha256") -> "AncillaUsage":
+    """Track actual Ch/Maj dirty borrows across all emitted checkpoint stages.
+
+    Dirty workspace is borrowed from the existing 256-bit SHA work registers,
+    not newly allocated qubits; the originating region's exact inverse is
+    emitted by the stage and the clean XOR oracle.
+    """
+    layout = compiled.layout
+    work = set(range(layout.work_start_slot, layout.work_start_slot + 8))
+    scratch = layout.scratch_slot
+    borrowed_peak = 0
+    borrow_regions = 0
+    for region in compiled.circuit.regions:
+        if region.kind not in ("CH_ADD", "MAJ_ADD"):
+            continue
+        md = dict(region.metadata)
+        slots = [
+            md[key] for key in sorted(md)
+            if key.startswith("borrowed") and key[8:].isdigit()
+        ]
+        if not slots or len(slots) != len(set(slots)):
+            raise AssertionError("invalid dirty workspace lease")
+        if not set(slots).issubset(work) or scratch in slots:
+            raise AssertionError("borrowed word aliases clean workspace or message")
+        if md["target_slot"] in slots:
+            raise AssertionError("borrowed register aliases arithmetic target")
+        borrowed_peak = max(borrowed_peak, 32 * len(slots))
+        borrow_regions += 1
+    if borrow_regions == 0:
+        raise AssertionError("expected actual low-multiplicative dirty borrow regions")
+    return AncillaUsage(
+        dirty_borrow_peak_bits=borrowed_peak,
+        shared_clean_scratch_bits=32,
+        shared_clean_carry_bits=1,
+        audited_borrow_regions=borrow_regions,
+    )
+
+
+@dataclass(frozen=True)
+class AncillaUsage:
+    dirty_borrow_peak_bits: int
+    shared_clean_scratch_bits: int
+    shared_clean_carry_bits: int
+    audited_borrow_regions: int
+
+
 def _emit_stage(
     c: ReversibleCircuit, layout: OptimizedShaLayout,
     step: CheckpointStep, schedule: tuple[int, ...] | None,
@@ -285,10 +342,10 @@ def _emit_stage(
                 region_kind="CHAIN_FEED_FORWARD",
             )
 
-    c.extend(stage.gates)
+    _extend_with_regions(c, stage)
     for word, role in enumerate("abcdefgh"):
         _xor_word(c, layout, roles[role], target_slot(word))
-    c.extend(stage.inverse().gates)
+    _extend_with_regions(c, stage.inverse())
     c.extend(init.inverse().gates)
     c.add_region(
         "CHECKPOINT_SHA_BLOCK", stage_start, len(c.gates),
@@ -341,7 +398,9 @@ def compile_optimized_sha256(
     for step in plan.steps:
         _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
     circuit.validate()
-    return CompiledOptimizedSha256(layout, circuit, plan)
+    result = CompiledOptimizedSha256(layout, circuit, plan)
+    analyze_optimized_ancillas(result)
+    return result
 
 
 def initial_optimized_state(
