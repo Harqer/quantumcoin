@@ -125,6 +125,38 @@ def iter_pauli_rotations(gates: Iterator[Gate]) -> Iterator[PauliRotation]:
 
 
 @dataclass(frozen=True)
+class BicycleRotationInventory:
+    """Exact requested PBC rotations, NOT synthesized QLDPC physical gates."""
+    original_reversible_gates: int
+    emitted_pauli_rotations: int
+    ccx_equivalents: int
+    gross_data_modules: int
+
+
+def bicycle_rotation_inventory(compiled: "CompiledOptimizedSha256") -> BicycleRotationInventory:
+    """Count genuine T-angle PBC terms without constructing giant basis arrays.
+
+    A circuit's 64-round reusable arithmetic is the input to this cost
+    function. It never multiplies the SHA register allocation by operation
+    count or reports unmeasured logical/physical error rates.
+    """
+    counts = {
+        "X": 4, "CX": 6, "CCX": 7,
+        "MAJ": 19, "MAJ_INV": 19, "UMA": 19, "UMA_INV": 19,
+    }
+    size = 0
+    for gate in compiled.circuit.gates:
+        gate.validate()
+        size += counts[gate.kind]
+    return BicycleRotationInventory(
+        original_reversible_gates=len(compiled.circuit.gates),
+        emitted_pauli_rotations=size,
+        ccx_equivalents=compiled.circuit.nonlinear_gate_count,
+        gross_data_modules=(compiled.layout.logical_bit_capacity + 10) // 11,
+    )
+
+
+@dataclass(frozen=True)
 class BicycleRegisterUsage:
     """Live-register occupancy of the *same* SHA compiler, never per-operation.
 
