@@ -50,7 +50,7 @@ jobs:
           original=compile_optimized_sha256(1,fixed_blocks=fixed,optimize_gates=False,qec_code="gross")
           optimized=compile_optimized_sha256(1,fixed_blocks=fixed,optimize_gates=True,qec_code="gross")
           report={
-            "workload":"SHA-256("abc") one fixed padded block",
+            "workload":"SHA-256 abc one fixed padded block",
             "logical_width_before":original.layout.logical_bit_capacity,
             "logical_width_after":optimized.layout.logical_bit_capacity,
             "semantic_gates_before":len(original.circuit.gates),
