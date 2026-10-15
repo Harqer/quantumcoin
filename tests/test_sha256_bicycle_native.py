@@ -110,3 +110,23 @@ def test_native_numerics_model_cost_aggregates_each_real_input_instruction() -> 
     assert summary["physical_qubits"] is None
     with pytest.raises(ValueError, match="no model rows"):
         summarize_native_numerics([])
+
+
+def test_real_sha_toffoli_sample_is_nonlinear_and_exactly_seven_t_angles(tmp_path: Path):
+    from quantum.sha256_transmon_d8.qldpc_lowering import rotations_for_gate
+    padded = pad_sha256_message(b"abc")
+    compiled = compile_optimized_sha256(1, fixed_blocks={0:padded}, qec_code="gross")
+    selected = next(g for g in compiled.circuit.gates if g.kind == "CCX")
+    dest = tmp_path / "sha-ccx.pbc.ndjson"
+    count, size, gates = write_sha_bicycle_program(
+        compiled, dest, selected_gate_kind="CCX",
+    )
+    expected = [rotation.instruction(compiled.layout.logical_bit_capacity)
+                for rotation in rotations_for_gate(selected)]
+    assert list(map(json.loads, dest.read_text().splitlines())) == expected
+    assert count == 7
+    assert gates == 1
+    assert size == dest.stat().st_size
+    assert all(len(op["Rotation"]["basis"]) == 545 for op in expected)
+    with pytest.raises(ValueError, match="prefix OR"):
+        write_sha_bicycle_program(compiled, tmp_path / "bad", selected_gate_kind="CCX", prefix_gates=1)
