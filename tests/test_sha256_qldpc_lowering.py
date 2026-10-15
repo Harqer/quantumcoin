@@ -101,9 +101,9 @@ def test_every_reversible_gate_lowers_phase_correctly(gate: Gate) -> None:
 
 
 @pytest.mark.parametrize(("kind", "expected"), (
-    ("X", 1), ("CX", 3), ("CCX", 7),
-    ("MAJ", 13), ("MAJ_INV", 13),
-    ("UMA", 13), ("UMA_INV", 13),
+    ("X", 4), ("CX", 6), ("CCX", 7),
+    ("MAJ", 19), ("MAJ_INV", 19),
+    ("UMA", 19), ("UMA_INV", 19),
 ))
 def test_pbc_rotation_costs_match_exact_decomposition(kind: str, expected: int) -> None:
     qubits = {"X": (0,), "CX": (0, 1), "CCX": (0, 1, 2)}.get(
@@ -156,9 +156,9 @@ def test_basis_preparation_uses_only_dynamic_inputs_and_digest_measurements() ->
     compiled = CompiledOptimizedSha256(layout, ReversibleCircuit(), plan_checkpoints(2))
     emitted = list(iter_bicycle_pbc(compiled, prepare_message=b"z" * 56))
     prep_count = sum(bit.bit_count() for bit in padded[64:])
-    assert len(emitted) == prep_count + 256
-    assert all("Rotation" in record for record in emitted[:prep_count])
-    measurements = emitted[prep_count:]
+    assert len(emitted) == 4 * prep_count + 256
+    assert all("Rotation" in record for record in emitted[:4 * prep_count])
+    measurements = emitted[4 * prep_count:]
     assert all(list(record) == ["Measurement"] for record in measurements)
     assert all(record["Measurement"]["basis"].count("Z") == 1 for record in measurements)
     assert all(record["Measurement"]["flip_result"] is False for record in measurements)
@@ -219,3 +219,16 @@ def test_qldpc_is_integrated_with_existing_optimized_compiler(tmp_path: Path) ->
     assert any("X" in op["Rotation"]["basis"] for op in prefix)
     with pytest.raises(ValueError, match="qec_code"):
         compile_optimized_sha256(1, qec_code="unknown")
+
+
+def test_bicycle_native_t_angle_decimal_precision_and_no_clifford_fallback() -> None:
+    # IBM bicycle_compiler v0.2.1 uses an exact fixed-point comparison to
+    # FRAC_PI_4 for native T synthesis. Truncating to Python float pi/4
+    # incorrectly selects its small-angle path, which can drop Cliffords.
+    for kind, wires in (("X", (0,)), ("CX", (0, 1)), ("CCX", (0, 1, 2))):
+        instr = [op.instruction(max(wires) + 1) for op in rotations_for_gate(Gate(kind, wires))]
+        assert all(
+            abs(float(record["Rotation"]["angle"])) == pytest.approx(math.pi / 4, abs=1e-15)
+            for record in instr
+        )
+        assert all(len(record["Rotation"]["angle"].lstrip("-")) > 28 for record in instr)
