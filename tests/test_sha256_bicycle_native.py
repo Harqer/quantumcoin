@@ -77,7 +77,7 @@ def test_native_isa_parser_counts_documented_parallel_module_operations(tmp_path
     assert kinds == {"Measure": 1, "JointMeasure": 2}
     assert modules == 2
     with pytest.raises(ValueError, match="no encoded"):
-        native_isa_counts(tmp_path / "empty.isa") if False else native_isa_counts(_empty_file(tmp_path))
+        native_isa_counts(_empty_file(tmp_path))
 
 
 def _empty_file(path: Path) -> Path:
