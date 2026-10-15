@@ -376,6 +376,15 @@ class CompiledOptimizedSha256:
         from .qldpc_lowering import bicycle_register_usage
         return bicycle_register_usage(self)
 
+    def resource_report(self, *, qualtran: bool = False):
+        """Exact current SHA gate/width/depth inventory and optional Qualtran.
+
+        Counts are for the same reversible circuit used by QLDPC lowering,
+        not for a second implementation or new per-gate qubit allocation.
+        """
+        from .resource_estimation import report_optimized_sha_resources
+        return report_optimized_sha_resources(self, qualtran=qualtran)
+
     def encoded_rotation_inventory(self):
         """Count exact native-angle Pauli instructions for this SHA circuit."""
         from .qldpc_lowering import bicycle_rotation_inventory
