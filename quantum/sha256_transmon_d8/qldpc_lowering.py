@@ -125,11 +125,106 @@ class BicycleRegisterUsage:
         return self.modules * self.data_logical_per_module
 
 
+@dataclass(frozen=True)
+class EncodedRegisterLease:
+    """One stage's input and output chaining occupancy.
+
+    A logical checkpoint slot is *reused* only after the matching reversible
+    cleanup makes it |0>. The encoder always maps a slot to the same Gross
+    module; no fresh physical module is created for each arithmetic gate.
+    """
+
+    stage: int
+    block_index: int
+    source_checkpoint: int
+    target_checkpoint: int
+    active_before: tuple[int, ...]
+    active_during: tuple[int, ...]
+    active_after: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class EncodedRegisterLifetime:
+    stages: tuple[EncodedRegisterLease, ...]
+    peak_live_checkpoints: int
+    peak_live_logical_bits: int
+    logical_capacity: int
+    module_capacity: int
+
+    def encoded_location(self, logical_wire: int) -> tuple[int, int]:
+        """Deterministic (Gross module, 11-way program slot), not gate-local."""
+        if not 0 <= logical_wire < self.logical_capacity:
+            raise ValueError("logical wire out of register allocation")
+        return divmod(logical_wire, 11)
+
+
+def analyze_bicycle_register_lifetimes(
+    compiled: "CompiledOptimizedSha256",
+) -> EncodedRegisterLifetime:
+    """Validate global reversible checkpoint reuse for the encoded target.
+
+    Fixed message inputs and the digest are permanent logical wires.
+    Temporary work/scratch/carry occupy one common register set for *every*
+    compression. Checkpoint writes toggle their stored state; a repeated
+    compute/XOR/uncompute stage releases it for later use. This analysis
+    intentionally does not treat unknown coherent inputs as recyclable.
+    """
+    layout = compiled.layout
+    plan = compiled.plan
+    ncheck = plan.checkpoint_count
+    active: set[int] = set()
+    peak = 0
+    stages: list[EncodedRegisterLease] = []
+    for stage, step in enumerate(plan.steps):
+        if step.source >= 0 and step.source not in active:
+            raise AssertionError("reused checkpoint was read after cleanup")
+        if step.target >= 0 and step.source == step.target:
+            raise AssertionError("SHA chain source and target checkpoint alias")
+        if step.target >= ncheck or step.source >= ncheck:
+            raise AssertionError("checkpoint ID outside allocated register pool")
+        before = tuple(sorted(active))
+        during = active | ({step.target} if step.target >= 0 else set())
+        peak = max(peak, len(during))
+        if step.target >= 0:
+            if step.target in active:
+                active.remove(step.target)
+            else:
+                active.add(step.target)
+        stages.append(EncodedRegisterLease(
+            stage=stage,
+            block_index=step.block_index,
+            source_checkpoint=step.source,
+            target_checkpoint=step.target,
+            active_before=before,
+            active_during=tuple(sorted(during)),
+            active_after=tuple(sorted(active)),
+        ))
+    if active:
+        raise AssertionError("checkpointed SHA left encoded register occupied")
+    if peak != plan.peak_live or peak > ncheck:
+        raise AssertionError("checkpoint lifetime disagrees with allocated peak")
+
+    permanent = 512 * len(layout.dynamic_indices) + 256
+    # A compression always uses one shared 256-bit work register plus
+    # 32-bit shared scratch and a 1-bit carry. No per-gate temporaries.
+    peak_bits = permanent + peak * 256 + 256 + 33
+    if peak_bits > layout.logical_bit_capacity:
+        raise AssertionError("live register peak exceeded encoded allocation")
+    return EncodedRegisterLifetime(
+        stages=tuple(stages),
+        peak_live_checkpoints=peak,
+        peak_live_logical_bits=peak_bits,
+        logical_capacity=layout.logical_bit_capacity,
+        module_capacity=(layout.logical_bit_capacity + 10) // 11,
+    )
+
+
 def bicycle_register_usage(compiled: "CompiledOptimizedSha256") -> BicycleRegisterUsage:
     """Account for wire reuse and verified dirty leases before PBC lowering."""
     from .optimized_multiblock import analyze_optimized_ancillas
     l = compiled.layout
     audit = analyze_optimized_ancillas(compiled)
+    analyze_bicycle_register_lifetimes(compiled)
     width = l.logical_bit_capacity
     module_data = 11
     return BicycleRegisterUsage(
