@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from dataclasses import asdict, dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -19,7 +18,7 @@ import subprocess
 from typing import Any
 
 from .optimized_multiblock import compile_optimized_sha256
-from .qldpc_lowering import iter_bicycle_pbc, bicycle_rotation_inventory
+from .qldpc_lowering import bicycle_rotation_inventory
 from .reversible_multiblock import pad_sha256_message
 
 
@@ -105,6 +104,35 @@ def native_isa_counts(isa_file: str | Path) -> tuple[int, Counter[str], int]:
     return operation_lines, kinds, module_count
 
 
+def summarize_native_numerics(rows: list[dict[str, str]]) -> dict[str, Any]:
+    """Aggregate each actual PBC iteration's incremental operation counts.
+
+    bicycle_numerics outputs per-input-instruction cost fields, while
+    end_time/total_error are cumulative. Its 'qubits' field reflects padded
+    logical *program slots*, not the device's physical transmons.
+    """
+    if not rows:
+        raise ValueError("bicycle_numerics returned no model rows")
+    incremental = (
+        "idles", "t_injs", "automorphisms", "measurements",
+        "joint_measurements", "measurement_depth",
+    )
+    totals = {name: 0 for name in incremental}
+    for row in rows:
+        for name in incremental:
+            totals[name] += int(row[name])
+    last = rows[-1]
+    return {
+        "input_pbc_instructions_accounted": len(rows),
+        "incremental_operation_totals": totals,
+        "padded_logical_program_slots": int(last["qubits"]),
+        "modeled_syndrome_cycles_elapsed": int(last["end_time"]),
+        "modeled_cumulative_failure_probability": float(last["total_error"]),
+        "model_code": last["code"],
+        "physical_qubits": None,
+    }
+
+
 def run_bicycle_native_benchmark(
     *,
     message: bytes,
@@ -157,8 +185,11 @@ def run_bicycle_native_benchmark(
     with csv.open(encoding="utf-8") as file:
         import csv as csvlib
         results = list(csvlib.DictReader(file))
-    if not results:
-        raise ValueError("bicycle_numerics returned no measured model results")
+    summary = summarize_native_numerics(results)
+    if len(results) != count:
+        raise ValueError("bicycle_numerics iteration count differs from PBC input")
+    if summary["padded_logical_program_slots"] != ((width + 10) // 11) * 11:
+        raise ValueError("bicycle_numerics program-slot allocation differs from compiled circuit")
     report = {
         "sha_message_hex": message.hex(),
         "sha256_expected_digest": hashlib.sha256(message).hexdigest(),
@@ -175,9 +206,13 @@ def run_bicycle_native_benchmark(
         "native_isa_operation_types": dict(sorted(kinds.items())),
         "native_isa_modules_observed": actual_modules,
         "native_numerics_last_row": results[-1],
+        "native_numerics_summary": summary,
         "pbc_sha256": _digest(pbc), "isa_sha256": _digest(isa),
         "numerics_sha256": _digest(csv),
-        "physical_scope": "IBM bicycle_numerics model, not measured Rigetti hardware",
+        "physical_scope": (
+            "IBM bicycle_numerics model, not measured Rigetti hardware; "
+            "qubits is padded *logical program capacity*, NOT physical qubits"
+        ),
     }
     (out / "sha_bicycle.report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8",
