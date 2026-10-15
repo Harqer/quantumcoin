@@ -41,7 +41,7 @@ def qldpc_capacity(compiled: "CompiledOptimizedSha256", *,
     Failure is decisive for this *particular* QLDPC code and module mapping,
     without asserting impossibility for an alternative circuit or code.
     """
-    if isinstance(device_physical_qubits, bool) or device_physical_qubits < 1:
+    if type(device_physical_qubits) is not int or device_physical_qubits < 1:
         raise ValueError("device_physical_qubits must be a positive integer")
     if compiled.qec_code not in ("gross", "two-gross"):
         raise ValueError("select 'gross' or 'two-gross' before QLDPC capacity checking")
