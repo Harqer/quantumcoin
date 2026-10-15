@@ -13,6 +13,10 @@ from pathlib import Path
 from .d8_two_body_decomposition import _expand_macro
 from .ir import Gate
 from .reversible_block import CompiledReversibleBlockSha256, pad_sha256_single_block
+from .reversible_multiblock import (
+    CompiledReversibleMultiSha256,
+    pad_sha256_message,
+)
 from .sha256 import H0
 
 
@@ -94,4 +98,73 @@ def write_sha256_qasm3(
         ):
             output.write(piece)
             size += len(piece.encode("utf-8"))
+    return size
+
+
+def iter_multiblock_sha256_qasm3(
+    compiled: CompiledReversibleMultiSha256,
+    *,
+    prepare_message: bytes | None = None,
+    measure_digest: bool = True,
+) -> Iterator[str]:
+    """Stream every gate of the coherent multi-block SHA-256 XOR oracle.
+
+    Without prepare_message, each 512-bit input block is an arbitrary quantum
+    register. With a message, emit only the X basis-state preparation gates for
+    correctly padded blocks (not a classical hash or classical schedule).
+    Intermediate chaining states and work registers remain coherent and are
+    uncomputed by the circuit before final readout.
+    """
+    layout = compiled.layout
+    yield "OPENQASM 3.0;\n"
+    yield f"qubit[{layout.logical_bit_capacity}] q;\n"
+    if measure_digest:
+        yield "bit[256] digest;\n"
+
+    if prepare_message is not None:
+        padded = pad_sha256_message(prepare_message)
+        if len(padded) != compiled.block_count * 64:
+            raise ValueError(
+                "basis-state message length requires a different compiled "
+                "SHA-256 block count"
+            )
+        for block in range(compiled.block_count):
+            for word_index in range(16):
+                offset = block * 64 + word_index * 4
+                value = int.from_bytes(padded[offset:offset + 4], "big")
+                slot = layout.schedule_slot(block, word_index)
+                for bit in range(32):
+                    if value & (1 << bit):
+                        yield f"x q[{layout.word_bit(slot, bit)}];\n"
+
+    for gate in compiled.circuit.gates:
+        for instruction in native_qasm3_gates(gate):
+            yield instruction + "\n"
+
+    if measure_digest:
+        for word in range(8):
+            for bit in range(32):
+                yield (
+                    f"digest[{word * 32 + bit}] = "
+                    f"measure q[{layout.digest_bit(word, bit)}];\n"
+                )
+
+
+def write_multiblock_sha256_qasm3(
+    compiled: CompiledReversibleMultiSha256,
+    path: str | Path,
+    *,
+    prepare_message: bytes | None = None,
+    measure_digest: bool = True,
+) -> int:
+    """Write the complete multi-block circuit without materializing QASM text."""
+    size = 0
+    with Path(path).open("w", encoding="utf-8") as output:
+        for instruction in iter_multiblock_sha256_qasm3(
+            compiled,
+            prepare_message=prepare_message,
+            measure_digest=measure_digest,
+        ):
+            output.write(instruction)
+            size += len(instruction.encode("utf-8"))
     return size

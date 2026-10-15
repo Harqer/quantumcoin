@@ -89,8 +89,30 @@ from .workspace_liveness import (
     analyze_workspace_liveness,
 )
 from .sha256 import compile_single_block_sha256, simulate_compiled_sha256
+from .reversible_multiblock import (
+    CompiledReversibleMultiSha256,
+    ReversibleMultiBlockLayout,
+    compile_reversible_multiblock_sha256,
+    initial_multiblock_state,
+    multiblock_digest_from_state,
+    pad_sha256_message,
+    simulate_reversible_multiblock_sha256,
+)
+from .qasm3_reversible import (
+    iter_multiblock_sha256_qasm3,
+    write_multiblock_sha256_qasm3,
+)
 
 __all__ = [
+    "CompiledReversibleMultiSha256",
+    "ReversibleMultiBlockLayout",
+    "compile_reversible_multiblock_sha256",
+    "initial_multiblock_state",
+    "multiblock_digest_from_state",
+    "pad_sha256_message",
+    "simulate_reversible_multiblock_sha256",
+    "iter_multiblock_sha256_qasm3",
+    "write_multiblock_sha256_qasm3",
     "CEPHEUS_ARN",
     "CarrierPlacement",
     "CepheusSnapshot",
