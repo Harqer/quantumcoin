@@ -48,7 +48,8 @@ jobs:
         run: |
           rustup toolchain install 1.90.0 --profile minimal
           rustup override set 1.90.0
-          cargo build --release --locked -p bicycle_compiler -p bicycle_numerics
+          cargo build --release -p bicycle_compiler -p bicycle_numerics
+          sha256sum Cargo.lock
 
       - name: Generate native Gross Clifford measurement table
         working-directory: /tmp/bicycle-upstream
