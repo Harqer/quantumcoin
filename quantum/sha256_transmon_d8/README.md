@@ -1,3 +1,70 @@
+## QLDPC-aware reuse in the existing optimized SHA-256 compiler
+
+This is **not a second SHA implementation**. The existing
+`compile_optimized_sha256` now accepts `qec_code="gross"` or
+`qec_code="two-gross"`. Both use the **same** reversible SHA gate IR,
+checkpoint schedule, coherent message wires, shared 256-bit work register,
+32-bit scratch, carry and 32/64-bit dirty borrowed Ch/Maj state. The
+`qldpc_lowering.py` module lowers *that exact circuit* into the published
+IBM Bicycle Architecture Compiler v0.2.1 Pauli-based computation (PBC)
+input format without ever allocating qubits for an individual arithmetic
+gate.
+
+```python
+from quantum.sha256_transmon_d8 import (
+    compile_optimized_sha256, pad_sha256_message,
+)
+message = b"abc"
+padded = pad_sha256_message(message)
+program = compile_optimized_sha256(
+    len(padded) // 64,
+    fixed_blocks={0: padded},
+    qec_code="gross",
+)
+usage = program.encoded_register_usage()
+lifetimes = program.encoded_register_lifetimes()
+print(usage.logical_qubits, usage.modules, lifetimes.peak_live_logical_bits)
+
+# Actual NDJSON rotations and Pauli measurements accepted by IBM's compiler:
+program.write_encoded_pbc("sha_bicycle.ndjson", prepare_message=message)
+
+# If the real Rust binary is installed, run it on the exact SHA circuit:
+program.compile_encoded_isa(
+    "sha_bicycle.ndjson", "sha_bicycle_isa.ndjson",
+    executable="/path/to/bicycle_compiler",
+    measurement_table="/path/to/table_gross",
+)
+```
+
+The upstream IBM compiler, not Quantumcoin, produces the resulting
+bivariate-bicycle logical ISA. Install the official Apache-2.0
+[IBM Bicycle Architecture Compiler](https://github.com/qiskit-community/bicycle-architecture-compiler)
+at the tested **v0.2.1** version (Rust 1.86+) using its README's
+`cargo build --release` and
+`bicycle_compiler gross generate table_gross` procedures.
+The real command accepts line-delimited PBC operations and handles multiple
+11-program-logical-qubit code modules, GHZ joint measurements, and T
+injection. Gate-precise mappings: X -> one X-Pauli rotation, CX ->
+three commuting Clifford Pauli rotations, Toffoli -> seven commuting
+pi/4 Pauli rotations. All are exactly equivalent up to global phase,
+including on superpositions; the test suite checks phase-sensitive
+vectors rather than only reversible basis truth tables.
+
+Every checkpoint is computed, used and uncomputed by the same reversible
+gate sequence. Physical **program-slot occupancy** is determined by the
+number of *simultaneously live* logical registers, not by the number of
+arithmetic instructions. The measured `peak_live_logical_bits` and
+`encoded_location(wire)` derive from the actual checkpoint plan. An
+intermediate checkpoint can be reused only once its state has been
+uncomputed to |0>; coherent inputs and the digest output remain live.
+The diagnostic `modules = ceil(logical_qubits/11)` is **not** a
+hardware-validated physical-qubit or gate count: a Gross module contains
+additional pivot/physical syndrome resources, requires a real syndrome
+decoder and code-specific factory/routing architecture, and is not an
+assertion of Rigetti Cepheus compatibility. The native executable must be
+run for actual encoded operations, and measured noise/timing/factory
+data are required for physical execution costing.
+
 ## Width-optimized coherent multi-block SHA-256 (optional compiler)
 
 `optimized_multiblock.py` adds **reversible Bennett-style checkpointing**,
