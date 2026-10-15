@@ -24,6 +24,7 @@ program = compile_optimized_sha256(
 usage = program.encoded_register_usage()
 lifetimes = program.encoded_register_lifetimes()
 print(usage.logical_qubits, usage.modules, lifetimes.peak_live_logical_bits)
+print(program.encoded_rotation_inventory())  # actual PBC demand; not hardware gate count
 
 # Actual NDJSON rotations and Pauli measurements accepted by IBM's compiler:
 program.write_encoded_pbc("sha_bicycle.ndjson", prepare_message=message)
