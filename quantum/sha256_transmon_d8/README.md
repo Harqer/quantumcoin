@@ -1,3 +1,63 @@
+## Coherent multi-block SHA-256 (complete 64 rounds per block)
+
+The `reversible_multiblock.py` implementation extends coherent SHA-256 to
+**any positive number of padded 512-bit blocks**. Unlike the compact
+fixed-message `packed97` path, every message bit is an input quantum wire.
+There is **no classical expansion of W[t] or intermediate SHA digest**.
+
+For each block, the circuit:
+1. CNOT-copies its previous 256-bit chaining state into a reusable 256-bit
+   working register.
+2. Computes W[16]..W[63] in a 16-word in-place rolling schedule, executes
+   **all 64 SHA-256 rounds**, then adds the **incoming chaining state**
+   (not the fixed SHA IV) modulo 2^32 to the working state.
+3. CNOT-copies that block's resulting digest into the next clean chaining
+   register; runs the exact inverse of the block's compression; and restores
+   the work area and original block schedule.
+4. After all blocks, CNOT-XORs the final chain into the 256-bit output,
+   reverses the entire chain to clean **all** intermediate states and the
+   initial IV ancilla. Message inputs are unchanged.
+
+The oracle is linear over arbitrary fixed-block-count input superpositions and
+supports an arbitrary initial digest output (XOR oracle). Its workspace
+restoration requires **no measurement, reset, or host-side hash execution**.
+
+```python
+from quantum.sha256_transmon_d8 import (
+    compile_reversible_multiblock_sha256,
+    pad_sha256_message,
+    initial_multiblock_state,
+    multiblock_digest_from_state,
+    write_multiblock_sha256_qasm3,
+)
+from quantum.sha256_transmon_d8.ir import simulate
+
+message = b"x" * 56  # requires TWO SHA-256 blocks
+padded = pad_sha256_message(message)
+compiled = compile_reversible_multiblock_sha256(len(padded) // 64)
+initial = initial_multiblock_state(compiled, padded)
+final = simulate(compiled.circuit, initial)
+print(multiblock_digest_from_state(compiled, final).hex())
+write_multiblock_sha256_qasm3(
+    compiled, "sha256_two_blocks.qasm", prepare_message=message,
+)
+```
+
+A basis-state message preparation is optional for the QASM exporter; omit
+`prepare_message` to leave quantum block input wires uninitialized for a
+caller-supplied coherent state. Standard padding fixes the number of blocks
+and the 64-bit bit-length field; coherent inputs in one circuit share that
+fixed padded length.
+
+Logical width is **768 × B + 801 qubits** for B padded blocks:
+512B message + 256(B+1) chain + 256 reusable work + 32 scratch + 256 digest
+output + 1 carry. That is 1,569 qubits for B=1, 2,337 for B=2,
+and 3,105 for B=3. This is a correctness-first logical implementation,
+**not** a demonstration of execution on the 107-qubit Cepheus device.
+It also does not claim the OpenQASM program fits a provider's task-size or
+hardware-error budget. The one-block coherent specialization remains as a
+smaller alternative for B=1.
+
 ## Coherent 512-bit reversible SHA-256 oracle
 
 The general-message implementation is in `reversible_block.py`. Unlike the
@@ -37,8 +97,8 @@ the actual target compiler.
 1 carry), or 353 idealized d=8 carriers. It is **not** a physically runnable
 107-qubit Cepheus job. The existing fixed-message and nonce-only compact
 profiles remain separate; neither is evidence that a fully coherent 512-bit
-message fits in 97 carriers. This implementation supports one SHA block;
-multi-block coherent chaining requires a separate stateful construction.
+message fits in 97 carriers. The `reversible_block.py` specialization supports one SHA block;
+use `reversible_multiblock.py` for coherent multi-block chaining.
 
 # Exact reversible SHA-256 on d=8 transmons
 
