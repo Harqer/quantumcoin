@@ -9,6 +9,7 @@ import pytest
 from quantum.sha256_transmon_d8.bicycle_native_benchmark import (
     native_isa_counts,
     write_sha_bicycle_program,
+    summarize_native_numerics,
 )
 from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
 from quantum.sha256_transmon_d8.qldpc_lowering import (
@@ -84,3 +85,28 @@ def _empty_file(path: Path) -> Path:
     p = path / "empty.isa"
     p.write_text("")
     return p
+
+
+def test_native_numerics_model_cost_aggregates_each_real_input_instruction() -> None:
+    # The native gross_1e-4 run emitted four rotations. Per-line TGate
+    # injections are not cumulative; end_time and total_error already are.
+    rows = [
+        {"code": "gross", "qubits": "550", "idles": "300",
+         "t_injs": "1", "automorphisms": "2", "measurements": "53",
+         "joint_measurements": "49", "measurement_depth": "17",
+         "end_time": "600", "total_error": "0.000003"},
+        {"code": "gross", "qubits": "550", "idles": "300",
+         "t_injs": "1", "automorphisms": "2", "measurements": "53",
+         "joint_measurements": "49", "measurement_depth": "17",
+         "end_time": "1200", "total_error": "0.000006"},
+    ]
+    summary = summarize_native_numerics(rows)
+    assert summary["input_pbc_instructions_accounted"] == 2
+    assert summary["incremental_operation_totals"]["t_injs"] == 2
+    assert summary["incremental_operation_totals"]["joint_measurements"] == 98
+    assert summary["modeled_syndrome_cycles_elapsed"] == 1200
+    assert summary["modeled_cumulative_failure_probability"] == 0.000006
+    assert summary["padded_logical_program_slots"] == 550
+    assert summary["physical_qubits"] is None
+    with pytest.raises(ValueError, match="no model rows"):
+        summarize_native_numerics([])
