@@ -1,0 +1,70 @@
+name: SHA Qualtran exact resource accounting
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "quantum/sha256_transmon_d8/resource_estimation.py"
+      - "quantum/sha256_transmon_d8/optimized_multiblock.py"
+      - "tests/test_sha256_qualtran.py"
+      - ".github/workflows/quantum-qualtran-resources.yml"
+  pull_request:
+    paths:
+      - "quantum/sha256_transmon_d8/resource_estimation.py"
+      - "quantum/sha256_transmon_d8/optimized_multiblock.py"
+      - "tests/test_sha256_qualtran.py"
+      - ".github/workflows/quantum-qualtran-resources.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sha-qualtran-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-sha-qualtran:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned Qualtran cost-analysis library
+        run: |
+          python -m pip install --disable-pip-version-check qualtran==0.7.0 pytest
+
+      - name: Validate actual SHA gate costs with Qualtran
+        run: python -m pytest -q tests/test_sha256_resource_estimation.py tests/test_sha256_qualtran.py
+
+      - name: Export independently cross-checked SHA circuit resources
+        run: |
+          mkdir -p /tmp/sha-qualtran
+          python -m quantum.sha256_transmon_d8.resource_estimation \
+            --message-hex 616263 \
+            --qec-code gross --qualtran \
+            --json-output /tmp/sha-qualtran/sha256-abc-gross-resources.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path("/tmp/sha-qualtran/sha256-abc-gross-resources.json").read_text())
+          assert r["logical"]["logical_qubits"] == 545
+          assert r["qualtran"]["qubit_count_from_audited_sha_signature"] == 545
+          assert r["qualtran"]["qec_gate_cost"]["toffoli"] == r["logical"]["primitive_gate_counts"]["CCX"]
+          assert r["qldpc"]["physical_qubits"] is None
+          print("Qualtran verified",r["logical"]["expanded_primitive_gates"],r["logical"]["exact_t_count_ancilla_free_ccx"])
+          PY
+
+      - name: Upload exact SHA resource evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha-qualtran-resource-evidence
+          path: /tmp/sha-qualtran/
+          if-no-files-found: warn
+          retention-days: 14
