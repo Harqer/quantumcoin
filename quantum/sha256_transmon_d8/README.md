@@ -1,3 +1,69 @@
+## Exact optimized SHA-256 resources with Qualtran
+
+The existing `compile_optimized_sha256()` now exposes `program.resource_report()`.
+Its **exact** logical gate costs are enumerated directly from the same reversible
+SHA circuit compiled for Gross-code QLDPC. MAJ/UMA gates are expanded through
+`_expand_macro()` (not treated as one physical pulse). Every Toffoli is
+decomposed with the existing **ancilla-free** `_decompose_ccx()` into
+H/T/T†/CNOT and counted gate-by-gate.
+
+```python
+from quantum.sha256_transmon_d8 import (
+    compile_optimized_sha256, pad_sha256_message,
+)
+message = b"abc"
+padded = pad_sha256_message(message)
+program = compile_optimized_sha256(
+    1, fixed_blocks={0: padded}, qec_code="gross",
+)
+resource = program.resource_report(qualtran=True)
+print(resource["logical"]["logical_qubits"])
+print(resource["logical"]["primitive_gate_counts"])
+print(resource["logical"]["clifford_t_gate_counts"])
+print(resource["logical"]["clifford_t_asap_depth"])
+print(resource["qualtran"]["qec_gate_cost"])
+```
+
+Reproduce the same report in CI or locally:
+
+```bash
+pip install qualtran==0.7.0
+python -m quantum.sha256_transmon_d8.resource_estimation \
+  --message-hex 616263 --qec-code gross --qualtran \
+  --json-output sha256-abc-gross-resources.json
+# Keep one block coherent (unknown quantum input) instead of fixed:
+python -m quantum.sha256_transmon_d8.resource_estimation \
+  --message-hex 616263 --dynamic-blocks 0 --qec-code gross \
+  --json-output sha256-coherent-resources.json
+```
+
+The precise gate inventory and longest-path depths are from the **existing
+gate list** and reuse the circuit's true SHA wire IDs. Qualtran
+`QECGatesCost()` independently classifies these actual primitive gate
+multiplicities (rather than a guessed SHA asymptotic formula). Qualtran
+`QubitCount()` is applied to a Bloq with the SHA circuit's audited
+register/signature width; its equality check does **not** independently
+prove qubit lifetime safety. The SHA checkpoint/dirty-ancilla contract
+remains governed by `analyze_optimized_ancillas()` and
+`analyze_bicycle_register_lifetimes()`.
+
+The ancilla-free Toffoli's T count is seven per Toffoli (from our exact
+15-gate decomposition); Qualtran's Toffoli cost is a *logical gate-family
+count*, not a fixed physical T factory cost. ASAP depth is the critical
+path for the **as-written all-to-all** circuit, not an optimized hardware
+routing/scheduling result. Counting the unused/untouched wires separately
+does not establish that they can safely be released during coherent SHA.
+
+**Physical boundary:** these counts establish the exact circuit's logical
+width and decomposition-level operations. Encoded Gross ISA operations
+must be measured by running the actual
+`bicycle_native_benchmark.py` and IBM compiler/numerics, and physical
+qubits/factory footprint still require hardware/noise and error-budget
+parameters. No 107-transmon physical feasibility is inferred.
+
+Sources: [Qualtran resource counting](https://qualtran.readthedocs.io/en/latest/reference/qualtran/resource_counting.html);
+[Qualtran qubit-count caveats](https://qualtran.readthedocs.io/en/latest/reference/qualtran/resource_counting/QubitCount.html).
+
 ## QLDPC-aware reuse in the existing optimized SHA-256 compiler
 
 This is **not a second SHA implementation**. The existing
