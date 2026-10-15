@@ -362,6 +362,49 @@ class CompiledOptimizedSha256:
     layout: OptimizedShaLayout
     circuit: ReversibleCircuit
     plan: CheckpointPlan
+    # Same SHA computation, now optionally lowered to its fault-tolerant
+    # QLDPC backend. No duplicate arithmetic workspace or second circuit.
+    qec_code: str | None = None
+
+    def encoded_register_lifetimes(self):
+        """Derive the actual checkpoint/dirty-workspace reuse trace."""
+        from .qldpc_lowering import analyze_bicycle_register_lifetimes
+        return analyze_bicycle_register_lifetimes(self)
+
+    def encoded_register_usage(self):
+        """Gross program-slot inventory; not a physical device estimate."""
+        from .qldpc_lowering import bicycle_register_usage
+        return bicycle_register_usage(self)
+
+    def write_encoded_pbc(
+        self, path: str, *,
+        prepare_message: bytes | None = None,
+        measure_digest: bool = True,
+    ) -> int:
+        """Export exact SHA arithmetic to the selected IBM bicycle code."""
+        if self.qec_code is None:
+            raise ValueError("compile SHA with qec_code='gross' or 'two-gross'")
+        from .qldpc_lowering import write_bicycle_pbc
+        return write_bicycle_pbc(
+            self, path,
+            prepare_message=prepare_message,
+            measure_digest=measure_digest,
+        )
+
+    def compile_encoded_isa(
+        self, pbc_path: str, isa_path: str, *,
+        executable: str = "bicycle_compiler",
+        measurement_table: str | None = None,
+    ) -> None:
+        """Invoke the upstream published Rust QLDPC compiler, not an emulator."""
+        if self.qec_code is None:
+            raise ValueError("compile SHA with qec_code='gross' or 'two-gross'")
+        from .qldpc_lowering import compile_bicycle_isa
+        compile_bicycle_isa(
+            pbc_path, isa_path,
+            executable=executable, code=self.qec_code,
+            measurement_table=measurement_table,
+        )
 
     @property
     def logical_gate_count(self) -> int:
@@ -376,6 +419,7 @@ def compile_optimized_sha256(
     block_count: int,
     *,
     fixed_blocks: dict[int, bytes] | None = None,
+    qec_code: str | None = None,
 ) -> CompiledOptimizedSha256:
     """Compile a clean coherent SHA XOR oracle using checkpoint reuse.
 
@@ -384,6 +428,8 @@ def compile_optimized_sha256(
     quantum compression gates. Unlisted blocks retain 512 coherent input bits.
     The block count and padding are caller-supplied fixed context.
     """
+    if qec_code not in (None, "gross", "two-gross"):
+        raise ValueError("qec_code must be 'gross', 'two-gross', or None")
     fixed = fixed_blocks or {}
     if block_count < 1 or any(i < 0 or i >= block_count for i in fixed):
         raise ValueError("fixed block index outside compiled message")
@@ -398,8 +444,10 @@ def compile_optimized_sha256(
     for step in plan.steps:
         _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
     circuit.validate()
-    result = CompiledOptimizedSha256(layout, circuit, plan)
+    result = CompiledOptimizedSha256(layout, circuit, plan, qec_code=qec_code)
     analyze_optimized_ancillas(result)
+    if qec_code is not None:
+        result.encoded_register_lifetimes()
     return result
 
 
