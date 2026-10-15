@@ -56,10 +56,18 @@ class PauliRotation:
         basis = ["I"] * logical_qubits
         for wire, pauli in self.factors:
             basis[wire] = pauli
-        return {"Rotation": {
-            "basis": basis,
-            "angle": str(float(self.angle_over_pi) * math.pi),
-        }}
+        # The upstream compiler uses a 96-fractional-bit fixed-point angle
+        # and dispatches T angles by exact equality with FRAC_PI_4.
+        # A 16-digit Python float of pi/4 can miss that branch; use a
+        # high-precision decimal literal that rounds to the same I32F96
+        # constant as the upstream fixed crate's FRAC_PI_4.
+        if self.angle_over_pi == Fraction(1, 4):
+            angle = "0.785398163397448309615660845819875721"
+        elif self.angle_over_pi == Fraction(-1, 4):
+            angle = "-0.785398163397448309615660845819875721"
+        else:
+            angle = str(float(self.angle_over_pi) * math.pi)
+        return {"Rotation": {"basis": basis, "angle": angle}}
 
 
 def _rotation(factors: tuple[tuple[int, str], ...], numerator: int, denominator: int = 1) -> PauliRotation:
@@ -70,22 +78,36 @@ def rotations_for_gate(gate: Gate) -> Iterator[PauliRotation]:
     """Exact X/CX/CCX as Pauli rotations, up to global phases.
 
     CX(c,t) ~ exp(+i*pi/4 Zc) exp(+i*pi/4 Xt)
-              exp(-i*pi/4 ZcXt).
+              exp(-i*pi/4 ZcXt); each pi/2 rotation is two pi/4 units.
     CCX(a,b,t) ~ product over the seven nontrivial subsets of
     (Za, Zb, Xt) with alternating signs at angles pi/4.
     These operators all commute within each gate, and the second identity
     comes from the exact controlled-controlled-X projector polynomial.
+    Every emitted angle is +/-pi/4, compatible with the upstream native
+    T-rotation path, which does not yet apply returned Clifford corrections.
     """
     gate.validate()
     for primitive in _expand_macro(gate):
         qs = primitive.qubits
         if primitive.kind == "X":
-            yield _rotation(((qs[0], "X"),), 1)
+            # Four pi/4 T rotations are the exact Pauli-X gate up to global
+            # phase. The upstream v0.2.1 PBC compiler currently ignores
+            # Clifford corrections returned by the small-angle synthesizer,
+            # so sending a pi rotation directly would not be faithful.
+            for _ in range(4):
+                yield _rotation(((qs[0], "X"),), 1, 4)
         elif primitive.kind == "CX":
             control, target = qs
-            yield _rotation(((control, "Z"),), 1, 2)
-            yield _rotation(((target, "X"),), 1, 2)
-            yield _rotation(((control, "Z"), (target, "X")), -1, 2)
+            # CX is three commuting Clifford (pi/2) Pauli rotations.
+            # Split each into two native pi/4 rotations to avoid unhandled
+            # Clifford corrections in upstream compile_rotation.
+            for factors, sign in (
+                (((control, "Z"),), 1),
+                (((target, "X"),), 1),
+                (((control, "Z"), (target, "X")), -1),
+            ):
+                for _ in range(2):
+                    yield _rotation(factors, sign, 4)
         elif primitive.kind == "CCX":
             a, b, t = qs
             factors = ((a, "Z"), (b, "Z"), (t, "X"))
