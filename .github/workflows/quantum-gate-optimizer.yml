@@ -1,0 +1,77 @@
+name: SHA reversible optimizer proof and resource delta
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "quantum/sha256_transmon_d8/gate_optimizer.py"
+      - "quantum/sha256_transmon_d8/optimized_multiblock.py"
+      - "tests/test_sha256_gate_optimizer.py"
+      - ".github/workflows/quantum-gate-optimizer.yml"
+  pull_request:
+    paths:
+      - "quantum/sha256_transmon_d8/gate_optimizer.py"
+      - "quantum/sha256_transmon_d8/optimized_multiblock.py"
+      - "tests/test_sha256_gate_optimizer.py"
+      - ".github/workflows/quantum-gate-optimizer.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sha-gate-opt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-commutation-optimizer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install deterministic gate tests
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Validate reversible gate algebra and SHA digest cleanup
+        run: python -m pytest -q tests/test_sha256_gate_optimizer.py
+      - name: Export exact optimization delta of existing SHA compiler
+        run: |
+          mkdir -p /tmp/sha-gate-optimizer
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
+          from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
+          padded=pad_sha256_message(b"abc")
+          fixed={0:padded}
+          original=compile_optimized_sha256(1,fixed_blocks=fixed,optimize_gates=False,qec_code="gross")
+          optimized=compile_optimized_sha256(1,fixed_blocks=fixed,optimize_gates=True,qec_code="gross")
+          report={
+            "workload":"SHA-256("abc") one fixed padded block",
+            "logical_width_before":original.layout.logical_bit_capacity,
+            "logical_width_after":optimized.layout.logical_bit_capacity,
+            "semantic_gates_before":len(original.circuit.gates),
+            "semantic_gates_after":len(optimized.circuit.gates),
+            "primitive_gates_before":original.circuit.primitive_gate_count,
+            "primitive_gates_after":optimized.circuit.primitive_gate_count,
+            "pbc_rotations_before":original.encoded_rotation_inventory().emitted_pauli_rotations,
+            "pbc_rotations_after":optimized.encoded_rotation_inventory().emitted_pauli_rotations,
+            "cancelled_pairs":optimized.gate_optimization.cancelled_pairs,
+          }
+          assert report["logical_width_after"]==report["logical_width_before"]
+          assert report["primitive_gates_after"]<=report["primitive_gates_before"]
+          assert report["pbc_rotations_after"]<=report["pbc_rotations_before"]
+          print(json.dumps(report,indent=2))
+          Path("/tmp/sha-gate-optimizer/delta.json").write_text(json.dumps(report,indent=2)+"\n")
+          PY
+      - name: Upload source-derived resource reduction
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha-gate-optimization-delta
+          path: /tmp/sha-gate-optimizer/
+          if-no-files-found: warn
+          retention-days: 14
