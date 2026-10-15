@@ -1,3 +1,59 @@
+## Correct-by-construction SHA gate reduction and QLDPC capacity
+
+`compile_optimized_sha256()` now applies **commutation-aware reversible
+gate cancellation by default**. The pass runs in amortized linear time in the
+number of emitted gates. It cancels inverse X, CX and CCX pairs when every
+intervening operation commutes, handles symmetric Toffoli controls, and
+cancels opaque inverse MAJ/UMA macros only across disjoint wires. Every
+registered semantic region boundary (CH_ADD, MAJ_ADD, ADD32, checkpoint
+stages) remains a barrier and is remapped exactly after cancellation. The
+optimizations never add qubits, discard unknown states or alter the
+compute/use/uncompute contract.
+
+For a before/after report and reversible baseline:
+
+```python
+baseline = compile_optimized_sha256(
+    1, fixed_blocks={0: padded}, qec_code="gross", optimize_gates=False,
+)
+optimized = compile_optimized_sha256(
+    1, fixed_blocks={0: padded}, qec_code="gross",
+)
+print(optimized.gate_optimization)
+print(optimized.resource_report()["logical"]["primitive_gate_counts"])
+print(optimized.encoded_rotation_inventory().emitted_pauli_rotations)
+```
+
+**Selected QLDPC code capacity is not the same as register-width
+optimization.** The IBM Gross code `[[144,12,12]]` requires 144 data
+physical qubits per module plus 144 additional syndrome-check qubits for
+IBM's implementation. The IBM Bicycle compiler exposes 11 user program
+logical slots per module (one of its 12 logical qubits is a pivot). Therefore
+the 545-wire fixed-message clean XOR oracle is 50 modules: at least
+7,200 *physical data* qubits for Gross alone, before syndrome checks,
+factories, wiring, decoding and routing. This is **not executable on the
+advertised 108-physical-qubit Rigetti Cepheus-1-108Q**, even though
+its abstract logical-slot width is correctly accounted for.
+
+The integrated `program.qldpc_device_capacity(device_physical_qubits=108)`
+and `program.require_qldpc_device_capacity(...)` perform an explicit
+code-specific capacity preflight. The latter fails closed if data qubits
+exceed the hardware budget. It does **not** claim a sufficient full
+hardware admission when data capacity happens to fit. The d=8 packed
+transmon mapping is a distinct unverified encoding: Braket's documented
+native Cepheus RX/RY/CZ interface does not itself establish coherent
+eight-level transmon gates or a hardware-backed QLDPC decoder.
+
+These statements do not rule out a different specialized SHA/nonce
+algorithm, a smaller code, a different measured-output contract, or
+future hardware. Such a candidate needs its own validated
+logical/physical execution path and empirical resource evidence.
+
+References:
+- https://www.ibm.com/quantum/blog/nature-qldpc-error-correction
+- https://github.com/qiskit-community/bicycle-architecture-compiler
+- https://aws.amazon.com/blogs/quantum-computing/amazon-braket-launches-rigetti-cepheus-1-108q-superconducting-device/
+
 ## Exact optimized SHA-256 resources with Qualtran
 
 The existing `compile_optimized_sha256()` now exposes `program.resource_report()`.

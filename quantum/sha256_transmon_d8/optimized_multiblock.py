@@ -365,6 +365,7 @@ class CompiledOptimizedSha256:
     # Same SHA computation, now optionally lowered to its fault-tolerant
     # QLDPC backend. No duplicate arithmetic workspace or second circuit.
     qec_code: str | None = None
+    gate_optimization: "CancellationReport | None" = None
 
     def encoded_register_lifetimes(self):
         """Derive the actual checkpoint/dirty-workspace reuse trace."""
@@ -384,6 +385,16 @@ class CompiledOptimizedSha256:
         """
         from .resource_estimation import report_optimized_sha_resources
         return report_optimized_sha_resources(self, qualtran=qualtran)
+
+    def qldpc_device_capacity(self, *, device_physical_qubits: int = 108):
+        """Actual selected QLDPC codeword capacity, not an algorithmic limit."""
+        from .qldpc_capacity import qldpc_capacity
+        return qldpc_capacity(self, device_physical_qubits=device_physical_qubits)
+
+    def require_qldpc_device_capacity(self, *, device_physical_qubits: int = 108):
+        """Reject QLDPC hardware mappings larger than the device's data budget."""
+        from .qldpc_capacity import require_qldpc_device_capacity
+        return require_qldpc_device_capacity(self, device_physical_qubits=device_physical_qubits)
 
     def encoded_rotation_inventory(self):
         """Count exact native-angle Pauli instructions for this SHA circuit."""
@@ -434,6 +445,7 @@ def compile_optimized_sha256(
     *,
     fixed_blocks: dict[int, bytes] | None = None,
     qec_code: str | None = None,
+    optimize_gates: bool = True,
 ) -> CompiledOptimizedSha256:
     """Compile a clean coherent SHA XOR oracle using checkpoint reuse.
 
@@ -458,7 +470,14 @@ def compile_optimized_sha256(
     for step in plan.steps:
         _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
     circuit.validate()
-    result = CompiledOptimizedSha256(layout, circuit, plan, qec_code=qec_code)
+    optimization = None
+    if optimize_gates:
+        from .gate_optimizer import cancel_commuting_inverse_gates
+        circuit, optimization = cancel_commuting_inverse_gates(circuit)
+    result = CompiledOptimizedSha256(
+        layout, circuit, plan, qec_code=qec_code,
+        gate_optimization=optimization,
+    )
     analyze_optimized_ancillas(result)
     if qec_code is not None:
         result.encoded_register_lifetimes()
