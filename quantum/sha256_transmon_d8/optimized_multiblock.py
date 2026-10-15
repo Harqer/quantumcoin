@@ -386,6 +386,16 @@ class CompiledOptimizedSha256:
         from .resource_estimation import report_optimized_sha_resources
         return report_optimized_sha_resources(self, qualtran=qualtran)
 
+    def qldpc_device_capacity(self, *, device_physical_qubits: int = 108):
+        """Actual selected QLDPC codeword capacity, not an algorithmic limit."""
+        from .qldpc_capacity import qldpc_capacity
+        return qldpc_capacity(self, device_physical_qubits=device_physical_qubits)
+
+    def require_qldpc_device_capacity(self, *, device_physical_qubits: int = 108):
+        """Reject QLDPC hardware mappings larger than the device's data budget."""
+        from .qldpc_capacity import require_qldpc_device_capacity
+        return require_qldpc_device_capacity(self, device_physical_qubits=device_physical_qubits)
+
     def encoded_rotation_inventory(self):
         """Count exact native-angle Pauli instructions for this SHA circuit."""
         from .qldpc_lowering import bicycle_rotation_inventory
