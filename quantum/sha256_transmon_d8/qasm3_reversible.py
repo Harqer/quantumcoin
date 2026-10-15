@@ -18,6 +18,9 @@ from .reversible_multiblock import (
     pad_sha256_message,
 )
 from .sha256 import H0
+from .optimized_multiblock import (
+    CompiledOptimizedSha256, pad_sha256_message,
+)
 
 
 _NATIVE_NAME = {
@@ -168,3 +171,62 @@ def write_multiblock_sha256_qasm3(
             output.write(instruction)
             size += len(instruction.encode("utf-8"))
     return size
+
+
+def iter_optimized_sha256_qasm3(
+    compiled: CompiledOptimizedSha256,
+    *,
+    prepare_message: bytes | None = None,
+    measure_digest: bool = True,
+) -> Iterator[str]:
+    """Stream all reversible checkpoint gates and optional coherent-input prep.
+
+    Whole fixed blocks have no input wires. Dynamic blocks are explicitly
+    initialized only when prepare_message is given. Every SHA compression is
+    represented in quantum gates; no host-side digest is computed.
+    """
+    layout = compiled.layout
+    yield "OPENQASM 3.0;\n"
+    yield f"qubit[{layout.logical_bit_capacity}] q;\n"
+    if measure_digest:
+        yield "bit[256] digest;\n"
+    if prepare_message is not None:
+        padded = pad_sha256_message(prepare_message)
+        if len(padded) != layout.block_count * 64:
+            raise ValueError("message requires a different SHA-256 block count")
+        for block in range(layout.block_count):
+            data = padded[64 * block:64 * (block + 1)]
+            known = layout.fixed_blocks[block]
+            if known is not None:
+                if data != known:
+                    raise ValueError("message differs from the specialized SHA block")
+                continue
+            for word in range(16):
+                value = int.from_bytes(data[4 * word:4 * (word + 1)], "big")
+                for bit in range(32):
+                    if value & (1 << bit):
+                        yield f"x q[{layout.word_bit(layout.schedule_slot(block, word), bit)}];\n"
+    for gate in compiled.circuit.gates:
+        for primitive in native_qasm3_gates(gate):
+            yield primitive + "\n"
+    if measure_digest:
+        for word in range(8):
+            for bit in range(32):
+                yield f"digest[{32 * word + bit}] = measure q[{layout.digest_bit(word, bit)}];\n"
+
+
+def write_optimized_sha256_qasm3(
+    compiled: CompiledOptimizedSha256, path: str | Path,
+    *,
+    prepare_message: bytes | None = None,
+    measure_digest: bool = True,
+) -> int:
+    """Write a complete optimized multi-block SHA circuit without text copies."""
+    count = 0
+    with Path(path).open("w", encoding="utf-8") as output:
+        for line in iter_optimized_sha256_qasm3(
+            compiled, prepare_message=prepare_message, measure_digest=measure_digest
+        ):
+            output.write(line)
+            count += len(line.encode("utf-8"))
+    return count
