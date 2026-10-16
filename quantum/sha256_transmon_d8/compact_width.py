@@ -119,10 +119,21 @@ def emit_constant_add(c: ReversibleCircuit, layout, target_slot: int,
     constant &= 0xFFFFFFFF
     if not constant:
         return
-    if layout.digest_start_slot <= target_slot < layout.digest_start_slot + 8:
-        raise ValueError("cannot borrow digest output while adding to output")
     target = tuple(layout.word_bit(target_slot, j) for j in range(32))
-    dirty = tuple(layout.digest_bit(0, j) for j in range(32))
+    if getattr(layout, "clean_digest_output", False):
+        # In this layout digest and live SHA state are the SAME eight words.
+        # Borrow another SHA state word, never the target itself. Arbitrary
+        # quantum/entangled state of those 32 wires is restored exactly.
+        if not layout.digest_start_slot <= target_slot < layout.digest_start_slot + 8:
+            raise ValueError("clean-output constant addition must target a SHA state word")
+        other = layout.digest_start_slot + (
+            (target_slot - layout.digest_start_slot + 1) % 8
+        )
+        dirty = tuple(layout.word_bit(other, j) for j in range(32))
+    else:
+        if layout.digest_start_slot <= target_slot < layout.digest_start_slot + 8:
+            raise ValueError("cannot borrow digest output while adding to output")
+        dirty = tuple(layout.digest_bit(0, j) for j in range(32))
     if set(target) & set(dirty):
         raise AssertionError("dirty borrow aliases constant target")
     start = len(c.gates)
