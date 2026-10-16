@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from heapq import heappop, heappush
+from hashlib import blake2b
 from dataclasses import asdict, dataclass
 import hashlib
 import json
@@ -157,6 +158,27 @@ def count_exact_sha_resources(compiled: "CompiledOptimizedSha256") -> ExactLogic
     )
 
 
+def _semantic_template_fingerprint(gates: "list[Gate]") -> str:
+    """Hash an exact gate sequence up to consistent qubit renaming.
+
+    This recognizes reusable gate *templates*, not equal quantum values.
+    Operands retain first-appearance aliasing, and gate order is preserved.
+    """
+    qubit_ids: dict[int, int] = {}
+    digest = blake2b(digest_size=16)
+    for gate in gates:
+        normalized: list[int] = []
+        for wire in gate.qubits:
+            if wire not in qubit_ids:
+                qubit_ids[wire] = len(qubit_ids)
+            normalized.append(qubit_ids[wire])
+        digest.update(gate.kind.encode("ascii"))
+        digest.update(b":")
+        digest.update(",".join(map(str, normalized)).encode("ascii"))
+        digest.update(b";")
+    return digest.hexdigest()
+
+
 def weighted_semantic_hotspots(circuit: "ReversibleCircuit") -> dict[str, Any]:
     """Count reusable *region templates* and weight their actual nonlinear work.
 
@@ -189,6 +211,34 @@ def weighted_semantic_hotspots(circuit: "ReversibleCircuit") -> dict[str, Any]:
             item["primitive_gates"] += 1
             item[primitive.kind] += 1
 
+    # Structural fingerprinting is independent of gate-cost attribution:
+    # overlapping ancestor/child regions are useful code templates but their
+    # gates must not be summed twice. No computed value is ever cached here.
+    template_groups: dict[tuple[str, str], list[int]] = defaultdict(list)
+    for ordinal, region in enumerate(circuit.regions):
+        fingerprint = _semantic_template_fingerprint(
+            circuit.gates[region.start:region.stop]
+        )
+        template_groups[(region.kind, fingerprint)].append(ordinal)
+    structural_templates: list[dict[str, int | str]] = []
+    for (kind, fingerprint), ordinals in template_groups.items():
+        if len(ordinals) < 2:
+            continue
+        example = circuit.regions[ordinals[0]]
+        structural_templates.append({
+            "kind": kind,
+            "fingerprint": fingerprint,
+            "instances": len(ordinals),
+            "semantic_gates_per_instance": example.stop - example.start,
+        })
+    structural_templates.sort(
+        key=lambda item: (
+            -int(item["instances"]) * int(item["semantic_gates_per_instance"]),
+            str(item["kind"]),
+            str(item["fingerprint"]),
+        )
+    )
+
     nodes: list[dict[str, int | str]] = []
     for kind, item in counts.items():
         nodes.append({
@@ -216,6 +266,11 @@ def weighted_semantic_hotspots(circuit: "ReversibleCircuit") -> dict[str, Any]:
         "weight": "7-T exact ancilla-free CCX decomposition proxy; not runtime or physical qubits",
         "reuse_limit": "region frequency measures templates, not identical SSA-value computations",
         "nodes": nodes,
+        "structural_templates": structural_templates,
+        "structural_template_note": (
+            "same ordered gate pattern under local qubit renaming; "
+            "does NOT prove repeated runtime values or valid CSE"
+        ),
     }
 
 
