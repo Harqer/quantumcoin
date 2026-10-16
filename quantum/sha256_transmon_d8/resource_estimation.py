@@ -365,6 +365,36 @@ def report_optimized_sha_resources(
         },
     }
     report["optimization_hotspots"] = weighted_semantic_hotspots(compiled.circuit)
+    # The coherent XOR-oracle contract retains both the dynamic message and
+    # an arbitrary 256-bit output register. This is an information-theoretic
+    # storage floor, not a claim that a zero-workspace SHA circuit exists.
+    coherent_interface_floor = (
+        exact.width_breakdown["coherent_message_inputs"]
+        + exact.width_breakdown["digest_output"]
+    )
+    workspace_and_checkpoints = (
+        exact.width_breakdown["reversible_chain_checkpoints"]
+        + exact.width_breakdown["shared_compression_work_register"]
+        + exact.width_breakdown["shared_clean_scratch"]
+        + exact.width_breakdown["shared_clean_carry"]
+    )
+    if coherent_interface_floor + workspace_and_checkpoints != exact.logical_qubits:
+        raise AssertionError("SHA width lower-bound decomposition mismatch")
+    report["width_optimization"] = {
+        "coherent_interface_minimum_bits": coherent_interface_floor,
+        "allocated_logical_bits": exact.logical_qubits,
+        "workspace_and_checkpoint_bits": workspace_and_checkpoints,
+        "checkpoint_bits": exact.width_breakdown["reversible_chain_checkpoints"],
+        "shared_work_bits": exact.width_breakdown["shared_compression_work_register"],
+        "shared_scratch_and_carry_bits": (
+            exact.width_breakdown["shared_clean_scratch"]
+            + exact.width_breakdown["shared_clean_carry"]
+        ),
+        "caveat": (
+            "information-theoretic floor for the exact coherent XOR interface, "
+            "not a demonstrated attainable SHA implementation or hardware fit"
+        ),
+    }
     if qualtran:
         report["qualtran"] = qualtran_crosscheck(exact)
     return report
