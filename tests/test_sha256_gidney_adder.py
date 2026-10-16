@@ -225,3 +225,38 @@ def test_gidney_clean_carry_and_extra_register_contract_is_strict():
         make_gidney_adder((0, 1), (2, 3), 4, (0,))
     with pytest.raises(ValueError, match="distinct"):
         make_gidney_adder((0, 1), (2, 3), 2, (4,))
+
+
+def test_full_canonical_sha_gidney_provenance_and_global_31_bit_pool():
+    from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
+    from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
+
+    padded = pad_sha256_message(b"abc")
+    compiled = compile_optimized_sha256(1, fixed_blocks={0: padded}, qec_code="gross")
+    original_hash = compiled.resource_report()["logical"]["sha_gate_sequence_sha256"]
+    candidate = compiled.gidney_carry_program()
+    r = candidate.report()
+    assert candidate.canonical_gate_sha256 == original_hash
+    assert r["replaced_modular_adders"] > 0
+    assert r["inverse_modular_adders"] > 0
+    assert r["forward_modular_adders"] > 0
+    assert r["extra_logical_carry_qubits"] == 31
+    assert r["peak_logical_qubits"] == 545 + 31
+    assert r["extra_x_erase_measurements"] == 31 * r["replaced_modular_adders"]
+    assert r["saved_t_count"] == 310 * r["replaced_modular_adders"]
+    assert r["candidate_t_count"] < r["original_seven_t_count"]
+    assert not r["executable_in_current_qldpc_backend"]
+    assert compiled.layout.logical_bit_capacity == 545
+    assert compiled.resource_report()["logical"]["sha_gate_sequence_sha256"] == original_hash
+
+
+def test_full_coherent_sha_gidney_preserves_input_width_and_extra_qubit_accounting():
+    from quantum.sha256_transmon_d8.optimized_multiblock import compile_optimized_sha256
+
+    compiled = compile_optimized_sha256(1)
+    candidate = compiled.gidney_carry_program()
+    assert compiled.layout.logical_bit_capacity == 1057
+    assert candidate.logical_qubits == 1088
+    assert candidate.forward_adders > 0 and candidate.inverse_adders > 0
+    assert candidate.t_saved == 310 * candidate.replacements
+    assert candidate.x_measurements == 31 * candidate.replacements
