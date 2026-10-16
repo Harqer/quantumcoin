@@ -20,6 +20,9 @@ def _apply_statevector(
 ) -> list[complex]:
     n = len(vector)
     if isinstance(op, Gate):
+        if op.kind == "X":
+            bit = 1 << op.qubits[0]
+            return [vector[j ^ bit] for j in range(n)]
         assert op.kind == "CX"
         control, target = op.qubits
         out = vector.copy()
@@ -82,21 +85,22 @@ def _sample_input(n, seed):
     return [x / norm for x in amplitudes]
 
 
-def _ideal(n, amplitudes):
+def _ideal(n, amplitudes, *, subtract=False):
     out = [0j] * (2 ** (3 * n))
     mask = (1 << n) - 1
     for input_value, amplitude in enumerate(amplitudes):
         source = input_value & mask
         target = (input_value >> n) & mask
-        key = source | (((source + target) & mask) << n)
+        result = target - source if subtract else target + source
+        key = source | ((result & mask) << n)
         out[key] = amplitude
     return out
 
 
-def _adder(n):
+def _adder(n, *, subtract=False):
     return make_gidney_adder(
         tuple(range(n)), tuple(range(n, 2 * n)),
-        2 * n, tuple(range(2 * n + 1, 3 * n)),
+        2 * n, tuple(range(2 * n + 1, 3 * n)), subtract=subtract,
     )
 
 
@@ -118,13 +122,14 @@ def test_qualtran_literal_and_isometry_4t_preserves_all_input_phases():
 
 
 @pytest.mark.parametrize("n", (1, 2, 3))
-def test_entangled_arbitrary_complex_superposition_exact_every_measurement_branch(n):
-    adder = _adder(n)
+@pytest.mark.parametrize("subtract", (False, True))
+def test_entangled_arbitrary_complex_superposition_exact_every_measurement_branch(n, subtract):
+    adder = _adder(n, subtract=subtract)
     amplitudes = _sample_input(n, 20261016 + n)
     v = [0j] * (2 ** (3 * n))
     for k, amplitude in enumerate(amplitudes):
         v[k] = amplitude
-    expected = _ideal(n, amplitudes)
+    expected = _ideal(n, amplitudes, subtract=subtract)
     for outcome_pattern in itertools.product((0, 1), repeat=n - 1):
         results = dict(enumerate(outcome_pattern))
         actual = _run_statevector(v, adder.operations, results)
@@ -148,8 +153,11 @@ def _simulate_32bit_adder_basis(adder: GidneyAdder, source: int, target: int, se
     while i < len(ops):
         op = ops[i]
         if isinstance(op, Gate):
-            x, y = op.qubits
-            bits[y] ^= bits[x]
+            if op.kind == "X":
+                bits[op.qubits[0]] ^= 1
+            else:
+                x, y = op.qubits
+                bits[y] ^= bits[x]
             i += 1
         elif isinstance(op, SingleQubitGate) and op.kind == "H":
             if (
@@ -182,8 +190,9 @@ def _simulate_32bit_adder_basis(adder: GidneyAdder, source: int, target: int, se
     return bits, phase
 
 
-def test_32bit_adder_matches_modulo_arithmetic_and_recycles_all_31_ancillas():
-    adder = _adder(32)
+@pytest.mark.parametrize("subtract", (False, True))
+def test_32bit_adder_matches_modulo_arithmetic_and_recycles_all_31_ancillas(subtract):
+    adder = _adder(32, subtract=subtract)
     assert adder.t_count == 124
     assert adder.erasure_measurements == 31
     assert adder.cost_summary() == {
@@ -204,7 +213,8 @@ def test_32bit_adder_matches_modulo_arithmetic_and_recycles_all_31_ancillas():
         initial, phase = _simulate_32bit_adder_basis(adder, source, target, source ^ target)
         assert phase == 0
         assert sum(initial[k] << k for k in range(32)) == source
-        assert sum(initial[k+32] << k for k in range(32)) == (source+target) & 0xffffffff
+        expected = target - source if subtract else target + source
+        assert sum(initial[k+32] << k for k in range(32)) == expected & 0xffffffff
         assert initial[64:] == [0] * 32
 
 
