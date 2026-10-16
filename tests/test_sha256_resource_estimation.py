@@ -217,6 +217,10 @@ def test_versioned_dependency_graph_rejects_changed_control_reuse():
     assert graph["repeated_nonlinear_product_uses"] == 1
     product = graph["top_repeated_product_candidates"][0]
     assert product["occurrences"] == 2
+    assert product["conditional_coherent_ccx_savings_upper_bound"] == 0
+    assert product["conditional_extra_cx"] == 2
+    assert product["conditional_extra_clean_qubits"] == 1
+    assert graph["coherent_share_upper_bound_t_savings"] == 0
     assert product["first_primitive_index"] == 1
     assert product["last_primitive_index"] == 2
     assert product["control_value_versions"] == [
@@ -229,6 +233,22 @@ def test_versioned_dependency_graph_rejects_changed_control_reuse():
         for edge in graph["edges"]
     )
     assert "necessary but insufficient" in graph["reuse_guardrail"]
+
+
+def test_product_reuse_needs_three_identical_version_uses_for_ccx_savings():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.ccx(0, 1, 2)
+    circuit.ccx(0, 1, 3)
+    circuit.ccx(0, 1, 4)
+    graph = weighted_dependency_graph(circuit)
+    product = graph["top_repeated_product_candidates"][0]
+    assert product["occurrences"] == 3
+    assert product["conditional_coherent_ccx_savings_upper_bound"] == 1
+    assert product["conditional_seven_t_savings_upper_bound"] == 7
+    assert product["conditional_extra_cx"] == 3
+    assert graph["coherent_share_upper_bound_t_savings"] == 7
 
 
 def test_canonical_sha_weighted_dependency_accounting(actual_sha, sha_cost):
