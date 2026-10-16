@@ -261,7 +261,7 @@ def analyze_bicycle_register_lifetimes(
     permanent = 512 * len(layout.dynamic_indices) + 256
     # A compression always uses one shared 256-bit work register plus
     # 32-bit shared scratch and a 1-bit carry. No per-gate temporaries.
-    peak_bits = permanent + peak * 256 + 256 + 33
+    peak_bits = permanent + peak * 256 + 256 + (0 if layout.width_first else 33)
     if peak_bits > layout.logical_bit_capacity:
         raise AssertionError("live register peak exceeded encoded allocation")
     return EncodedRegisterLifetime(
@@ -286,7 +286,7 @@ def bicycle_register_usage(compiled: "CompiledOptimizedSha256") -> BicycleRegist
         data_logical_per_module=module_data,
         modules=(width + module_data - 1) // module_data,
         reused_work_qubits=256,
-        reused_clean_scratch_qubits=33,
+        reused_clean_scratch_qubits=0 if l.width_first else 33,
         dirty_borrow_peak_qubits=audit.dirty_borrow_peak_bits,
         checkpoint_logical_qubits=l.work_start_slot * 32 - l.checkpoint_start_slot * 32,
         dynamic_input_qubits=512 * len(l.dynamic_indices),
