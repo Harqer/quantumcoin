@@ -160,7 +160,15 @@ def test_clean_carry_adder_matches_general_adder_and_restores_workspace(width: i
 
 def test_real_32_bit_add_selects_proven_clean_carry_specialization():
     from quantum.sha256_transmon_d8.sha256 import _add32
-    layout = _ConstantLayout()
+    class _TwoWordLayout:
+        carry_bit = 64
+
+        @staticmethod
+        def word_bit(slot: int, bit: int) -> int:
+            assert slot in (0, 1) and 0 <= bit < 32
+            return 32 * slot + bit
+
+    layout = _TwoWordLayout()
     circuit = ReversibleCircuit()
     _add32(circuit, layout, 0, 1)
     assert circuit.primitive_gate_count == 186
