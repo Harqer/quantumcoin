@@ -101,10 +101,14 @@ class OptimizedShaLayout:
     """Packed dynamic blocks + logarithmic checkpoints + reusable work."""
 
     fixed_blocks: tuple[bytes | None, ...]
+    width_first: bool = False
+    clean_digest_output: bool = False
 
     def __post_init__(self) -> None:
         if not self.fixed_blocks:
             raise ValueError("at least one message block is required")
+        if self.clean_digest_output and (not self.width_first or len(self.fixed_blocks) != 1):
+            raise ValueError("clean digest output requires width_first one-block SHA")
         if any(block is not None and len(block) != 64 for block in self.fixed_blocks):
             raise ValueError("fixed SHA-256 blocks must be exactly 64 bytes")
 
@@ -130,7 +134,9 @@ class OptimizedShaLayout:
 
     @property
     def digest_start_slot(self) -> int:
-        return self.scratch_slot + 1
+        if self.clean_digest_output:
+            return self.work_start_slot
+        return self.work_start_slot + 8 + (0 if self.width_first else 1)
 
     @property
     def carry_bit(self) -> int:
@@ -138,7 +144,7 @@ class OptimizedShaLayout:
 
     @property
     def logical_bit_capacity(self) -> int:
-        return self.carry_bit + 1
+        return self.carry_bit + (0 if self.width_first else 1)
 
     @property
     def total_transmons(self) -> int:
@@ -150,6 +156,8 @@ class OptimizedShaLayout:
         return slot * 32 + bit
 
     def scratch_bit(self, bit: int) -> int:
+        if self.width_first:
+            raise ValueError("width-first SHA has no allocated scratch qubit")
         return self.word_bit(self.scratch_slot, bit)
 
     def schedule_slot(self, block: int, round_index: int) -> int:
@@ -204,6 +212,21 @@ class _ScheduleView:
     def scratch_bit(self, bit: int) -> int:
         return self.layout.scratch_bit(bit)
 
+    @property
+    def width_first(self) -> bool:
+        return self.layout.width_first
+
+    @property
+    def clean_digest_output(self) -> bool:
+        return self.layout.clean_digest_output
+
+    @property
+    def digest_start_slot(self) -> int:
+        return self.layout.digest_start_slot
+
+    def digest_bit(self, word: int, bit: int) -> int:
+        return self.layout.digest_bit(word, bit)
+
     def schedule_slot(self, round_index: int) -> int:
         return self.layout.schedule_slot(self.block, round_index)
 
@@ -244,6 +267,10 @@ def analyze_optimized_ancillas(compiled: "CompiledOptimizedSha256") -> "AncillaU
     emitted by the stage and the clean XOR oracle.
     """
     layout = compiled.layout
+    if layout.width_first:
+        # SHA arithmetic uses reversible in-place source embeddings.
+        # Dirty MCX output borrows are restored; no new workspace allocated.
+        return AncillaUsage(0, 0, 0, 0)
     work = set(range(layout.work_start_slot, layout.work_start_slot + 8))
     scratch = layout.scratch_slot
     borrowed_peak = 0
@@ -336,6 +363,10 @@ def _emit_stage(
     for word, role in enumerate("abcdefgh"):
         if step.source == -1:
             _add_constant32(stage, view, roles[role], H0[word])
+        elif layout.width_first:
+            from .compact_width import add_word
+            add_word(stage, view, source_slot(word), roles[role],
+                     kind="CHAIN_FEED_FORWARD")
         else:
             _add32(
                 stage, view, source_slot(word), roles[role],
@@ -355,6 +386,66 @@ def _emit_stage(
         dirty_borrow_peak_bits=64,
         reused_clean_scratch_bits=33,
     )
+
+
+def _emit_clean_output_sha(
+    c: ReversibleCircuit, layout: OptimizedShaLayout, schedule: tuple[int, ...] | None,
+) -> None:
+    """Exact coherent SHA for a CLEAN digest register, using it as state.
+
+    Contract is |message>|0> -> |message>|SHA256(message)>.
+    This is NOT the arbitrary-output XOR oracle |message>|y> -> |message>|y^H>.
+    The circuit is still a unitary reversible permutation on ALL input wires:
+    the promised hash map is only specified on initially-clean digest outputs.
+
+    All 64 SHA rounds are emitted. Coherent schedule is reversibly updated,
+    then restored AFTER the final digest has been computed; no 256-bit work
+    or extra scratch/carry is allocated.
+    """
+    if not layout.clean_digest_output or not layout.width_first or layout.block_count != 1:
+        raise ValueError("clean output SHA requires one-block width-first layout")
+    from .compact_width import emit_schedule_update_width_first
+
+    view = _ScheduleView(layout, 0)
+    roles = dict(zip("abcdefgh", (layout.digest_start_slot + i for i in range(8))))
+    start = len(c.gates)
+    # The clean output starts at |0>; prepare SHA-256 IV reversibly in place.
+    for word, value in enumerate(H0):
+        for bit in range(32):
+            if value & (1 << bit):
+                c.x(layout.digest_bit(word, bit))
+
+    schedule_history = ReversibleCircuit()
+    for t in range(64):
+        if schedule is None:
+            if t >= 16:
+                update = ReversibleCircuit()
+                emit_schedule_update_width_first(update, view, t)
+                _extend_with_regions(c, update)
+                schedule_history.extend(update.gates)
+            const = K[t]
+            source_schedule = view.schedule_slot(t)
+        else:
+            const = (K[t] + schedule[t]) & MASK32
+            source_schedule = None
+
+        roles = _emit_round(
+            c, view, roles, const, "low_multiplicative",
+            schedule_source_slot=source_schedule,
+        )
+
+    # 64 rotations of eight role wires return to original physical order.
+    if any(roles[name] != layout.digest_start_slot + i
+           for i, name in enumerate("abcdefgh")):
+        raise AssertionError("SHA final roles differ from output wire order")
+
+    for i, name in enumerate("abcdefgh"):
+        _add_constant32(c, view, roles[name], H0[i])
+
+    # The output is now hash(message). Schedule updates touched MESSAGE
+    # registers only; reversing them cannot affect the computed digest.
+    c.extend(schedule_history.inverse().gates)
+    c.add_region("CLEAN_OUTPUT_SHA", start, len(c.gates), block_index=0)
 
 
 @dataclass(frozen=True)
@@ -446,6 +537,8 @@ def compile_optimized_sha256(
     fixed_blocks: dict[int, bytes] | None = None,
     qec_code: str | None = None,
     optimize_gates: bool = True,
+    width_first: bool = False,
+    clean_digest_output: bool = False,
 ) -> CompiledOptimizedSha256:
     """Compile a clean coherent SHA XOR oracle using checkpoint reuse.
 
@@ -459,7 +552,11 @@ def compile_optimized_sha256(
     fixed = fixed_blocks or {}
     if block_count < 1 or any(i < 0 or i >= block_count for i in fixed):
         raise ValueError("fixed block index outside compiled message")
-    layout = OptimizedShaLayout(tuple(fixed.get(i) for i in range(block_count)))
+    layout = OptimizedShaLayout(
+        tuple(fixed.get(i) for i in range(block_count)),
+        width_first=width_first,
+        clean_digest_output=clean_digest_output,
+    )
     plan = plan_checkpoints(block_count)
     known_schedules = {
         i: _fixed_schedule(block) for i, block in enumerate(layout.fixed_blocks)
@@ -467,8 +564,11 @@ def compile_optimized_sha256(
     }
 
     circuit = ReversibleCircuit()
-    for step in plan.steps:
-        _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
+    if layout.clean_digest_output:
+        _emit_clean_output_sha(circuit, layout, known_schedules.get(0))
+    else:
+        for step in plan.steps:
+            _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
     circuit.validate()
     optimization = None
     if optimize_gates:
@@ -507,6 +607,11 @@ def initial_optimized_state(
     if output_words is not None:
         if len(output_words) != 8:
             raise ValueError("SHA digest register needs eight words")
+        if layout.clean_digest_output and any(output_words):
+            raise ValueError(
+                "clean-output SHA requires a zero-initialized digest register; "
+                "use the arbitrary-output XOR oracle for nonzero initial outputs"
+            )
         for word, value in enumerate(output_words):
             layout.set_word(state, layout.digest_start_slot + word, value)
     return state

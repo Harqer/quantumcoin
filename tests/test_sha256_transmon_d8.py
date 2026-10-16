@@ -220,10 +220,12 @@ def test_constant_specialization_beats_generic_constant_addition():
 def test_abc_resource_regression_ceiling():
     compiled = compile_single_block_sha256(b"abc")
 
-    # Keep improvements monotonic while allowing future passes to reduce these
-    # numbers further.
+    # Compare real gate primitives separately from IR representation size.
+    # Clean-carry arithmetic removes two physical CX per ADD32, but emits the
+    # first/last stage as four primitives rather than two Cuccaro macros;
+    # that adds 328 semantic nodes while reducing physical gates.
     assert compiled.logical_gate_count <= 124_346
-    assert compiled.ir_node_count <= 83_386
+    assert compiled.ir_node_count <= 83_714
 
 
 def test_fused_round_constants_reduce_logical_gate_count():

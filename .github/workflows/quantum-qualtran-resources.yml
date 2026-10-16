@@ -60,6 +60,34 @@ jobs:
           print("Qualtran verified",r["logical"]["expanded_primitive_gates"],r["logical"]["exact_t_count_ancilla_free_ccx"])
           PY
 
+      - name: Audit full coherent input dependencies and width
+        run: |
+          python -m quantum.sha256_transmon_d8.resource_estimation \
+            --message-hex 616263 \
+            --dynamic-blocks 0 --qec-code gross --qualtran \
+            --json-output /tmp/sha-qualtran/sha256-dynamic-coherent-resources.json >/dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("/tmp/sha-qualtran/sha256-dynamic-coherent-resources.json").read_text())
+          w, g, l = r["width_optimization"], r["dependency_graph"], r["logical"]
+          assert w["coherent_interface_minimum_bits"] == 768
+          assert w["allocated_logical_bits"] == l["logical_qubits"] == 1057
+          assert g["primitive_gates_examined"] == l["expanded_primitive_gates"]
+          assert (g["repeated_nonlinear_product_uses"] +
+                  g["nonlinear_product_signatures"]) == l["primitive_gate_counts"]["CCX"]
+          assert r["qldpc"]["physical_qubits"] is None
+          print(json.dumps({
+            "case": "full_coherent_one_block",
+            "logical_qubits": l["logical_qubits"],
+            "primitive_gates": l["expanded_primitive_gates"],
+            "toffoli": l["primitive_gate_counts"]["CCX"],
+            "nonlinear_signatures": g["nonlinear_product_signatures"],
+            "repeated_product_uses": g["repeated_nonlinear_product_uses"],
+            "conditional_coherent_sharing_t_upper_bound": g["coherent_share_upper_bound_t_savings"]
+          }, indent=2))
+          PY
+
       - name: Upload exact SHA resource evidence
         if: always()
         uses: actions/upload-artifact@v4

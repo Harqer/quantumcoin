@@ -11,6 +11,7 @@ from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
 from quantum.sha256_transmon_d8.d8_two_body_decomposition import _expand_macro
 from quantum.sha256_transmon_d8.resource_estimation import (
     count_exact_sha_resources, report_optimized_sha_resources,
+    weighted_semantic_hotspots, weighted_dependency_graph,
 )
 
 
@@ -99,3 +100,165 @@ def test_resource_accounting_rejects_out_of_range_wires(actual_sha):
             count_exact_sha_resources(actual_sha)
     finally:
         actual_sha.circuit.gates[0] = saved
+
+
+def test_weighted_hotspots_use_exclusive_innermost_nodes():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.x(0)
+    circuit.ccx(0, 1, 2)
+    circuit.cx(1, 3)
+    circuit.ccx(0, 1, 2)
+    circuit.x(4)
+    circuit.add_region("ROUND", 0, 5)
+    circuit.add_region("CH_ADD", 1, 4)
+
+    profile = weighted_semantic_hotspots(circuit)
+    nodes = {node["kind"]: node for node in profile["nodes"]}
+    assert nodes["ROUND"]["template_instances"] == 1
+    assert nodes["ROUND"]["primitive_gates"] == 2
+    assert nodes["ROUND"]["x"] == 2
+    assert nodes["CH_ADD"]["primitive_gates"] == 3
+    assert nodes["CH_ADD"]["ccx"] == 2
+    assert nodes["CH_ADD"]["cx"] == 1
+    assert nodes["CH_ADD"]["seven_t_ccx_proxy"] == 14
+    assert sum(node["primitive_gates"] for node in nodes.values()) == 5
+    assert sum(node["ccx"] for node in nodes.values()) == 2
+
+
+def test_weighted_hotspots_match_canonical_sha_counts(actual_sha, sha_cost):
+    profile = actual_sha.resource_report()["optimization_hotspots"]
+    nodes = profile["nodes"]
+    assert sum(node["semantic_gates"] for node in nodes) == sha_cost.semantic_gate_instances
+    assert sum(node["primitive_gates"] for node in nodes) == sha_cost.expanded_primitive_gates
+    assert sum(node["ccx"] for node in nodes) == sha_cost.primitive_gate_counts["CCX"]
+    assert sum(node["seven_t_ccx_proxy"] for node in nodes) == sha_cost.exact_t_count_ancilla_free_ccx
+    kinds = {node["kind"] for node in nodes}
+    assert {"CH_ADD", "MAJ_ADD", "SIGMA0_ADD", "SIGMA1_ADD"} <= kinds
+    assert any(node["template_instances"] > 1 for node in nodes)
+    assert profile["reuse_limit"].startswith("region frequency")
+
+
+def test_structural_templates_identify_same_relabelled_gates_without_value_sharing():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 1)
+    circuit.ccx(0, 1, 2)
+    circuit.add_region("AND_TEMPLATE", 0, 2)
+
+    circuit.cx(10, 11)
+    circuit.ccx(10, 11, 12)
+    circuit.add_region("AND_TEMPLATE", 2, 4)
+
+    circuit.cx(20, 21)
+    circuit.ccx(21, 20, 22)
+    circuit.add_region("AND_TEMPLATE", 4, 6)
+
+    profile = weighted_semantic_hotspots(circuit)
+    templates = [
+        item for item in profile["structural_templates"]
+        if item["kind"] == "AND_TEMPLATE"
+    ]
+    assert len(templates) == 1
+    assert templates[0]["instances"] == 2
+    assert templates[0]["semantic_gates_per_instance"] == 2
+    assert "does NOT prove" in profile["structural_template_note"]
+    assert sum(node["primitive_gates"] for node in profile["nodes"]) == 6
+
+
+def test_actual_sha_report_contains_repeated_structure_not_just_kind(actual_sha):
+    profile = actual_sha.resource_report()["optimization_hotspots"]
+    assert profile["structural_templates"]
+    assert any(
+        item["instances"] >= 2 and item["semantic_gates_per_instance"] > 1
+        for item in profile["structural_templates"]
+    )
+
+
+def test_width_floor_is_derived_from_coherent_oracle_register_contract(actual_sha):
+    fixed_report = actual_sha.resource_report()["width_optimization"]
+    assert fixed_report["coherent_interface_minimum_bits"] == 256
+    assert fixed_report["allocated_logical_bits"] == 545
+    assert fixed_report["workspace_and_checkpoint_bits"] == 289
+    assert fixed_report["shared_work_bits"] == 256
+    assert fixed_report["shared_scratch_and_carry_bits"] == 33
+
+    dynamic_sha = compile_optimized_sha256(1)
+    # An arbitrary 512-bit message plus an independent 256-bit XOR output
+    # require 768 logical qubits before accounting for the actual SHA work.
+    dynamic_report = dynamic_sha.resource_report()["width_optimization"]
+    assert dynamic_report["coherent_interface_minimum_bits"] == 768
+    assert dynamic_report["allocated_logical_bits"] == 1057
+    assert dynamic_report["workspace_and_checkpoint_bits"] == 289
+    assert "not a demonstrated attainable" in dynamic_report["caveat"]
+
+
+def test_versioned_dependency_graph_rejects_changed_control_reuse():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 1)          # create version 1 of wire 1
+    circuit.add_region("SOURCE", 0, 1)
+    circuit.ccx(0, 1, 2)     # same controls/versions
+    circuit.add_region("AND_A", 1, 2)
+    circuit.ccx(0, 1, 3)     # reuse *candidate*
+    circuit.add_region("AND_B", 2, 3)
+    circuit.x(0)             # invalidates wire 0's previous version
+    circuit.add_region("CHANGE", 3, 4)
+    circuit.ccx(0, 1, 4)     # not the same mathematical value
+    circuit.add_region("AND_C", 4, 5)
+
+    graph = weighted_dependency_graph(circuit)
+    assert graph["primitive_gates_examined"] == 5
+    assert graph["nonlinear_product_signatures"] == 2
+    assert graph["repeated_nonlinear_product_groups"] == 1
+    assert graph["repeated_nonlinear_product_uses"] == 1
+    product = graph["top_repeated_product_candidates"][0]
+    assert product["occurrences"] == 2
+    assert product["conditional_coherent_ccx_savings_upper_bound"] == 0
+    assert product["conditional_extra_cx"] == 2
+    assert product["conditional_extra_clean_qubits"] == 1
+    assert graph["coherent_share_upper_bound_t_savings"] == 0
+    assert product["first_primitive_index"] == 1
+    assert product["last_primitive_index"] == 2
+    assert product["control_value_versions"] == [
+        {"wire": 0, "version": 0}, {"wire": 1, "version": 1}
+    ]
+    assert any(
+        edge["producer_region"] == "SOURCE"
+        and edge["consumer_region"] == "AND_A"
+        and edge["operand_role"] == "control_read"
+        for edge in graph["edges"]
+    )
+    assert "necessary but insufficient" in graph["reuse_guardrail"]
+
+
+def test_product_reuse_needs_three_identical_version_uses_for_ccx_savings():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.ccx(0, 1, 2)
+    circuit.ccx(0, 1, 3)
+    circuit.ccx(0, 1, 4)
+    graph = weighted_dependency_graph(circuit)
+    product = graph["top_repeated_product_candidates"][0]
+    assert product["occurrences"] == 3
+    assert product["conditional_coherent_ccx_savings_upper_bound"] == 1
+    assert product["conditional_seven_t_savings_upper_bound"] == 7
+    assert product["conditional_extra_cx"] == 3
+    assert graph["coherent_share_upper_bound_t_savings"] == 7
+
+
+def test_canonical_sha_weighted_dependency_accounting(actual_sha, sha_cost):
+    graph = weighted_dependency_graph(actual_sha.circuit)
+    assert graph["primitive_gates_examined"] == sha_cost.expanded_primitive_gates
+    assert graph["nonlinear_product_signatures"] <= sha_cost.primitive_gate_counts["CCX"]
+    assert graph["repeated_nonlinear_product_uses"] + graph["nonlinear_product_signatures"] == (
+        sha_cost.primitive_gate_counts["CCX"]
+    )
+    assert graph["cross_region_value_reads"] == sum(
+        edge["cross_region_value_reads"] for edge in graph["edges"]
+    )
+    assert graph["initial_version_operand_reads"] > 0
