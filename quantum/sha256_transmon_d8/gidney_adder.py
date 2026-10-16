@@ -198,3 +198,153 @@ def make_gidney_adder(
     if result.t_count != 4 * (n - 1) or result.erasure_measurements != n - 1:
         raise AssertionError("published Gidney arithmetic accounting diverged")
     return result
+
+
+@dataclass(frozen=True)
+class GidneyShaLowering:
+    """Logical dynamic carry policy for ONE canonical compiled SHA stream.
+
+    The original compilation is unchanged. No physical implementation or
+    supported QLDPC feed-forward compilation is claimed by this policy.
+    """
+    operations: tuple[GidneyInstruction, ...]
+    logical_qubits: int
+    original_logical_qubits: int
+    forward_adders: int
+    inverse_adders: int
+    replacements: int
+    x_measurements: int
+    t_gate_count: int
+    original_t_gate_count: int
+    canonical_gate_sha256: str
+
+    @property
+    def t_saved(self) -> int:
+        return self.original_t_gate_count - self.t_gate_count
+
+    def report(self) -> dict[str, int | bool | str]:
+        return {
+            "policy": "published_gidney_4t_temp_and_carry",
+            "canonical_sha256_gate_digest": self.canonical_gate_sha256,
+            "forward_modular_adders": self.forward_adders,
+            "inverse_modular_adders": self.inverse_adders,
+            "replaced_modular_adders": self.replacements,
+            "extra_logical_carry_qubits": self.logical_qubits - self.original_logical_qubits,
+            "peak_logical_qubits": self.logical_qubits,
+            "extra_x_erase_measurements": self.x_measurements,
+            "original_seven_t_count": self.original_t_gate_count,
+            "candidate_t_count": self.t_gate_count,
+            "saved_t_count": self.t_saved,
+            "executable_in_current_qldpc_backend": False,
+            "hardware_blocker": (
+                "Current PBC/Qldpc backend has no verified support for "
+                "dynamic H/measure/reset, conditional CZ and T/TDG/S lowering"
+            ),
+        }
+
+
+def lower_gidney_sha_adders(
+    compiled: "CompiledOptimizedSha256",
+) -> GidneyShaLowering:
+    """Replace provenance-checked Cuccaro add/subtract spans by Gidney.
+
+    This is not a second SHA implementation: replacement operations are
+    assembled from the one canonical optimized reversible gate stream.
+    The source regions must match the actual Cuccaro circuit or its inverse
+    exactly, with the project-wide carry bit restored on all paths.
+    """
+    from .ir import ReversibleCircuit
+    from .sha256 import _add_bits
+    from .resource_estimation import count_exact_sha_resources
+
+    compiled.circuit.validate()
+    base = compiled.circuit
+    initial_width = compiled.layout.logical_bit_capacity
+    carry_pool = tuple(range(initial_width, initial_width + 31))
+    cache: dict[tuple[int, int], tuple[list[Gate], list[Gate]]] = {}
+    substitutions: dict[int, tuple[int, GidneyAdder]] = {}
+    forwards = 0
+    inverses = 0
+    recognized_kinds = {
+        "ADD32", "ADD32_INNER", "COHERENT_W_ADD", "CHAIN_FEED_FORWARD"
+    }
+    for region in base.regions:
+        if region.kind not in recognized_kinds:
+            continue
+        metadata = dict(region.metadata)
+        src, dst = metadata["source_slot"], metadata["target_slot"]
+        key = (src, dst)
+        if key not in cache:
+            c = ReversibleCircuit()
+            _add_bits(
+                c,
+                [compiled.layout.word_bit(src, i) for i in range(32)],
+                [compiled.layout.word_bit(dst, i) for i in range(32)],
+                compiled.layout.carry_bit,
+                clean_carry=True,
+            )
+            cache[key] = (c.gates, c.inverse().gates)
+        current = base.gates[region.start:region.stop]
+        forward, inverse = cache[key]
+        if current == forward:
+            subtract = False
+            forwards += 1
+        elif current == inverse:
+            subtract = True
+            inverses += 1
+        else:
+            raise ValueError(
+                f"{region.kind} [{region.start},{region.stop}) was changed "
+                "from the documented reversible Cuccaro add/subtract template; "
+                "refusing a measurement-based replacement without exact proof"
+            )
+        if region.start in substitutions:
+            raise ValueError("overlapping Gidney adder regions")
+        adder = make_gidney_adder(
+            tuple(compiled.layout.word_bit(src, i) for i in range(32)),
+            tuple(compiled.layout.word_bit(dst, i) for i in range(32)),
+            compiled.layout.carry_bit,
+            carry_pool,
+            outcome_start=31 * (forwards + inverses - 1),
+            subtract=subtract,
+        )
+        substitutions[region.start] = (region.stop, adder)
+
+    if not substitutions:
+        raise ValueError("no Cuccaro modular adders with proven provenance")
+    i = 0
+    lowered: list[GidneyInstruction] = []
+    while i < len(base.gates):
+        replacement = substitutions.get(i)
+        if replacement is None:
+            lowered.append(base.gates[i])
+            i += 1
+            continue
+        end, adder = replacement
+        if any(i < start < end for start in substitutions):
+            raise ValueError("overlapping full modular adders")
+        lowered.extend(adder.operations)
+        i = end
+    resources = count_exact_sha_resources(compiled)
+    # Every swapped Cuccaro gate region is 62 CCX under the verified
+    # clean-carry SHA contract. Replace their 7T decomposition with 124T.
+    replacements = len(substitutions)
+    t = resources.exact_t_count_ancilla_free_ccx - replacements * 62 * 7
+    t += replacements * 124
+    if t < 0:
+        raise AssertionError("incorrect Gidney T-count accounting")
+    result = GidneyShaLowering(
+        tuple(lowered),
+        initial_width + 31,
+        initial_width,
+        forwards,
+        inverses,
+        replacements,
+        31 * replacements,
+        t,
+        resources.exact_t_count_ancilla_free_ccx,
+        resources.sha_gate_sequence_sha256,
+    )
+    if sum(isinstance(op, MeasureZReset) for op in lowered) != result.x_measurements:
+        raise AssertionError("measured carry erasure did not reconcile")
+    return result
