@@ -87,7 +87,7 @@ def count_exact_sha_resources(compiled: "CompiledOptimizedSha256") -> ExactLogic
     breakdown = {
         "coherent_message_inputs": dynamic * 512,
         "reversible_chain_checkpoints": ncheck * 256,
-        "shared_compression_work_register": 256,
+        "shared_compression_work_register": 0 if layout.clean_digest_output else 256,
         "shared_clean_scratch": 0 if layout.width_first else 32,
         "shared_clean_carry": 0 if layout.width_first else 1,
         "digest_output": 256,
