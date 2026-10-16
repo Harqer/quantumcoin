@@ -160,12 +160,20 @@ def _add_bits(
     source_bits: list[int],
     target_bits: list[int],
     carry: int,
+    *,
+    clean_carry: bool = False,
 ) -> None:
     """Exact little-endian target += source mod 2^n.
 
-    The source register and carry are restored. This is the reusable Cuccaro
-    arithmetic kernel for both 32-bit SHA words and the coherent schedule's
-    subword limbs.
+    Source is unchanged and carry is restored. The general Cuccaro path
+    supports arbitrary incoming carry. The clean-carry specialization is
+    valid ONLY when carry starts at |0>; it saves two CX gates (one when
+    width=1) without changing Toffoli count or allocating extra workspace.
+
+    In the clean path, the first carry is computed into the existing clean
+    carry wire instead of temporarily modifying source[0]. This only changes
+    the first/last ripple stage; all intermediate MAJ/UMA macros are shared.
+    The entire circuit consists of exact X/CX/CCX permutations.
     """
     if not source_bits or len(source_bits) != len(target_bits):
         raise ValueError("source_bits and target_bits must have equal nonzero width")
@@ -176,29 +184,40 @@ def _add_bits(
 
     width = len(source_bits)
     if width == 1:
-        # Modulo 2: only the low sum bit is observed, no outgoing carry.
-        # MAJ(cin, b, a); UMA(cin, b, a) is exactly b ^= cin ^ a,
-        # for arbitrary carry/input states, including superpositions.
-        c.cx(carry, target_bits[0])
+        if not clean_carry:
+            c.cx(carry, target_bits[0])
         c.cx(source_bits[0], target_bits[0])
         return
 
-    _maj(c, carry, target_bits[0], source_bits[0])
-    for i in range(width - 2):
-        _maj(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
+    if clean_carry:
+        # With carry=0, the first carry-out equals a0 AND b0. Store it in
+        # the existing carry wire, leaving a0 available and unchanged.
+        c.ccx(source_bits[0], target_bits[0], carry)
+        c.cx(source_bits[0], target_bits[0])
+    else:
+        _maj(c, carry, target_bits[0], source_bits[0])
 
-    # The highest-bit carry-out is discarded by modulo-2**width SHA
-    # arithmetic. Do not compute a nonlinear carry only to uncompute it:
-    # MAJ(a,b,c); UMA(a,b,c) == CX(a,b); CX(c,b) *exactly*, with
-    # a and c restored on every computational basis state and linearly
-    # on arbitrary superpositions. Save two Toffoli and two CNOT gates
-    # per full-width addition without borrowing more qubits.
-    c.cx(source_bits[width - 2], target_bits[width - 1])
+    for i in range(width - 2):
+        incoming = carry if clean_carry and i == 0 else source_bits[i]
+        _maj(c, incoming, target_bits[i + 1], source_bits[i + 1])
+
+    # The top carry-out is discarded for arithmetic modulo 2^width.
+    highest_incoming = carry if clean_carry and width == 2 else source_bits[width - 2]
+    c.cx(highest_incoming, target_bits[width - 1])
     c.cx(source_bits[width - 1], target_bits[width - 1])
 
     for i in range(width - 3, -1, -1):
-        _uma(c, source_bits[i], target_bits[i + 1], source_bits[i + 1])
-    _uma(c, carry, target_bits[0], source_bits[0])
+        incoming = carry if clean_carry and i == 0 else source_bits[i]
+        _uma(c, incoming, target_bits[i + 1], source_bits[i + 1])
+
+    if clean_carry:
+        # After restoring the upstream ripple, b0 holds a0 XOR b0 and
+        # carry holds a0 AND b0. Since a0 AND (a0 XOR b0) =
+        # a0 AND NOT b0, these exact gates restore the clean carry to 0.
+        c.ccx(source_bits[0], target_bits[0], carry)
+        c.cx(source_bits[0], carry)
+    else:
+        _uma(c, carry, target_bits[0], source_bits[0])
 
 
 def _add32(
@@ -215,6 +234,7 @@ def _add32(
         [layout.word_bit(source_slot, i) for i in range(32)],
         [layout.word_bit(target_slot, i) for i in range(32)],
         layout.carry_bit,
+        clean_carry=True,  # audited SHA layout: shared carry starts/restores to |0>
     )
 
     c.add_region(
