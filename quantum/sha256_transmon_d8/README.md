@@ -1,3 +1,20 @@
+# Reversible quantum SHA-256 — primary objective
+
+**This package implements the standard, complete SHA-256 algorithm as a reversible, coherent quantum circuit.** Its goal is exact SHA-256 arithmetic with restored workspace and maximal correctness-preserving gate/qubit reuse—not Bitcoin mining, nonce search, double hashing, Grover/preimage recovery, or inversion of a digest alone.
+
+The required full-algorithm contract is:
+
+```text
+|message>|output>|clean ancillas>
+  --> |message>|output XOR SHA256(message)>|clean ancillas>
+```
+
+**“Reverse” means uncomputing the forward SHA-256 intermediate gates after copying out the digest.** It does not imply that SHA-256 can be uniquely inverted from a hash. Full 64-round SHA-256, its exact message schedule, multi-block chaining and feed-forward remain the requirements. The primary code path is `optimized_multiblock.py` (with `reversible_block.py` and `reversible_multiblock.py` as coherent references); gate optimization, reusable ancillas, Qualtran accounting, QLDPC and physical compilation should all operate on this same reversible SHA semantics.
+
+**[Engineering source of truth: AGENTS.md](AGENTS.md).** Specialized nonce/mining paths remain in the repository unchanged but are **not** this workstream's objective. Fixed-message resource benchmarks are not hardware-feasibility evidence for general coherent-message SHA.
+
+---
+
 ## Correct-by-construction SHA gate reduction and QLDPC capacity
 
 `compile_optimized_sha256()` now applies **commutation-aware reversible
