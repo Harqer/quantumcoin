@@ -126,6 +126,11 @@ def emit_reversible_schedule_update(
     The three sources are distinct from the target and are unchanged.
     Inversion reconstructs W[t-16] exactly, including on superpositions.
     """
+    if getattr(layout, "width_first", False):
+        from .compact_width import emit_schedule_update_width_first
+        emit_schedule_update_width_first(circuit, layout, round_index)
+        return
+
     if not 16 <= round_index < 64:
         raise ValueError("schedule update exists only for rounds 16..63")
 
