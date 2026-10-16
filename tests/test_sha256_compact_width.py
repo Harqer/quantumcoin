@@ -168,3 +168,68 @@ def test_complete_coherent_message_sha_1024_qubits_and_xor_output(message):
     assert out[:p.layout.digest_start_slot*32]==init[:p.layout.digest_start_slot*32]
     assert simulate(p.circuit.inverse(),out)==init
     assert p.layout.logical_bit_capacity==1024
+
+
+def test_clean_output_sha_preflight_768_logical_qubits_not_xor_oracle():
+    # A CLEAN output register doubles as the live SHA-256 state; the
+    # independent arbitrary-y XOR oracle continues to require 1,024 bits.
+    p = compile_optimized_sha256(
+        1, width_first=True, clean_digest_output=True,
+        optimize_gates=False, qec_code="gross",
+    )
+    assert p.layout.logical_bit_capacity == 768
+    assert p.layout.work_start_slot == p.layout.digest_start_slot
+    report = p.resource_report()["logical"]
+    assert report["logical_qubits"] == 768
+    assert report["width_breakdown"] == {
+        "coherent_message_inputs": 512,
+        "reversible_chain_checkpoints": 0,
+        "shared_compression_work_register": 0,
+        "shared_clean_scratch": 0,
+        "shared_clean_carry": 0,
+        "digest_output": 256,
+    }
+    assert p.qldpc_device_capacity().program_logical_qubits == 768
+    assert all(max(g.qubits) < 768 for g in p.circuit.gates)
+    with pytest.raises(ValueError, match="zero-initialized digest"):
+        initial_optimized_state(
+            p, pad_sha256_message(b"abc"),
+            output_words=(1,0,0,0,0,0,0,0),
+        )
+
+
+@pytest.mark.parametrize("message", (b"abc", b""))
+def test_clean_output_sha_full_coherent_64_round_digest_and_input_restore(message):
+    """Actual full SHA digest, original input restored, and inverse exact."""
+    padded = pad_sha256_message(message)
+    p = compile_optimized_sha256(
+        1, width_first=True, clean_digest_output=True, optimize_gates=False,
+    )
+    before = initial_optimized_state(p, padded)
+    after = simulate(p.circuit, before)
+    assert p.layout.logical_bit_capacity == 768
+    assert after[:512] == before[:512], "coherent quantum input must be restored"
+    assert optimized_digest_from_state(p, after) == hashlib.sha256(message).digest()
+    assert simulate(p.circuit.inverse(), after) == before
+
+
+def test_clean_output_sha_fixed_full_rounds_use_256_qubits_not_512():
+    """Fixed-message specialization still EMITS all 64 SHA rounds."""
+    padded = pad_sha256_message(b"abc")
+    p = compile_optimized_sha256(
+        1, width_first=True, clean_digest_output=True, optimize_gates=False,
+        fixed_blocks={0:padded},
+    )
+    assert p.layout.logical_bit_capacity == 256
+    assert len(p.circuit.gates) > 1000  # Actual SHA, not host-side precomputed hash
+    before = initial_optimized_state(p, padded)
+    after = simulate(p.circuit, before)
+    assert optimized_digest_from_state(p, after) == hashlib.sha256(b"abc").digest()
+    assert simulate(p.circuit.inverse(), after) == before
+
+
+def test_clean_output_requires_optin_width_first_single_block():
+    with pytest.raises(ValueError, match="requires width_first one-block"):
+        compile_optimized_sha256(1, clean_digest_output=True)
+    with pytest.raises(ValueError, match="requires width_first one-block"):
+        compile_optimized_sha256(2, width_first=True, clean_digest_output=True)
