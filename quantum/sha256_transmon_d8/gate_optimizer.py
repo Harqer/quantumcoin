@@ -1,9 +1,10 @@
-"""Exact reversible SHA CNOT resynthesis and inverse cancellation.
+"""Semantics-preserving reversible SHA gate cancellation in amortized O(G).
 
-The fixed-width CX conjugation peephole is linear-time and phase-exact; the
-inverse-pair pass is amortized O(G). Both operate within existing semantic
-region boundaries and preserve wire allocation, phase and reversible maps.
-No new ancillas, hardware assumptions, or measurement instructions are added.
+Unlike adjacent-only peepholes, this pass cancels inverse controlled-X gates
+through gates they mathematically commute with. It never reorders noncommuting
+gates, invents clean ancillas, or changes the register allocation. Full
+semantically marked arithmetic/dirty-borrow boundaries are respected so every
+existing region retains valid provenance and verification intervals.
 """
 from __future__ import annotations
 
@@ -21,7 +22,6 @@ class CancellationReport:
     original_gates: int
     optimized_gates: int
     cancelled_pairs: int
-    cnot_conjugations: int
     original_primitives: int
     optimized_primitives: int
     protected_region_boundaries: int
@@ -35,39 +35,6 @@ def _canonical(g: Gate) -> tuple[str, tuple[int, ...]]:
     if g.kind == "CCX":
         return g.kind, tuple(sorted(g.qubits[:2])) + g.qubits[2:]
     return g.kind, g.qubits
-
-
-def _reduce_cnot_conjugations(segment: list[Gate]) -> tuple[list[Gate], int]:
-    """Exact three-to-two CX rewrite for a linear conjugation triangle.
-
-    Let A = CX(a,b) and the three wires a,b,c be distinct. Two identities:
-      A; CX(b,c); A == CX(b,c); CX(a,c)
-      A; CX(c,a); A == CX(c,a); CX(c,b)
-
-    The first moves a linear dependency downstream, the second moves it
-    upstream; they are exact binary permutations, hence phase-correct on
-    *arbitrary* coherent inputs. Never cross a semantic-region boundary or
-    match operations with unknown phase/measurement behavior.
-    """
-    out: list[Gate] = []
-    rewrites = 0
-    for gate in segment:
-        out.append(gate)
-        if len(out) < 3:
-            continue
-        first, middle, last = out[-3:]
-        if first.kind != "CX" or middle.kind != "CX" or first != last:
-            continue
-        a, b = first.qubits
-        control, target = middle.qubits
-        if control == b and target not in (a, b):
-            out[-3:] = [middle, Gate("CX", (a, target))]
-        elif target == a and control not in (a, b):
-            out[-3:] = [middle, Gate("CX", (control, b))]
-        else:
-            continue
-        rewrites += 1
-    return out, rewrites
 
 
 def _reduce_segment(segment: list[Gate]) -> list[Gate]:
@@ -167,13 +134,8 @@ def cancel_commuting_inverse_gates(
     boundaries = sorted({0, len(circuit.gates)} | circuit.region_boundaries())
     new_gates: list[Gate] = []
     offsets: dict[int, int] = {0: 0}
-    cnot_conjugations = 0
     for start, stop in zip(boundaries, boundaries[1:]):
-        # A small GF(2) template resolves noncommuting conjugation
-        # patterns that the inverse-pair commutation pass cannot cancel.
-        braid_reduced, rewrites = _reduce_cnot_conjugations(circuit.gates[start:stop])
-        cnot_conjugations += rewrites
-        optimized = _reduce_segment(braid_reduced)
+        optimized = _reduce_segment(circuit.gates[start:stop])
         new_gates.extend(optimized)
         offsets[stop] = len(new_gates)
     new_regions: list[SemanticRegion] = []
@@ -194,14 +156,12 @@ def cancel_commuting_inverse_gates(
     if out.primitive_gate_count > circuit.primitive_gate_count:
         raise AssertionError("inverse cancellation increased primitive count")
     removed = len(circuit.gates) - len(out.gates)
-    inverse_pair_gates = removed - cnot_conjugations
-    if inverse_pair_gates < 0 or inverse_pair_gates % 2:
-        raise AssertionError("CX conjugation / inverse cancellation count mismatch")
+    if removed % 2:
+        raise AssertionError("inverse cancellation did not remove gate pairs")
     return out, CancellationReport(
         original_gates=len(circuit.gates),
         optimized_gates=len(out.gates),
-        cancelled_pairs=inverse_pair_gates // 2,
-        cnot_conjugations=cnot_conjugations,
+        cancelled_pairs=removed // 2,
         original_primitives=circuit.primitive_gate_count,
         optimized_primitives=out.primitive_gate_count,
         protected_region_boundaries=len(boundaries),
