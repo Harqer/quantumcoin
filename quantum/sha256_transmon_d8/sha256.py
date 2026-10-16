@@ -400,6 +400,11 @@ def _add_constant32(
     circuit. This preserves the exact arithmetic contract while removing gates
     whose controls are compile-time constants.
     """
+    if getattr(layout, "width_first", False):
+        from .compact_width import emit_constant_add
+        emit_constant_add(c, layout, target_slot, value)
+        return
+
     value &= MASK32
     if value == 0:
         return
@@ -480,6 +485,13 @@ def _emit_round(
     complete reusable ADD32 path from every round.
     """
     h = roles["h"]
+    if getattr(layout, "width_first", False):
+        from .compact_width import emit_round_width_first
+        return emit_round_width_first(
+            c, layout, roles, round_constant,
+            schedule_source_slot=schedule_source_slot,
+        )
+
     if boolean_strategy == "anf":
         ch_compute = _scratch_xor_ch
         maj_compute = _scratch_xor_maj
