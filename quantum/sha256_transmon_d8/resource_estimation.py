@@ -15,7 +15,8 @@ hardware routing or actual Rigetti physical operations.
 """
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict
+from heapq import heappop, heappush
 from dataclasses import asdict, dataclass
 import hashlib
 import json
@@ -156,6 +157,68 @@ def count_exact_sha_resources(compiled: "CompiledOptimizedSha256") -> ExactLogic
     )
 
 
+def weighted_semantic_hotspots(circuit: "ReversibleCircuit") -> dict[str, Any]:
+    """Count reusable *region templates* and weight their actual nonlinear work.
+
+    A gate belongs to the narrowest covering semantic region, so nested SHA
+    rounds/checkpoints do not double-count cost. Repeated region kinds identify
+    optimization hotspots, NOT common values: reuse of a computed bit requires
+    a separate proof that the operands are the same version and that cleanup
+    is legal. No qubits or gates are added to the executable SHA circuit.
+    """
+    circuit.validate()
+    starts: dict[int, list[tuple[int, int, int, int, str]]] = defaultdict(list)
+    instances = Counter(region.kind for region in circuit.regions)
+    for ordinal, region in enumerate(circuit.regions):
+        starts[region.start].append((
+            region.stop - region.start, -region.start,
+            region.stop, ordinal, region.kind,
+        ))
+
+    active: list[tuple[int, int, int, int, str]] = []
+    counts: dict[str, Counter[str]] = defaultdict(Counter)
+    for index, gate in enumerate(circuit.gates):
+        for region in starts.get(index, ()):
+            heappush(active, region)
+        while active and active[0][2] <= index:
+            heappop(active)
+        kind = active[0][4] if active else "_UNREGIONED"
+        item = counts[kind]
+        item["semantic_gates"] += 1
+        for primitive in _expand_macro(gate):
+            item["primitive_gates"] += 1
+            item[primitive.kind] += 1
+
+    nodes: list[dict[str, int | str]] = []
+    for kind, item in counts.items():
+        nodes.append({
+            "kind": kind,
+            "template_instances": instances[kind],
+            "semantic_gates": item["semantic_gates"],
+            "primitive_gates": item["primitive_gates"],
+            "x": item["X"],
+            "cx": item["CX"],
+            "ccx": item["CCX"],
+            "seven_t_ccx_proxy": 7 * item["CCX"],
+        })
+    nodes.sort(key=lambda node: (
+        -int(node["seven_t_ccx_proxy"]),
+        -int(node["primitive_gates"]),
+        str(node["kind"]),
+    ))
+    if sum(int(node["primitive_gates"]) for node in nodes) != circuit.primitive_gate_count:
+        raise AssertionError("weighted hotspot accounting lost a primitive")
+    if sum(int(node["ccx"]) for node in nodes) != circuit.nonlinear_gate_count:
+        raise AssertionError("weighted hotspot accounting lost a nonlinear gate")
+    return {
+        "source": "same post-optimization SHA gate stream as logical and Qualtran counts",
+        "attribution": "exclusive narrowest covering semantic region",
+        "weight": "7-T exact ancilla-free CCX decomposition proxy; not runtime or physical qubits",
+        "reuse_limit": "region frequency measures templates, not identical SSA-value computations",
+        "nodes": nodes,
+    }
+
+
 def qualtran_crosscheck(resources: ExactLogicalResources) -> dict[str, Any]:
     """Independently call Qualtran's real QECGatesCost/QubitCount APIs.
 
@@ -246,6 +309,7 @@ def report_optimized_sha_resources(
             "note": "Full native IBM bicycle_compiler run required for QLDPC physical operation inventory.",
         },
     }
+    report["optimization_hotspots"] = weighted_semantic_hotspots(compiled.circuit)
     if qualtran:
         report["qualtran"] = qualtran_crosscheck(exact)
     return report
