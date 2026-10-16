@@ -386,6 +386,16 @@ class CompiledOptimizedSha256:
         from .resource_estimation import report_optimized_sha_resources
         return report_optimized_sha_resources(self, qualtran=qualtran)
 
+    def gidney_carry_program(self):
+        """Provenance-check and lower existing SHA adders to measured 4-T ANDs.
+
+        Requires 31 extra *shared* clean carry ancillas per active adder,
+        recycled after reset. Current QLDPC backend cannot execute this
+        dynamic schedule; existing reversible gate stream is unchanged.
+        """
+        from .gidney_adder import lower_gidney_sha_adders
+        return lower_gidney_sha_adders(self)
+
     def measurement_assisted_program(self):
         """Lower this exact SHA gate stream using proved dynamic Ch/Maj cleanup.
 
