@@ -175,3 +175,21 @@ def test_actual_sha_report_contains_repeated_structure_not_just_kind(actual_sha)
         item["instances"] >= 2 and item["semantic_gates_per_instance"] > 1
         for item in profile["structural_templates"]
     )
+
+
+def test_width_floor_is_derived_from_coherent_oracle_register_contract(actual_sha):
+    fixed_report = actual_sha.resource_report()["width_optimization"]
+    assert fixed_report["coherent_interface_minimum_bits"] == 256
+    assert fixed_report["allocated_logical_bits"] == 545
+    assert fixed_report["workspace_and_checkpoint_bits"] == 289
+    assert fixed_report["shared_work_bits"] == 256
+    assert fixed_report["shared_scratch_and_carry_bits"] == 33
+
+    dynamic_sha = compile_optimized_sha256(1)
+    # An arbitrary 512-bit message plus an independent 256-bit XOR output
+    # require 768 logical qubits before accounting for the actual SHA work.
+    dynamic_report = dynamic_sha.resource_report()["width_optimization"]
+    assert dynamic_report["coherent_interface_minimum_bits"] == 768
+    assert dynamic_report["allocated_logical_bits"] == 1057
+    assert dynamic_report["workspace_and_checkpoint_bits"] == 289
+    assert "not a demonstrated attainable" in dynamic_report["caveat"]
