@@ -607,6 +607,11 @@ def initial_optimized_state(
     if output_words is not None:
         if len(output_words) != 8:
             raise ValueError("SHA digest register needs eight words")
+        if layout.clean_digest_output and any(output_words):
+            raise ValueError(
+                "clean-output SHA requires a zero-initialized digest register; "
+                "use the arbitrary-output XOR oracle for nonzero initial outputs"
+            )
         for word, value in enumerate(output_words):
             layout.set_word(state, layout.digest_start_slot + word, value)
     return state
