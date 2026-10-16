@@ -45,6 +45,61 @@ def test_commuting_inverse_cancels_through_shared_target_and_shared_control():
     assert optimized2.gates == [Gate("CX", (0, 3))]
 
 
+@pytest.mark.parametrize(
+    ("middle", "correction"),
+    (
+        (Gate("CX", (1, 2)), Gate("CX", (0, 2))),
+        (Gate("CX", (2, 0)), Gate("CX", (2, 1))),
+    ),
+)
+def test_exact_cnot_conjugation_reduces_three_to_two_without_phase(
+    middle: Gate, correction: Gate,
+) -> None:
+    outer = Gate("CX", (0, 1))
+    original = _make(outer, middle, outer)
+    reduced, report = cancel_commuting_inverse_gates(original)
+    assert reduced.gates == [middle, correction]
+    assert report.cnot_conjugations == 1
+    assert report.cancelled_pairs == 0
+    assert report.original_primitives == 3
+    assert report.optimized_primitives == 2
+    for basis in range(8):
+        state = [(basis >> wire) & 1 for wire in range(3)]
+        assert simulate(original, state) == simulate(reduced, state)
+        assert simulate(reduced.inverse(), simulate(reduced, state)) == state
+
+
+def test_cnot_conjugation_does_not_cross_semantic_boundaries() -> None:
+    outer = Gate("CX", (0, 1))
+    middle = Gate("CX", (1, 2))
+    source = _make(outer, middle, outer)
+    source.add_region("OP_A", 0, 1)
+    source.add_region("OP_B", 1, 3)
+    reduced, report = cancel_commuting_inverse_gates(source)
+    assert reduced.gates == source.gates
+    assert report.cnot_conjugations == 0
+    assert report.cancelled_pairs == 0
+    assert reduced.regions == source.regions
+
+
+def test_cnot_conjugation_and_commutation_peepholes_compose() -> None:
+    source = _make(
+        Gate("CX", (0, 1)),
+        Gate("CX", (1, 2)),
+        Gate("CX", (0, 1)),
+        Gate("X", (3,)),
+        Gate("CX", (0, 2)),
+    )
+    reduced, report = cancel_commuting_inverse_gates(source)
+    # Conjugation creates CX(0,2), which cancels across independent X(3).
+    assert reduced.gates == [Gate("CX", (1, 2)), Gate("X", (3,))]
+    assert report.cnot_conjugations == 1
+    assert report.cancelled_pairs == 1
+    for basis in range(16):
+        state = [(basis >> wire) & 1 for wire in range(4)]
+        assert simulate(source, state) == simulate(reduced, state)
+
+
 def test_noncommuting_intervening_gates_are_not_cancelled():
     for middle in (
         Gate("CX", (2, 3)),  # reads target of outer CNOT
