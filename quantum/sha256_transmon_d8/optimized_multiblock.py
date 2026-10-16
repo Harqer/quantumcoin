@@ -102,10 +102,13 @@ class OptimizedShaLayout:
 
     fixed_blocks: tuple[bytes | None, ...]
     width_first: bool = False
+    clean_digest_output: bool = False
 
     def __post_init__(self) -> None:
         if not self.fixed_blocks:
             raise ValueError("at least one message block is required")
+        if self.clean_digest_output and (not self.width_first or len(self.fixed_blocks) != 1):
+            raise ValueError("clean digest output requires width_first one-block SHA")
         if any(block is not None and len(block) != 64 for block in self.fixed_blocks):
             raise ValueError("fixed SHA-256 blocks must be exactly 64 bytes")
 
@@ -131,6 +134,8 @@ class OptimizedShaLayout:
 
     @property
     def digest_start_slot(self) -> int:
+        if self.clean_digest_output:
+            return self.work_start_slot
         return self.work_start_slot + 8 + (0 if self.width_first else 1)
 
     @property
@@ -210,6 +215,10 @@ class _ScheduleView:
     @property
     def width_first(self) -> bool:
         return self.layout.width_first
+
+    @property
+    def clean_digest_output(self) -> bool:
+        return self.layout.clean_digest_output
 
     @property
     def digest_start_slot(self) -> int:
@@ -379,6 +388,66 @@ def _emit_stage(
     )
 
 
+def _emit_clean_output_sha(
+    c: ReversibleCircuit, layout: OptimizedShaLayout, schedule: tuple[int, ...] | None,
+) -> None:
+    """Exact coherent SHA for a CLEAN digest register, using it as state.
+
+    Contract is |message>|0> -> |message>|SHA256(message)>.
+    This is NOT the arbitrary-output XOR oracle |message>|y> -> |message>|y^H>.
+    The circuit is still a unitary reversible permutation on ALL input wires:
+    the promised hash map is only specified on initially-clean digest outputs.
+
+    All 64 SHA rounds are emitted. Coherent schedule is reversibly updated,
+    then restored AFTER the final digest has been computed; no 256-bit work
+    or extra scratch/carry is allocated.
+    """
+    if not layout.clean_digest_output or not layout.width_first or layout.block_count != 1:
+        raise ValueError("clean output SHA requires one-block width-first layout")
+    from .compact_width import emit_schedule_update_width_first
+
+    view = _ScheduleView(layout, 0)
+    roles = dict(zip("abcdefgh", (layout.digest_start_slot + i for i in range(8))))
+    start = len(c.gates)
+    # The clean output starts at |0>; prepare SHA-256 IV reversibly in place.
+    for word, value in enumerate(H0):
+        for bit in range(32):
+            if value & (1 << bit):
+                c.x(layout.digest_bit(word, bit))
+
+    schedule_history = ReversibleCircuit()
+    for t in range(64):
+        if schedule is None:
+            if t >= 16:
+                update = ReversibleCircuit()
+                emit_schedule_update_width_first(update, view, t)
+                _extend_with_regions(c, update)
+                schedule_history.extend(update.gates)
+            const = K[t]
+            source_schedule = view.schedule_slot(t)
+        else:
+            const = (K[t] + schedule[t]) & MASK32
+            source_schedule = None
+
+        roles = _emit_round(
+            c, view, roles, const, "low_multiplicative",
+            schedule_source_slot=source_schedule,
+        )
+
+    # 64 rotations of eight role wires return to original physical order.
+    if any(roles[name] != layout.digest_start_slot + i
+           for i, name in enumerate("abcdefgh")):
+        raise AssertionError("SHA final roles differ from output wire order")
+
+    for i, name in enumerate("abcdefgh"):
+        _add_constant32(c, view, roles[name], H0[i])
+
+    # The output is now hash(message). Schedule updates touched MESSAGE
+    # registers only; reversing them cannot affect the computed digest.
+    c.extend(schedule_history.inverse().gates)
+    c.add_region("CLEAN_OUTPUT_SHA", start, len(c.gates), block_index=0)
+
+
 @dataclass(frozen=True)
 class CompiledOptimizedSha256:
     layout: OptimizedShaLayout
@@ -469,6 +538,7 @@ def compile_optimized_sha256(
     qec_code: str | None = None,
     optimize_gates: bool = True,
     width_first: bool = False,
+    clean_digest_output: bool = False,
 ) -> CompiledOptimizedSha256:
     """Compile a clean coherent SHA XOR oracle using checkpoint reuse.
 
@@ -483,7 +553,9 @@ def compile_optimized_sha256(
     if block_count < 1 or any(i < 0 or i >= block_count for i in fixed):
         raise ValueError("fixed block index outside compiled message")
     layout = OptimizedShaLayout(
-        tuple(fixed.get(i) for i in range(block_count)), width_first=width_first
+        tuple(fixed.get(i) for i in range(block_count)),
+        width_first=width_first,
+        clean_digest_output=clean_digest_output,
     )
     plan = plan_checkpoints(block_count)
     known_schedules = {
@@ -492,8 +564,11 @@ def compile_optimized_sha256(
     }
 
     circuit = ReversibleCircuit()
-    for step in plan.steps:
-        _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
+    if layout.clean_digest_output:
+        _emit_clean_output_sha(circuit, layout, known_schedules.get(0))
+    else:
+        for step in plan.steps:
+            _emit_stage(circuit, layout, step, known_schedules.get(step.block_index))
     circuit.validate()
     optimization = None
     if optimize_gates:
