@@ -11,7 +11,7 @@ from quantum.sha256_transmon_d8.reversible_multiblock import pad_sha256_message
 from quantum.sha256_transmon_d8.d8_two_body_decomposition import _expand_macro
 from quantum.sha256_transmon_d8.resource_estimation import (
     count_exact_sha_resources, report_optimized_sha_resources,
-    weighted_semantic_hotspots,
+    weighted_semantic_hotspots, weighted_dependency_graph,
 )
 
 
@@ -193,3 +193,52 @@ def test_width_floor_is_derived_from_coherent_oracle_register_contract(actual_sh
     assert dynamic_report["allocated_logical_bits"] == 1057
     assert dynamic_report["workspace_and_checkpoint_bits"] == 289
     assert "not a demonstrated attainable" in dynamic_report["caveat"]
+
+
+def test_versioned_dependency_graph_rejects_changed_control_reuse():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 1)          # create version 1 of wire 1
+    circuit.add_region("SOURCE", 0, 1)
+    circuit.ccx(0, 1, 2)     # same controls/versions
+    circuit.add_region("AND_A", 1, 2)
+    circuit.ccx(0, 1, 3)     # reuse *candidate*
+    circuit.add_region("AND_B", 2, 3)
+    circuit.x(0)             # invalidates wire 0's previous version
+    circuit.add_region("CHANGE", 3, 4)
+    circuit.ccx(0, 1, 4)     # not the same mathematical value
+    circuit.add_region("AND_C", 4, 5)
+
+    graph = weighted_dependency_graph(circuit)
+    assert graph["primitive_gates_examined"] == 5
+    assert graph["nonlinear_product_signatures"] == 2
+    assert graph["repeated_nonlinear_product_groups"] == 1
+    assert graph["repeated_nonlinear_product_uses"] == 1
+    product = graph["top_repeated_product_candidates"][0]
+    assert product["occurrences"] == 2
+    assert product["first_primitive_index"] == 1
+    assert product["last_primitive_index"] == 2
+    assert product["control_value_versions"] == [
+        {"wire": 0, "version": 0}, {"wire": 1, "version": 1}
+    ]
+    assert any(
+        edge["producer_region"] == "SOURCE"
+        and edge["consumer_region"] == "AND_A"
+        and edge["operand_role"] == "control_read"
+        for edge in graph["edges"]
+    )
+    assert "necessary but insufficient" in graph["reuse_guardrail"]
+
+
+def test_canonical_sha_weighted_dependency_accounting(actual_sha, sha_cost):
+    graph = weighted_dependency_graph(actual_sha.circuit)
+    assert graph["primitive_gates_examined"] == sha_cost.expanded_primitive_gates
+    assert graph["nonlinear_product_signatures"] <= sha_cost.primitive_gate_counts["CCX"]
+    assert graph["repeated_nonlinear_product_uses"] + graph["nonlinear_product_signatures"] == (
+        sha_cost.primitive_gate_counts["CCX"]
+    )
+    assert graph["cross_region_value_reads"] == sum(
+        edge["cross_region_value_reads"] for edge in graph["edges"]
+    )
+    assert graph["initial_version_operand_reads"] > 0
