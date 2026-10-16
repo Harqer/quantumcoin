@@ -101,6 +101,7 @@ class OptimizedShaLayout:
     """Packed dynamic blocks + logarithmic checkpoints + reusable work."""
 
     fixed_blocks: tuple[bytes | None, ...]
+    width_first: bool = False
 
     def __post_init__(self) -> None:
         if not self.fixed_blocks:
@@ -130,7 +131,7 @@ class OptimizedShaLayout:
 
     @property
     def digest_start_slot(self) -> int:
-        return self.scratch_slot + 1
+        return self.work_start_slot + 8 + (0 if self.width_first else 1)
 
     @property
     def carry_bit(self) -> int:
@@ -138,7 +139,7 @@ class OptimizedShaLayout:
 
     @property
     def logical_bit_capacity(self) -> int:
-        return self.carry_bit + 1
+        return self.carry_bit + (0 if self.width_first else 1)
 
     @property
     def total_transmons(self) -> int:
@@ -150,6 +151,8 @@ class OptimizedShaLayout:
         return slot * 32 + bit
 
     def scratch_bit(self, bit: int) -> int:
+        if self.width_first:
+            raise ValueError("width-first SHA has no allocated scratch qubit")
         return self.word_bit(self.scratch_slot, bit)
 
     def schedule_slot(self, block: int, round_index: int) -> int:
@@ -204,6 +207,17 @@ class _ScheduleView:
     def scratch_bit(self, bit: int) -> int:
         return self.layout.scratch_bit(bit)
 
+    @property
+    def width_first(self) -> bool:
+        return self.layout.width_first
+
+    @property
+    def digest_start_slot(self) -> int:
+        return self.layout.digest_start_slot
+
+    def digest_bit(self, word: int, bit: int) -> int:
+        return self.layout.digest_bit(word, bit)
+
     def schedule_slot(self, round_index: int) -> int:
         return self.layout.schedule_slot(self.block, round_index)
 
@@ -244,6 +258,10 @@ def analyze_optimized_ancillas(compiled: "CompiledOptimizedSha256") -> "AncillaU
     emitted by the stage and the clean XOR oracle.
     """
     layout = compiled.layout
+    if layout.width_first:
+        # SHA arithmetic uses reversible in-place source embeddings.
+        # Dirty MCX output borrows are restored; no new workspace allocated.
+        return AncillaUsage(0, 0, 0, 0)
     work = set(range(layout.work_start_slot, layout.work_start_slot + 8))
     scratch = layout.scratch_slot
     borrowed_peak = 0
@@ -336,6 +354,10 @@ def _emit_stage(
     for word, role in enumerate("abcdefgh"):
         if step.source == -1:
             _add_constant32(stage, view, roles[role], H0[word])
+        elif layout.width_first:
+            from .compact_width import add_word
+            add_word(stage, view, source_slot(word), roles[role],
+                     kind="CHAIN_FEED_FORWARD")
         else:
             _add32(
                 stage, view, source_slot(word), roles[role],
@@ -446,6 +468,7 @@ def compile_optimized_sha256(
     fixed_blocks: dict[int, bytes] | None = None,
     qec_code: str | None = None,
     optimize_gates: bool = True,
+    width_first: bool = False,
 ) -> CompiledOptimizedSha256:
     """Compile a clean coherent SHA XOR oracle using checkpoint reuse.
 
@@ -459,7 +482,9 @@ def compile_optimized_sha256(
     fixed = fixed_blocks or {}
     if block_count < 1 or any(i < 0 or i >= block_count for i in fixed):
         raise ValueError("fixed block index outside compiled message")
-    layout = OptimizedShaLayout(tuple(fixed.get(i) for i in range(block_count)))
+    layout = OptimizedShaLayout(
+        tuple(fixed.get(i) for i in range(block_count)), width_first=width_first
+    )
     plan = plan_checkpoints(block_count)
     known_schedules = {
         i: _fixed_schedule(block) for i, block in enumerate(layout.fixed_blocks)
