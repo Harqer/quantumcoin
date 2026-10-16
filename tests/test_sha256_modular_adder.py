@@ -129,3 +129,50 @@ def test_shared_registers_not_duplicated_by_each_add() -> None:
     initial[35] = 1
     assert simulate(repeated, initial) == initial
     assert max(q for gate in repeated.gates for q in gate.qubits) == 64
+
+
+@pytest.mark.parametrize("width", (1, 2, 3, 4, 5, 6))
+def test_clean_carry_adder_matches_general_adder_and_restores_workspace(width: int):
+    """Exhaustive clean-carry contract, including inverse and source preservation."""
+    original = _optimized_modular_add(width)
+    specialized = ReversibleCircuit()
+    _add_bits(
+        specialized,
+        list(range(width)),
+        list(range(width, 2 * width)),
+        2 * width,
+        clean_carry=True,
+    )
+    expected_saved = 1 if width == 1 else 2
+    assert specialized.primitive_gate_count == original.primitive_gate_count - expected_saved
+    assert specialized.nonlinear_gate_count == original.nonlinear_gate_count
+
+    for source in range(1 << width):
+        for target in range(1 << width):
+            state = _bits(source, width) + _bits(target, width) + [0]
+            result = simulate(specialized, state)
+            assert result == simulate(original, state)
+            assert _word(result, 0, width) == source
+            assert _word(result, width, width) == (source + target) % (1 << width)
+            assert result[-1] == 0
+            assert simulate(specialized.inverse(), result) == state
+
+
+def test_real_32_bit_add_selects_proven_clean_carry_specialization():
+    from quantum.sha256_transmon_d8.sha256 import _add32
+    layout = _ConstantLayout()
+    circuit = ReversibleCircuit()
+    _add32(circuit, layout, 0, 1)
+    assert circuit.primitive_gate_count == 186
+    assert circuit.nonlinear_gate_count == 62
+    assert circuit.regions[0].kind == "ADD32"
+    rng = random.Random(20261016)
+    for source, target in [(0, 0), (0xFFFFFFFF, 1), (0x12345678, 0x87654321)] + [
+        (rng.getrandbits(32), rng.getrandbits(32)) for _ in range(24)
+    ]:
+        state = _bits(source, 32) + _bits(target, 32) + [0]
+        result = simulate(circuit, state)
+        assert _word(result, 0, 32) == source
+        assert _word(result, 32, 32) == (source + target) & 0xFFFFFFFF
+        assert result[-1] == 0
+        assert simulate(circuit.inverse(), result) == state
