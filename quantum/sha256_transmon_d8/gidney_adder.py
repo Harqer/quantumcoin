@@ -63,6 +63,7 @@ class GidneyAdder:
     initial_carry: int
     leased_carries: tuple[int, ...]
     outcome_start: int
+    subtract: bool = False
 
     @property
     def t_count(self) -> int:
@@ -130,11 +131,13 @@ def _and_erase(
 def make_gidney_adder(
     source_bits: tuple[int, ...], target_bits: tuple[int, ...],
     clean_carry: int, clean_extra_carries: tuple[int, ...],
-    *, outcome_start: int = 0,
+    *, outcome_start: int = 0, subtract: bool = False,
 ) -> GidneyAdder:
     """Emit Gidney's exact n-bit temporary-AND carry construction.
 
     Contract: little-endian words, all carry bits |0> on entry.
+    When subtract=True, the operation is b <- b-a mod 2**n, obtained by
+    (temporarily) complementing a and setting input carry to one.
     The initial carry is the project's one existing scratch carry.
     The other n-1 carries are EXTRA clean qubits. Overflow is discarded.
     """
@@ -150,6 +153,12 @@ def make_gidney_adder(
         raise ValueError("measurement outcome index must be nonnegative")
 
     ops: list[GidneyInstruction] = []
+    if subtract:
+        # a two's-complement subtraction: b-a = b+(~a)+1 mod 2**n.
+        # Flip each source bit temporarily and set the preserved input carry
+        # to one; restore both only after every measured carry is erased.
+        ops.extend(Gate("X", (q,)) for q in source_bits)
+        ops.append(Gate("X", (clean_carry,)))
     # Carry list c[0]..c[n-1]. Source and target stay unchanged during
     # all carry computations; carry c[k] is the exact majority of lower bits.
     carries = (clean_carry,) + clean_extra_carries
@@ -179,9 +188,12 @@ def make_gidney_adder(
             ops.extend((Gate("CX", (ci, a)), Gate("CX", (ci, b))))
         ops.extend((Gate("CX", (a, b)), Gate("CX", (ci, b))))
 
+    if subtract:
+        ops.append(Gate("X", (clean_carry,)))
+        ops.extend(Gate("X", (q,)) for q in source_bits)
     result = GidneyAdder(
         tuple(ops), n, source_bits, target_bits,
-        clean_carry, clean_extra_carries, outcome_start,
+        clean_carry, clean_extra_carries, outcome_start, subtract,
     )
     if result.t_count != 4 * (n - 1) or result.erasure_measurements != n - 1:
         raise AssertionError("published Gidney arithmetic accounting diverged")
