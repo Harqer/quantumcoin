@@ -347,12 +347,21 @@ def weighted_dependency_graph(circuit: "ReversibleCircuit") -> dict[str, Any]:
             ],
             "occurrences": len(uses),
             "repeat_ccx_uses": len(uses) - 1,
+            # Compute once + exact uncompute costs two CCX. Replacing
+            # every original CCX use by a CX from one clean AND ancilla
+            # can save CCX only when the product has >=3 uses.
+            # This is a conditional *upper bound*, not a chosen rewrite.
+            "conditional_coherent_ccx_savings_upper_bound": max(0, len(uses) - 2),
+            "conditional_seven_t_savings_upper_bound": 7 * max(0, len(uses) - 2),
+            "conditional_extra_cx": len(uses),
+            "conditional_extra_clean_qubits": 1,
             "first_primitive_index": uses[0][0],
             "last_primitive_index": uses[-1][0],
             "region_kinds": sorted({kind for _, kind in uses}),
         })
     repeated.sort(key=lambda item: (
-        -item["repeat_ccx_uses"],
+        -item["conditional_seven_t_savings_upper_bound"],
+        item["last_primitive_index"] - item["first_primitive_index"],
         item["first_primitive_index"],
     ))
     edge_summary = [
@@ -372,11 +381,17 @@ def weighted_dependency_graph(circuit: "ReversibleCircuit") -> dict[str, Any]:
         "repeated_nonlinear_product_uses": sum(
             item["repeat_ccx_uses"] for item in repeated
         ),
+        "coherent_share_upper_bound_t_savings": sum(
+            item["conditional_seven_t_savings_upper_bound"] for item in repeated
+        ),
         "top_repeated_product_candidates": repeated[:16],
         "reuse_guardrail": (
             "equal control wire+version is necessary but insufficient for "
-            "materialization; prove ancilla cleanliness, coherent phase, "
-            "operand lifetime, edge routing, fanout, QEC and feed-forward costs"
+            "materialization; conditional upper bound assumes one extra "
+            "clean qubit per concurrently live product, exact CCX compute "
+            "and uncompute, plus CNOT fanout. Prove ancilla cleanliness, "
+            "coherent phase, operand lifetime, edge routing, fanout, QEC "
+            "and feed-forward costs before rewriting"
         ),
         "physical_bit_packing": (
             "no physical qubit or qudit compression established by "
