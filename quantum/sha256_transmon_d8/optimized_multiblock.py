@@ -386,6 +386,16 @@ class CompiledOptimizedSha256:
         from .resource_estimation import report_optimized_sha_resources
         return report_optimized_sha_resources(self, qualtran=qualtran)
 
+    def measurement_assisted_program(self):
+        """Lower this exact SHA gate stream using proved dynamic Ch/Maj cleanup.
+
+        The core circuit and all reversible/QLDPC APIs remain unchanged.
+        The returned logical dynamic program requires a backend supporting
+        X-basis measurement/reset and conditional Clifford corrections.
+        """
+        from .measurement_cleanup import lower_measurement_assisted_cleanup
+        return lower_measurement_assisted_cleanup(self)
+
     def qldpc_device_capacity(self, *, device_physical_qubits: int = 108):
         """Actual selected QLDPC codeword capacity, not an algorithmic limit."""
         from .qldpc_capacity import qldpc_capacity
