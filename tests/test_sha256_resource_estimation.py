@@ -138,3 +138,40 @@ def test_weighted_hotspots_match_canonical_sha_counts(actual_sha, sha_cost):
     assert {"CH_ADD", "MAJ_ADD", "SIGMA0_ADD", "SIGMA1_ADD"} <= kinds
     assert any(node["template_instances"] > 1 for node in nodes)
     assert profile["reuse_limit"].startswith("region frequency")
+
+
+def test_structural_templates_identify_same_relabelled_gates_without_value_sharing():
+    from quantum.sha256_transmon_d8.ir import ReversibleCircuit
+
+    circuit = ReversibleCircuit()
+    circuit.cx(0, 1)
+    circuit.ccx(0, 1, 2)
+    circuit.add_region("AND_TEMPLATE", 0, 2)
+
+    circuit.cx(10, 11)
+    circuit.ccx(10, 11, 12)
+    circuit.add_region("AND_TEMPLATE", 2, 4)
+
+    circuit.cx(20, 21)
+    circuit.ccx(21, 20, 22)
+    circuit.add_region("AND_TEMPLATE", 4, 6)
+
+    profile = weighted_semantic_hotspots(circuit)
+    templates = [
+        item for item in profile["structural_templates"]
+        if item["kind"] == "AND_TEMPLATE"
+    ]
+    assert len(templates) == 1
+    assert templates[0]["instances"] == 2
+    assert templates[0]["semantic_gates_per_instance"] == 2
+    assert "does NOT prove" in profile["structural_template_note"]
+    assert sum(node["primitive_gates"] for node in profile["nodes"]) == 6
+
+
+def test_actual_sha_report_contains_repeated_structure_not_just_kind(actual_sha):
+    profile = actual_sha.resource_report()["optimization_hotspots"]
+    assert profile["structural_templates"]
+    assert any(
+        item["instances"] >= 2 and item["semantic_gates_per_instance"] > 1
+        for item in profile["structural_templates"]
+    )
