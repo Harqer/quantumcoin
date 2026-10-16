@@ -101,15 +101,17 @@ def test_cnot_conjugation_and_commutation_peepholes_compose() -> None:
 
 
 def test_noncommuting_intervening_gates_are_not_cancelled():
+    # These are genuine blockers; unlike a three-CX conjugation triangle,
+    # no exact two-CX replacement exists for these opaque/one-qubit middles.
     for middle in (
-        Gate("CX", (2, 3)),  # reads target of outer CNOT
-        Gate("X", (0,)),  # writes its control
+        Gate("X", (0,)),  # writes the control
         Gate("MAJ", (0, 1, 3)),  # opaque macro touches control
     ):
         source = _make(Gate("CX", (0, 2)), middle, Gate("CX", (0, 2)))
         optimized, report = cancel_commuting_inverse_gates(source)
         assert optimized.gates == source.gates
         assert report.cancelled_pairs == 0
+        assert report.cnot_conjugations == 0
 
 
 def test_macro_inverse_and_symmetric_toffoli_controls():
