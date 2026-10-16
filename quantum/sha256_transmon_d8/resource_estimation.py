@@ -274,6 +274,117 @@ def weighted_semantic_hotspots(circuit: "ReversibleCircuit") -> dict[str, Any]:
     }
 
 
+def weighted_dependency_graph(circuit: "ReversibleCircuit") -> dict[str, Any]:
+    """Observe exact read-after-write dependencies in the canonical gate stream.
+
+    Nodes are individual annotated SHA regions; directed edges record control
+    reads and target updates across those regions. Versioned CCX control pairs
+    are conservative *candidate* reusable XOR-AND products. No extra gates,
+    temp qubits, or automatic CSE follow from the analysis.
+
+    All operations are expanded exact computational-basis X/CX/CCX primitives;
+    a target write always creates a new value version, including X gates.
+    This analysis does not assume different versions have different values.
+    """
+    circuit.validate()
+    starts: dict[int, list[tuple[int, int, int, int, str]]] = defaultdict(list)
+    for ordinal, region in enumerate(circuit.regions):
+        starts[region.start].append((
+            region.stop - region.start, -region.start,
+            region.stop, ordinal, region.kind,
+        ))
+
+    active: list[tuple[int, int, int, int, str]] = []
+    versions: dict[int, int] = defaultdict(int)
+    last_writers: dict[int, tuple[int, str]] = {}
+    edges: Counter[tuple[str, str, str]] = Counter()
+    products: dict[
+        tuple[tuple[int, int], tuple[int, int]],
+        list[tuple[int, str]],
+    ] = defaultdict(list)
+    first_reads = 0
+    primitive_index = 0
+    for index, gate in enumerate(circuit.gates):
+        for region in starts.get(index, ()):
+            heappush(active, region)
+        while active and active[0][2] <= index:
+            heappop(active)
+        region_id = active[0][3] if active else -1
+        region_kind = active[0][4] if active else "_UNREGIONED"
+
+        for primitive in _expand_macro(gate):
+            target = primitive.qubits[-1]
+            controls = primitive.qubits[:-1]
+            if primitive.kind == "CCX":
+                signature = tuple(sorted(
+                    ((wire, versions[wire]) for wire in controls)
+                ))
+                products[signature].append((primitive_index, region_kind))
+
+            # Each control is read but not modified; target's previous value
+            # contributes to target XOR and therefore also has a dependency.
+            for wire, role in (
+                *((q, "control_read") for q in controls),
+                (target, "target_update"),
+            ):
+                previous = last_writers.get(wire)
+                if previous is None:
+                    first_reads += 1
+                elif previous[0] != region_id:
+                    edges[(previous[1], region_kind, role)] += 1
+
+            versions[target] += 1
+            last_writers[target] = (region_id, region_kind)
+            primitive_index += 1
+
+    repeated: list[dict[str, Any]] = []
+    for signature, uses in products.items():
+        if len(uses) < 2:
+            continue
+        repeated.append({
+            "control_value_versions": [
+                {"wire": wire, "version": ver} for wire, ver in signature
+            ],
+            "occurrences": len(uses),
+            "repeat_ccx_uses": len(uses) - 1,
+            "first_primitive_index": uses[0][0],
+            "last_primitive_index": uses[-1][0],
+            "region_kinds": sorted({kind for _, kind in uses}),
+        })
+    repeated.sort(key=lambda item: (
+        -item["repeat_ccx_uses"],
+        item["first_primitive_index"],
+    ))
+    edge_summary = [
+        {"producer_region": producer, "consumer_region": consumer,
+         "operand_role": role, "cross_region_value_reads": count}
+        for (producer, consumer, role), count in edges.most_common()
+    ]
+    # The inventory is a formal risk filter, not a resource reduction.
+    # Lifetime/storage/fanout/phase/QEC costs have not been proven.
+    return {
+        "primitive_gates_examined": primitive_index,
+        "initial_version_operand_reads": first_reads,
+        "cross_region_value_reads": sum(edges.values()),
+        "edges": edge_summary,
+        "nonlinear_product_signatures": len(products),
+        "repeated_nonlinear_product_groups": len(repeated),
+        "repeated_nonlinear_product_uses": sum(
+            item["repeat_ccx_uses"] for item in repeated
+        ),
+        "top_repeated_product_candidates": repeated[:16],
+        "reuse_guardrail": (
+            "equal control wire+version is necessary but insufficient for "
+            "materialization; prove ancilla cleanliness, coherent phase, "
+            "operand lifetime, edge routing, fanout, QEC and feed-forward costs"
+        ),
+        "physical_bit_packing": (
+            "no physical qubit or qudit compression established by "
+            "this logical dataflow graph"
+        ),
+    }
+
+
 def qualtran_crosscheck(resources: ExactLogicalResources) -> dict[str, Any]:
     """Independently call Qualtran's real QECGatesCost/QubitCount APIs.
 
@@ -365,6 +476,7 @@ def report_optimized_sha_resources(
         },
     }
     report["optimization_hotspots"] = weighted_semantic_hotspots(compiled.circuit)
+    report["dependency_graph"] = weighted_dependency_graph(compiled.circuit)
     # The coherent XOR-oracle contract retains both the dynamic message and
     # an arbitrary 256-bit output register. This is an information-theoretic
     # storage floor, not a claim that a zero-workspace SHA circuit exists.
