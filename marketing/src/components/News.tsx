@@ -5,24 +5,24 @@ import { ArrowRight } from "lucide-react";
 const newsItems = [
   {
     id: 1,
-    title: "Qbitcoin successfully passes Foundry tests",
-    date: "Jun 14, 2026",
-    category: "Development",
-    description: "Our DI-QKD integration has achieved 100% stability in short-range tests, outperforming legacy standards.",
+    title: "QBTC testnet development",
+    date: "In development",
+    category: "Engineering",
+    description: "Research and testnet prototypes are being developed. Production issuance is not live.",
   },
   {
     id: 2,
-    title: "Quantum Hardware Market Surges 300%",
-    date: "Jun 12, 2026",
-    category: "Industry",
-    description: "With global investment in quantum reaching all-time highs, the ecosystem is rapidly maturing for consumer-grade L2 protocols.",
+    title: "Quantum security exploration",
+    date: "Research stage",
+    category: "Research",
+    description: "We are evaluating QRNG and post-quantum cryptographic approaches for future systems.",
   },
   {
     id: 3,
-    title: "Partnership Announcement: Scaling DI-QKD",
-    date: "Jun 10, 2026",
-    category: "Business",
-    description: "We are actively seeking strategic partners to scale our quantum-secured infrastructure across global nodes.",
+    title: "Issuer and reserve partnerships",
+    date: "Not finalized",
+    category: "Partnerships",
+    description: "A regulated issuer-of-record arrangement and stablecoin backing have not been finalized.",
   },
 ];
 
@@ -32,10 +32,10 @@ export default function News() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Latest Updates
+            Current Development Priorities
           </h2>
-          <a href="#" className="hidden sm:flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500">
-            View all news
+          <a href="https://github.com/Harqer/quantumcoin" className="hidden sm:flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500">
+            View source
             <ArrowRight className="w-4 h-4" />
           </a>
         </div>
@@ -58,8 +58,7 @@ export default function News() {
                 {item.description}
               </p>
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium mt-auto">
-                Read more
-                <ArrowRight className="w-4 h-4" />
+                In progress
               </div>
             </article>
           ))}
