@@ -6,18 +6,18 @@ import { Shield, Lock, Zap } from "lucide-react";
 export default function About() {
   const features = [
     {
-      name: "Device-Independent QKD",
-      description: "Securing your assets with DI-QKD, enabling low-distance quantum cryptography on current hardware today.",
+      name: "Quantum Security Research",
+      description: "Exploring quantum entropy and key management techniques; research is not a claim of production-grade quantum-secure settlement.",
       icon: Shield,
     },
     {
-      name: "Post-Quantum Cryptography",
-      description: "Our L2 is fully integrated with the latest PQC algorithms, protecting against future 'Store Now, Decrypt Later' attacks.",
+      name: "Post-Quantum Readiness",
+      description: "Evaluating standardized post-quantum cryptographic approaches as the product and its security design mature.",
       icon: Lock,
     },
     {
-      name: "Blazing Fast L2",
-      description: "Experience immediate finality and high throughput without compromising on our award-winning security standards.",
+      name: "Base Ecosystem Development",
+      description: "Prototyping programmable payments on Base. Production issuance, reserve backing, and independent security reviews remain pending.",
       icon: Zap,
     },
   ];
@@ -28,10 +28,10 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
-              Why Qbitcoin L2 is the Best Method
+              Why We Are Building QBitcoin
             </h2>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed">
-              We passed our rigorous Foundry wallet tests and are now scaling the future of finance. Qbitcoin employs both Post-Quantum Cryptography (PQC) and Device-Independent Quantum Key Distribution (DI-QKD) directly at the protocol level. 
+              QBitcoin is an early-stage project researching secure settlement infrastructure for AI-native commerce. A testnet prototype is not a production stablecoin or proof of independent regulatory approval. 
             </p>
             <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-zinc-600 dark:text-zinc-400">
               {features.map((feature) => (
