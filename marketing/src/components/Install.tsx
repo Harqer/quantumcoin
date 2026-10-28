@@ -8,10 +8,10 @@ export default function Install() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white mb-4">
-            Install and Join the Network
+            Explore the QBitcoin Prototype
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Get started with Qbitcoin L2 in seconds. We are currently seeking credible partners and investments to expand our DI-QKD distance capabilities.
+            QBitcoin is in development. The published GitHub repository documents current research and prototype work; production wallet software and a redeemable QBTC token are not offered here.
           </p>
         </div>
 
@@ -30,18 +30,18 @@ export default function Install() {
           <div className="font-mono text-zinc-300 space-y-4">
             <p className="flex items-center">
               <span className="text-indigo-400 mr-4">~</span>
-              <span>npm install -g @qbitcoin/cli</span>
+              <span>git clone https://github.com/Harqer/quantumcoin</span>
             </p>
             <p className="flex items-center">
               <span className="text-indigo-400 mr-4">~</span>
-              <span>qbitcoin wallet create</span>
+              <span>cd quantumcoin</span>
             </p>
             <p className="flex items-center text-zinc-500 text-sm">
-              # Initializes your PQC-secured wallet locally
+              # Review the README and project documentation
             </p>
             <p className="flex items-center">
               <span className="text-indigo-400 mr-4">~</span>
-              <span>qbitcoin bridge --amount 100 --target l2</span>
+              <span># Do not send funds to an unverified QBTC address</span>
             </p>
           </div>
         </div>
