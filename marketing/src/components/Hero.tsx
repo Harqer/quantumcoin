@@ -19,24 +19,24 @@ export default function Hero() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-8">
             <span className="flex h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-            Introducing Qbitcoin L2
+            Introducing QBitcoin · Research & Development
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-8">
-            The Ultimate <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">Quantum-Secure</span> Layer 2
+            Building <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">Future-Ready</span> Digital Settlement
           </h1>
           
           <p className="text-xl md:text-2xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Protecting your assets with Device-Independent Quantum Key Distribution (DI-QKD) and Post-Quantum Cryptography (PQC).
+            QBitcoin is exploring Base-native, programmable stablecoin settlement and quantum-security research for AI commerce. QBTC is in development; no redeemable QBTC stablecoin is currently offered.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="#install" className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-full transition-all shadow-lg hover:shadow-indigo-500/25">
-              Start Building
+              Explore Development
               <ArrowRight className="w-5 h-5" />
             </a>
             <a href="#about" className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-zinc-900 dark:text-white bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-full transition-all shadow-sm">
-              Read the Whitepaper
+              About QBitcoin
             </a>
           </div>
         </motion.div>
