@@ -92,15 +92,7 @@ function AutoScrollRow({ items, speed, direction = 1 }: { items: typeof provider
           key={`${item.name}-${index}`}
           className="flex-none flex items-center gap-3 px-6 py-3 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-700 font-semibold text-zinc-800 dark:text-zinc-200 hover:scale-105 transition-transform"
         >
-          {item.logo && (
-            <img 
-              src={item.logo} 
-              alt={`${item.name} logo`} 
-              className="w-8 h-8 object-contain rounded"
-              loading="lazy"
-              draggable="false"
-            />
-          )}
+          
           <span>{item.name}</span>
         </div>
       ))}
@@ -117,10 +109,10 @@ export default function HardwareCarousel() {
     <section className="py-24 overflow-hidden bg-zinc-50 dark:bg-zinc-900 border-y border-zinc-200 dark:border-zinc-800">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-12 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
-          Natively Supported Quantum Hardware
+          Quantum Hardware Research Landscape
         </h2>
         <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-          Qbitcoin L2 integrates directly with the world's leading quantum processors, ensuring unparalleled security across all modalities.
+          These organizations are part of the wider quantum computing ecosystem. Their appearance does not imply a QBitcoin integration, endorsement, or partnership.
         </p>
       </div>
       <div className="relative w-full flex flex-col gap-4 overflow-x-hidden">
