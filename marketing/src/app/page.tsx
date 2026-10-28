@@ -14,7 +14,7 @@ export default function Home() {
             <div className="w-8 h-8 rounded bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-bold text-lg">
               Q
             </div>
-            <span className="text-xl font-bold tracking-tight">Qbitcoin L2</span>
+            <span className="text-xl font-bold tracking-tight">QBitcoin</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <a href="#about" className="text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
@@ -24,7 +24,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-4">
             <a href="#install" className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-full transition-all">
-              Launch App
+              Explore Project
             </a>
           </div>
         </div>
@@ -45,13 +45,12 @@ export default function Home() {
             <div className="w-6 h-6 rounded bg-zinc-800 flex items-center justify-center text-white font-bold text-xs">
               Q
             </div>
-            <span className="font-semibold text-zinc-200">Qbitcoin L2 &copy; 2026</span>
+            <span className="font-semibold text-zinc-200">QBitcoin &copy; 2026</span>
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
-            <a href="#" className="hover:text-white transition-colors">Discord</a>
+            <a href="https://github.com/Harqer/quantumcoin" className="hover:text-white transition-colors">GitHub</a>
+            <a href="https://spresso-shop-smarter.itbrginsnow01.chatgpt.site" className="hover:text-white transition-colors">Spresso</a>
+            <a href="mailto:dexter@getqubits.com" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>
